@@ -39,3 +39,33 @@ impl From<&TradeError> for TradeErrorInfo {
         Self { kind: kind.into(), message: e.to_string(), retry_after_ms: retry }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn flattens_every_variant() {
+        let cases = [
+            (TradeError::RateLimited { retry_after: Duration::from_millis(1500) }, "rate_limited", Some(1500)),
+            (TradeError::Http { status: 502, message: "bad".into() }, "http", None),
+            (TradeError::Decode("eof".into()), "decode", None),
+            (TradeError::Unsupported("poe.ninja"), "unsupported", None),
+            (TradeError::Config("nope".into()), "config", None),
+        ];
+        for (err, kind, retry) in cases {
+            let info = TradeErrorInfo::from(&err);
+            assert_eq!(info.kind, kind);
+            assert_eq!(info.retry_after_ms, retry);
+            assert_eq!(info.message, err.to_string());
+        }
+        assert_eq!(TradeError::Http { status: 502, message: "bad".into() }.to_string(), "http 502: bad");
+    }
+
+    #[test]
+    fn default_user_agent_has_version_and_contact() {
+        let ua = crate::default_user_agent();
+        assert!(ua.starts_with(&format!("kalandra/{}", env!("CARGO_PKG_VERSION"))));
+        assert!(ua.contains("github.com/nightah/kalandra"));
+    }
+}
