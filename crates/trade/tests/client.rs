@@ -412,9 +412,15 @@ async fn invalid_json_maps_to_decode() {
 
 #[tokio::test]
 async fn transport_errors_are_reported() {
-    // wiremock pools servers (a dropped one keeps listening), so bind and release a
-    // port ourselves to get a guaranteed connection refusal.
-    let port = std::net::TcpListener::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port();
+    // A server that hangs up on every connection. (Binding then releasing a port is
+    // racy: a concurrently started wiremock server can grab it.)
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    tokio::spawn(async move {
+        while let Ok((sock, _)) = listener.accept().await {
+            drop(sock);
+        }
+    });
     let cfg =
         TradeConfig { base_url: Url::parse(&format!("http://127.0.0.1:{port}")).unwrap(), ..TradeConfig::default() };
     let c = TradeClient::new(cfg, Box::new(SystemClock)).unwrap();
