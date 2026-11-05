@@ -87,6 +87,18 @@ fn settings_roundtrip_through_toml() {
 }
 
 #[test]
+fn onboarding_done_defaults_to_false_and_roundtrips() {
+    assert!(!Settings::default().ui.onboarding_done);
+    let old: Settings = toml::from_str("version = 1\n[ui]\nlanguage = \"de\"\nstart_minimised = false\n").unwrap();
+    assert!(!old.ui.onboarding_done);
+    assert_eq!(old.ui.language, "de");
+    let mut s = Settings::default();
+    s.ui.onboarding_done = true;
+    let back: Settings = toml::from_str(&toml::to_string(&s).unwrap()).unwrap();
+    assert!(back.ui.onboarding_done);
+}
+
+#[test]
 fn partial_document_fills_defaults() {
     let s: Settings = toml::from_str("version = 1\n[overlay]\nopacity = 0.5\n").unwrap();
     assert!((s.overlay.opacity - 0.5).abs() < f64::EPSILON);
@@ -400,6 +412,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
         "[a-z]{2}(-[A-Z]{2})?",
         prop_oneof![Just(Theme::System), Just(Theme::Dark), Just(Theme::Light)],
         any::<bool>(),
+        any::<bool>(),
     );
     let platform = prop::option::of(prop_oneof![
         Just(BackendKind::Windows),
@@ -423,7 +436,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
                 s.trade.poesessid,
             ) = trade;
             (s.overlay.auto_hide_ms, s.overlay.opacity, s.overlay.side) = overlay;
-            (s.ui.language, s.ui.theme, s.ui.start_minimised) = ui;
+            (s.ui.language, s.ui.theme, s.ui.start_minimised, s.ui.onboarding_done) = ui;
             s.platform.backend_override = platform;
             s
         })
