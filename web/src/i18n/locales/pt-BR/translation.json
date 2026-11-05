@@ -30,7 +30,8 @@
     "statMin": "Mínimo de {{stat}}",
     "statMax": "Máximo de {{stat}}",
     "search": "Buscar",
-    "loading": "Buscando…"
+    "loading": "Buscando…",
+    "mouseCaptured": "O Path of Exile 2 está capturando o mouse, então não dá para clicar neste painel. Abra o Diagnóstico pelo menu do kalandra na bandeja e desative a captura do mouse do Proton."
   },
   "item": {
     "rarityLabel": "Raridade:",
@@ -292,5 +293,15 @@
         "kde": "KDE (comando de atalho personalizado)"
       }
     }
+  },
+  "proton": {
+    "title": "Captura do mouse do Proton",
+    "body": "No Proton, o Path of Exile 2 em tela cheia captura o mouse, então cliques e teclas nunca chegam ao painel do kalandra. Desativar a captura do mouse do Wine para o jogo resolve isso; o cursor deixa de ficar preso à janela do jogo.",
+    "statusOn": "Captura do mouse: ativada (padrão do Wine)",
+    "statusOff": "Captura do mouse: desativada",
+    "fix": "Desativar a captura do mouse",
+    "undo": "Restaurar configuração anterior",
+    "quitGame": "Feche o Path of Exile 2 antes: o Wine reescreve as configurações dele quando o jogo é fechado.",
+    "restartGame": "Pronto. Abra o Path of Exile 2 de novo para a alteração ter efeito."
   }
 }

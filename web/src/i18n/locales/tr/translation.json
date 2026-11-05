@@ -30,7 +30,8 @@
     "statMin": "{{stat}} için en az",
     "statMax": "{{stat}} için en çok",
     "search": "Ara",
-    "loading": "Aranıyor…"
+    "loading": "Aranıyor…",
+    "mouseCaptured": "Path of Exile 2 fareyi yakalıyor, bu yüzden bu panele tıklanamıyor. Sistem tepsisindeki kalandra menüsünden Tanılama'yı açın ve Proton fare yakalamayı kapatın."
   },
   "item": {
     "rarityLabel": "Nadirlik:",
@@ -290,5 +291,15 @@
         "kde": "KDE (özel kısayol komutu)"
       }
     }
+  },
+  "proton": {
+    "title": "Proton fare yakalama",
+    "body": "Proton altında tam ekran Path of Exile 2 fareyi yakalar; bu yüzden tıklamalar ve tuşlar kalandra'nın paneline hiç ulaşmaz. Oyun için Wine'ın fare yakalamasını kapatmak bunu düzeltir; imleç artık oyun penceresine kilitli kalmaz.",
+    "statusOn": "Fare yakalama: açık (Wine varsayılanı)",
+    "statusOff": "Fare yakalama: kapalı",
+    "fix": "Fare yakalamayı kapat",
+    "undo": "Önceki ayarı geri yükle",
+    "quitGame": "Önce Path of Exile 2'den çıkın: Wine, oyun kapanırken ayarlarını yeniden yazar.",
+    "restartGame": "Tamam. Değişikliğin etkili olması için Path of Exile 2'yi yeniden başlatın."
   }
 }

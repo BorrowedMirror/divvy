@@ -30,7 +30,8 @@
     "statMin": "Minimum pour {{stat}}",
     "statMax": "Maximum pour {{stat}}",
     "search": "Rechercher",
-    "loading": "Recherche…"
+    "loading": "Recherche…",
+    "mouseCaptured": "Path of Exile 2 capture la souris, ce panneau ne peut donc pas être cliqué. Ouvrez Diagnostics depuis le menu de kalandra dans la zone de notification et désactivez la capture de la souris par Proton."
   },
   "item": {
     "rarityLabel": "Rareté :",
@@ -292,5 +293,15 @@
         "kde": "KDE (commande de raccourci personnalisé)"
       }
     }
+  },
+  "proton": {
+    "title": "Capture de la souris par Proton",
+    "body": "Sous Proton, Path of Exile 2 en plein écran capture la souris : les clics et les touches n'atteignent jamais le panneau de kalandra. Désactiver la capture de la souris de Wine pour le jeu règle le problème ; le curseur n'est alors plus verrouillé dans la fenêtre du jeu.",
+    "statusOn": "Capture de la souris : activée (par défaut dans Wine)",
+    "statusOff": "Capture de la souris : désactivée",
+    "fix": "Désactiver la capture de la souris",
+    "undo": "Rétablir le réglage précédent",
+    "quitGame": "Quittez d'abord Path of Exile 2 : Wine réécrit ses réglages à la fermeture du jeu.",
+    "restartGame": "C'est fait. Relancez Path of Exile 2 pour que la modification prenne effet."
   }
 }
