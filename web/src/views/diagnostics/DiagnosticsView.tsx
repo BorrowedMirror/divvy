@@ -81,9 +81,14 @@ export function DiagnosticsView() {
     <Page>
       <header className="mb-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gold">{t("diagnostics.title")}</h1>
-        <Button variant="primary" onClick={() => void copy()}>
-          {t("diagnostics.copyReport")}
-        </Button>
+        <span className="flex items-center gap-3">
+          <a href="#/onboarding" className="text-sm text-muted underline hover:text-fg">
+            {t("diagnostics.onboardingLink")}
+          </a>
+          <Button variant="primary" onClick={() => void copy()}>
+            {t("diagnostics.copyReport")}
+          </Button>
+        </span>
       </header>
 
       <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">

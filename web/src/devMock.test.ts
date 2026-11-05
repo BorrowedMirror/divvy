@@ -13,6 +13,8 @@ test("dev mock answers every command from fixtures", async () => {
   expect(await commands.getDiagnostics()).toEqual(diagnostics());
   expect(await commands.listLeagues()).toEqual({ status: "ok", data: leagues });
   expect(await commands.hideOverlay()).toEqual({ status: "ok", data: null });
+  expect((await commands.recheckPermissions()).platform).toBe("macos");
+  expect((await commands.getPermissions()).missing).toHaveLength(3);
 });
 
 test("dev mock resolves queries and emits an item on the overlay route", async () => {
