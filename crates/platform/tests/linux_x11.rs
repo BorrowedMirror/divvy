@@ -220,34 +220,7 @@ fn child() {
     }
 
     // Our "game" sees the injected Ctrl+C and answers by putting the item on the clipboard.
-    let game_clip = std::thread::spawn({
-        let display = display.clone();
-        move || {
-            let (gconn, _) = x11rb::connect(Some(&display)).unwrap();
-            gconn
-                .change_window_attributes(
-                    game,
-                    &x11rb::protocol::xproto::ChangeWindowAttributesAux::new().event_mask(EventMask::KEY_PRESS),
-                )
-                .unwrap();
-            gconn.flush().unwrap();
-            let mut clip = arboard::Clipboard::new().unwrap();
-            let deadline = Instant::now() + Duration::from_secs(10);
-            while Instant::now() < deadline {
-                match gconn.poll_for_event().unwrap() {
-                    Some(Event::KeyPress(k)) if u16::from(k.state) & u16::from(ModMask::CONTROL) != 0 => {
-                        clip.set_text(ITEM).unwrap();
-                        // Keep serving the selection until the reader is done.
-                        std::thread::sleep(Duration::from_secs(1));
-                        return true;
-                    }
-                    Some(_) => {}
-                    None => std::thread::sleep(Duration::from_millis(5)),
-                }
-            }
-            false
-        }
-    });
+    let game_clip = spawn_fake_game(&display, game);
     std::thread::sleep(Duration::from_millis(200));
     platform.clipboard.set_text("previous").unwrap();
     let opts = CopyOptions {
@@ -282,6 +255,9 @@ fn child() {
         platform.input_simulator.send_chord(&Chord::new(&[], "NoSuchKey")),
         Err(PlatformError::InvalidChord(_))
     ));
+
+    held_keys_are_respected(&conn, root, &platform);
+    hotkey_held_during_copy(&display, &conn, root, game, &platform, &hotkeys);
 
     // Overlay styling over a raw Xcb handle.
     let ov_win = create_window(&conn, root, None, 0, 0);
@@ -318,4 +294,138 @@ fn child() {
     conn.flush().unwrap();
     next_event(&events, "Lost", |e| matches!(e, WindowEvent::Lost));
     assert!(platform.window_tracker.game_window().is_none());
+}
+
+/// Stand-in for the game: on a Ctrl+<key> KeyPress it puts the item on the clipboard.
+fn spawn_fake_game(display: &str, game: Window) -> std::thread::JoinHandle<bool> {
+    let display = display.to_owned();
+    std::thread::spawn(move || {
+        let (gconn, _) = x11rb::connect(Some(&display)).unwrap();
+        gconn
+            .change_window_attributes(
+                game,
+                &x11rb::protocol::xproto::ChangeWindowAttributesAux::new().event_mask(EventMask::KEY_PRESS),
+            )
+            .unwrap();
+        gconn.flush().unwrap();
+        let mut clip = arboard::Clipboard::new().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while Instant::now() < deadline {
+            match gconn.poll_for_event().unwrap() {
+                Some(Event::KeyPress(k)) if u16::from(k.state) & u16::from(ModMask::CONTROL) != 0 => {
+                    clip.set_text(ITEM).unwrap();
+                    // Keep serving the selection until the reader is done.
+                    std::thread::sleep(Duration::from_secs(1));
+                    return true;
+                }
+                Some(_) => {}
+                None => std::thread::sleep(Duration::from_millis(5)),
+            }
+        }
+        false
+    })
+}
+
+// Keycodes of the Xvfb default (evdev) keymap.
+const KC_CTRL_L: u8 = 37;
+const KC_SHIFT_L: u8 = 50;
+const KC_A: u8 = 38;
+
+fn fake_key(conn: &RustConnection, root: Window, keycode: u8, down: bool) {
+    use x11rb::protocol::xproto::{KEY_PRESS_EVENT, KEY_RELEASE_EVENT};
+    use x11rb::protocol::xtest::ConnectionExt as _;
+    let ty = if down { KEY_PRESS_EVENT } else { KEY_RELEASE_EVENT };
+    conn.xtest_fake_input(ty, keycode, x11rb::CURRENT_TIME, root, 0, 0, 0).unwrap();
+    conn.sync().unwrap();
+}
+
+fn key_down(conn: &RustConnection, keycode: u8) -> bool {
+    let keys = conn.query_keymap().unwrap().reply().unwrap().keys;
+    keys[usize::from(keycode / 8)] & (1 << (keycode % 8)) != 0
+}
+
+/// Held chord modifiers stay down; extra held modifiers are released; a held non-modifier key
+/// (the hotkey's) delays the chord until it is released.
+fn held_keys_are_respected(conn: &RustConnection, root: Window, platform: &kalandra_platform::Platform) {
+    let ctrl_f5 = Chord::parse("Ctrl+F5").unwrap();
+    fake_key(conn, root, KC_CTRL_L, true);
+    fake_key(conn, root, KC_SHIFT_L, true);
+    platform.input_simulator.send_chord(&ctrl_f5).unwrap();
+    assert!(key_down(conn, KC_CTRL_L), "held Ctrl must not be synthetically released");
+    assert!(!key_down(conn, KC_SHIFT_L), "extra held Shift must be released first");
+    fake_key(conn, root, KC_CTRL_L, false);
+    assert!(!key_down(conn, KC_CTRL_L));
+
+    // Hotkey key held: send_chord waits for its release.
+    fake_key(conn, root, KC_A, true);
+    let releaser = std::thread::spawn({
+        let display = std::env::var("DISPLAY").unwrap();
+        move || {
+            let (c, s) = x11rb::connect(Some(&display)).unwrap();
+            let r = c.setup().roots[s].root;
+            std::thread::sleep(Duration::from_millis(150));
+            fake_key(&c, r, KC_A, false);
+        }
+    });
+    let start = Instant::now();
+    platform.input_simulator.send_chord(&ctrl_f5).unwrap();
+    let waited = start.elapsed();
+    releaser.join().unwrap();
+    assert!(waited >= Duration::from_millis(120), "did not wait for release: {waited:?}");
+    assert!(waited < Duration::from_secs(2), "{waited:?}");
+
+    // Never released: capped (~400ms), then sent anyway.
+    fake_key(conn, root, KC_A, true);
+    let start = Instant::now();
+    platform.input_simulator.send_chord(&ctrl_f5).unwrap();
+    let waited = start.elapsed();
+    fake_key(conn, root, KC_A, false);
+    assert!(waited >= Duration::from_millis(350) && waited < Duration::from_secs(2), "{waited:?}");
+}
+
+/// The real flow: the user presses a global hotkey (XGrabKey) and still holds it while the copy
+/// chord is sent. The game must still receive the chord (not the grabbing client).
+fn hotkey_held_during_copy(
+    display: &str,
+    conn: &RustConnection,
+    root: Window,
+    game: Window,
+    platform: &kalandra_platform::Platform,
+    hotkeys: &Receiver<kalandra_platform::HotkeyEvent>,
+) {
+    // Ctrl+A as the hotkey: its Ctrl is also the copy chord's.
+    let hotkey = Chord::parse("Ctrl+A").unwrap();
+    platform.hotkeys.register(HotkeyAction::PriceCheck, &hotkey).unwrap();
+    conn.set_input_focus(InputFocus::PARENT, game, x11rb::CURRENT_TIME).unwrap();
+    conn.flush().unwrap();
+    let game_clip = spawn_fake_game(display, game);
+    std::thread::sleep(Duration::from_millis(200));
+    platform.clipboard.set_text("before hotkey").unwrap();
+
+    fake_key(conn, root, KC_CTRL_L, true);
+    fake_key(conn, root, KC_A, true);
+    assert_eq!(hotkeys.recv_timeout(Duration::from_secs(5)).expect("hotkey").action, HotkeyAction::PriceCheck);
+    let releaser = std::thread::spawn({
+        let display = display.to_owned();
+        move || {
+            let (c, s) = x11rb::connect(Some(&display)).unwrap();
+            let r = c.setup().roots[s].root;
+            std::thread::sleep(Duration::from_millis(100));
+            fake_key(&c, r, KC_A, false);
+        }
+    });
+    let opts = CopyOptions {
+        advanced: false,
+        timeout: Duration::from_secs(5),
+        poll_interval: Duration::from_millis(20),
+        restore_clipboard: true,
+    };
+    let text = copy_item_text(&*platform.input_simulator, &*platform.clipboard, opts, &std::thread::sleep)
+        .expect("copy flow with held hotkey");
+    releaser.join().unwrap();
+    fake_key(conn, root, KC_CTRL_L, false);
+    assert_eq!(text, ITEM);
+    assert!(game_clip.join().unwrap(), "game never saw Ctrl+C while the hotkey was held");
+    assert_eq!(platform.clipboard.get_text().unwrap().as_deref(), Some("before hotkey"));
+    platform.hotkeys.unregister_all().unwrap();
 }

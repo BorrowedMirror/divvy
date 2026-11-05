@@ -1,6 +1,7 @@
 //! X11 / XWayland backend (default on Linux whenever `DISPLAY` is set).
 mod conn;
 pub(crate) mod input;
+mod keystate;
 mod overlay;
 mod tracker;
 

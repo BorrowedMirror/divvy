@@ -9,6 +9,8 @@ use enigo::{Direction, Enigo, Keyboard, Settings};
 use global_hotkey::hotkey::HotKey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, HotKeyState};
 
+use super::keystate::{HeldState, RELEASE_WAIT, X11KeyState};
+use crate::backend::chord_plan::{ChordKeys, run_chord};
 use crate::backend::ghk::to_hotkey;
 use crate::{
     Chord, Clipboard, HotkeyAction, HotkeyEvent, HotkeyHost, InputEvent, InputListener, InputSimulator, KeyModifier,
@@ -34,8 +36,15 @@ pub(crate) enum EnigoTarget {
 }
 
 /// Keystroke injection through enigo.
+///
+/// On X11 a private key-state connection lets `send_chord` (1) wait until the triggering
+/// hotkey's key is physically released, because global-hotkey's `XGrabKey` grab would otherwise
+/// swallow the synthetic chord, and (2) leave held chord modifiers alone and release extra ones
+/// (see [`crate::backend::chord_plan`]). On Wayland the key state is unknown: every chord
+/// modifier is pressed and released, as before.
 pub(crate) struct EnigoSimulator {
     enigo: Mutex<Enigo>,
+    keys: Option<X11KeyState>,
 }
 
 impl std::fmt::Debug for EnigoSimulator {
@@ -51,7 +60,13 @@ impl EnigoSimulator {
             EnigoTarget::Wayland => Settings { x11_display: Some(NO_DISPLAY.into()), ..Settings::default() },
         };
         let enigo = Enigo::new(&settings).map_err(|e| PlatformError::Backend(format!("enigo: {e}")))?;
-        Ok(Self { enigo: Mutex::new(enigo) })
+        let keys = match target {
+            EnigoTarget::X11 => X11KeyState::connect(None)
+                .inspect_err(|e| tracing::warn!(error = %e, "x11 key state unavailable; held keys ignored"))
+                .ok(),
+            EnigoTarget::Wayland => None,
+        };
+        Ok(Self { enigo: Mutex::new(enigo), keys })
     }
 }
 
@@ -100,30 +115,44 @@ pub(crate) fn enigo_modifier(m: KeyModifier) -> enigo::Key {
     }
 }
 
+struct Keys<'a> {
+    enigo: &'a mut Enigo,
+    key: enigo::Key,
+    held: HeldState,
+}
+
+fn enigo_err(e: enigo::InputError) -> PlatformError {
+    PlatformError::Backend(format!("enigo: {e}"))
+}
+
+impl ChordKeys for Keys<'_> {
+    type Error = PlatformError;
+    /// Release the exact physical keycodes (e.g. Shift_R), not just the default keysym's.
+    fn release_held(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        let codes = self.held.keycodes_of(m).to_vec();
+        if codes.is_empty() {
+            return self.release(m);
+        }
+        codes.into_iter().try_for_each(|c| self.enigo.raw(u16::from(c), Direction::Release).map_err(enigo_err))
+    }
+    fn press(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Press).map_err(enigo_err)
+    }
+    fn release(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Release).map_err(enigo_err)
+    }
+    fn click(&mut self) -> Result<(), PlatformError> {
+        self.enigo.key(self.key, Direction::Click).map_err(enigo_err)
+    }
+}
+
 impl InputSimulator for EnigoSimulator {
     fn send_chord(&self, chord: &Chord) -> Result<(), PlatformError> {
         let key = enigo_key(&chord.key).ok_or_else(|| PlatformError::InvalidChord(chord.to_string()))?;
-        let err = |e: enigo::InputError| PlatformError::Backend(format!("enigo: {e}"));
+        let held = self.keys.as_ref().and_then(|k| k.settle(RELEASE_WAIT)).unwrap_or_default();
         let mut enigo = lock(&self.enigo);
-        let mut pressed = Vec::new();
-        let mut result = Ok(());
-        for m in &chord.modifiers {
-            let k = enigo_modifier(*m);
-            if let Err(e) = enigo.key(k, Direction::Press) {
-                result = Err(err(e));
-                break;
-            }
-            pressed.push(k);
-        }
-        if result.is_ok() {
-            result = enigo.key(key, Direction::Click).map_err(err);
-        }
-        // Always release what we pressed, even on failure, so no modifier stays stuck.
-        for k in pressed.into_iter().rev() {
-            let released = enigo.key(k, Direction::Release).map_err(err);
-            result = result.and(released);
-        }
-        result
+        let held_mods = held.modifiers.clone();
+        run_chord(&chord.modifiers, &held_mods, &mut Keys { enigo: &mut enigo, key, held })
     }
 }
 
