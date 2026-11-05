@@ -2,7 +2,8 @@
 //! `test-hook` feature, and only when `KALANDRA_TEST_HOOK=<port>` is set. Binds 127.0.0.1 only.
 //!
 //! Line protocol (see e2e/lib/hook.ts): `trigger 0|1`, `text <json string>`, `state`,
-//! `tray open_settings|open_diagnostics|price_check|quit`, `quit`. One reply line each:
+//! `tray open_settings|open_diagnostics|price_check|quit`, `settings` (current settings as JSON),
+//! `save_settings <json settings>` (validate + persist, like the IPC command), `quit`. One reply line each:
 //! `ok`, `err <message>`, or a JSON object for `state`.
 use std::{
     io::{BufRead, BufReader, Write},
@@ -75,6 +76,14 @@ pub fn handle(app: &AppHandle, line: &str) -> String {
             })
             .to_string()
         }
+        "settings" => serde_json::to_string(&state.settings()).unwrap_or_else(|e| format!("err {e}")),
+        "save_settings" => match serde_json::from_str(arg) {
+            Ok(settings) => match flow::apply_settings(app, &state, settings) {
+                Ok(_) => "ok".into(),
+                Err(e) => format!("err {e}"),
+            },
+            Err(e) => format!("err {e}"),
+        },
         "tray" => {
             let id = match arg {
                 "open_settings" => tray::ids::SETTINGS,
