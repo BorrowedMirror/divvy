@@ -1,13 +1,53 @@
-# Skeleton; workstream I completes it.
 name: ci
+
 on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
 jobs:
-  rust:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - run: cargo fmt --all -- --check
+
+  generated:
+    name: generated files + xtask
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: xtask
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - name: xtask unit tests
+        run: cargo nextest run -p xtask --locked
+      - name: commitlint config and commit docs are fresh
+        run: |
+          cargo xtask gen --no-bindings
+          git diff --exit-code -- .commitlintrc.json docs/contributing/commit-message.md
+
+  clippy:
+    name: clippy (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -15,7 +55,158 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Linux deps
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/linux-deps
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: clippy
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  deny:
+    name: cargo deny
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        checks: [advisories, "bans licenses sources"]
+    # New advisories must not block unrelated PRs; they still fail on master and nightly.
+    continue-on-error: ${{ matrix.checks == 'advisories' && github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check ${{ matrix.checks }}
+
+  machete:
+    name: cargo machete
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-machete
+      - run: cargo machete --skip-target-dir
+
+  test:
+    name: test + coverage (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/linux-deps
+      - name: Start Xvfb + openbox
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libgtk-layer-shell-dev
-      - run: cargo test --workspace
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          sleep 1
+          DISPLAY=:99 openbox &
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: test
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest,cargo-llvm-cov
+      - name: nextest + llvm-cov with per-crate gates
+        run: cargo xtask coverage --check --profile ci
+      - name: Upload junit
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.os }}
+          path: target/nextest/ci/junit.xml
+          if-no-files-found: ignore
+      - name: Upload coverage (core)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/core.lcov
+          flags: core
+          name: core-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload coverage (data)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/data.lcov
+          flags: data
+          name: data-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload coverage (trade)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/trade.lcov
+          flags: trade
+          name: trade-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload coverage (platform)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/platform.lcov
+          flags: platform
+          name: platform-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload coverage (config)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/config.lcov
+          flags: config
+          name: config-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+
+  bindings:
+    name: bindings are fresh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/linux-deps
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: bindings
+      - name: web/src/bindings.ts matches the Rust IPC types
+        run: cargo test --locked -p kalandra-desktop --test bindings
+
+  web:
+    name: web lint + typecheck + coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web lint
+      - run: pnpm --dir web typecheck
+      - run: pnpm --dir web coverage
+      - name: Upload coverage (web)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: web/coverage/lcov.info
+          flags: web
+          name: web
+          disable_search: true
+          fail_ci_if_error: false

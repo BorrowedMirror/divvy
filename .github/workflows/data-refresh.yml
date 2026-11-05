@@ -1,0 +1,49 @@
+name: data-refresh
+
+# Regenerates the bundled game data (crates/data/assets) and opens a PR only when it changed.
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: xtask
+      - name: cargo xtask data refresh
+        run: cargo xtask data refresh
+      - name: Data crate still passes its tests
+        run: cargo test --locked -p kalandra-data
+      - name: Open pull request if the data changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/data-refresh
+          delete-branch: true
+          add-paths: crates/data/assets/**
+          commit-message: |
+            build(data): refresh game data
+
+            Scheduled `cargo xtask data refresh` picked up upstream changes to the
+            trade2 data endpoints or the game exports.
+          title: "build(data): refresh game data"
+          body: |
+            Automated run of `cargo xtask data refresh` (workflow `${{ github.workflow }}`, run ${{ github.run_id }}).
+
+            Review the manifest diff (`crates/data/assets/manifest.json`) for unexpected schema or count changes before merging.
+          labels: data

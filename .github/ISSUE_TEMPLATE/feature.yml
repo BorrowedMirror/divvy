@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an idea or improvement for kalandra.
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that kalandra makes hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen? Mock-ups and examples welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other tools or workarounds you have tried.
+  - type: checkboxes
+    id: tos
+    attributes:
+      label: Game terms of use
+      options:
+        - label: This feature only reads copied item text and public trade data; it does not automate gameplay or read game memory.
+          required: true

@@ -1,0 +1,57 @@
+name: fixtures-refresh
+
+# Manually re-records the trade2 wiremock fixtures from the live API at a low request rate
+# (`cargo xtask fixtures record`, 2 s between requests) and proposes them as a PR.
+on:
+  workflow_dispatch:
+    inputs:
+      league:
+        description: League to search (default - first poe2 league from the API)
+        required: false
+        default: ""
+      base_type:
+        description: Base type used for the recorded search
+        required: false
+        default: Leather Belt
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: xtask
+      - name: Record fixtures
+        env:
+          LEAGUE: ${{ inputs.league }}
+          BASE_TYPE: ${{ inputs.base_type }}
+        run: |
+          args=(--delay-ms 2000 --base-type "$BASE_TYPE")
+          if [ -n "$LEAGUE" ]; then args+=(--league "$LEAGUE"); fi
+          cargo xtask fixtures record "${args[@]}"
+      - name: Trade tests still pass on the new fixtures
+        run: cargo test --locked -p kalandra-trade
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/fixtures-refresh
+          delete-branch: true
+          add-paths: crates/trade/tests/fixtures/**
+          commit-message: |
+            test(trade): re-record trade api fixtures
+
+            Keeps the wiremock fixtures in line with the live trade2 API shape.
+          title: "test(trade): re-record trade api fixtures"
+          body: Automated run of `cargo xtask fixtures record` (run ${{ github.run_id }}).

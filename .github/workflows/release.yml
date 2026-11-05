@@ -1,0 +1,160 @@
+name: release
+
+# Tag `v*` (created by `cargo xtask release <version>`) -> draft GitHub release with signed
+# bundles, the Tauri updater manifest (latest.json), SHA-256 checksums, an SBOM and
+# third-party notices. A maintainer reviews and publishes the draft by hand.
+#
+# Signing secrets live ONLY in the `release` environment (protected: tags `v*`, required
+# reviewers), and only the `build` job enters that environment.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  draft:
+    name: draft release + notes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release_id: ${{ steps.create.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Release notes (git-cliff)
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: RELEASE_NOTES.md
+      - name: Create draft release
+        id: create
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease=()
+          case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
+          gh release create "$TAG" --draft --verify-tag "${prerelease[@]}" \
+            --title "kalandra $TAG" --notes-file RELEASE_NOTES.md
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id")
+          echo "release_id=$id" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: bundle (${{ matrix.name }})
+    needs: draft
+    environment: release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows
+            os: windows-latest
+            args: --bundles msi,nsis
+          - name: macos-universal
+            os: macos-latest
+            args: --target universal-apple-darwin --bundles app,dmg
+          - name: linux
+            os: ubuntu-24.04
+            args: --bundles appimage,deb,rpm
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/linux-deps
+      - run: rustup toolchain install
+      - if: runner.os == 'macOS'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-${{ matrix.name }}
+          save-if: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web build
+      - run: cargo install tauri-cli --version "^2" --locked
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          # Updater signatures (latest.json).
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # macOS code signing + notarisation (ignored on other runners).
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: cargo tauri
+          releaseId: ${{ needs.draft.outputs.release_id }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          # web/dist is built above; .github/tauri-release.conf.json (merged over tauri.conf.json)
+          # skips beforeBuildCommand and enables updater artifacts.
+          args: ${{ matrix.args }} --config ${{ github.workspace }}/.github/tauri-release.conf.json
+
+  attest:
+    name: checksums + sbom + notices
+    needs: [draft, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-about
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p dist
+          gh release download "$TAG" --dir dist --pattern '*'
+      - name: SBOM (CycloneDX, Cargo.lock + pnpm-lock.yaml)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: kalandra.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Third-party notices
+        run: cargo about generate --workspace about.hbs -o THIRD-PARTY-NOTICES.html
+      - name: SHA-256 checksums (bundles, updater manifest, SBOM, notices)
+        run: |
+          cp kalandra.cdx.json THIRD-PARTY-NOTICES.html dist/
+          rm -f dist/SHA256SUMS.txt
+          (cd dist && sha256sum -- *) > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Attach to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release upload "$TAG" --clobber \
+            SHA256SUMS.txt kalandra.cdx.json THIRD-PARTY-NOTICES.html
