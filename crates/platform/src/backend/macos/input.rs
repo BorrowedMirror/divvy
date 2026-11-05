@@ -7,6 +7,7 @@ use enigo::{Direction, Enigo, Key, Keyboard, Settings};
 use super::keymap;
 use super::model::{self, CopyModifier, PERM_ACCESSIBILITY, PERM_INPUT_MONITORING};
 use super::permissions;
+use crate::backend::chord_plan::{ChordKeys, run_chord};
 use crate::{Chord, InputEvent, InputListener, InputSimulator, KeyModifier, PlatformError};
 
 /// Gap between synthetic key events so the game samples modifier state reliably.
@@ -49,7 +50,46 @@ fn enigo_modifier(m: KeyModifier) -> Key {
     }
 }
 
+/// Modifiers physically held right now (HID system state, i.e. real keyboards only).
+fn held_modifiers() -> Vec<KeyModifier> {
+    use objc2_core_graphics::{CGEventSource, CGEventSourceStateID};
+    model::held_from_flags(CGEventSource::flags_state(CGEventSourceStateID::HIDSystemState).0)
+}
+
+struct Keys {
+    enigo: Enigo,
+    keycode: u16,
+}
+
+fn backend(e: enigo::InputError) -> PlatformError {
+    PlatformError::Backend(e.to_string())
+}
+
+impl ChordKeys for Keys {
+    type Error = PlatformError;
+    fn release_held(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.release(m)
+    }
+    fn press(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Press).map_err(backend)?;
+        std::thread::sleep(KEY_GAP);
+        Ok(())
+    }
+    fn release(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Release).map_err(backend).inspect_err(|e| {
+            tracing::warn!(error = %e, ?m, "failed to release modifier");
+        })
+    }
+    fn click(&mut self) -> Result<(), PlatformError> {
+        self.enigo.raw(self.keycode, Direction::Click).map_err(backend)?;
+        std::thread::sleep(KEY_GAP);
+        Ok(())
+    }
+}
+
 impl InputSimulator for MacInputSimulator {
+    /// Held chord modifiers (Cmd from Cmd+D) are left down; extra held ones (Shift from
+    /// Cmd+Shift+D) are released first. See [`crate::backend::chord_plan`].
     fn send_chord(&self, chord: &Chord) -> Result<(), PlatformError> {
         if !permissions::accessibility() {
             return Err(PlatformError::PermissionDenied(PERM_ACCESSIBILITY));
@@ -57,29 +97,7 @@ impl InputSimulator for MacInputSimulator {
         let chord = model::remap_chord(chord, self.copy_modifier);
         let keycode = keymap::mac_keycode(&chord.key).ok_or_else(|| PlatformError::InvalidChord(chord.to_string()))?;
         let settings = Settings { open_prompt_to_get_permissions: false, ..Settings::default() };
-        let mut enigo = Enigo::new(&settings).map_err(|e| PlatformError::Backend(e.to_string()))?;
-        let backend = |e: enigo::InputError| PlatformError::Backend(e.to_string());
-
-        let mut pressed = Vec::with_capacity(chord.modifiers.len());
-        let mut result = Ok(());
-        for &m in &chord.modifiers {
-            if let Err(e) = enigo.key(enigo_modifier(m), Direction::Press) {
-                result = Err(backend(e));
-                break;
-            }
-            pressed.push(m);
-            std::thread::sleep(KEY_GAP);
-        }
-        if result.is_ok() {
-            result = enigo.raw(keycode, Direction::Click).map_err(backend);
-            std::thread::sleep(KEY_GAP);
-        }
-        // Always release what we pressed, even after an error, so no modifier sticks.
-        for &m in pressed.iter().rev() {
-            if let Err(e) = enigo.key(enigo_modifier(m), Direction::Release) {
-                tracing::warn!(error = %e, ?m, "failed to release modifier");
-            }
-        }
-        result
+        let enigo = Enigo::new(&settings).map_err(|e| PlatformError::Backend(e.to_string()))?;
+        run_chord(&chord.modifiers, &held_modifiers(), &mut Keys { enigo, keycode })
     }
 }

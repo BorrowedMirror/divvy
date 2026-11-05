@@ -4,7 +4,8 @@ use std::sync::mpsc::Receiver;
 use enigo::{Direction, Enigo, Key, Keyboard, Settings};
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_LWIN, VK_MENU, VK_SHIFT};
 
-use super::logic::{self, modifier_vk, plan_chord, vk_for_code};
+use super::logic::{self, modifier_vk, vk_for_code};
+use crate::backend::chord_plan::{ChordKeys, run_chord};
 use crate::{Chord, InputEvent, InputListener, InputSimulator, KeyModifier, PlatformError};
 
 // The pure key mapping uses its own constants; pin a sample of them to the `windows` crate's.
@@ -68,32 +69,35 @@ fn held_modifiers() -> Vec<KeyModifier> {
         .collect()
 }
 
+struct Keys {
+    enigo: Enigo,
+    vk: u16,
+}
+
+fn enigo_err(e: enigo::InputError) -> PlatformError {
+    PlatformError::Backend(format!("enigo: {e}"))
+}
+
+impl ChordKeys for Keys {
+    type Error = PlatformError;
+    fn release_held(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.release(m)
+    }
+    fn press(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Press).map_err(enigo_err)
+    }
+    fn release(&mut self, m: KeyModifier) -> Result<(), PlatformError> {
+        self.enigo.key(enigo_modifier(m), Direction::Release).map_err(enigo_err)
+    }
+    fn click(&mut self) -> Result<(), PlatformError> {
+        self.enigo.key(Key::Other(u32::from(self.vk)), Direction::Click).map_err(enigo_err)
+    }
+}
+
 impl InputSimulator for EnigoSimulator {
     fn send_chord(&self, chord: &Chord) -> Result<(), PlatformError> {
         let vk = vk_for_code(&chord.key).ok_or_else(|| PlatformError::InvalidChord(chord.to_string()))?;
-        let plan = plan_chord(&chord.modifiers, &held_modifiers());
-        let err = |e: enigo::InputError| PlatformError::Backend(format!("enigo: {e}"));
-        let mut enigo = Enigo::new(&Settings::default()).map_err(|e| PlatformError::Backend(format!("enigo: {e}")))?;
-        for &m in &plan.release_first {
-            enigo.key(enigo_modifier(m), Direction::Release).map_err(err)?;
-        }
-        let mut pressed = Vec::with_capacity(plan.press.len());
-        let mut result = Ok(());
-        for &m in &plan.press {
-            if let Err(e) = enigo.key(enigo_modifier(m), Direction::Press) {
-                result = Err(err(e));
-                break;
-            }
-            pressed.push(m);
-        }
-        if result.is_ok() {
-            result = enigo.key(Key::Other(u32::from(vk)), Direction::Click).map_err(err);
-        }
-        // Always release what we pressed, even after a failure, so no modifier is left stuck.
-        for &m in pressed.iter().rev() {
-            let released = enigo.key(enigo_modifier(m), Direction::Release).map_err(err);
-            result = result.and(released);
-        }
-        result
+        let enigo = Enigo::new(&Settings::default()).map_err(|e| PlatformError::Backend(format!("enigo: {e}")))?;
+        run_chord(&chord.modifiers, &held_modifiers(), &mut Keys { enigo, vk })
     }
 }

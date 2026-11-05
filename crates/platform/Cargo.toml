@@ -61,7 +61,7 @@ mockall.workspace = true
 pretty_assertions.workspace = true
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
-x11rb = { workspace = true, features = ["allow-unsafe-code", "shape"] }
+x11rb = { workspace = true, features = ["allow-unsafe-code", "shape", "xtest"] }
 arboard.workspace = true
 
 # Windows backend (workstream D): raw Win32 calls for window tracking and overlay styling.
@@ -72,5 +72,5 @@ windows.workspace = true
 # this keeps the shared `native` feature list untouched.
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2-core-foundation = { workspace = true, features = ["std", "CFBase", "CFString", "CFDictionary", "CFNumber", "CFArray", "CFRunLoop", "CFDate", "CFCGTypes"] }
-objc2-core-graphics = { workspace = true, features = ["std", "CGWindow", "CGEvent"] }
+objc2-core-graphics = { workspace = true, features = ["std", "CGWindow", "CGEvent", "CGEventSource", "CGEventTypes"] }
 objc2-application-services = { workspace = true, features = ["std", "libc", "HIServices", "AXUIElement", "AXError", "AXValue"] }
