@@ -65,3 +65,30 @@ export async function switchToWindow(label: "overlay" | "settings" | "diagnostic
   }
   throw new Error(`no webview with #/${label}; saw: ${[...new Set(seen)].join(", ")}`);
 }
+
+/**
+ * Wait until the (still hidden) overlay webview has loaded the app and rendered the overlay.
+ *
+ * The app emits `item-copied` once and the overlay does not ask for it again, so a hotkey that
+ * fires before the overlay's React tree has subscribed is lost (no price query ever runs). Real
+ * users never press the hotkey within a second of launch; the specs do, so they wait here.
+ * Also fails fast on a binary built without `tauri/custom-protocol`, whose webviews point at the
+ * Vite dev server (`http://localhost:5173`) and never load anything.
+ */
+export async function waitForOverlayReady(timeoutMs = 20000): Promise<void> {
+  await switchToWindow("overlay", timeoutMs);
+  const url = await browser.getUrl();
+  if (url.startsWith("http://localhost:5173")) {
+    throw new Error(
+      `overlay webview loads ${url}: the app was built without \`tauri/custom-protocol\` ` +
+        "(rebuild with `cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol`)",
+    );
+  }
+  await browser.waitUntil(
+    () =>
+      browser.execute(
+        () => document.readyState === "complete" && document.querySelector("article[aria-label]") !== null,
+      ),
+    { timeout: timeoutMs, interval: 100, timeoutMsg: `overlay app never rendered (${url})` },
+  );
+}
