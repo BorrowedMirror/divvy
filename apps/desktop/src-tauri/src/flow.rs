@@ -95,6 +95,15 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
                 height: m.size().height as i32,
             };
             let (x, y) = logic::overlay_position((cursor.x as i32, cursor.y as i32), size, area);
+            // Layer-shell surfaces ignore set_position; anchor them to the output edge instead.
+            #[cfg(target_os = "linux")]
+            if state.backend == kalandra_platform::BackendKind::Wayland {
+                let right = x > area.x + area.width / 2;
+                let side = if right { area.x + area.width - (x + size.0) } else { x - area.x };
+                if let Err(e) = crate::overlay::linux::anchor_layer(&win, right, y - area.y, side.max(0)) {
+                    state.record_error(format!("layer-shell anchor: {e}"));
+                }
+            }
             let _ = win.set_position(PhysicalPosition::new(x, y));
         }
     }

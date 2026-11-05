@@ -237,3 +237,22 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   `PriceSummary` JSON (serde field names) or `null`.
 - Web `data-testid`s used by e2e: `price-summary` on the overlay's price block (its text includes the median
   amount), `settings-root` on the settings page root.
+
+### F (linux + platform common) — additive only
+- `BackendKind::parse(&str) -> Option<BackendKind>` (the `KALANDRA_BACKEND` grammar) and
+  `EnvProbe::is_gnome(&self) -> bool`.
+- `copy::looks_like_item(&str) -> bool` (local `Item Class:` check, no core dependency) and
+  `copy::copy_chord(advanced: bool) -> Chord`. `copy_item_text` returns `NoItemText` when the
+  clipboard changed to non-item text, `Timeout` when nothing arrived.
+- `backend::Unsupported(&'static str)`: stand-in implementing every trait (all calls ->
+  `PlatformError::Unsupported`, `is_game_focused` -> `true`); backends use it for capabilities
+  that are `false`.
+- `backend::hook::start_global_hook()` is `pub(crate)` (shared by x11/windows/macos).
+- `backend::x11::{overlay, X11Overlay}`; `backend::wayland::{overlay, sigusr2_trigger}`.
+  `wayland::overlay` always returns `Unsupported` (layer-shell is applied on the GTK window).
+- Wayland `WindowTracker::subscribe` and `InputListener::start` return `Unsupported`; the
+  Wayland `HotkeyHost::events()` also yields SIGUSR2 as `PriceCheck`.
+- `apps/desktop/src-tauri/src/overlay/linux.rs`: `pre_init() -> BackendKind`,
+  `pre_init_with(Option<BackendKind>) -> BackendKind`, `gdk_backend_for(BackendKind)`,
+  `set_click_through(&WebviewWindow, bool)`, `anchor_layer(&WebviewWindow, right, top, side)`
+  in addition to `prepare`.

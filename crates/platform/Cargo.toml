@@ -21,7 +21,17 @@ undocumented_unsafe_blocks = "warn"
 [features]
 default = []
 # Enables real OS backends; off in pure-logic unit tests.
-native = ["dep:arboard", "dep:enigo", "dep:global-hotkey", "dep:rdev"]
+native = [
+  "dep:arboard",
+  "dep:enigo",
+  "dep:global-hotkey",
+  "dep:rdev",
+  "dep:x11rb",
+  "dep:ashpd",
+  "dep:signal-hook",
+  "dep:tokio",
+  "dep:futures",
+]
 
 [dependencies]
 raw-window-handle.workspace = true
@@ -35,9 +45,21 @@ global-hotkey = { workspace = true, optional = true }
 rdev = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-x11rb = { workspace = true, optional = true, features = ["allow-unsafe-code"] }
-ashpd = { workspace = true, optional = true }
+x11rb = { workspace = true, optional = true, features = ["allow-unsafe-code", "xfixes", "shape", "record"] }
+ashpd = { workspace = true, optional = true, features = ["tokio"] }
+# enigo: x11rb (default) for X11/XWayland, `wayland` (virtual-keyboard protocol) for wlroots.
+# libei is deliberately NOT enabled: enigo 0.6 unwraps RemoteDesktop portal errors (panics)
+# and, because cargo features are crate-global, would also try libei under X11.
+enigo = { workspace = true, optional = true, features = ["wayland"] }
+arboard = { workspace = true, optional = true, features = ["wayland-data-control"] }
+signal-hook = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true, features = ["rt"] }
+futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 mockall.workspace = true
 pretty_assertions.workspace = true
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+x11rb = { workspace = true, features = ["allow-unsafe-code", "shape"] }
+arboard.workspace = true

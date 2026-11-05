@@ -13,7 +13,7 @@ pub mod tray;
 use std::sync::{Arc, atomic::Ordering};
 
 use kalandra_config::{Paths, Settings};
-use kalandra_platform::{BackendKind, EnvProbe, Platform};
+use kalandra_platform::{BackendKind, Platform};
 use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_specta::{Builder, collect_commands, collect_events};
 
@@ -138,8 +138,7 @@ pub fn run() {
     let log_path = init_logging(paths.as_ref());
     let mut errors = Vec::new();
     let settings = load_settings(paths.as_ref(), &mut errors);
-    let backend = kalandra_platform::detect(&EnvProbe::from_env(), settings.platform.backend_override);
-    overlay::pre_init(backend);
+    let backend = overlay::pre_init(settings.platform.backend_override);
     let platform = create_platform(backend, &mut errors);
     let data = match kalandra_data::bundled() {
         Ok(d) => Some(Arc::new(d)),
@@ -181,8 +180,11 @@ pub fn run() {
             }
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
+            // The Wayland backend already maps SIGUSR2 into its hotkey stream; avoid a double trigger.
             #[cfg(unix)]
-            spawn_signal_triggers(&handle);
+            if state.backend != BackendKind::Wayland {
+                spawn_signal_triggers(&handle);
+            }
             if let Some(p) = state.paths.as_ref()
                 && let Err(e) = cli::write_pid(&p.cache_dir)
             {
