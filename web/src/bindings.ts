@@ -171,7 +171,7 @@ export type IpcError = IpcError_Serialize | IpcError_Deserialize;
 
 /**  Error shape for every command. */
 export type IpcError_Deserialize = {
-	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `internal`. */
+	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `internal`. */
 	kind: string,
 	message: string,
 	retry_after_ms?: number | null,
@@ -179,7 +179,7 @@ export type IpcError_Deserialize = {
 
 /**  Error shape for every command. */
 export type IpcError_Serialize = {
-	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `internal`. */
+	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `internal`. */
 	kind: string,
 	message: string,
 	retry_after_ms: number | null,

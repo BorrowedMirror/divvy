@@ -132,22 +132,29 @@ fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Pl
     }
 }
 
+/// Install the shell's signal handlers. SIGUSR1 (pinned) is always ours: unhandled, its default
+/// action terminates the process. SIGUSR2 is ours unless a Wayland platform already maps it.
 #[cfg(unix)]
-fn spawn_signal_triggers(app: &tauri::AppHandle) {
-    use signal_hook::{
-        consts::{SIGUSR1, SIGUSR2},
-        iterator::Signals,
-    };
-    let Ok(mut signals) = Signals::new([SIGUSR1, SIGUSR2]) else { return };
+fn install_signal_triggers(wayland_platform: bool) -> std::io::Result<signal_hook::iterator::Signals> {
+    use signal_hook::consts::{SIGUSR1, SIGUSR2};
+    let mut sigs = vec![SIGUSR1];
+    if logic::shell_handles_sigusr2(wayland_platform) {
+        sigs.push(SIGUSR2);
+    }
+    signal_hook::iterator::Signals::new(sigs)
+}
+
+#[cfg(unix)]
+fn spawn_signal_triggers(app: &tauri::AppHandle, state: &AppState, mut signals: signal_hook::iterator::Signals) {
     let app = app.clone();
-    std::thread::Builder::new()
-        .name("kalandra-signals".into())
-        .spawn(move || {
-            for sig in signals.forever() {
-                flow::trigger(&app, sig == SIGUSR1);
-            }
-        })
-        .ok();
+    let spawned = std::thread::Builder::new().name("kalandra-signals".into()).spawn(move || {
+        for sig in signals.forever() {
+            flow::trigger(&app, sig == signal_hook::consts::SIGUSR1);
+        }
+    });
+    if let Err(e) = spawned {
+        state.record_error(format!("spawn signal thread: {e}"));
+    }
 }
 
 pub fn run() {
@@ -174,6 +181,15 @@ pub fn run() {
     let settings = load_settings(paths.as_ref(), &mut errors);
     let backend = overlay::pre_init(settings.platform.backend_override);
     let platform = create_platform(backend, &mut errors);
+    // Installed before the event loop so an early SIGUSR1 can't kill the app.
+    #[cfg(unix)]
+    let signals = match install_signal_triggers(platform.is_some() && backend == BackendKind::Wayland) {
+        Ok(s) => Some(s),
+        Err(e) => {
+            errors.push(format!("signal triggers unavailable: {e}"));
+            None
+        }
+    };
     let data = match kalandra_data::bundled() {
         Ok(d) => Some(Arc::new(d)),
         Err(e) => {
@@ -204,23 +220,41 @@ pub fn run() {
             builder.mount_events(app);
             let handle = app.handle().clone();
             let state = Arc::clone(&app.state::<Arc<AppState>>());
-            if let Err(e) = tray::build(&handle) {
-                state.record_error(format!("tray unavailable: {e}"));
-            }
+            let tray_ok = match tray::build(&handle) {
+                Ok(()) => true,
+                Err(e) => {
+                    state.record_error(format!("tray unavailable: {e}"));
+                    false
+                }
+            };
+            // Without a tray there is no Quit item: closing settings must quit instead of hiding.
+            state.close_quits.store(!tray_ok, Ordering::SeqCst);
             if let Some(win) = app.get_webview_window(flow::OVERLAY)
                 && let Err(e) = overlay::prepare(&win)
             {
                 state.record_error(format!("overlay styling failed: {e}"));
             }
-            if let Err(e) = flow::register_hotkeys(&state, &state.settings()) {
-                state.record_error(format!("hotkeys: {e}"));
-            }
+            // Portal registration can block for seconds; keep the main thread free.
+            let (st, h) = (Arc::clone(&state), handle.clone());
+            tauri::async_runtime::spawn_blocking(move || {
+                let _guard = st.apply_lock.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                let hotkeys_ok = match flow::register_hotkeys(&st, &st.settings()) {
+                    Ok(()) => st.capabilities().global_hotkeys,
+                    Err(e) => {
+                        st.record_error(format!("hotkeys: {e}"));
+                        false
+                    }
+                };
+                // No tray or no hotkey: the settings window is the only way in.
+                if logic::must_show_settings(tray_ok, hotkeys_ok) {
+                    let _ = flow::show_settings(&h, "settings");
+                }
+            });
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
-            // The Wayland backend already maps SIGUSR2 into its hotkey stream; avoid a double trigger.
             #[cfg(unix)]
-            if state.backend != BackendKind::Wayland {
-                spawn_signal_triggers(&handle);
+            if let Some(signals) = signals {
+                spawn_signal_triggers(&handle, &state, signals);
             }
             if let Some(p) = state.paths.as_ref()
                 && let Err(e) = cli::write_pid(&p.cache_dir)
@@ -250,7 +284,14 @@ pub fn run() {
                 && window.label() == flow::SETTINGS
             {
                 api.prevent_close();
-                let _ = window.hide();
+                let app = window.app_handle();
+                let state = app.state::<Arc<AppState>>();
+                if state.close_quits.load(Ordering::SeqCst) {
+                    state.quitting.store(true, Ordering::SeqCst);
+                    app.exit(0);
+                } else {
+                    let _ = window.hide();
+                }
             }
         })
         .build(tauri::generate_context!())

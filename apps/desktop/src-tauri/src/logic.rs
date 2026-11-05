@@ -1,4 +1,12 @@
 //! Pure, Tauri-independent pieces of the app flow (unit-tested).
+use std::{
+    sync::{
+        Arc, Mutex, PoisonError,
+        atomic::{AtomicBool, Ordering},
+    },
+    time::{Duration, Instant},
+};
+
 use kalandra_config::Settings;
 use kalandra_core::{
     ParsedItem,
@@ -136,9 +144,115 @@ pub fn is_allowed_trade_url(url: &str, override_base: Option<&url::Url>) -> bool
     }
 }
 
+/// Whether the copy keystroke may be sent: only into the focused game window when the backend
+/// can track windows (otherwise e.g. a terminal would receive Ctrl+C).
+pub fn may_copy(window_tracking: bool, game_focused: impl FnOnce() -> bool) -> bool {
+    !window_tracking || game_focused()
+}
+
+/// Whether the shell must handle SIGUSR2 itself: a Wayland platform already maps it to a hotkey.
+/// SIGUSR1 (pinned) is always the shell's, else its default action would kill the app.
+pub fn shell_handles_sigusr2(wayland_platform: bool) -> bool {
+    !wayland_platform
+}
+
+/// Serialises price-check flows: one copy at a time, and presses within the debounce window of
+/// the last accepted one are dropped (key repeat / storms). Overlapping copies could otherwise
+/// "restore" the clipboard to the item text captured by the other run.
+#[derive(Debug)]
+pub struct FlowGate {
+    in_flight: AtomicBool,
+    last: Mutex<Option<Instant>>,
+    debounce: Duration,
+}
+
+/// Held while a flow runs; dropping it lets the next press through.
+#[derive(Debug)]
+pub struct FlowPermit(Arc<FlowGate>);
+
+impl Drop for FlowPermit {
+    fn drop(&mut self) {
+        self.0.in_flight.store(false, Ordering::SeqCst);
+    }
+}
+
+impl FlowGate {
+    pub const DEBOUNCE: Duration = Duration::from_millis(150);
+
+    pub fn new(debounce: Duration) -> Self {
+        Self { in_flight: AtomicBool::new(false), last: Mutex::new(None), debounce }
+    }
+
+    /// Start a flow at `now`, or `None` if one is running or the last start was too recent.
+    pub fn try_begin(self: &Arc<Self>, now: Instant) -> Option<FlowPermit> {
+        let mut last = self.last.lock().unwrap_or_else(PoisonError::into_inner);
+        if last.is_some_and(|t| now.saturating_duration_since(t) < self.debounce) {
+            return None;
+        }
+        if self.in_flight.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+            return None;
+        }
+        *last = Some(now);
+        Some(FlowPermit(Arc::clone(self)))
+    }
+}
+
+impl Default for FlowGate {
+    fn default() -> Self {
+        Self::new(Self::DEBOUNCE)
+    }
+}
+
+/// Show settings at startup when the user would otherwise have no way in (no tray or no hotkey).
+pub fn must_show_settings(tray_ok: bool, hotkeys_ok: bool) -> bool {
+    !tray_ok || !hotkeys_ok
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn settings_shown_when_unreachable() {
+        assert!(!must_show_settings(true, true));
+        assert!(must_show_settings(false, true));
+        assert!(must_show_settings(true, false));
+        assert!(must_show_settings(false, false));
+    }
+
+    #[test]
+    fn flow_gate_serialises_and_debounces() {
+        let gate = Arc::new(FlowGate::default());
+        let t0 = Instant::now();
+        let ms = Duration::from_millis;
+        let p = gate.try_begin(t0).expect("first press runs");
+        assert!(gate.try_begin(t0 + ms(500)).is_none(), "dropped while in flight");
+        drop(p);
+        assert!(gate.try_begin(t0 + ms(100)).is_none(), "debounced");
+        let p = gate.try_begin(t0 + ms(200)).expect("after debounce");
+        drop(p);
+        assert!(gate.try_begin(t0).is_none(), "earlier instant is too soon");
+    }
+
+    #[test]
+    fn copy_requires_focus_only_with_tracking() {
+        use kalandra_platform::{Rect, WindowTracker};
+        use kalandra_testkit::fakes::{FakeWindowTracker, game_window};
+        assert!(may_copy(false, || false));
+        let tracker = FakeWindowTracker::new();
+        assert!(!may_copy(true, || tracker.is_game_focused()), "no game window");
+        tracker.set_window(Some(game_window(Rect { x: 0, y: 0, width: 10, height: 10 })));
+        assert!(may_copy(true, || tracker.is_game_focused()));
+        tracker.set_focused(false);
+        assert!(!may_copy(true, || tracker.is_game_focused()), "terminal focused");
+        assert!(may_copy(false, || tracker.is_game_focused()), "no tracking => allow");
+    }
+
+    #[test]
+    fn sigusr2_ownership() {
+        assert!(shell_handles_sigusr2(false));
+        assert!(!shell_handles_sigusr2(true));
+    }
 
     #[test]
     fn log_filter_caps_http_stack() {

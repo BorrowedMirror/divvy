@@ -14,7 +14,7 @@ use crate::{flow, state::AppState};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, thiserror::Error)]
 #[error("{kind}: {message}")]
 pub struct IpcError {
-    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `internal`.
+    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `internal`.
     pub kind: String,
     pub message: String,
     pub retry_after_ms: Option<u64>,
@@ -80,12 +80,20 @@ pub fn get_settings(state: State<'_, Arc<AppState>>) -> Settings {
 
 #[tauri::command]
 #[specta::specta]
-pub fn save_settings(
+pub async fn save_settings(
     app: AppHandle,
     state: State<'_, Arc<AppState>>,
     settings: Settings,
 ) -> Result<Settings, IpcError> {
-    flow::apply_settings(&app, &state, settings)
+    apply_off_main(app, Arc::clone(&state), settings).await
+}
+
+/// Sync Tauri commands run on the main thread, and hotkey registration (XDG portal) can block
+/// for seconds, so settings are applied on the blocking pool.
+async fn apply_off_main(app: AppHandle, state: Arc<AppState>, settings: Settings) -> Result<Settings, IpcError> {
+    tauri::async_runtime::spawn_blocking(move || flow::apply_settings(&app, &state, settings))
+        .await
+        .map_err(|e| IpcError::new("internal", e.to_string()))?
 }
 
 #[tauri::command]
@@ -182,7 +190,7 @@ pub fn open_settings(app: AppHandle) -> Result<(), IpcError> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn rebind_hotkey(
+pub async fn rebind_hotkey(
     app: AppHandle,
     state: State<'_, Arc<AppState>>,
     action: HotkeyAction,
@@ -194,5 +202,5 @@ pub fn rebind_hotkey(
         HotkeyAction::PriceCheckPinned => settings.hotkeys.price_check_pinned = chord,
         HotkeyAction::OpenSettings => settings.hotkeys.open_settings = chord,
     }
-    flow::apply_settings(&app, &state, settings).map(|_| ())
+    apply_off_main(app, Arc::clone(&state), settings).await.map(|_| ())
 }

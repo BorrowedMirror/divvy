@@ -52,21 +52,46 @@ fn env_url(key: &str, default: &str) -> Url {
     env_override(key).unwrap_or_else(|| Url::parse(default).expect("static url"))
 }
 
+fn trade_config(settings: &Settings) -> TradeConfig {
+    TradeConfig {
+        base_url: env_url("KALANDRA_TRADE_BASE_URL", "https://www.pathofexile.com"),
+        user_agent: logic::user_agent(settings),
+        poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
+        ..TradeConfig::default()
+    }
+}
+
+fn ninja(ua: String) -> Arc<PoeNinjaSource> {
+    Arc::new(PoeNinjaSource::new(env_url("KALANDRA_NINJA_BASE_URL", "https://poe.ninja"), ua))
+}
+
+fn scout(ua: String) -> Arc<Poe2ScoutSource> {
+    Arc::new(Poe2ScoutSource::new(env_url("KALANDRA_SCOUT_BASE_URL", "https://poe2scout.com"), ua))
+}
+
 impl Sources {
     pub fn from_settings(settings: &Settings) -> Result<Self, String> {
-        let ua = logic::user_agent(settings);
-        let config = TradeConfig {
-            base_url: env_url("KALANDRA_TRADE_BASE_URL", "https://www.pathofexile.com"),
-            user_agent: ua.clone(),
-            poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
-            ..TradeConfig::default()
-        };
+        let config = trade_config(settings);
+        let ua = config.user_agent.clone();
         let trade = TradeClient::new(config, Box::new(SystemClock)).map_err(|e| e.to_string())?;
-        Ok(Self {
-            trade: Arc::new(trade),
-            ninja: Arc::new(PoeNinjaSource::new(env_url("KALANDRA_NINJA_BASE_URL", "https://poe.ninja"), ua.clone())),
-            scout: Arc::new(Poe2ScoutSource::new(env_url("KALANDRA_SCOUT_BASE_URL", "https://poe2scout.com"), ua)),
-        })
+        Ok(Self { trade: Arc::new(trade), ninja: ninja(ua.clone()), scout: scout(ua) })
+    }
+
+    /// Sources for new `settings`, reusing every client whose inputs are unchanged so a save
+    /// keeps the trade rate-limiter state and the price caches. `None` = nothing to rebuild.
+    pub fn updated(&self, settings: &Settings) -> Result<Option<Self>, String> {
+        let config = trade_config(settings);
+        let old = self.trade.config();
+        let ua_changed = old.user_agent != config.user_agent;
+        let trade_changed = ua_changed || old.base_url != config.base_url || old.poesessid != config.poesessid;
+        if !trade_changed {
+            return Ok(None);
+        }
+        let ua = config.user_agent.clone();
+        let trade = Arc::new(TradeClient::new(config, Box::new(SystemClock)).map_err(|e| e.to_string())?);
+        let (ninja, scout) =
+            if ua_changed { (ninja(ua.clone()), scout(ua)) } else { (self.ninja.clone(), self.scout.clone()) };
+        Ok(Some(Self { trade, ninja, scout }))
     }
 
     /// The configured source if it supports the item, else the official trade API.
@@ -97,6 +122,12 @@ pub struct AppState {
     pub pinned: AtomicBool,
     pub overlay_visible: AtomicBool,
     pub quitting: AtomicBool,
+    /// Closing settings quits the app (set when there is no tray to quit from).
+    pub close_quits: AtomicBool,
+    /// Serialises copy flows (hotkey, signal, tray, test hook, IPC).
+    pub flow_gate: Arc<logic::FlowGate>,
+    /// Held for a whole settings apply (register hotkeys, persist, swap state).
+    pub apply_lock: Mutex<()>,
     pub log_path: Option<std::path::PathBuf>,
 }
 
@@ -124,6 +155,9 @@ impl AppState {
             pinned: AtomicBool::new(false),
             overlay_visible: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
+            close_quits: AtomicBool::new(false),
+            flow_gate: Arc::default(),
+            apply_lock: Mutex::new(()),
             log_path,
         })
     }
@@ -161,5 +195,30 @@ impl AppState {
 
     pub fn is_pinned(&self) -> bool {
         self.pinned.load(Ordering::SeqCst)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn updated_sources_keep_unchanged_clients() {
+        let mut s = Settings::default();
+        let base = Sources::from_settings(&s).unwrap();
+        s.league.league = Some("Dawn".into());
+        s.trade.widen_pct = 25.0;
+        assert!(base.updated(&s).unwrap().is_none(), "unrelated change keeps everything");
+
+        s.trade.poesessid = Some("abc".into());
+        let next = base.updated(&s).unwrap().expect("poesessid rebuilds trade");
+        assert!(!Arc::ptr_eq(&base.trade, &next.trade));
+        assert!(Arc::ptr_eq(&base.ninja, &next.ninja) && Arc::ptr_eq(&base.scout, &next.scout));
+        assert_eq!(next.trade.config().poesessid.as_deref(), Some("abc"));
+
+        s.trade.contact = Some("me@example.com".into());
+        let ua = next.updated(&s).unwrap().expect("user agent rebuilds all");
+        assert!(!Arc::ptr_eq(&next.trade, &ua.trade) && !Arc::ptr_eq(&next.ninja, &ua.ninja));
+        assert!(ua.updated(&s).unwrap().is_none());
     }
 }
