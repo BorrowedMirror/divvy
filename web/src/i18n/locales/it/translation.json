@@ -1,1 +1,225 @@
-{}
+{
+  "common": {
+    "loading": "Caricamento…",
+    "dismiss": "Chiudi"
+  },
+  "overlay": {
+    "title": "Controllo prezzi",
+    "empty": "Passa il mouse su un oggetto nel gioco e premi {{hotkey}} per controllarne il prezzo.",
+    "openSettings": "Apri impostazioni",
+    "pin": "Fissa overlay",
+    "unpin": "Sblocca overlay",
+    "close": "Chiudi overlay",
+    "league": "Lega",
+    "widen": "Allarga ±%",
+    "widenAria": "Allarga gli intervalli dei valori in percentuale",
+    "status": "Venditori",
+    "stats": "Statistiche",
+    "misc": "Proprietà oggetto",
+    "itemValue": "sull'oggetto: {{value}}",
+    "min": "min",
+    "max": "max",
+    "statMin": "Minimo per {{stat}}",
+    "statMax": "Massimo per {{stat}}",
+    "search": "Cerca",
+    "loading": "Ricerca…"
+  },
+  "item": {
+    "rarityLabel": "Rarità:",
+    "ilvl": "liv. ogg. {{value}}",
+    "quality": "{{value}}% qualità",
+    "gemLevel": "livello {{value}}",
+    "waystoneTier": "tier {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Corrotto",
+    "unidentified": "Non identificato"
+  },
+  "rarity": {
+    "normal": "Normale",
+    "magic": "Magico",
+    "rare": "Raro",
+    "unique": "Unico",
+    "currency": "Valuta",
+    "gem": "Gemma",
+    "other": "Altro"
+  },
+  "misc": {
+    "item_level": "Livello oggetto",
+    "quality": "Qualità",
+    "gem_level": "Livello gemma",
+    "waystone_tier": "Tier Waystone",
+    "sockets": "Incastonature",
+    "corrupted": "Corrotto",
+    "any": "Qualsiasi",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "status": {
+    "securable": "Acquisto immediato",
+    "online": "Online",
+    "any": "Tutti"
+  },
+  "source": {
+    "trade": "Sito di scambio",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Prezzi · {{source}}",
+    "total_one": "{{count}} inserzione",
+    "total_many": "{{count}} di inserzioni",
+    "total_other": "{{count}} inserzioni",
+    "empty": "Nessuna inserzione corrisponde a questi filtri. Prova a disattivare alcune statistiche o ad allargare gli intervalli.",
+    "min": "Min",
+    "median": "Mediana",
+    "max": "Max",
+    "listings": "Inserzioni",
+    "price": "Prezzo",
+    "seller": "Venditore",
+    "age": "Pubblicata",
+    "unknownSeller": "sconosciuto",
+    "openTrade": "Apri sul sito di scambio"
+  },
+  "age": {
+    "now": "proprio ora",
+    "minutes": "{{count}} min fa",
+    "hours": "{{count}} h fa",
+    "days": "{{count}} g fa"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "chaos",
+    "gold": "oro"
+  },
+  "errors": {
+    "parse": "Impossibile leggere l'oggetto",
+    "trade": "Il sito di scambio ha restituito un errore",
+    "rate_limited": "Limite di richieste del sito di scambio raggiunto",
+    "config": "Problema con le impostazioni",
+    "platform": "Errore della piattaforma",
+    "no_item": "Nessun oggetto negli appunti",
+    "internal": "Si è verificato un errore",
+    "commandFailed": "Azione non riuscita",
+    "retryIn_one": "Nuovo tentativo tra {{count}} secondo",
+    "retryIn_many": "Nuovo tentativo tra {{count}} di secondi",
+    "retryIn_other": "Nuovo tentativo tra {{count}} secondi"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "tabs": {
+      "general": "Generali",
+      "hotkeys": "Scorciatoie",
+      "trade": "Scambi",
+      "overlay": "Overlay",
+      "platform": "Piattaforma"
+    },
+    "language": "Lingua",
+    "theme": "Tema",
+    "startMinimised": "Avvia ridotto nell'area di notifica",
+    "source": "Fonte dei prezzi",
+    "leagueAuto": "Rileva la lega automaticamente",
+    "league": "Lega",
+    "leaguesFailed": "Impossibile caricare le leghe: {{message}}",
+    "onlineOnly": "Solo venditori online",
+    "widenPct": "Allarga intervalli dei valori (%)",
+    "enableAllStats": "Attiva tutte le statistiche per impostazione predefinita",
+    "contact": "E-mail di contatto",
+    "contactHelp": "Facoltativa. Viene aggiunta allo User-Agent così GGG può contattarti in caso di problemi.",
+    "autoHide": "Ritardo di occultamento (ms)",
+    "opacity": "Opacità (0,1–1)",
+    "side": "Posizione",
+    "backend": "Backend della piattaforma",
+    "backendHelp": "Lascia su Automatico a meno che la diagnostica non consigli altrimenti. Ha effetto dopo il riavvio.",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "saved": "Impostazioni salvate",
+    "discard": "Annulla modifiche",
+    "saveFailed": "Impossibile salvare: {{message}}",
+    "loadFailed": "Impossibile caricare le impostazioni.",
+    "fixErrors": "Correggi i campi evidenziati prima di salvare.",
+    "externalChange": "Le impostazioni sono state modificate altrove.",
+    "reload": "Carica le più recenti"
+  },
+  "theme": {
+    "system": "Sistema",
+    "dark": "Scuro",
+    "light": "Chiaro"
+  },
+  "side": {
+    "cursor": "Vicino al cursore",
+    "left": "Bordo sinistro",
+    "right": "Bordo destro"
+  },
+  "backend": {
+    "auto": "Automatico",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (nativo)",
+    "fake": "Fittizio (test)"
+  },
+  "hotkeys": {
+    "help": "Fai clic su una scorciatoia, poi premi la nuova combinazione di tasti. Esc annulla.",
+    "price_check": "Controllo prezzi",
+    "price_check_pinned": "Controllo prezzi (fissato)",
+    "open_settings": "Apri impostazioni",
+    "pressKeys": "Premi i tasti…",
+    "needsModifier": "Aggiungi Ctrl, Alt, Maiusc o Meta (solo i tasti F funzionano da soli).",
+    "rebindFailed": "Impossibile assegnare la scorciatoia: {{message}}",
+    "advancedCopy": "Copia avanzata dell'oggetto",
+    "advancedCopyHelp": "Usa Ctrl+Alt+C per rendere disponibili tier e intervalli dei modificatori."
+  },
+  "validation": {
+    "widen": "Inserisci un valore tra 0 e 100.",
+    "email": "Inserisci un indirizzo e-mail valido o lascia vuoto il campo.",
+    "league": "Scegli una lega o attiva il rilevamento automatico.",
+    "autoHide": "Inserisci un numero intero tra 0 e 10000 (0 disattiva l'occultamento).",
+    "opacity": "Inserisci un valore tra 0,1 e 1.",
+    "hotkeyClash": "Questa scorciatoia è già usata da un'altra azione.",
+    "poesessid": "Usa solo lettere e cifre."
+  },
+  "diagnostics": {
+    "title": "Diagnostica",
+    "version": "Versione",
+    "os": "Sistema operativo",
+    "backend": "Backend",
+    "dataVersion": "Dati di gioco",
+    "league": "Lega",
+    "settingsPath": "File delle impostazioni",
+    "logPath": "File di log",
+    "capabilities": "Funzionalità",
+    "supported": "supportata",
+    "unsupported": "non supportata",
+    "missingPermissions": "Autorizzazioni mancanti",
+    "recentErrors": "Errori recenti",
+    "noErrors": "Nessun errore registrato.",
+    "copyReport": "Copia rapporto",
+    "copied": "Rapporto copiato negli appunti",
+    "copyFailed": "Impossibile accedere agli appunti",
+    "loadFailed": "Impossibile caricare la diagnostica."
+  },
+  "capability": {
+    "window_tracking": "Rilevamento finestra di gioco",
+    "overlay_always_on_top": "Overlay sempre in primo piano",
+    "overlay_click_through": "Overlay trasparente ai clic",
+    "global_hotkeys": "Scorciatoie globali",
+    "passive_hook": "Hook di input passivo",
+    "keystroke_injection": "Invio di tasti (copia oggetto)",
+    "clipboard": "Accesso agli appunti"
+  },
+  "guidance": {
+    "accessibility": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Accessibilità e attiva kalandra. È necessario per le scorciatoie e la copia degli oggetti.",
+    "screenRecording": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e attiva kalandra perché possa trovare la finestra di gioco. Poi riavvia kalandra.",
+    "wayland": "Modalità Wayland nativa: le scorciatoie globali passano dal portale desktop, l'overlay è ancorato allo schermo anziché alla finestra di gioco e l'invio di tasti potrebbe non essere disponibile. Usa X11/XWayland se il compositor lo consente.",
+    "gnome": "GNOME non supporta le funzionalità Wayland di cui kalandra ha bisogno, quindi lì viene eseguito tramite XWayland (X11). Esegui anche il gioco sotto XWayland.",
+    "generic": "Autorizzazione mancante: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Controllo prezzi (fissato)",
+    "settings": "Impostazioni…",
+    "diagnostics": "Diagnostica",
+    "quit": "Esci da kalandra",
+    "tooltip": "kalandra"
+  }
+}
