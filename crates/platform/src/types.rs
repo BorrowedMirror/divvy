@@ -131,3 +131,36 @@ pub struct Capabilities {
     /// Human-readable notes, e.g. "Wayland-native: overlay anchored to output".
     pub notes: Vec<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_letters_digits_and_named_keys() {
+        assert_eq!(Chord::parse("Ctrl+Alt+D").unwrap(), Chord::new(&[KeyModifier::Ctrl, KeyModifier::Alt], "KeyD"));
+        assert_eq!(Chord::parse("control + 1").unwrap(), Chord::new(&[KeyModifier::Ctrl], "Digit1"));
+        assert_eq!(Chord::parse("shift+F5").unwrap(), Chord::new(&[KeyModifier::Shift], "F5"));
+        assert_eq!(
+            Chord::parse("cmd+option+KeyX").unwrap(),
+            Chord::new(&[KeyModifier::Meta, KeyModifier::Alt], "KeyX")
+        );
+        assert_eq!(Chord::parse("super+win+d").unwrap().modifiers, vec![KeyModifier::Meta, KeyModifier::Meta]);
+    }
+
+    #[test]
+    fn parse_rejects_bad_chords() {
+        for s in ["", "ctrl", "ctrl+alt", "a+b", "+++"] {
+            assert!(matches!(Chord::parse(s), Err(crate::PlatformError::InvalidChord(_))), "{s}");
+        }
+    }
+
+    #[test]
+    fn display_roundtrips() {
+        for s in ["Ctrl+Alt+D", "Shift+F5", "Meta+1", "Ctrl+Shift+Alt+Escape"] {
+            let c = Chord::parse(s).unwrap();
+            assert_eq!(c.to_string(), s);
+            assert_eq!(Chord::parse(&c.to_string()).unwrap(), c);
+        }
+    }
+}
