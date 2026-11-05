@@ -199,6 +199,12 @@ fn load_dir_round_trip() {
     assert_eq!(manifest.game_version.as_deref(), Some("0.0.1"));
 }
 
+#[test]
+fn embedded_missing_file_rejected() {
+    let err = decode_embedded(embedded::MANIFEST, &embedded::FILES[..2]).unwrap_err();
+    assert!(matches!(err, DataError::Io(ref f, _) if f == "uniques.json.zst"), "{err:?}");
+}
+
 // ---- catalog ----
 
 fn ids(hits: &[(&StatDef, bool)]) -> Vec<(String, bool)> {
@@ -271,4 +277,42 @@ fn clone_shares_indexes() {
     let d = data();
     let c = d.clone();
     assert!(std::ptr::eq(d.bundle(), c.bundle()));
+}
+
+// ---- bundled assets ----
+
+#[test]
+fn bundled_assets_load() {
+    let d = bundled().unwrap();
+    assert!(d.bundle().stats.len() > 5000, "{} stats", d.bundle().stats.len());
+    assert!(d.bundle().bases.len() > 1000);
+    assert!(d.bundle().uniques.len() > 300);
+    assert!(d.bundle().statics.len() > 300);
+    assert_eq!(d.manifest.schema_version, SCHEMA_VERSION);
+    assert_eq!(d.static_item("Divine Orb").unwrap().id, "divine");
+    let hood = d.base("Hunter Hood").unwrap();
+    assert_eq!((hood.category.as_str(), hood.item_class.as_str()), ("armour.helmet", "Helmets"));
+    assert_eq!(d.base_in_magic_name("Sturdy Hunter Hood of the Fox").unwrap().name, "Hunter Hood");
+    assert!(d.unique("Astramentis").is_some());
+    let life = d.stats_by_template("+# to maximum Life", ModKind::Explicit);
+    assert!(life.iter().any(|(s, negate)| s.id == "explicit.stat_3299347043" && !negate), "{life:?}");
+    // Records are sorted deterministically.
+    assert!(d.bundle().bases.windows(2).all(|w| w[0].name < w[1].name));
+}
+
+#[test]
+fn bundled_is_cached() {
+    let a = bundled_static();
+    let b = bundled_static();
+    assert!(std::ptr::eq(a, b));
+    let c = bundled().unwrap();
+    assert!(std::ptr::eq(a.bundle(), c.bundle()));
+}
+
+#[test]
+fn bundled_manifest_snapshot() {
+    insta::assert_json_snapshot!(bundled_static().manifest, {
+        ".generated_at" => "[generated_at]",
+        ".*.sha256" => "[sha256]",
+    });
 }

@@ -3,7 +3,7 @@
 //! Assets live in `crates/data/assets/` as zstd-compressed JSON (`*.json.zst`) plus a
 //! plain `manifest.json` ([`Manifest`]) recording schema version, source URLs and sha256
 //! of each decompressed file. Assets are produced by `cargo xtask data refresh`.
-use std::path::Path;
+use std::{path::Path, sync::OnceLock};
 
 use kalandra_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
 use serde::{Deserialize, Serialize};
@@ -124,9 +124,50 @@ fn load_with<'a>(
     Ok(GameData::from_bundle(manifest, bundle))
 }
 
+mod embedded {
+    pub const MANIFEST: &[u8] = include_bytes!("../assets/manifest.json");
+    pub const FILES: [(&str, &[u8]); 4] = [
+        ("stats.json.zst", include_bytes!("../assets/stats.json.zst")),
+        ("bases.json.zst", include_bytes!("../assets/bases.json.zst")),
+        ("uniques.json.zst", include_bytes!("../assets/uniques.json.zst")),
+        ("statics.json.zst", include_bytes!("../assets/statics.json.zst")),
+    ];
+}
+
+fn decode_embedded(manifest: &[u8], files: &[(&str, &'static [u8])]) -> Result<GameData, DataError> {
+    load_with(manifest, |name| {
+        files
+            .iter()
+            .find(|(n, _)| *n == name)
+            .map(|(_, b)| std::borrow::Cow::Borrowed(*b))
+            .ok_or_else(|| DataError::Io(name.to_owned(), std::io::ErrorKind::NotFound.into()))
+    })
+}
+
+static BUNDLED: OnceLock<GameData> = OnceLock::new();
+
 /// Load the assets compiled into the binary (`include_bytes!`).
+///
+/// Decoding happens once per process; later calls return a cheap clone (the indexed data
+/// is shared behind an `Arc`).
 pub fn bundled() -> Result<GameData, DataError> {
-    todo!("workstream C: embed generated assets")
+    if let Some(data) = BUNDLED.get() {
+        return Ok(data.clone());
+    }
+    let data = decode_embedded(embedded::MANIFEST, &embedded::FILES)?;
+    Ok(BUNDLED.get_or_init(|| data).clone())
+}
+
+/// The bundled assets as a process-wide static.
+///
+/// # Panics
+/// If the compiled-in assets are corrupt; this is a build defect caught by this crate's
+/// tests.
+pub fn bundled_static() -> &'static GameData {
+    if BUNDLED.get().is_none() {
+        let _ = bundled().expect("bundled game data assets are valid");
+    }
+    BUNDLED.get().expect("initialised above")
 }
 
 /// Load from an explicit directory (manifest + assets), for tests and updates.
