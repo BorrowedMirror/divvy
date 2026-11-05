@@ -61,4 +61,5 @@ mockall.workspace = true
 pretty_assertions.workspace = true
 
 [target.'cfg(target_os = "linux")'.dev-dependencies]
-x11rb = { workspace = true, features = ["allow-unsafe-code"] }
+x11rb = { workspace = true, features = ["allow-unsafe-code", "shape"] }
+arboard.workspace = true

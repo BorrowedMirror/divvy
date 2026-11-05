@@ -64,21 +64,18 @@ impl OverlayWindow for X11Overlay {
         // Never take keyboard focus away from the game.
         let mut hints = WmHints::new();
         hints.input = Some(false);
-        hints.set(c, self.window).map_err(x_err)?;
-        c.flush().map_err(x_err)
+        hints.set(c, self.window).map_err(x_err)?.check().map_err(x_err)
     }
 
     fn show_at(&self, rect: Rect) -> Result<(), PlatformError> {
         let c = &self.conn.conn;
         let aux = ConfigureWindowAux::new().x(rect.x).y(rect.y).width(rect.width).height(rect.height);
         c.configure_window(self.window, &aux).map_err(x_err)?;
-        c.map_window(self.window).map_err(x_err)?;
-        c.flush().map_err(x_err)
+        c.map_window(self.window).map_err(x_err)?.check().map_err(x_err)
     }
 
     fn hide(&self) -> Result<(), PlatformError> {
-        self.conn.conn.unmap_window(self.window).map_err(x_err)?;
-        self.conn.conn.flush().map_err(x_err)
+        self.conn.conn.unmap_window(self.window).map_err(x_err)?.check().map_err(x_err)
     }
 
     fn set_click_through(&self, enabled: bool) -> Result<(), PlatformError> {
@@ -88,10 +85,12 @@ impl OverlayWindow for X11Overlay {
             let region = c.generate_id().map_err(x_err)?;
             c.xfixes_create_region(region, &[]).map_err(x_err)?;
             c.xfixes_set_window_shape_region(self.window, SK::INPUT, 0, 0, region).map_err(x_err)?;
-            c.xfixes_destroy_region(region).map_err(x_err)?;
+            c.xfixes_destroy_region(region).map_err(x_err)?.check().map_err(x_err)
         } else {
-            c.xfixes_set_window_shape_region(self.window, SK::INPUT, 0, 0, x11rb::NONE).map_err(x_err)?;
+            c.xfixes_set_window_shape_region(self.window, SK::INPUT, 0, 0, x11rb::NONE)
+                .map_err(x_err)?
+                .check()
+                .map_err(x_err)
         }
-        c.flush().map_err(x_err)
     }
 }
