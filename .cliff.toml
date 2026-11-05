@@ -45,7 +45,7 @@ commit_preprocessors = [
 commit_parsers = [
   { message = "^release", skip = true },
   # Before the type groups: the first matching parser wins.
-  { body = ".*security", group = "<!-- 00 -->Security" },
+  { footer = "^[Ss]ecurity", group = "<!-- 00 -->Security" },
   { message = "^feat", group = "<!-- 01 -->Features" },
   { message = "^fix", group = "<!-- 02 -->Bug fixes" },
   { message = "^perf", group = "<!-- 03 -->Performance" },
