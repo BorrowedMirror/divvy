@@ -1,0 +1,214 @@
+{
+  "result": [
+    {
+      "id": "pseudo",
+      "label": "Pseudo",
+      "entries": [
+        {
+          "id": "pseudo.pseudo_total_cold_resistance",
+          "text": "+#% total to Cold Resistance",
+          "type": "pseudo"
+        },
+        {
+          "id": "pseudo.pseudo_total_fire_resistance",
+          "text": "+#% total to Fire Resistance",
+          "type": "pseudo"
+        },
+        {
+          "id": "pseudo.pseudo_total_lightning_resistance",
+          "text": "+#% total to Lightning Resistance",
+          "type": "pseudo"
+        }
+      ]
+    },
+    {
+      "id": "explicit",
+      "label": "Explicit",
+      "entries": [
+        {
+          "id": "explicit.stat_1050105434",
+          "text": "# to maximum Mana",
+          "type": "explicit"
+        },
+        {
+          "id": "explicit.stat_3299347043",
+          "text": "# to maximum Life",
+          "type": "explicit"
+        },
+        {
+          "id": "explicit.stat_4220027924",
+          "text": "#% to Cold Resistance",
+          "type": "explicit"
+        }
+      ]
+    },
+    {
+      "id": "implicit",
+      "label": "Implicit",
+      "entries": [
+        {
+          "id": "implicit.stat_3917489142",
+          "text": "#% increased Rarity of Items found",
+          "type": "implicit"
+        },
+        {
+          "id": "implicit.stat_4041853756",
+          "text": "Adds Irradiated to a Map \n# use remaining",
+          "type": "implicit"
+        },
+        {
+          "id": "implicit.stat_275498888",
+          "text": "Maximum Quality is #%",
+          "type": "implicit"
+        }
+      ]
+    },
+    {
+      "id": "fractured",
+      "label": "Fractured",
+      "entries": [
+        {
+          "id": "fractured.stat_3917489142",
+          "text": "#% increased Rarity of Items found",
+          "type": "fractured"
+        },
+        {
+          "id": "fractured.stat_1050105434",
+          "text": "# to maximum Mana",
+          "type": "fractured"
+        },
+        {
+          "id": "fractured.stat_3981240776",
+          "text": "# to Spirit",
+          "type": "fractured"
+        }
+      ]
+    },
+    {
+      "id": "crafted",
+      "label": "Crafted",
+      "entries": [
+        {
+          "id": "crafted.stat_3917489142",
+          "text": "#% increased Rarity of Items found",
+          "type": "crafted"
+        },
+        {
+          "id": "crafted.stat_1671376347",
+          "text": "#% to Lightning Resistance",
+          "type": "crafted"
+        },
+        {
+          "id": "crafted.stat_4220027924",
+          "text": "#% to Cold Resistance",
+          "type": "crafted"
+        }
+      ]
+    },
+    {
+      "id": "enchant",
+      "label": "Enchant",
+      "entries": [
+        {
+          "id": "enchant.stat_1715784068",
+          "text": "Players in Area are #% Delirious",
+          "type": "enchant"
+        },
+        {
+          "id": "enchant.stat_3261801346",
+          "text": "# to Dexterity",
+          "type": "enchant"
+        },
+        {
+          "id": "enchant.stat_4080418644",
+          "text": "# to Strength",
+          "type": "enchant"
+        }
+      ]
+    },
+    {
+      "id": "rune",
+      "label": "Augment",
+      "entries": [
+        {
+          "id": "rune.stat_2280525771",
+          "text": "Bonded: # to maximum Life",
+          "type": "augment"
+        },
+        {
+          "id": "rune.stat_2926029365",
+          "text": "Bonded: # to maximum Mana",
+          "type": "augment"
+        },
+        {
+          "id": "rune.stat_3523867985",
+          "text": "#% increased Armour, Evasion and Energy Shield",
+          "type": "augment"
+        }
+      ]
+    },
+    {
+      "id": "desecrated",
+      "label": "Desecrated",
+      "entries": [
+        {
+          "id": "desecrated.stat_3299347043",
+          "text": "# to maximum Life",
+          "type": "desecrated"
+        },
+        {
+          "id": "desecrated.stat_4052037485",
+          "text": "# to maximum Energy Shield (Local)",
+          "type": "desecrated"
+        },
+        {
+          "id": "desecrated.stat_4015621042",
+          "text": "#% increased Energy Shield",
+          "type": "desecrated"
+        }
+      ]
+    },
+    {
+      "id": "sanctum",
+      "label": "Sanctum",
+      "entries": [
+        {
+          "id": "sanctum.stat_767926824",
+          "text": "Zarokh, the Temporal drops Blessed Bonds",
+          "type": "sanctum"
+        },
+        {
+          "id": "sanctum.stat_3840591093",
+          "text": "Zarokh, the Temporal drops Against the Darkness",
+          "type": "sanctum"
+        },
+        {
+          "id": "sanctum.stat_2878762585",
+          "text": "#% chance to Avoid Resolve loss from Enemy Hits",
+          "type": "sanctum"
+        }
+      ]
+    },
+    {
+      "id": "skill",
+      "label": "Skill",
+      "entries": [
+        {
+          "id": "skill.shield_block",
+          "text": "Grants Skill: Level # Raise Shield",
+          "type": "skill"
+        },
+        {
+          "id": "skill.mana_drain",
+          "text": "Grants Skill: Level # Mana Drain",
+          "type": "skill"
+        },
+        {
+          "id": "skill.power_siphon",
+          "text": "Grants Skill: Level # Power Siphon",
+          "type": "skill"
+        }
+      ]
+    }
+  ]
+}

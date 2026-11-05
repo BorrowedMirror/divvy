@@ -1,0 +1,4 @@
+x-rate-limit-policy: trade-exchange-request-limit
+x-rate-limit-rules: Ip
+x-rate-limit-ip: 5:15:60,10:90:300,30:300:1800
+x-rate-limit-ip-state: 2:15:0,2:90:0,2:300:0

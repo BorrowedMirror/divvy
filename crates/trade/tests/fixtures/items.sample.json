@@ -1,0 +1,236 @@
+{
+  "result": [
+    {
+      "id": "accessory",
+      "label": "Accessories",
+      "entries": [
+        {
+          "type": "Crimson Amulet"
+        },
+        {
+          "type": "Gold Amulet"
+        },
+        {
+          "type": "Gold Ring",
+          "text": "Andvarius Gold Ring",
+          "name": "Andvarius",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Stellar Amulet",
+          "text": "Astramentis Stellar Amulet",
+          "name": "Astramentis",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "armour",
+      "label": "Armour",
+      "entries": [
+        {
+          "type": "Leather Vest"
+        },
+        {
+          "type": "Smuggler Coat"
+        },
+        {
+          "type": "Grand Cuisses",
+          "text": "Ab Aeterno Grand Cuisses",
+          "name": "Ab Aeterno",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Runemastered Grand Cuisses",
+          "text": "Ab Aeterno Runemastered Grand Cuisses",
+          "name": "Ab Aeterno",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "currency",
+      "label": "Currency",
+      "entries": [
+        {
+          "type": "Preserved Rib"
+        },
+        {
+          "type": "Ancient Rib"
+        }
+      ]
+    },
+    {
+      "id": "flask",
+      "label": "Flasks",
+      "entries": [
+        {
+          "type": "Thawing Charm"
+        },
+        {
+          "type": "Topaz Charm"
+        },
+        {
+          "type": "Antidote Charm",
+          "text": "Arakaali's Gift Antidote Charm",
+          "name": "Arakaali's Gift",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Dousing Charm",
+          "text": "Beira's Anguish Dousing Charm",
+          "name": "Beira's Anguish",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "gem",
+      "label": "Gems",
+      "entries": [
+        {
+          "type": "Alchemist's Boon"
+        },
+        {
+          "type": "Ancestral Cry"
+        }
+      ]
+    },
+    {
+      "id": "jewel",
+      "label": "Jewels",
+      "entries": [
+        {
+          "type": "Emerald"
+        },
+        {
+          "type": "Diamond"
+        },
+        {
+          "type": "Time-Lost Diamond",
+          "text": "Against the Darkness Time-Lost Diamond",
+          "name": "Against the Darkness",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Diamond",
+          "text": "Controlled Metamorphosis Diamond",
+          "name": "Controlled Metamorphosis",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "map",
+      "label": "Maps",
+      "entries": [
+        {
+          "type": "Kulemak's Invitation"
+        },
+        {
+          "type": "Idol of Estazunti"
+        },
+        {
+          "type": "Delirium Tablet",
+          "text": "Clear Skies Delirium Tablet",
+          "name": "Clear Skies",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Overseer Tablet",
+          "text": "Cruel Hegemony Overseer Tablet",
+          "name": "Cruel Hegemony",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "weapon",
+      "label": "Weapons",
+      "entries": [
+        {
+          "type": "Glass Shank"
+        },
+        {
+          "type": "Kris Knife"
+        },
+        {
+          "type": "Siphoning Wand",
+          "text": "Adonia's Ego Siphoning Wand",
+          "name": "Adonia's Ego",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Changeling Talisman",
+          "text": "Amor Mandragora Changeling Talisman",
+          "name": "Amor Mandragora",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "sanctum",
+      "label": "Sanctum",
+      "entries": [
+        {
+          "type": "Urn Relic"
+        },
+        {
+          "type": "Amphora Relic"
+        },
+        {
+          "type": "Tapestry Relic",
+          "text": "The Burden of Leadership Tapestry Relic",
+          "name": "The Burden of Leadership",
+          "flags": {
+            "unique": true
+          }
+        },
+        {
+          "type": "Seal Relic",
+          "text": "The Changing Seasons Seal Relic",
+          "name": "The Changing Seasons",
+          "flags": {
+            "unique": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "wombgift",
+      "label": "Wombgift",
+      "entries": [
+        {
+          "type": "Ornate Wombgift"
+        },
+        {
+          "type": "Banded Wombgift"
+        }
+      ]
+    }
+  ]
+}

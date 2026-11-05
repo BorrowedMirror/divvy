@@ -1,0 +1,6 @@
+x-rate-limit-policy: trade-search-request-limit
+x-rate-limit-rules: Account,Ip
+x-rate-limit-account: 3:5:60
+x-rate-limit-account-state: 3:5:0
+x-rate-limit-ip: 5:10:60,15:60:300,30:300:1800,600:21600:3600
+x-rate-limit-ip-state: 3:10:0,3:60:0,3:300:0,3:21600:0

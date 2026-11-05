@@ -1,0 +1,131 @@
+{
+  "core": {
+    "items": [
+      {
+        "id": "divine",
+        "name": "Divine Orb",
+        "image": "/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png",
+        "category": "Currency",
+        "detailsId": "divine-orb"
+      },
+      {
+        "id": "exalted",
+        "name": "Exalted Orb",
+        "image": "/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+        "category": "Currency",
+        "detailsId": "exalted-orb"
+      },
+      {
+        "id": "chaos",
+        "name": "Chaos Orb",
+        "image": "/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/c0ca392a78/CurrencyRerollRare.png",
+        "category": "Currency",
+        "detailsId": "chaos-orb"
+      }
+    ],
+    "rates": {
+      "exalted": 704.8,
+      "chaos": 9.61
+    },
+    "primary": "divine",
+    "secondary": "chaos"
+  },
+  "lines": [
+    {
+      "id": 527,
+      "itemId": "Mageblood Utility Belt",
+      "detailsId": "mageblood-utility-belt",
+      "name": "Mageblood",
+      "baseType": "Utility Belt",
+      "levelRequired": 55,
+      "category": "Belt",
+      "primaryValue": 130.0,
+      "listingCount": 7570,
+      "corrupted": false,
+      "sparkLine": {
+        "totalChange": 10.17,
+        "data": [
+          0,
+          14.41,
+          null,
+          14.41,
+          9.24,
+          null,
+          10.17
+        ]
+      }
+    },
+    {
+      "id": 311,
+      "itemId": "Headhunter Heavy Belt",
+      "detailsId": "headhunter-heavy-belt",
+      "name": "Headhunter",
+      "baseType": "Heavy Belt",
+      "levelRequired": 50,
+      "category": "Belt",
+      "primaryValue": 6.94,
+      "listingCount": 1522,
+      "corrupted": false,
+      "sparkLine": {
+        "totalChange": -18.11,
+        "data": [
+          0,
+          -10.14,
+          null,
+          -4.8,
+          -29.9,
+          null,
+          -18.11
+        ]
+      }
+    },
+    {
+      "id": 340,
+      "itemId": "Kalandra's Touch Ring",
+      "detailsId": "kalandras-touch-ring",
+      "name": "Kalandra's Touch",
+      "baseType": "Ring",
+      "levelRequired": 0,
+      "category": "Ring",
+      "primaryValue": 1.24,
+      "listingCount": 814,
+      "corrupted": false,
+      "sparkLine": {
+        "totalChange": -11.5,
+        "data": [
+          0,
+          -28.49,
+          null,
+          43.01,
+          19.33,
+          null,
+          -11.5
+        ]
+      }
+    },
+    {
+      "id": 308,
+      "itemId": "Andvarius Gold Ring",
+      "detailsId": "andvarius-gold-ring",
+      "name": "Andvarius",
+      "baseType": "Gold Ring",
+      "levelRequired": 40,
+      "category": "Ring",
+      "primaryValue": 0.07735,
+      "listingCount": 2232,
+      "corrupted": false,
+      "sparkLine": {
+        "totalChange": 30.48,
+        "data": [
+          0,
+          68.2,
+          null,
+          72.06,
+          75.94,
+          null,
+          30.48
+        ]
+      }
+    }
+  ]
+}

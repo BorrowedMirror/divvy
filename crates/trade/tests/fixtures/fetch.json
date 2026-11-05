@@ -1,0 +1,1003 @@
+{
+  "result": [
+    {
+      "id": "0033ca90abddfb1584ae7ce42cbe97e7e5115c625013142cb20b1e20e51b3070",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2025-01-13T21:21:29Z",
+        "stash": {
+          "name": "Shop",
+          "x": 10,
+          "y": 6
+        },
+        "price": {
+          "type": "~b/o",
+          "amount": 1,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller1#0001",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char1",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char1 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "0033ca90abddfb1584ae7ce42cbe97e7e5115c625013142cb20b1e20e51b3070",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 40,
+        "identified": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "15% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "50% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+10 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "7de4152805fb954495a45b2f92bef3d8dd052d8c333b128748ae7b661430eac4",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2025-01-12T23:42:54Z",
+        "stash": {
+          "name": "Shop",
+          "x": 3,
+          "y": 3
+        },
+        "price": {
+          "type": "~b/o",
+          "amount": 1,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller2#0002",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char2",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char2 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "7de4152805fb954495a45b2f92bef3d8dd052d8c333b128748ae7b661430eac4",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 73,
+        "identified": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "11% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "64% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+10 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "46ef1c2f63ce1c11c4c4a73daa149041a0050dd22b4d76370ce4e512bf3e16c0",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2025-01-17T21:08:09Z",
+        "stash": {
+          "name": "Shop",
+          "x": 11,
+          "y": 3
+        },
+        "price": {
+          "type": "~b/o",
+          "amount": 1,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller3#0003",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char3",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char3 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "46ef1c2f63ce1c11c4c4a73daa149041a0050dd22b4d76370ce4e512bf3e16c0",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 79,
+        "identified": true,
+        "corrupted": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          },
+          {
+            "name": "Quality (Attribute Modifiers)",
+            "values": [
+              [
+                "+20%",
+                1
+              ]
+            ],
+            "displayMode": 0,
+            "type": 6
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "15% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "59% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+12 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "2d21fd92b9b59184dd4c6d67d0b80237c6dd2ed67871345b0c13c67cccd08a10",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2026-02-04T12:46:41Z",
+        "stash": {
+          "name": "Shop",
+          "x": 3,
+          "y": 8
+        },
+        "price": {
+          "type": "~price",
+          "amount": 1,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller4#0004",
+          "online": {
+            "league": "Standard",
+            "status": "afk"
+          },
+          "lastCharacterName": "Char4",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char4 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "2d21fd92b9b59184dd4c6d67d0b80237c6dd2ed67871345b0c13c67cccd08a10",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 80,
+        "identified": true,
+        "corrupted": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "8% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "60% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+10 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "e643dd4bd5154c655a7b8b1c5056c7ffa9ae24df55408f5e2c87e08a41f3a68d",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2025-01-13T21:21:29Z",
+        "stash": {
+          "name": "Shop",
+          "x": 11,
+          "y": 6
+        },
+        "price": {
+          "type": "~b/o",
+          "amount": 1,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller5#0005",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char5",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char5 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "e643dd4bd5154c655a7b8b1c5056c7ffa9ae24df55408f5e2c87e08a41f3a68d",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 82,
+        "identified": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "6% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "69% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+10 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "aeb5a12c54d9fb6d691fe8fadc7a71c2872b62a56778fec8b39356b6b15f631f",
+      "listing": {
+        "method": "psapi",
+        "indexed": "2026-10-29T14:33:40Z",
+        "stash": {
+          "name": "Shop",
+          "x": 11,
+          "y": 8
+        },
+        "price": {
+          "type": "~price",
+          "amount": 2,
+          "currency": "divine"
+        },
+        "account": {
+          "name": "Seller6#0006",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char6",
+          "language": "en_US",
+          "realm": "poe2"
+        },
+        "whisper": "@Char6 Hi, I would like to buy your item listed in Standard"
+      },
+      "item": {
+        "realm": "poe2",
+        "verified": true,
+        "w": 1,
+        "h": 1,
+        "league": "Standard",
+        "id": "aeb5a12c54d9fb6d691fe8fadc7a71c2872b62a56778fec8b39356b6b15f631f",
+        "name": "Andvarius",
+        "typeLine": "Gold Ring",
+        "baseType": "Gold Ring",
+        "rarity": "Unique",
+        "ilvl": 79,
+        "identified": true,
+        "corrupted": true,
+        "properties": [
+          {
+            "name": "Ring",
+            "values": [],
+            "displayMode": 0,
+            "type": 109
+          }
+        ],
+        "requirements": [
+          {
+            "name": "Level",
+            "values": [
+              [
+                "40",
+                0
+              ]
+            ],
+            "displayMode": 0,
+            "type": 62
+          }
+        ],
+        "implicitMods": [
+          {
+            "description": "7% increased [ItemRarity|Rarity of Items] found",
+            "domain": "implicit",
+            "hash": "stat.implicit.stat_3917489142",
+            "mods": [
+              {
+                "level": 50,
+                "magnitudes": [
+                  {
+                    "min": "6",
+                    "max": "15"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicitMods": [
+          {
+            "description": "60% increased [ItemRarity|Rarity of Items] found",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3917489142",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "50",
+                    "max": "70"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "+10 to [Dexterity|Dexterity]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_3261801346",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "10",
+                    "max": "10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "description": "-20% to all [ElementalDamage|Elemental] [Resistances]",
+            "domain": "explicit",
+            "hash": "stat.explicit.stat_2901986750",
+            "mods": [
+              {
+                "magnitudes": [
+                  {
+                    "min": "-20",
+                    "max": "-20"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "flavourText": [
+          "Danger is the price of wealth."
+        ],
+        "frameType": 3,
+        "frameTypeId": "Unique",
+        "extended": {
+          "hashes": {
+            "explicit": [
+              [
+                "explicit.stat_3917489142",
+                [
+                  1
+                ]
+              ],
+              [
+                "explicit.stat_3261801346",
+                [
+                  0
+                ]
+              ],
+              [
+                "explicit.stat_2901986750",
+                [
+                  2
+                ]
+              ]
+            ],
+            "implicit": [
+              [
+                "implicit.stat_3917489142",
+                [
+                  0
+                ]
+              ]
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

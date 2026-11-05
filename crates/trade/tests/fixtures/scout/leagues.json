@@ -1,0 +1,50 @@
+[
+  {
+    "Value": "Forbidden Rites",
+    "ShortName": "forbiddenrites",
+    "IsCurrent": true,
+    "DivinePrice": 966.5638733842405,
+    "ChaosDivinePrice": 9.274320073343734,
+    "BaseCurrencyApiId": "exalted",
+    "BaseCurrencyBaseItemTypeId": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "BaseCurrencyText": "Exalted Orb",
+    "BaseCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+    "ExaltedCurrencyText": "Exalted Orb",
+    "ExaltedCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+    "DivineCurrencyText": "Divine Orb",
+    "DivineCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png",
+    "ChaosCurrencyText": "Chaos Orb",
+    "ChaosCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/c0ca392a78/CurrencyRerollRare.png",
+    "DefaultCurrency": {
+      "ApiId": "exalted",
+      "BaseItemTypeId": "Metadata/Items/Currency/CurrencyAddModToRare",
+      "Text": "Exalted Orb",
+      "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+      "RelativePrice": 1
+    }
+  },
+  {
+    "Value": "Standard",
+    "ShortName": "standard",
+    "IsCurrent": false,
+    "DivinePrice": 195.88729411764703,
+    "ChaosDivinePrice": 1.8436451211072662,
+    "BaseCurrencyApiId": "exalted",
+    "BaseCurrencyBaseItemTypeId": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "BaseCurrencyText": "Exalted Orb",
+    "BaseCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+    "ExaltedCurrencyText": "Exalted Orb",
+    "ExaltedCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+    "DivineCurrencyText": "Divine Orb",
+    "DivineCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png",
+    "ChaosCurrencyText": "Chaos Orb",
+    "ChaosCurrencyIconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/c0ca392a78/CurrencyRerollRare.png",
+    "DefaultCurrency": {
+      "ApiId": "exalted",
+      "BaseItemTypeId": "Metadata/Items/Currency/CurrencyAddModToRare",
+      "Text": "Exalted Orb",
+      "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+      "RelativePrice": 1
+    }
+  }
+]

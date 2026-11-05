@@ -1,0 +1,5 @@
+x-rate-limit-policy: trade-search-request-limit
+x-rate-limit-rules: Ip
+x-rate-limit-ip: 5:10:60,15:60:300,30:300:1800,600:21600:3600
+x-rate-limit-ip-state: 6:10:60,6:60:0,6:300:0,6:21600:0
+retry-after: 60
