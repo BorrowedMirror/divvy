@@ -167,3 +167,25 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
 
 ## Contract changes
 (append here)
+
+### Workstream H (testkit / fake-game / e2e) — all additive
+- `kalandra-testkit::fakes`: besides the listed fakes and `fake_platform() -> Platform`, adds
+  `FakePlatformBuilder::{new, item_text, advanced_text, copy_delay, window, clipboard, capabilities, build -> (Platform, FakeHandles)}`,
+  `FakeHandles { clipboard, input_simulator, window_tracker, hotkeys, input_listener }`, `ClipboardOp`, `OverlayCall`,
+  `game_window(Rect)`, `copy_chord()`, `advanced_copy_chord()`, `fake_capabilities()`. Every fake is a cloneable handle
+  over shared state. Streams (`subscribe`/`events`/`start`) may be taken once; later calls return `AlreadyStarted`.
+- `kalandra-testkit::fixtures`: `mount_trade_fixtures` is `async fn(&MockServer)`. `fixture(name)` reads
+  `crates/trade/tests/fixtures/<name>.json`, falling back to testkit's own samples in `crates/testkit/fixtures/`.
+  Adds `try_fixture`, `testkit_fixture`, `FixtureError`, `TradeMock` (prices, leagues, total, 429 injection per
+  `Endpoint`, `mount`, `serve(addr)`), `MockListing`, `LEAGUES_PATH`/`SEARCH_PREFIX`/`FETCH_PREFIX`.
+- `tools/fake-game` CLI adds `--corpus-id <id>`, `--advanced-corpus-id <id>`, `--corpus-dir` (env
+  `KALANDRA_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH`; prints `EXIT` on shutdown; `FAKE_GAME_DEBUG=1` logs
+  window events to stderr; Cmd+C counts as Ctrl+C (macOS).
+- Desktop env vars the e2e suite relies on: `KALANDRA_TRADE_BASE_URL` (overrides `TradeConfig::base_url`, no trailing
+  slash, e.g. `http://127.0.0.1:18080`), `KALANDRA_CONFIG_DIR` (already listed), `KALANDRA_TEST_HOOK=<port>`.
+- Test hook: every command answers with exactly one line (`ok`, `err <message>`, or JSON for `state`). New command
+  `tray <menu-id>` runs the tray menu handler for `open_settings` / `quit` (unknown id -> `err ...`). `state` gains
+  optional fields `overlay_pinned: bool`, `settings_visible: bool`, `tray_present: bool`; `last_price` is the
+  `PriceSummary` JSON (serde field names) or `null`.
+- Web `data-testid`s used by e2e: `price-summary` on the overlay's price block (its text includes the median
+  amount), `settings-root` on the settings page root.
