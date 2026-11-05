@@ -466,10 +466,8 @@ fn trade_client_is_a_price_source_for_everything() {
 }
 
 // Full price() path: FilterSet::to_trade_query + search + fetch + core::pricing::summarise.
-// Both core functions are `todo!()` until workstream A merges; the lead un-ignores this
 // test after merging core.
 #[tokio::test]
-#[ignore = "needs kalandra-core summarise/to_trade_query (workstream A)"]
 async fn price_full_search_path() {
     let server = MockServer::start().await;
     Mock::given(method("POST")).respond_with(search_ok()).mount(&server).await;
