@@ -4,5 +4,10 @@
   },
   "bundle": {
     "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://github.com/nightah/kalandra/releases/latest/download/latest.json"]
+    }
   }
 }
