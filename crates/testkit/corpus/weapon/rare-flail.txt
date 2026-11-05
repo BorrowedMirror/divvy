@@ -1,0 +1,15 @@
+Item Class: Flails
+Rarity: Rare
+Doom Lash
+Iron Flail
+--------
+Physical Damage: 33-62 (augmented)
+Critical Hit Chance: 7.00%
+Attacks per Second: 1.40
+--------
+Requires: Level 35, 45 Str, 45 Int
+--------
+Item Level: 50
+--------
+84% increased Physical Damage
++26 to Intelligence

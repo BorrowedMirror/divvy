@@ -1,0 +1,17 @@
+Item Class: Bucklers
+Rarity: Rare
+Hate Guard
+Plated Buckler
+--------
+Block chance: 20%
+Evasion Rating: 181 (augmented)
+--------
+Requires: Level 45, 78 Dex
+--------
+Item Level: 72
+--------
+Grants Skill: Parry
+--------
+64% increased Evasion Rating
++51 to maximum Life
++27% to Fire Resistance

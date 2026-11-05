@@ -1,0 +1,18 @@
+Item Class: Belts
+Rarity: Unique
+Headhunter
+Heavy Belt
+--------
+Requires: Level 60
+--------
+Item Level: 83
+--------
+20% increased Stun Threshold (implicit)
+--------
++49 to Strength
++47 to Dexterity
++66 to maximum Life
+When you kill a Rare monster, you gain its Modifiers for 20 seconds
+--------
+"A man's soul rules from a cavern of bone, eats and drinks
+from the flesh of others, and seeks dominion over all."

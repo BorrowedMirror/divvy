@@ -1,0 +1,17 @@
+Item Class: Amulets
+Rarity: Unique
+Astramentis
+Stellar Amulet
+--------
+Requires: Level 59
+--------
+Item Level: 79
+--------
++14 to all Attributes (implicit)
+--------
++94 to all Attributes
+-4 Physical Damage taken from Attack Hits
+--------
+The stars are made of the same stuff as we.
+--------
+Corrupted

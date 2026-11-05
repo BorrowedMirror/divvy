@@ -1,0 +1,20 @@
+Item Class: Crossbows
+Rarity: Rare
+Grim Bolt
+Bombard Crossbow
+--------
+Physical Damage: 77-312 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.65
+Reload Time: 0.85
+--------
+Requires: Level 70, 89 Str, 89 Dex
+--------
+Item Level: 80
+--------
+Grenade Skills Fire an additional Projectile (implicit)
+--------
+121% increased Physical Damage
++15 to Strength
++3 to Level of all Projectile Skills
+Loads an additional bolt

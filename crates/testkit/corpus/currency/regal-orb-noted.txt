@@ -1,0 +1,12 @@
+Item Class: Stackable Currency
+Rarity: Currency
+Regal Orb
+--------
+Stack Size: 20/20
+--------
+Upgrades a Magic item to a Rare item, adding one random modifier
+--------
+Right click this item then left click a Magic item to apply it. Current modifiers are retained and a new one is added.
+Shift click to unstack.
+--------
+Note: ~b/o 1 exalted

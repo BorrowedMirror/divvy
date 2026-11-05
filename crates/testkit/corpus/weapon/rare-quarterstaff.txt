@@ -1,0 +1,17 @@
+Item Class: Quarterstaves
+Rarity: Rare
+Gale Pillar
+Wrapped Quarterstaff
+--------
+Physical Damage: 112-187 (augmented)
+Critical Hit Chance: 11.50%
+Attacks per Second: 1.40
+--------
+Requires: Level 60, 98 Dex, 42 Int
+--------
+Item Level: 78
+--------
+127% increased Physical Damage
+Adds 7 to 14 Physical Damage
++68 to Accuracy Rating
+Gain 21 Life per enemy killed

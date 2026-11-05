@@ -1,0 +1,16 @@
+Item Class: One Hand Maces
+Rarity: Rare
+Skull Knell
+Wooden Club
+--------
+Physical Damage: 24-42 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.45
+--------
+Requires: Level 12, 24 Str
+--------
+Item Level: 21
+--------
+68% increased Physical Damage
++12 to Strength
+Leeches 6.41% of Physical Damage as Life

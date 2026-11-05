@@ -1,0 +1,12 @@
+Item Class: Gloves
+Rarity: Magic
+Sanguine Riveted Mitts of the Penguin
+--------
+Armour: 96
+--------
+Requires: Level 45, 74 Str
+--------
+Item Level: 52
+--------
++57 to maximum Life
++21% to Cold Resistance

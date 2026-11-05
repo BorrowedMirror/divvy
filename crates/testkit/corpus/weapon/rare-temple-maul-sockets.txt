@@ -1,0 +1,27 @@
+Item Class: Two Hand Maces
+Rarity: Rare
+Brood Hammer
+Temple Maul
+--------
+Quality: +20% (augmented)
+Physical Damage: 175-298 (augmented)
+Fire Damage: 31-48 (fire)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.10
+--------
+Requires: Level 65, 157 Str
+--------
+Sockets: S S S
+--------
+Item Level: 82
+--------
+Adds 31 to 48 Fire Damage (rune)
+--------
+Causes 30% increased Stun Buildup (implicit)
+--------
+162% increased Physical Damage
++212 to Accuracy Rating
+24% increased Critical Damage Bonus
+Leeches 8.8% of Physical Damage as Life
+--------
+Corrupted

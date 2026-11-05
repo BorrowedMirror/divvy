@@ -1,0 +1,23 @@
+Item Class: Waystones
+Rarity: Rare
+Shrouded Halls
+Waystone (Tier 15)
+--------
+Waystone Tier: 15
+Revives Available: 0 (augmented)
+Pack Size: +18% (augmented)
+Magic Monsters: +35% (augmented)
+Rare Monsters: +28% (augmented)
+Item Rarity: +46% (augmented)
+Waystone Drop Chance: +210% (augmented)
+--------
+Item Level: 81
+--------
+Monsters deal 26% of Damage as Extra Lightning
+Monsters have 20% increased Area of Effect
+Area has patches of Shocked Ground
+Players have 40% less Recovery Rate of Life and Energy Shield
+Monsters fire 2 additional Projectiles
+Monsters have 70% increased Freeze Buildup
+--------
+Can be used in a Map Device, allowing you to enter a Map. Waystones can only be used once.

@@ -1,0 +1,16 @@
+Item Class: Claws
+Rarity: Magic
+Glinting Hooked Claw of Ease
+--------
+Physical Damage: 12-32 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.70 (augmented)
+--------
+Requires: Level 18, 32 Dex
+--------
+Item Level: 25
+--------
+Grants 8 Life per Enemy Hit (implicit)
+--------
+Adds 3 to 6 Physical Damage
+8% increased Attack Speed

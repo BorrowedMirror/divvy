@@ -1,0 +1,21 @@
+Item Class: Skill Gems
+Rarity: Gem
+Lightning Arrow
+--------
+Attack, AoE, Projectile, Lightning, Chaining, Bow
+Level: 21 (Max)
+Quality: +23% (augmented)
+Cost: 18 Mana
+Attack Speed: 100% of base
+Attack Damage: 141% of base
+--------
+Requires: Level 90, 129 (unmet) Dex
+--------
+Fire a charged arrow at the target, causing them to be struck by a bolt of lightning which damages nearby enemies.
+--------
+Converts 80% of Physical damage to Lightning damage
+Chains 2 times
+--------
+Place into an empty skill gem socket in the Skills Panel to gain this skill. Right click to remove from the Skills Panel.
+--------
+Corrupted

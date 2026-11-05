@@ -1,0 +1,18 @@
+Item Class: Life Flasks
+Rarity: Magic
+Abundant Greater Life Flask of the Medic
+--------
+Recovers 465 Life over 3 Seconds
+Consumes 10 of 85 (augmented) Charges on use
+Currently has 85 Charges
+--------
+Requires: Level 20
+--------
+Item Level: 50
+--------
+{ Prefix Modifier "Abundant" (Tier: 2) }
++15(14-17) to maximum Charges
+{ Suffix Modifier "of the Medic" (Tier: 3) }
+Removes Bleeding on use
+--------
+Right click to drink. Can only hold charges while in belt. Refill at Wells or by killing monsters.

@@ -1,0 +1,18 @@
+Item Class: Shields
+Rarity: Rare
+Rune Bastion
+Splintered Tower Shield
+--------
+Block chance: 26%
+Armour: 384 (augmented)
+--------
+Requires: Level 55, 98 Str
+--------
+Item Level: 77
+--------
+Grants Skill: Raise Shield
+--------
+106% increased Armour
++84 to maximum Life
++21% to Cold Resistance
++30% to Chaos Resistance

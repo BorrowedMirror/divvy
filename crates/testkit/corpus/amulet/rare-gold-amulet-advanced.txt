@@ -1,0 +1,20 @@
+Item Class: Amulets
+Rarity: Rare
+Golem Talisman
+Gold Amulet
+--------
+Requires: Level 48
+--------
+Item Level: 81
+--------
+{ Implicit Modifier }
+15(12-20)% increased Rarity of Items found (implicit)
+--------
+{ Prefix Modifier "Prosperous" (Tier: 2) — Drop }
+14(13-18)% increased Rarity of Items found
+{ Prefix Modifier "Virile" (Tier: 4) — Life }
++74(70-84) to maximum Life
+{ Suffix Modifier "of the Ice" (Tier: 5) — Elemental, Cold, Resistance }
++28(26-30)% to Cold Resistance
+{ Suffix Modifier "of the Bear" (Tier: 3) — Attribute }
++21(17-24) to Strength

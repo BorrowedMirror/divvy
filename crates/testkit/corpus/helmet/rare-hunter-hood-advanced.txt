@@ -1,0 +1,19 @@
+Item Class: Helmets
+Rarity: Rare
+Gale Cowl
+Expert Hunter Hood
+--------
+Evasion Rating: 402 (augmented)
+--------
+Requires: Level 65, 87 Dex
+--------
+Item Level: 80
+--------
+{ Prefix Modifier "Hale" (Tier: 7) — Life }
++42(40-49) to maximum Life
+{ Prefix Modifier "Agile" (Tier: 3) — Defences }
++109(98-119) to Evasion Rating
+{ Suffix Modifier "of the Kiln" (Tier: 4) — Elemental, Fire, Resistance }
++31(26-30)% to Fire Resistance
+{ Suffix Modifier "of Calamity" (Tier: 3) — Chaos, Resistance }
++16(14-17)% to Chaos Resistance

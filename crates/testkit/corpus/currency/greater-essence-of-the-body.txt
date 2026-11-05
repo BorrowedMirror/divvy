@@ -1,0 +1,13 @@
+Item Class: Stackable Currency
+Rarity: Currency
+Greater Essence of the Body
+--------
+Stack Size: 2/10
+--------
+Upgrades a Magic item to a Rare item, adding a guaranteed modifier
+--------
+Body Armour: +(70-84) to maximum Life
+Belt: +(70-84) to maximum Life
+--------
+Right click this item then left click a Magic item to apply it.
+Shift click to unstack.

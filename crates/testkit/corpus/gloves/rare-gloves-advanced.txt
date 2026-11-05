@@ -1,0 +1,20 @@
+Item Class: Gloves
+Rarity: Rare
+Kraken Hold
+Gold Gauntlets
+--------
+Quality: +20% (augmented)
+Armour: 281 (augmented)
+Energy Shield: 98 (augmented)
+--------
+Requires: Level 70, 57 Str, 57 Int
+--------
+Item Level: 81
+--------
+{ Prefix Modifier "Exuberant" (Tier: 3) — Life, Defences }
++98(91-110) to Armour
++38(36-41) to maximum Life
+{ Suffix Modifier "of Grandmastery" (Tier: 1) — Attack, Speed }
+16(14-16)% increased Attack Speed
+{ Crafted Suffix Modifier "of the Essence" }
++28(26-30)% to Lightning Resistance

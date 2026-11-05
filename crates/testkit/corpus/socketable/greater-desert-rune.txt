@@ -1,0 +1,14 @@
+Item Class: Augment
+Rarity: Currency
+Greater Desert Rune
+--------
+Stack Size: 3/10
+--------
+Requires: Level 31
+--------
+Martial Weapons: Adds 13 to 16 Fire Damage
+Armour: +14% to Fire Resistance
+Wands or Staves: Gain 10% of Damage as Extra Fire Damage
+--------
+Place into an empty Augment Socket in a Martial Weapon or Armour to apply its effect to that item. Once Socketed it cannot be retrieved without destroying it.
+Shift click to unstack.

@@ -1,0 +1,15 @@
+Item Class: Helmets
+Rarity: Unique
+Goldrim
+Felt Cap
+--------
+Evasion Rating: 41 (augmented)
+--------
+Item Level: 12
+--------
++34 to Evasion Rating
+10% increased Rarity of Items found
++32% to all Elemental Resistances
+Reflects 4 Physical Damage to Melee Attackers
+--------
+No metal slips as easily through the fingers as gold.

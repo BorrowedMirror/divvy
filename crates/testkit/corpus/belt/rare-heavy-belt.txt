@@ -1,0 +1,16 @@
+Item Class: Belts
+Rarity: Rare
+Kraken Lash
+Heavy Belt
+--------
+Requires: Level 55
+--------
+Item Level: 80
+--------
+19% increased Stun Threshold (implicit)
+--------
++98 to maximum Life
++142 to Armour
++38% to Fire Resistance
+21% increased Flask Life Recovery rate
++27 to Strength

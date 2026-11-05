@@ -1,0 +1,15 @@
+Item Class: Daggers
+Rarity: Rare
+Viper Edge
+Glass Shank
+--------
+Physical Damage: 18-71 (augmented)
+Critical Hit Chance: 6.00%
+Attacks per Second: 1.50
+--------
+Requires: Level 20, 18 Dex, 18 Int
+--------
+Item Level: 34
+--------
+Adds 9 to 17 Physical Damage
+23% increased Critical Damage Bonus

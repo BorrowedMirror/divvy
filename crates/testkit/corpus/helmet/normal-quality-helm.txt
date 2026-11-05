@@ -1,0 +1,11 @@
+Item Class: Helmets
+Rarity: Normal
+Superior Visored Helm
+--------
+Quality: +15% (augmented)
+Armour: 56 (augmented)
+Evasion Rating: 50 (augmented)
+--------
+Requires: Level 22, 21 Str, 21 Dex
+--------
+Item Level: 33

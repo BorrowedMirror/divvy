@@ -1,0 +1,15 @@
+Item Class: Gloves
+Rarity: Rare
+Hypnotic Grip
+Stocky Mitts
+--------
+Armour: 118 (augmented)
+--------
+Requires: Level 33, 54 Str
+--------
+Item Level: 68
+--------
+Adds 4 to 9 Physical Damage to Attacks
++66 to maximum Life
+11% increased Attack Speed
++29% to Lightning Resistance

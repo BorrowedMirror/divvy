@@ -1,0 +1,21 @@
+Item Class: Body Armours
+Rarity: Rare
+Soul Shroud
+Vile Robe
+--------
+Quality: +20% (augmented)
+Energy Shield: 412 (augmented)
+--------
+Requires: Level 65, 121 Int
+--------
+Sockets: S S
+--------
+Item Level: 80
+--------
++14% to Lightning Resistance (rune)
+--------
+92% increased Energy Shield
++71 to maximum Energy Shield
++89 to maximum Life
++37% to Cold Resistance
+18% increased Mana Regeneration Rate

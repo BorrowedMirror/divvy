@@ -1,0 +1,15 @@
+Item Class: Staves
+Rarity: Rare
+Mind Spire
+Ashen Staff
+--------
+Requires: Level 60, 117 Int
+--------
+Item Level: 79
+--------
+Grants Skill: Level 18 Firebolt
+--------
++4 to Level of all Fire Spell Skills
+169% increased Spell Damage
+43% increased Critical Hit Chance for Spells
+27% increased Cast Speed

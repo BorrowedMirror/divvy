@@ -1,0 +1,26 @@
+Item Class: Waystones
+Rarity: Rare
+Twisted Barrens
+Waystone (Tier 16)
+--------
+Waystone Tier: 16
+Revives Available: 0 (augmented)
+Pack Size: +12% (augmented)
+Rare Monsters: +41% (augmented)
+Item Rarity: +62% (augmented)
+Waystone Drop Chance: +255% (augmented)
+--------
+Item Level: 82
+--------
+{ Prefix Modifier "Searing" (Tier: 1) — Damage, Elemental, Fire }
+Monsters deal 32(25-35)% of Damage as Extra Fire
+{ Prefix Modifier "Hulking" (Tier: 1) }
+Monsters have 41(40-49)% increased Life
+{ Suffix Modifier "of Exposure" (Tier: 1) — Elemental, Resistance }
+Players have -20% to all maximum Resistances
+{ Suffix Modifier "of Frenzy" (Tier: 1) }
+Monsters have 18(15-20)% increased Attack, Cast and Movement Speed
+--------
+Can be used in a Map Device, allowing you to enter a Map. Waystones can only be used once.
+--------
+Corrupted

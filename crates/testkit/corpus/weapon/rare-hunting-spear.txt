@@ -1,0 +1,18 @@
+Item Class: Spears
+Rarity: Rare
+Grim Lance
+Hunting Spear
+--------
+Physical Damage: 54-99 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.50
+--------
+Requires: Level 40, 52 Str, 52 Dex
+--------
+Item Level: 66
+--------
+Grants Skill: Spear Throw
+--------
+104% increased Physical Damage
+12% increased Attack Speed
++21% to Cold Resistance

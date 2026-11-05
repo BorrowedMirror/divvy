@@ -1,0 +1,24 @@
+Item Class: Bows
+Rarity: Rare
+Doom Song
+Gemini Bow
+--------
+Physical Damage: 102-191 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.10
+--------
+Requires: Level 70, 138 Dex
+--------
+Item Level: 82
+--------
+{ Implicit Modifier }
+Bow Attacks fire an additional Arrow (implicit)
+--------
+{ Prefix Modifier "Tyrannical" (Tier: 2) — Damage, Physical, Attack }
+151(135-154)% increased Physical Damage
+{ Prefix Modifier "Gleaming" (Tier: 4) — Damage, Physical, Attack }
+Adds 16(14-19) to 28(26-33) Physical Damage
+{ Suffix Modifier "of Celebration" (Tier: 2) — Attack, Speed }
+17(15-17)% increased Attack Speed
+{ Suffix Modifier "of the Hunt" — Gem }
++3 to Level of all Projectile Skills

@@ -1,0 +1,15 @@
+Item Class: Support Gems
+Rarity: Gem
+Martial Tempo
+--------
+Support, Attack
+Level: 1
+Cost Multiplier: 120%
+--------
+Requires: Level 1
+--------
+Supports Strike Skills, causing them to have increased Attack Speed.
+--------
+Supported Skills have 15% increased Attack Speed
+--------
+This is a Support Gem. It does not grant a bonus to your character, but to skills in sockets connected to it. Place into an item socket connected to a socket containing the Skill Gem you wish to augment.

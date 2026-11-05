@@ -1,0 +1,13 @@
+Item Class: Augment
+Rarity: Currency
+Soul Core of Tacati
+--------
+Stack Size: 1/10
+--------
+Requires: Level 65
+--------
+Martial Weapons: 15% chance to Poison on Hit with this weapon
+Armour: +11% to Chaos Resistance
+--------
+Place into an empty Augment Socket in a Martial Weapon or Armour to apply its effect to that item. Once Socketed it cannot be retrieved without destroying it.
+Shift click to unstack.

@@ -1,0 +1,16 @@
+Item Class: Boots
+Rarity: Rare
+Storm Spur
+Lattice Sandals
+--------
+Quality: +8% (augmented)
+Energy Shield: 98 (augmented)
+--------
+Requires: Level 59, 71 Int
+--------
+Item Level: 75
+--------
+30% increased Movement Speed
++66 to maximum Energy Shield
++42% to Fire Resistance
++19 to Intelligence

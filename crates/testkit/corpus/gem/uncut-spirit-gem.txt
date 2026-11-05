@@ -1,0 +1,9 @@
+Item Class: Uncut Spirit Gems
+Rarity: Currency
+Uncut Spirit Gem (Level 18)
+--------
+Level: 18
+--------
+Creates a Persistent Buff Skill Gem or Levels up a Persistent Buff Skill Gem to level 18.
+--------
+Right Click to engrave a Persistent Buff Skill Gem.

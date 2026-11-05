@@ -1,0 +1,9 @@
+Item Class: Omen
+Rarity: Currency
+Omen of Whittling
+--------
+Stack Size: 1/10
+--------
+While this item is active in your inventory your next Chaos Orb will remove the lowest level modifier
+--------
+Right click to activate or deactivate. Omens are consumed when their effect is triggered.

@@ -1,0 +1,15 @@
+Item Class: Foci
+Rarity: Rare
+Mind Song
+Crystal Focus
+--------
+Energy Shield: 112 (augmented)
+--------
+Requires: Level 65, 89 Int
+--------
+Item Level: 81
+--------
+67% increased Energy Shield
+76% increased Spell Damage
++38 to maximum Mana
+14% increased Cast Speed

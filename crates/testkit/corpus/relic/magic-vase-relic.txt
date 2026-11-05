@@ -1,0 +1,10 @@
+Item Class: Relics
+Rarity: Magic
+Fortified Vase Relic of Clarity
+--------
+Item Level: 62
+--------
++12% to Maximum Honour
+14% increased Honour restored
+--------
+Place this item on any Relic Altar at the start of a Trial of the Sekhemas to apply its effects.

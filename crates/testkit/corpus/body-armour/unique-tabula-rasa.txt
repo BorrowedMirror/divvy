@@ -1,0 +1,14 @@
+Item Class: Body Armours
+Rarity: Unique
+Tabula Rasa
+Garment
+--------
+Requires: Level 1
+--------
+Sockets: S S S S S S
+--------
+Item Level: 60
+--------
+Has 6 Sockets
+--------
+Blank Slate
