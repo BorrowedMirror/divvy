@@ -168,7 +168,7 @@ export function SelectField<T extends string>({
       value={value}
       disabled={disabled}
       onValueChange={(v) => {
-        if (v !== null) onChange(v as T);
+        if (v !== null) onChange(v);
       }}
     >
       <div className={cx("flex flex-col gap-1", className)}>

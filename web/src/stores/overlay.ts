@@ -41,13 +41,16 @@ export type OverlayStore = {
   reset: () => void;
 };
 
-const initial = {
+const initial: Pick<
+  OverlayStore,
+  "item" | "filters" | "summary" | "error" | "retryAt" | "phase" | "pinned" | "visible"
+> = {
   item: null,
   filters: null,
   summary: null,
   error: null,
   retryAt: null,
-  phase: "idle" as Phase,
+  phase: "idle",
   pinned: false,
   visible: true,
 };
