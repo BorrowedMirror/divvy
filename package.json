@@ -1,0 +1,13 @@
+{
+  "name": "kalandra",
+  "private": true,
+  "packageManager": "pnpm@12.8.0",
+  "scripts": {
+    "commitlint": "commitlint"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "lefthook": "^2"
+  }
+}
