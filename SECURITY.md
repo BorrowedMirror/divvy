@@ -2,8 +2,10 @@
 
 ## Supported versions
 
-Only the latest release receives security fixes. kalandra updates itself through the signed
-Tauri updater; please make sure you are on the newest version before reporting.
+Only the latest release receives security fixes. Please make sure you are on the newest
+version from the [releases page](https://github.com/nightah/kalandra/releases) before reporting.
+Release artefacts are signed (Tauri updater signatures, Apple Developer ID on macOS) and listed
+in `SHA256SUMS.txt`; the app does not update itself yet.
 
 ## Reporting a vulnerability
 
@@ -16,14 +18,18 @@ days, and will credit you in the advisory unless you prefer otherwise.
 
 ## Scope
 
-In scope: the kalandra desktop app, its updater and release artefacts, and this repository's
-CI/release pipeline. Particularly relevant:
+In scope: the kalandra desktop app, its release artefacts (including the updater manifest
+`latest.json`), and this repository's CI/release pipeline. Particularly relevant:
 
 - handling of the optional `POESESSID` (it must never be logged or sent anywhere but
   pathofexile.com);
-- the IPC surface between the web UI and the Rust core;
+- the IPC surface between the web UI and the Rust core, including `open_trade`, which only
+  opens pathofexile.com URLs;
 - the global input hook and clipboard handling;
-- the debug-only test hook (`test-hook` feature), which must never be enabled in release builds.
+- the `kalandra --trigger` signal fallback and its pid file (Unix);
+- the test hook (a localhost TCP socket enabled by `KALANDRA_TEST_HOOK`), which is compiled
+  only into debug builds and builds with the `test-hook` feature, and must never be part of a
+  release build.
 
 Out of scope: vulnerabilities in Path of Exile 2, pathofexile.com, poe.ninja or poe2scout
 themselves (report those to their operators).
