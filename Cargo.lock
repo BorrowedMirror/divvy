@@ -3014,6 +3014,7 @@ dependencies = [
  "enigo",
  "futures",
  "global-hotkey",
+ "libc",
  "mockall",
  "objc2-application-services",
  "objc2-core-foundation",

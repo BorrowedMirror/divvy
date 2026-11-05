@@ -31,6 +31,7 @@ native = [
   "dep:signal-hook",
   "dep:tokio",
   "dep:futures",
+  "dep:libc",
 ]
 
 [dependencies]
@@ -55,6 +56,8 @@ arboard = { workspace = true, optional = true, features = ["wayland-data-control
 signal-hook = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true, features = ["rt"] }
 futures = { workspace = true, optional = true }
+# poll(2) on the X socket for the window tracker (already a transitive dependency).
+libc = { version = "0.2", optional = true }
 
 [dev-dependencies]
 mockall.workspace = true
