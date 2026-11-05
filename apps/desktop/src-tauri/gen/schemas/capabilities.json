@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Permissions for kalandra windows","local":true,"windows":["overlay","settings"],"permissions":["core:default","opener:default"]}}

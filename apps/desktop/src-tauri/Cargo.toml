@@ -1,0 +1,57 @@
+[package]
+name = "kalandra-desktop"
+description = "kalandra desktop shell (Tauri 2): windows, tray, IPC wiring"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+default-run = "kalandra"
+
+[lib]
+name = "kalandra_desktop"
+crate-type = ["rlib"]
+
+[[bin]]
+name = "kalandra"
+path = "src/main.rs"
+
+[lints.rust]
+# overlay/* modules need FFI on some OSes; everything else stays safe.
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[features]
+default = ["native"]
+native = ["kalandra-platform/native"]
+# Debug-only IPC test hook used by the macOS e2e harness and webdriver specs.
+test-hook = []
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+kalandra-config.workspace = true
+kalandra-core.workspace = true
+kalandra-data.workspace = true
+kalandra-platform.workspace = true
+kalandra-trade.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+specta.workspace = true
+specta-typescript.workspace = true
+tauri.workspace = true
+tauri-plugin-opener.workspace = true
+tauri-specta.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+kalandra-testkit.workspace = true
+tauri = { workspace = true, features = ["test"] }
