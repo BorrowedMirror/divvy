@@ -57,25 +57,58 @@ pub fn export_bindings(path: &std::path::Path) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-fn init_logging(paths: Option<&Paths>) -> Option<std::path::PathBuf> {
-    use tracing_subscriber::{EnvFilter, fmt, prelude::*};
-    let filter = EnvFilter::try_from_env("KALANDRA_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
-    let file = paths.and_then(|p| {
-        std::fs::create_dir_all(&p.log_dir).ok()?;
-        let path = p.log_dir.join("kalandra.log");
-        std::fs::File::create(&path).ok().map(|f| (path, f))
-    });
-    let registry = tracing_subscriber::registry().with(filter).with(fmt::layer().with_writer(std::io::stderr));
-    match file {
-        Some((path, f)) => {
-            let _ = registry.with(fmt::layer().with_ansi(false).with_writer(std::sync::Mutex::new(f))).try_init();
-            Some(path)
-        }
-        None => {
-            let _ = registry.try_init();
-            None
+/// Log file slot: the subscriber is installed early, the file is attached once this process is
+/// known to be the primary instance (a second launch must not truncate the running one's log).
+type LogFile = Arc<std::sync::Mutex<Option<std::fs::File>>>;
+
+struct LogFileWriter(LogFile);
+
+impl std::io::Write for LogFileWriter {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        match self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_mut() {
+            Some(f) => f.write(buf),
+            None => Ok(buf.len()),
         }
     }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        match self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_mut() {
+            Some(f) => f.flush(),
+            None => Ok(()),
+        }
+    }
+}
+
+fn init_logging() -> LogFile {
+    use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+    let env = std::env::var("KALANDRA_LOG").ok();
+    let filter = EnvFilter::try_new(logic::log_filter(env.as_deref()))
+        .unwrap_or_else(|_| EnvFilter::new(logic::log_filter(None)));
+    let slot = LogFile::default();
+    let writer = Arc::clone(&slot);
+    let _ = tracing_subscriber::registry()
+        .with(filter)
+        .with(fmt::layer().with_writer(std::io::stderr))
+        .with(fmt::layer().with_ansi(false).with_writer(move || LogFileWriter(Arc::clone(&writer))))
+        .try_init();
+    slot
+}
+
+/// Create (truncate) the log file, owner-only on unix, and start writing to it.
+fn attach_log_file(slot: &LogFile, paths: Option<&Paths>) -> Option<std::path::PathBuf> {
+    let p = paths?;
+    std::fs::create_dir_all(&p.log_dir).ok()?;
+    let path = p.log_dir.join("kalandra.log");
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut opts, 0o600);
+    let file = opts.open(&path).ok()?;
+    // `mode` only applies on creation; tighten a pre-existing file too.
+    #[cfg(unix)]
+    let _ = std::fs::set_permissions(&path, std::os::unix::fs::PermissionsExt::from_mode(0o600));
+    *slot.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(file);
+    Some(path)
 }
 
 fn load_settings(paths: Option<&Paths>, errors: &mut Vec<String>) -> Settings {
@@ -135,7 +168,8 @@ pub fn run() {
         std::process::exit(code);
     }
 
-    let log_path = init_logging(paths.as_ref());
+    let log_slot = init_logging();
+    let log_path = attach_log_file(&log_slot, paths.as_ref());
     let mut errors = Vec::new();
     let settings = load_settings(paths.as_ref(), &mut errors);
     let backend = overlay::pre_init(settings.platform.backend_override);

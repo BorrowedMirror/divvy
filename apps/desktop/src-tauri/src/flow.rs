@@ -142,23 +142,10 @@ pub fn show_settings(app: &AppHandle, route: &str) -> Result<(), IpcError> {
     Ok(())
 }
 
-/// Only allow opening the official trade site (or the configured override in tests).
-pub fn is_allowed_trade_url(url: &str) -> bool {
-    let Ok(parsed) = url::Url::parse(url) else { return false };
-    let override_host = std::env::var("KALANDRA_TRADE_BASE_URL")
-        .ok()
-        .and_then(|u| url::Url::parse(&u).ok())
-        .and_then(|u| u.host_str().map(str::to_owned));
-    match parsed.host_str() {
-        Some("www.pathofexile.com" | "pathofexile.com") => parsed.scheme() == "https",
-        Some(h) => override_host.as_deref() == Some(h),
-        None => false,
-    }
-}
-
 pub fn open_trade(app: &AppHandle, url: &str) -> Result<(), IpcError> {
     use tauri_plugin_opener::OpenerExt;
-    if !is_allowed_trade_url(url) {
+    let override_base = crate::state::env_override("KALANDRA_TRADE_BASE_URL");
+    if !logic::is_allowed_trade_url(url, override_base.as_ref()) {
         return Err(IpcError::new("internal", format!("refusing to open non-trade url {url}")));
     }
     app.opener().open_url(url, None::<&str>).map_err(|e| IpcError::new("internal", e.to_string()))
@@ -274,14 +261,6 @@ pub fn copy_chord(advanced: bool) -> Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn trade_url_allow_list() {
-        assert!(is_allowed_trade_url("https://www.pathofexile.com/trade2/search/poe2/Standard/abc"));
-        assert!(!is_allowed_trade_url("http://www.pathofexile.com/trade2"));
-        assert!(!is_allowed_trade_url("https://evil.example.com/"));
-        assert!(!is_allowed_trade_url("not a url"));
-    }
 
     #[test]
     fn close_keys() {

@@ -29,11 +29,27 @@ pub struct Sources {
     pub scout: Arc<Poe2ScoutSource>,
 }
 
+/// Endpoint override from `key` (e2e / wiremock). Only debug or `test-hook` builds honour it, and
+/// only for https or loopback URLs, so a release build can't be pointed at another host.
+pub fn env_override(key: &str) -> Option<Url> {
+    #[cfg(any(debug_assertions, feature = "test-hook"))]
+    {
+        let url = std::env::var(key).ok().and_then(|v| Url::parse(&v).ok())?;
+        if logic::is_safe_override(&url) {
+            return Some(url);
+        }
+        tracing::warn!("ignoring {key}: only https or loopback http URLs are allowed");
+        None
+    }
+    #[cfg(not(any(debug_assertions, feature = "test-hook")))]
+    {
+        let _ = key;
+        None
+    }
+}
+
 fn env_url(key: &str, default: &str) -> Url {
-    std::env::var(key)
-        .ok()
-        .and_then(|v| Url::parse(&v).ok())
-        .unwrap_or_else(|| Url::parse(default).expect("static url"))
+    env_override(key).unwrap_or_else(|| Url::parse(default).expect("static url"))
 }
 
 impl Sources {
