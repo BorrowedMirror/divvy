@@ -55,3 +55,7 @@ tracing-subscriber.workspace = true
 [dev-dependencies]
 kalandra-testkit.workspace = true
 tauri = { workspace = true, features = ["test"] }
+
+# macOS overlay: convert the overlay window into a non-activating NSPanel (workstream E).
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri-nspanel.workspace = true

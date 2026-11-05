@@ -108,6 +108,7 @@ tempfile = "3"
 objc2-core-foundation = { version = "0.3", default-features = false }
 objc2-core-graphics = { version = "0.3", default-features = false }
 objc2-application-services = { version = "0.3", default-features = false }
+tauri-nspanel = "2.1"
 
 [profile.release]
 lto = true
