@@ -4,7 +4,9 @@
 //! Line protocol (see e2e/lib/hook.ts): `trigger 0|1`, `text <json string>`, `state`,
 //! `tray open_settings|open_diagnostics|price_check|quit`, `settings` (current settings as JSON),
 //! `save_settings <json settings>` (validate + persist, like the IPC command), `quit`. One reply line each:
-//! `ok`, `err <message>`, or a JSON object for `state`.
+//! `ok`, `err <message>`, or a JSON object for `state`. When `KALANDRA_TEST_HOOK_TOKEN` is set, the
+//! first line must be `auth <token>` (no reply; anything else gets `err unauthorised` and the
+//! connection closes). A line that looks like an HTTP request closes the connection.
 use std::{
     io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
@@ -33,11 +35,44 @@ pub fn spawn(app: &AppHandle, port: u16) -> std::io::Result<u16> {
     Ok(bound)
 }
 
+/// Env var holding the shared secret; when set, a connection's first line must be `auth <token>`.
+pub const TOKEN_ENV: &str = "KALANDRA_TEST_HOOK_TOKEN";
+
+/// Lines that look like HTTP (a browser page doing `fetch("http://127.0.0.1:<port>")`).
+pub fn is_http_request(line: &str) -> bool {
+    const METHODS: [&str; 9] = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH", "CONNECT", "TRACE"];
+    let first = line.split_whitespace().next().unwrap_or("");
+    METHODS.iter().any(|m| first.eq_ignore_ascii_case(m))
+}
+
+/// Whether `line` authenticates against `token` (`None` = no token required).
+pub fn authorised(line: &str, token: Option<&str>) -> bool {
+    match token {
+        None => true,
+        Some(t) => line.strip_prefix("auth ").is_some_and(|got| !t.is_empty() && got.trim() == t),
+    }
+}
+
 fn serve(app: &AppHandle, stream: TcpStream) {
     let Ok(read) = stream.try_clone() else { return };
     let mut out = stream;
+    let token = std::env::var(TOKEN_ENV).ok();
+    let mut authed = token.is_none();
     for line in BufReader::new(read).lines().map_while(Result::ok) {
-        let reply = handle(app, line.trim());
+        let line = line.trim();
+        if is_http_request(line) {
+            break;
+        }
+        if !authed {
+            if authorised(line, token.as_deref()) {
+                // No reply: clients send `auth <token>` and their command back to back.
+                authed = true;
+                continue;
+            }
+            let _ = writeln!(out, "err unauthorised");
+            break;
+        }
+        let reply = handle(app, line);
         if writeln!(out, "{reply}").is_err() {
             break;
         }
@@ -109,5 +144,29 @@ pub fn handle(app: &AppHandle, line: &str) -> String {
             "ok".into()
         }
         other => format!("err unknown command `{other}`"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rejects_http_requests() {
+        assert!(is_http_request("GET / HTTP/1.1"));
+        assert!(is_http_request("post /x HTTP/1.1"));
+        assert!(is_http_request("OPTIONS * HTTP/1.1"));
+        assert!(!is_http_request("trigger 1"));
+        assert!(!is_http_request("state"));
+        assert!(!is_http_request(""));
+    }
+
+    #[test]
+    fn token_auth() {
+        assert!(authorised("state", None));
+        assert!(authorised("auth s3cret", Some("s3cret")));
+        assert!(!authorised("auth wrong", Some("s3cret")));
+        assert!(!authorised("state", Some("s3cret")));
+        assert!(!authorised("auth ", Some("")));
     }
 }

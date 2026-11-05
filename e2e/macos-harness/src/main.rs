@@ -91,6 +91,10 @@ impl Hook {
         let mut s = TcpStream::connect(("127.0.0.1", self.port))
             .with_context(|| format!("connecting to test hook on 127.0.0.1:{}", self.port))?;
         s.set_read_timeout(Some(Duration::from_secs(5)))?;
+        // The app requires `auth <token>` first when KALANDRA_TEST_HOOK_TOKEN is set (no reply).
+        if let Ok(token) = std::env::var("KALANDRA_TEST_HOOK_TOKEN") {
+            writeln!(s, "auth {token}")?;
+        }
         writeln!(s, "{cmd}")?;
         let mut line = String::new();
         BufReader::new(s).read_line(&mut line).with_context(|| format!("reading reply to `{cmd}`"))?;

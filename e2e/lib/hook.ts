@@ -30,7 +30,9 @@ export function hookCommand(cmd: string, timeoutMs = 5000, port = HOOK_PORT): Pr
       reject(new Error(`test hook: no reply to "${cmd}" within ${timeoutMs}ms`));
     }, timeoutMs);
     sock.setEncoding("utf8");
-    sock.on("connect", () => sock.write(`${cmd}\n`));
+    // With KALANDRA_TEST_HOOK_TOKEN set the app requires `auth <token>` first (it sends no reply).
+    const token = process.env.KALANDRA_TEST_HOOK_TOKEN;
+    sock.on("connect", () => sock.write(`${token ? `auth ${token}\n` : ""}${cmd}\n`));
     sock.on("data", (d: string) => {
       buf += d;
       const nl = buf.indexOf("\n");
