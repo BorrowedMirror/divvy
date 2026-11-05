@@ -19,6 +19,11 @@ export const commands = {
 	setOverlayPinned: (pinned: boolean) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("set_overlay_pinned", { pinned })),
 	openSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings")),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
+	/**
+	 *  Download, verify and install the announced update, then restart into it.
+	 *  On Windows the installer exits the app itself.
+	 */
+	installUpdate: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("install_update")),
 };
 
 /** Events */
@@ -28,6 +33,7 @@ export const events = {
 	priceFailed: makeEvent<PriceFailed_Serialize, PriceFailed_Deserialize>("price-failed"),
 	priceReady: makeEvent<PriceReady_Serialize, PriceReady_Deserialize>("price-ready"),
 	settingsChanged: makeEvent<SettingsChanged_Serialize, SettingsChanged_Deserialize>("settings-changed"),
+	updateAvailable: makeEvent<UpdateAvailable_Serialize, UpdateAvailable_Deserialize>("update-available"),
 };
 
 /* Types */
@@ -171,7 +177,7 @@ export type IpcError = IpcError_Serialize | IpcError_Deserialize;
 
 /**  Error shape for every command. */
 export type IpcError_Deserialize = {
-	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `internal`. */
+	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `update`, `internal`. */
 	kind: string,
 	message: string,
 	retry_after_ms?: number | null,
@@ -179,7 +185,7 @@ export type IpcError_Deserialize = {
 
 /**  Error shape for every command. */
 export type IpcError_Serialize = {
-	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `internal`. */
+	/**  `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `update`, `internal`. */
 	kind: string,
 	message: string,
 	retry_after_ms: number | null,
@@ -702,6 +708,8 @@ export type UiSettings_Deserialize = {
 	language?: string,
 	theme?: Theme,
 	start_minimised?: boolean,
+	/**  Check for and offer app updates in the background (release builds with an updater key only). */
+	check_updates?: boolean,
 };
 
 export type UiSettings_Serialize = {
@@ -709,6 +717,29 @@ export type UiSettings_Serialize = {
 	language: string,
 	theme: Theme,
 	start_minimised: boolean,
+	/**  Check for and offer app updates in the background (release builds with an updater key only). */
+	check_updates: boolean,
+};
+
+/**  A newer, signed release is available. `install_update` applies it. */
+export type UpdateAvailable = UpdateAvailable_Serialize | UpdateAvailable_Deserialize;
+
+/**  A newer, signed release is available. `install_update` applies it. */
+export type UpdateAvailable_Deserialize = {
+	version: string,
+	/**  Release notes from the updater manifest. */
+	notes?: string | null,
+	/**  Publish date (RFC 3339) as announced by the manifest. */
+	date?: string | null,
+};
+
+/**  A newer, signed release is available. `install_update` applies it. */
+export type UpdateAvailable_Serialize = {
+	version: string,
+	/**  Release notes from the updater manifest. */
+	notes: string | null,
+	/**  Publish date (RFC 3339) as announced by the manifest. */
+	date: string | null,
 };
 
 export type ValueRange = {
