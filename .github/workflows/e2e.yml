@@ -1,0 +1,169 @@
+name: e2e
+
+# End-to-end runs of the real app against tools/fake-game and recorded trade fixtures.
+# Scripts live in e2e/ (workstream H); this file only provisions each environment.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  windows:
+    name: windows (tauri-driver + msedgedriver)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: e2e
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cargo install tauri-driver --locked
+      - name: msedgedriver matching the installed WebView2
+        shell: pwsh
+        run: |
+          $version = (Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}').pv
+          Write-Host "WebView2 $version"
+          $zip = "$env:RUNNER_TEMP\edgedriver.zip"
+          Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile $zip
+          Expand-Archive $zip -DestinationPath "$env:RUNNER_TEMP\edgedriver" -Force
+          "$env:RUNNER_TEMP\edgedriver" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Build app (debug, test hook) and fake game
+        run: |
+          pnpm --dir web build
+          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p fake-game
+      - name: Run e2e
+        shell: pwsh
+        run: ./e2e/scripts/run-windows.ps1
+      - name: Upload artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-windows
+          path: e2e/artifacts/
+          if-no-files-found: ignore
+
+  linux-x11:
+    name: linux x11 (Xvfb + openbox)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/linux-deps
+        with:
+          extra: webkit2gtk-driver xdotool xclip
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: e2e
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cargo install tauri-driver --locked
+      - name: Build app (debug, test hook) and fake game
+        run: |
+          pnpm --dir web build
+          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p fake-game
+      - name: Run e2e (script starts Xvfb + openbox itself)
+        run: bash e2e/scripts/run-x11.sh
+      - name: Upload artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-linux-x11
+          path: e2e/artifacts/
+          if-no-files-found: ignore
+
+  linux-wayland:
+    name: linux wayland (sway headless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/linux-deps
+        with:
+          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr wl-clipboard wtype dbus-x11 webkit2gtk-driver
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: e2e
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cargo install tauri-driver --locked
+      - name: Build app (debug, test hook) and fake game
+        run: |
+          pnpm --dir web build
+          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p fake-game
+      - name: Run e2e (script starts headless sway + portal itself)
+        env:
+          WLR_BACKENDS: headless
+          WLR_LIBINPUT_NO_DEVICES: "1"
+          WLR_RENDERER: pixman
+        run: bash e2e/scripts/run-wayland.sh
+      - name: Upload artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-linux-wayland
+          path: e2e/artifacts/
+          if-no-files-found: ignore
+
+  macos:
+    name: macos (rust harness)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: e2e
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build app (debug, test hook) and fake game
+        run: |
+          pnpm --dir web build
+          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p fake-game
+      # WKWebView has no WebDriver; the harness drives the app over the KALANDRA_TEST_HOOK socket.
+      - name: Run macOS harness
+        run: cargo run --locked --manifest-path e2e/macos-harness/Cargo.toml
+      - name: Upload artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-macos
+          path: e2e/artifacts/
+          if-no-files-found: ignore
