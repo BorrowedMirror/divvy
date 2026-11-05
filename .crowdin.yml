@@ -1,0 +1,22 @@
+# Crowdin configuration (https://developers.crowdin.com/configuration-file/).
+# Source: English JSON (i18next v4 format, nested keys, CLDR plural suffixes _one/_other/...).
+# Run `crowdin upload sources` / `crowdin download` with CROWDIN_PROJECT_ID and
+# CROWDIN_PERSONAL_TOKEN set, or let .github/workflows/crowdin.yml do it.
+project_id_env: CROWDIN_PROJECT_ID
+api_token_env: CROWDIN_PERSONAL_TOKEN
+base_path: .
+preserve_hierarchy: true
+files:
+  - source: /web/src/i18n/locales/en/translation.json
+    translation: /web/src/i18n/locales/%two_letters_code%/%original_file_name%
+    type: i18next_json
+    update_option: update_as_unapproved
+    skip_untranslated_strings: true
+    export_only_approved: false
+    languages_mapping:
+      two_letters_code:
+        # Crowdin language id -> directory under locales/ (must match web/src/i18n/languages.ts)
+        pt-BR: pt-BR
+        zh-CN: zh-CN
+        zh-TW: zh-TW
+        es-ES: es

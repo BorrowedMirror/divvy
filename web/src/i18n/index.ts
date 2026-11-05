@@ -1,22 +1,46 @@
+/**
+ * i18n setup. Translations live in `locales/<locale>/translation.json` (Crowdin layout, see
+ * `.crowdin.yml` and docs/i18n.md). `en` is the source language; every other file may be
+ * partial and falls back to English key by key.
+ */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { de } from "./locales/de";
-import { en } from "./locales/en";
+import en from "./locales/en/translation.json";
+import { LANGUAGES, type LanguageCode } from "./languages";
 
-export const LANGUAGES = [
-  { code: "en", name: "English" },
-  { code: "de", name: "Deutsch" },
-] as const;
+export { LANGUAGES, type LanguageCode } from "./languages";
 
-export function supportedLanguage(tag: string | null | undefined): string {
-  const primary = (tag ?? "").toLowerCase().split("-")[0] ?? "";
-  return LANGUAGES.some((l) => l.code === primary) ? primary : "en";
+type Tree = { [k: string]: string | Tree };
+export type Messages = typeof en;
+
+const files = import.meta.glob<{ default: Tree }>("./locales/*/translation.json", { eager: true });
+
+/** All bundled resources keyed by locale code (`pt-BR`, `zh-CN`, ...). */
+export const resources: Record<string, { translation: Tree }> = Object.fromEntries(
+  Object.entries(files).map(([path, mod]) => [path.split("/")[2] as string, { translation: mod.default }]),
+);
+
+/** Map any BCP-47 tag (`pt-PT`, `zh-Hant-HK`, `de-AT`) to the closest supported locale. */
+export function supportedLanguage(tag: string | null | undefined): LanguageCode {
+  const t = (tag ?? "").replace("_", "-").toLowerCase();
+  if (!t) return "en";
+  const exact = LANGUAGES.find((l) => l.code.toLowerCase() === t);
+  if (exact) return exact.code;
+  const [primary, ...rest] = t.split("-");
+  if (primary === "zh") {
+    const traditional = rest.some((p) => ["hant", "tw", "hk", "mo"].includes(p));
+    return traditional ? "zh-TW" : "zh-CN";
+  }
+  if (primary === "pt") return "pt-BR";
+  const byPrimary = LANGUAGES.find((l) => l.code.toLowerCase().split("-")[0] === primary);
+  return byPrimary?.code ?? "en";
 }
 
 void i18n.use(initReactI18next).init({
-  resources: { en: { translation: en }, de: { translation: de } },
+  resources,
   lng: "en",
-  fallbackLng: "en",
+  fallbackLng: { "zh-TW": ["zh-CN", "en"], default: ["en"] },
+  supportedLngs: LANGUAGES.map((l) => l.code),
   interpolation: { escapeValue: false },
   returnNull: false,
   initAsync: false,

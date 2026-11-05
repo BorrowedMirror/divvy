@@ -1,0 +1,44 @@
+name: crowdin
+
+on:
+  push:
+    branches: [master]
+    paths: ["web/src/i18n/locales/en/translation.json"]
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crowdin
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # Requires repository secrets CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN.
+    if: github.repository_owner == 'nightah'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload sources and download translations
+        uses: crowdin/github-action@v2
+        with:
+          config: .crowdin.yml
+          upload_sources: true
+          upload_translations: false
+          download_translations: true
+          create_pull_request: true
+          localization_branch_name: i18n/crowdin
+          commit_message: "feat(web): update translations from crowdin"
+          pull_request_title: "feat(web): update translations from crowdin"
+          pull_request_body: "Automated translation sync from Crowdin. The i18n completeness tests in `web/src/i18n/i18n.test.ts` must pass before merging."
+          pull_request_base_branch_name: master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

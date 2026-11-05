@@ -1,0 +1,223 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "dismiss": "Dismiss"
+  },
+  "overlay": {
+    "title": "Price check",
+    "empty": "Hover an item in game and press {{hotkey}} to price check it.",
+    "openSettings": "Open settings",
+    "pin": "Pin overlay",
+    "unpin": "Unpin overlay",
+    "close": "Close overlay",
+    "league": "League",
+    "widen": "Widen ±%",
+    "widenAria": "Widen stat ranges by percent",
+    "status": "Sellers",
+    "stats": "Stats",
+    "misc": "Item properties",
+    "itemValue": "on item: {{value}}",
+    "min": "min",
+    "max": "max",
+    "statMin": "Minimum for {{stat}}",
+    "statMax": "Maximum for {{stat}}",
+    "search": "Search",
+    "loading": "Searching…"
+  },
+  "item": {
+    "rarityLabel": "Rarity:",
+    "ilvl": "ilvl {{value}}",
+    "quality": "{{value}}% quality",
+    "gemLevel": "level {{value}}",
+    "waystoneTier": "tier {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Corrupted",
+    "unidentified": "Unidentified"
+  },
+  "rarity": {
+    "normal": "Normal",
+    "magic": "Magic",
+    "rare": "Rare",
+    "unique": "Unique",
+    "currency": "Currency",
+    "gem": "Gem",
+    "other": "Other"
+  },
+  "misc": {
+    "item_level": "Item level",
+    "quality": "Quality",
+    "gem_level": "Gem level",
+    "waystone_tier": "Waystone tier",
+    "sockets": "Sockets",
+    "corrupted": "Corrupted",
+    "any": "Any",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "status": {
+    "securable": "Instant",
+    "online": "Online",
+    "any": "Any"
+  },
+  "source": {
+    "trade": "Trade site",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Prices · {{source}}",
+    "total_one": "{{count}} listing",
+    "total_other": "{{count}} listings",
+    "empty": "No listings match these filters. Try disabling some stats or widening the ranges.",
+    "min": "Min",
+    "median": "Median",
+    "max": "Max",
+    "listings": "Listings",
+    "price": "Price",
+    "seller": "Seller",
+    "age": "Listed",
+    "unknownSeller": "unknown",
+    "openTrade": "Open trade"
+  },
+  "age": {
+    "now": "just now",
+    "minutes": "{{count}}m ago",
+    "hours": "{{count}}h ago",
+    "days": "{{count}}d ago"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "chaos",
+    "gold": "gold"
+  },
+  "errors": {
+    "parse": "Couldn't read that item",
+    "trade": "The trade site returned an error",
+    "rate_limited": "Rate limited by the trade site",
+    "config": "Settings problem",
+    "platform": "Platform error",
+    "no_item": "No item on the clipboard",
+    "internal": "Something went wrong",
+    "commandFailed": "That action failed",
+    "retryIn_one": "Retry in {{count}} second",
+    "retryIn_other": "Retry in {{count}} seconds"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "general": "General",
+      "hotkeys": "Hotkeys",
+      "trade": "Trade",
+      "overlay": "Overlay",
+      "platform": "Platform"
+    },
+    "language": "Language",
+    "theme": "Theme",
+    "startMinimised": "Start minimised to tray",
+    "source": "Price source",
+    "leagueAuto": "Detect league automatically",
+    "league": "League",
+    "leaguesFailed": "Couldn't load leagues: {{message}}",
+    "onlineOnly": "Online sellers only",
+    "widenPct": "Widen stat ranges (%)",
+    "enableAllStats": "Enable all stats by default",
+    "contact": "Contact e-mail",
+    "contactHelp": "Optional. Added to the User-Agent so GGG can reach you if something misbehaves.",
+    "autoHide": "Auto-hide delay (ms)",
+    "opacity": "Opacity (0.1–1)",
+    "side": "Position",
+    "backend": "Platform backend",
+    "backendHelp": "Leave on automatic unless diagnostics recommends otherwise. Takes effect after a restart.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Settings saved",
+    "discard": "Discard changes",
+    "saveFailed": "Couldn't save: {{message}}",
+    "loadFailed": "Couldn't load settings.",
+    "fixErrors": "Fix the highlighted fields before saving.",
+    "externalChange": "Settings were changed elsewhere.",
+    "reload": "Load latest"
+  },
+  "theme": {
+    "system": "System",
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "side": {
+    "cursor": "Next to cursor",
+    "left": "Left edge",
+    "right": "Right edge"
+  },
+  "backend": {
+    "auto": "Automatic",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (native)",
+    "fake": "Fake (testing)"
+  },
+  "hotkeys": {
+    "help": "Click a shortcut, then press the new key combination. Esc cancels.",
+    "price_check": "Price check",
+    "price_check_pinned": "Price check (pinned)",
+    "open_settings": "Open settings",
+    "pressKeys": "Press keys…",
+    "needsModifier": "Add Ctrl, Alt, Shift or Meta (only F-keys work alone).",
+    "rebindFailed": "Couldn't bind that shortcut: {{message}}",
+    "advancedCopy": "Advanced item copy",
+    "advancedCopyHelp": "Uses Ctrl+Alt+C so mod tiers and ranges are available."
+  },
+  "validation": {
+    "widen": "Enter a value between 0 and 100.",
+    "email": "Enter a valid e-mail address or leave it empty.",
+    "league": "Choose a league or turn on automatic detection.",
+    "autoHide": "Enter a whole number between 0 and 10000 (0 disables auto-hide).",
+    "opacity": "Enter a value between 0.1 and 1.",
+    "hotkeyClash": "This shortcut is already used by another action.",
+    "poesessid": "Use only letters and digits."
+  },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "version": "Version",
+    "os": "OS",
+    "backend": "Backend",
+    "dataVersion": "Game data",
+    "league": "League",
+    "settingsPath": "Settings file",
+    "logPath": "Log file",
+    "capabilities": "Capabilities",
+    "supported": "supported",
+    "unsupported": "not supported",
+    "missingPermissions": "Missing permissions",
+    "recentErrors": "Recent errors",
+    "noErrors": "No errors recorded.",
+    "copyReport": "Copy report",
+    "copied": "Report copied to clipboard",
+    "copyFailed": "Couldn't access the clipboard",
+    "loadFailed": "Couldn't load diagnostics."
+  },
+  "capability": {
+    "window_tracking": "Game window tracking",
+    "overlay_always_on_top": "Overlay stays on top",
+    "overlay_click_through": "Click-through overlay",
+    "global_hotkeys": "Global hotkeys",
+    "passive_hook": "Passive input hook",
+    "keystroke_injection": "Keystroke injection (copy item)",
+    "clipboard": "Clipboard access"
+  },
+  "guidance": {
+    "accessibility": "macOS: open System Settings → Privacy & Security → Accessibility and enable kalandra. This is needed for hotkeys and copying items.",
+    "screenRecording": "macOS: open System Settings → Privacy & Security → Screen Recording and enable kalandra so it can find the game window. Restart kalandra afterwards.",
+    "wayland": "Wayland-native mode: global hotkeys go through the desktop portal, the overlay is anchored to the output rather than the game window, and keystroke injection may be unavailable. Use X11/XWayland if your compositor allows it.",
+    "gnome": "GNOME does not support the Wayland features kalandra needs, so it runs through XWayland (X11) there. Run the game under XWayland too.",
+    "generic": "Missing permission: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Price check (pinned)",
+    "settings": "Settings…",
+    "diagnostics": "Diagnostics",
+    "quit": "Quit kalandra",
+    "tooltip": "kalandra"
+  }
+}
