@@ -1,0 +1,7 @@
+# Sectioned layout written before `version` existed.
+[league]
+auto_detect = false
+league = "Standard"
+
+[trade]
+widen_pct = 25.0

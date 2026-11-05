@@ -1,0 +1,3 @@
+# Legacy settings where an empty league meant "pick automatically".
+league = ""
+hotkey = "alt+f5"
