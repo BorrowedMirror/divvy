@@ -12,6 +12,9 @@ workspace = true
 
 [dependencies]
 anyhow.workspace = true
-arboard.workspace = true
+# wayland-data-control: serve the clipboard natively under headless sway (wlr-data-control).
+arboard = { workspace = true, features = ["wayland-data-control"] }
 clap.workspace = true
+# A Wayland surface is only mapped once a buffer is committed, so we must actually draw.
+softbuffer.workspace = true
 winit.workspace = true

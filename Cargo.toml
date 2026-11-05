@@ -92,6 +92,7 @@ rdev = { git = "https://github.com/rustdesk-org/rdev", branch = "master" }
 x11rb = "0.13"
 ashpd = "0.12"
 winit = "0.30"
+softbuffer = "0.4"
 
 # tauri
 tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
