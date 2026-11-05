@@ -1,0 +1,222 @@
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, test } from "vitest";
+import type { Settings_Serialize } from "../../bindings";
+import { useSettingsStore } from "../../stores/settings";
+import { ipcError, settings } from "../../test/fixtures";
+import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
+import { SettingsView } from "./SettingsView";
+
+async function mount(handlers: Parameters<typeof setupIpc>[0] = {}) {
+  const calls = setupIpc(handlers);
+  const utils = renderWithProviders(<SettingsView onOpenDiagnostics={() => {}} />);
+  await screen.findByRole("tab", { name: "General" });
+  return { calls, ...utils };
+}
+
+const draft = () => useSettingsStore.getState().draft as Settings_Serialize;
+
+describe("SettingsView", () => {
+  test("shows loading then the general tab", async () => {
+    await mount();
+    expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Language" })).toHaveTextContent("English");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  test("load failure shows an error", async () => {
+    setupIpc({ get_settings: () => fail("nope") });
+    renderWithProviders(<SettingsView />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load settings.");
+  });
+
+  test("general tab edits enable save; save calls save_settings and toasts", async () => {
+    const user = userEvent.setup();
+    const { calls } = await mount();
+    await user.click(screen.getByRole("combobox", { name: "Theme" }));
+    await user.click(await screen.findByRole("option", { name: "Light" }));
+    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
+    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true });
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
+    expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize).ui.theme).toBe("light");
+    expect(await screen.findByText("Settings saved")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  test("discard reverts edits", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
+    await user.click(screen.getByRole("button", { name: "Discard changes" }));
+    expect(draft().ui.start_minimised).toBe(false);
+  });
+
+  test("save errors are displayed", async () => {
+    const user = userEvent.setup();
+    await mount({ save_settings: () => fail(ipcError("config", "disk full")) });
+    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Couldn't save: disk full")).toBeInTheDocument();
+  });
+
+  test("trade tab: source, league, toggles, widen, contact validation", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Trade" }));
+
+    await user.click(screen.getByRole("combobox", { name: "Price source" }));
+    await user.click(await screen.findByRole("option", { name: "poe2scout" }));
+    expect(draft().trade.source).toBe("poe2_scout");
+
+    const league = screen.getByRole("combobox", { name: "League" });
+    expect(league).toHaveAttribute("data-disabled");
+    await user.click(screen.getByRole("switch", { name: "Detect league automatically" }));
+    await user.click(screen.getByRole("combobox", { name: "League" }));
+    await user.click(await screen.findByRole("option", { name: "Dawn of the Hunt" }));
+    expect(draft().league).toEqual({ auto_detect: false, league: "Dawn of the Hunt" });
+
+    await user.click(screen.getByRole("switch", { name: "Online sellers only" }));
+    await user.click(screen.getByRole("switch", { name: "Enable all stats by default" }));
+    expect(draft().trade).toMatchObject({ online_only: false, enable_all_stats: true });
+
+    const widen = screen.getByRole("textbox", { name: "Widen stat ranges (%)" });
+    fireEvent.change(widen, { target: { value: "150" } });
+    fireEvent.blur(widen);
+    expect(await screen.findByText("Enter a value between 0 and 100.")).toBeInTheDocument();
+
+    const contact = screen.getByLabelText("Contact e-mail");
+    await user.type(contact, "nope");
+    expect(screen.getByText("Enter a valid e-mail address or leave it empty.")).toBeInTheDocument();
+    expect(screen.getByText("Fix the highlighted fields before saving.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+
+    await user.clear(contact);
+    expect(draft().trade.contact).toBeNull();
+  });
+
+  test("trade tab shows league load failures", async () => {
+    const user = userEvent.setup();
+    await mount({ list_leagues: () => fail(ipcError("trade", "offline")) });
+    await user.click(screen.getByRole("tab", { name: "Trade" }));
+    expect(await screen.findByText("Couldn't load leagues: offline")).toBeInTheDocument();
+  });
+
+  test("overlay tab edits auto-hide, opacity and side", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
+    fireEvent.change(autoHide, { target: { value: "3000" } });
+    fireEvent.blur(autoHide);
+    const opacity = screen.getByRole("textbox", { name: "Opacity (0.2–1)" });
+    fireEvent.change(opacity, { target: { value: "0.1" } });
+    fireEvent.blur(opacity);
+    expect(await screen.findByText("Enter a value between 0.2 and 1.")).toBeInTheDocument();
+    await user.click(screen.getByRole("combobox", { name: "Position" }));
+    await user.click(await screen.findByRole("option", { name: "Right edge" }));
+    expect(draft().overlay).toEqual({ auto_hide_ms: 3000, opacity: 0.1, side: "right" });
+  });
+
+  test("platform tab sets and clears the backend override", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Platform" }));
+    await user.click(screen.getByRole("combobox", { name: "Platform backend" }));
+    await user.click(await screen.findByRole("option", { name: "X11 / XWayland" }));
+    expect(draft().platform.backend_override).toBe("x11");
+    await user.click(screen.getByRole("combobox", { name: "Platform backend" }));
+    await user.click(await screen.findByRole("option", { name: "Automatic" }));
+    expect(draft().platform.backend_override).toBeNull();
+  });
+
+  test("settings-changed adopts external settings when clean", async () => {
+    await mount();
+    await flush();
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true } }) });
+    expect(screen.getByRole("switch", { name: "Start minimised to tray" })).toBeChecked();
+  });
+
+  test("settings-changed with unsaved edits offers to load the latest", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await flush();
+    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false } }) });
+    expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Load latest" }));
+    expect(draft().ui.theme).toBe("light");
+  });
+});
+
+describe("hotkeys tab", () => {
+  async function openHotkeys(handlers: Parameters<typeof setupIpc>[0] = {}) {
+    const user = userEvent.setup();
+    const res = await mount(handlers);
+    await user.click(screen.getByRole("tab", { name: "Hotkeys" }));
+    return { user, ...res };
+  }
+
+  test("records a chord from keydown and rebinds it", async () => {
+    const { user, calls } = await openHotkeys();
+    const btn = screen.getByRole("button", { name: /^Price check Ctrl\+D$/ });
+    await user.click(btn);
+    expect(btn).toHaveTextContent("Press keys…");
+    fireEvent.keyDown(btn, { code: "ControlLeft", ctrlKey: true });
+    expect(btn).toHaveTextContent("Press keys…");
+    fireEvent.keyDown(btn, { code: "KeyE", ctrlKey: true, shiftKey: true });
+    await waitFor(() => expect(callsOf(calls, "rebind_hotkey")).toHaveLength(1));
+    expect(callsOf(calls, "rebind_hotkey")[0]?.args).toEqual({
+      action: "price_check",
+      chord: { modifiers: ["ctrl", "shift"], key: "KeyE" },
+    });
+    expect(await screen.findByRole("button", { name: /^Price check Ctrl\+Shift\+E$/ })).toBeInTheDocument();
+    expect(draft().hotkeys.price_check).toEqual({ modifiers: ["ctrl", "shift"], key: "KeyE" });
+  });
+
+  test("needs a modifier for plain keys; Esc cancels", async () => {
+    const { user, calls } = await openHotkeys();
+    const btn = screen.getByRole("button", { name: /^Price check Ctrl\+D$/ });
+    await user.click(btn);
+    fireEvent.keyDown(btn, { code: "KeyQ" });
+    expect(screen.getByRole("alert")).toHaveTextContent(/Add Ctrl, Alt, Shift or Meta/);
+    fireEvent.keyDown(btn, { code: "Escape" });
+    expect(btn).toHaveTextContent("Ctrl+D");
+    expect(callsOf(calls, "rebind_hotkey")).toHaveLength(0);
+    // Not recording: keys are ignored.
+    fireEvent.keyDown(btn, { code: "KeyE", ctrlKey: true });
+    expect(callsOf(calls, "rebind_hotkey")).toHaveLength(0);
+  });
+
+  test("rejects chords bound to another action without calling the backend", async () => {
+    const { user, calls } = await openHotkeys();
+    const btn = screen.getByRole("button", { name: /^Open settings F10$/ });
+    await user.click(btn);
+    fireEvent.keyDown(btn, { code: "KeyD", ctrlKey: true });
+    expect(await screen.findByText("This shortcut is already used by another action.")).toBeInTheDocument();
+    expect(callsOf(calls, "rebind_hotkey")).toHaveLength(0);
+  });
+
+  test("shows backend rebind failures", async () => {
+    const { user } = await openHotkeys({ rebind_hotkey: () => fail(ipcError("platform", "grab failed")) });
+    const btn = screen.getByRole("button", { name: /^Open settings F10$/ });
+    await user.click(btn);
+    fireEvent.keyDown(btn, { code: "F9" });
+    expect(await screen.findByText("Couldn't bind that shortcut: grab failed")).toBeInTheDocument();
+  });
+
+  test("advanced copy toggle", async () => {
+    const { user } = await openHotkeys();
+    await user.click(screen.getByRole("switch", { name: /Advanced item copy/ }));
+    expect(draft().hotkeys.advanced_copy).toBe(true);
+  });
+
+  test("clashing hotkeys in loaded settings show a validation error", async () => {
+    const s = settings();
+    await openHotkeys({
+      get_settings: () => ({ ...s, hotkeys: { ...s.hotkeys, open_settings: s.hotkeys.price_check } }),
+    });
+    expect(screen.getByText("This shortcut is already used by another action.")).toBeInTheDocument();
+  });
+});
