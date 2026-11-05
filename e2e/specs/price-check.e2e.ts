@@ -45,7 +45,8 @@ describe(`price check (trigger: ${triggerMode()})`, () => {
     await switchToWindow("overlay");
     const summary = await $('[data-testid="price-summary"]');
     await summary.waitForDisplayed({ timeout: 10000 });
-    await expect(summary).toHaveText(expect.stringMatching(/\b2(\.0+)?\b/));
+    // The <dl> text has no separators ("MIN1 divMEDIAN2 div..."), so check the median cell.
+    await expect($('[data-testid="price-median"]')).toHaveText(expect.stringMatching(/^2(\.0+)?\s*div/));
   });
 
   it("pinned price check keeps the overlay open", async () => {
