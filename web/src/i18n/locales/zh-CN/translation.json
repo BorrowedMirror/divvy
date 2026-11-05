@@ -204,7 +204,7 @@
   },
   "guidance": {
     "accessibility": "macOS：打开“系统设置”→“隐私与安全性”→“辅助功能”，并启用 kalandra。快捷键和复制物品需要此权限。",
-    "screenRecording": "macOS：打开“系统设置”→“隐私与安全性”→“录屏”，并启用 kalandra，以便它找到游戏窗口。之后请重启 kalandra。",
+    "screenRecording": "macOS：打开“系统设置”→“隐私与安全性”→“屏幕录制”，并启用 kalandra，以便它找到游戏窗口。之后请重启 kalandra。",
     "wayland": "Wayland 原生模式：全局快捷键通过桌面门户实现，浮窗锚定在显示输出而非游戏窗口上，模拟按键可能不可用。如果你的合成器允许，请使用 X11/XWayland。",
     "gnome": "GNOME 不支持 kalandra 所需的 Wayland 功能，因此在 GNOME 上会通过 XWayland（X11）运行。请让游戏也在 XWayland 下运行。",
     "generic": "缺少权限：{{permission}}"
