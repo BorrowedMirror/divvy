@@ -2954,7 +2954,6 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-specta",
  "thiserror 2.0.21",
- "tokio",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -2983,8 +2982,6 @@ dependencies = [
 name = "kalandra-testkit"
 version = "0.1.0-rc.1"
 dependencies = [
- "insta",
- "kalandra-core",
  "kalandra-platform",
  "reqwest",
  "serde",
