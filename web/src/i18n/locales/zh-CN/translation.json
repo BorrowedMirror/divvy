@@ -30,7 +30,8 @@
     "statMin": "{{stat}} 的最小值",
     "statMax": "{{stat}} 的最大值",
     "search": "搜索",
-    "loading": "搜索中…"
+    "loading": "搜索中…",
+    "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 kalandra 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -288,5 +289,15 @@
         "kde": "KDE（自定义快捷键命令）"
       }
     }
+  },
+  "proton": {
+    "title": "Proton 鼠标捕获",
+    "body": "在 Proton 下，全屏运行的《流放之路2》会捕获鼠标，导致点击和按键无法到达 kalandra 面板。为该游戏关闭 Wine 的鼠标捕获即可解决；之后光标将不再被锁定在游戏窗口内。",
+    "statusOn": "鼠标捕获：开启（Wine 默认）",
+    "statusOff": "鼠标捕获：关闭",
+    "fix": "关闭鼠标捕获",
+    "undo": "恢复之前的设置",
+    "quitGame": "请先退出《流放之路2》：游戏退出时 Wine 会重写其设置。",
+    "restartGame": "已完成。重新启动《流放之路2》后更改即可生效。"
   }
 }

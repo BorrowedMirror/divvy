@@ -30,7 +30,8 @@
     "statMin": "{{stat}} の最小値",
     "statMax": "{{stat}} の最大値",
     "search": "検索",
-    "loading": "検索中…"
+    "loading": "検索中…",
+    "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。kalandra のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。"
   },
   "item": {
     "rarityLabel": "レアリティ:",
@@ -288,5 +289,15 @@
         "kde": "KDE (カスタムショートカットのコマンド)"
       }
     }
+  },
+  "proton": {
+    "title": "Proton のマウスキャプチャ",
+    "body": "Proton 環境では、フルスクリーンの Path of Exile 2 がマウスをキャプチャするため、クリックやキー入力が kalandra のパネルに届きません。このゲームの Wine のマウスキャプチャをオフにすると解決します。その場合、カーソルはゲームウィンドウ内に固定されなくなります。",
+    "statusOn": "マウスキャプチャ: オン (Wine の既定値)",
+    "statusOff": "マウスキャプチャ: オフ",
+    "fix": "マウスキャプチャをオフにする",
+    "undo": "以前の設定に戻す",
+    "quitGame": "先に Path of Exile 2 を終了してください。ゲームの終了時に Wine が設定を書き換えます。",
+    "restartGame": "完了しました。変更を反映するには Path of Exile 2 を再起動してください。"
   }
 }
