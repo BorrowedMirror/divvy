@@ -39,14 +39,28 @@ xdotool windowactivate --sync "$GAME"; sleep 0.3
 hook "text $(python3 -c "import json;print(json.dumps(open(\"e2e/fixtures/rare-ring.txt\").read()))")" >/dev/null
 sleep 0.8
 [ "$(top)" = "kalandra overlay" ] || fail "unpinned panel is not above the game (top: $(top))"
-[ "$(active)" = "Path of Exile 2" ] || fail "unpinned panel stole focus (active: $(active))"
-echo "ok: unpinned panel above the fullscreen game, game keeps focus"
+[ "$(active)" = "kalandra overlay" ] || fail "unpinned panel is not focused (active: $(active))"
+echo "ok: unpinned panel above the fullscreen game and focused"
 
 xdotool windowactivate --sync "$GAME"; sleep 0.3
 hook "tray price_check" >/dev/null; sleep 1.5
 [ "$(top)" = "kalandra overlay" ] || fail "pinned panel is not above the game (top: $(top))"
 [ "$(active)" = "kalandra overlay" ] || fail "pinned panel did not take focus (active: $(active))"
 echo "ok: pinned panel above the game and focused"
+
+for keys in ctrl+d ctrl+alt+d; do
+  hook "text_hide" >/dev/null 2>&1 || true
+  xdotool windowactivate --sync "$GAME"; sleep 0.3
+  xdotool key --clearmodifiers "$keys"; sleep 1.5
+  [ "$(top)" = "kalandra overlay" ] || fail "$keys: panel is not above the game (top: $(top))"
+  [ "$(active)" = "kalandra overlay" ] || fail "$keys: panel is not focused (active: $(active))"
+  echo "ok: $keys hotkey shows the panel above the game, focused"
+  if [ "$keys" = ctrl+d ]; then
+    xdotool key Escape; sleep 0.8
+    [ "$(active)" = "Path of Exile 2" ] || fail "Esc did not return focus to the game (active: $(active))"
+    echo "ok: Esc closes the unpinned panel and the game gets focus back"
+  fi
+done
 
 hook "tray open_settings" >/dev/null; sleep 0.8
 [ "$(top)" = "kalandra settings" ] || fail "settings not on top (top: $(top))"
