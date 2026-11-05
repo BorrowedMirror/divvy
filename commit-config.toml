@@ -1,0 +1,39 @@
+# Single source of truth for conventional-commit types and scopes.
+# `cargo xtask gen` regenerates .commitlintrc.json and docs/contributing/commit-message.md.
+
+header_max_length = 72
+
+[types]
+build = "Changes to the build system or dependencies"
+ci = "Changes to CI configuration"
+docs = "Documentation only"
+feat = "A new feature"
+fix = "A bug fix"
+perf = "A performance improvement"
+refactor = "A change that neither fixes a bug nor adds a feature"
+release = "Release commits"
+test = "Adding or fixing tests"
+
+[scopes]
+# crates and apps
+core = "crates/core"
+data = "crates/data (also build(data) for data refreshes)"
+trade = "crates/trade"
+platform = "crates/platform"
+config = "crates/config"
+testkit = "crates/testkit"
+desktop = "apps/desktop"
+xtask = "xtask"
+web = "web/"
+fake-game = "tools/fake-game"
+# build-only scopes
+deps = "dependency updates (build)"
+cargo = "Cargo configuration (build)"
+pnpm = "pnpm configuration (build)"
+tauri = "Tauri configuration (build)"
+# ci-only scopes
+github = "GitHub Actions (ci)"
+codecov = "Codecov (ci)"
+renovate = "Renovate (ci)"
+clippy = "Clippy configuration (ci)"
+commitlint = "commitlint configuration (ci)"
