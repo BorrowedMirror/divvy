@@ -1,7 +1,7 @@
 # git-cliff: CHANGELOG.md and release notes from conventional commits.
 #   git cliff --tag v<version> -o CHANGELOG.md     (cargo xtask release does this)
 #   git cliff --latest --strip header              (release.yml release notes)
-# Types mirror commit-config.toml.
+# Types mirror .commit-config.toml.
 
 [changelog]
 header = """

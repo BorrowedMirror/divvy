@@ -119,7 +119,7 @@ pub fn run(args: &ReleaseArgs) -> anyhow::Result<()> {
     }
     // Refresh the workspace members' entries in Cargo.lock only.
     cmd!(sh, "cargo update --workspace --offline").run()?;
-    cmd!(sh, "git cliff --config cliff.toml --tag {tag} --output CHANGELOG.md").run()?;
+    cmd!(sh, "git cliff --config .cliff.toml --tag {tag} --output CHANGELOG.md").run()?;
 
     let files: Vec<&str> = edits.iter().map(|(f, _)| *f).chain(["Cargo.lock", "CHANGELOG.md"]).collect();
     cmd!(sh, "git add {files...}").run()?;

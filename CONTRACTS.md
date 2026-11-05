@@ -138,7 +138,7 @@ winit window titled `Path of Exile 2`. CLI: `--item <path>` (normal text), `--ad
 (or `--item`). Prints `READY` on stdout once the window is mapped, `COPIED <n>` per copy.
 
 ### `xtask`
-`cargo xtask gen` (commitlint + commit docs from `commit-config.toml`, bindings),
+`cargo xtask gen` (commitlint + commit docs from `.commit-config.toml`, bindings),
 `data refresh [--offline]`, `coverage` (per-crate gates), `release`, `lint`.
 
 ## Gates
@@ -158,7 +158,7 @@ winit window titled `Path of Exile 2`. CLI: `--item <path>` (normal text), `--ad
 | F linux + platform common | `crates/platform/src/{lib,types,detect,copy,error}.rs`, `crates/platform/src/backend/{mod,hook,x11*,wayland*}`, `crates/platform/Cargo.toml`, `apps/desktop/src-tauri/src/overlay/linux.rs`, `crates/platform/tests/linux_*.rs` |
 | G web | `web/**` (except `web/src/bindings.ts`, generated) |
 | H testkit/e2e | `crates/testkit/{src,Cargo.toml}`, `tools/fake-game/**`, `e2e/**` |
-| I repo/CI | `.github/**`, `xtask/src/{main.rs,coverage.rs,release.rs,lint.rs}`, `deny.toml`, `about.toml`, `about.hbs`, `cliff.toml`, `docs/**` (except research files above), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `renovate.json`, `lefthook.yml`, `commit-config.toml`, `codecov.yml` |
+| I repo/CI | `.github/**`, `xtask/src/{main.rs,coverage.rs,release.rs,lint.rs}`, `.deny.toml`, `.about.toml`, `.about.hbs`, `.cliff.toml`, `docs/**` (except research files above), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.renovaterc.json`, `.lefthook.yml`, `.commit-config.toml`, `.codecov.yml` |
 | J config | `crates/config/**` |
 | Lead | `Cargo.toml`, `apps/desktop/**` (except overlay OS files), `CONTRACTS.md`, `README.md`, merges |
 

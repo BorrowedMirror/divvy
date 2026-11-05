@@ -5,7 +5,7 @@
    `cargo xtask release 0.2.0`. This:
    - sets the version in `Cargo.toml` (`[workspace.package]`), `apps/desktop/src-tauri/tauri.conf.json`
      and `web/package.json`, and refreshes `Cargo.lock`;
-   - regenerates `CHANGELOG.md` with git-cliff (`cliff.toml`);
+   - regenerates `CHANGELOG.md` with git-cliff (`.cliff.toml`);
    - commits `release: v0.2.0` and creates the annotated tag `v0.2.0`.
    It never pushes.
 3. Review the commit, then `git push origin master v0.2.0`.

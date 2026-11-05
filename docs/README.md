@@ -6,7 +6,7 @@
 ## Contributing
 
 - [Contributing guide](../CONTRIBUTING.md): development setup per OS, everyday commands.
-- [Commit message guidelines](contributing/commit-message.md) (generated from `commit-config.toml`).
+- [Commit message guidelines](contributing/commit-message.md) (generated from `.commit-config.toml`).
 - [CI workflows](contributing/ci.md): what runs where and how to reproduce it locally.
 - [Releasing](contributing/releasing.md): `cargo xtask release` and the release workflow.
 

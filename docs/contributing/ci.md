@@ -12,7 +12,7 @@
 
 ## Conventions
 
-- Actions are pinned to major versions; Renovate (`renovate.json`) proposes bumps as
+- Actions are pinned to major versions; Renovate (`.renovaterc.json`) proposes bumps as
   `build(deps): ...` after a 3-day minimum release age.
 - Workflows default to `permissions: contents: read`; jobs that write (PRs, releases) widen
   permissions locally.

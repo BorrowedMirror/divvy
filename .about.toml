@@ -1,6 +1,6 @@
 # cargo-about: third-party notices bundled with releases.
-#   cargo about generate --workspace about.hbs > THIRD-PARTY-NOTICES.html
-# Keep `accepted` in sync with `[licenses].allow` in deny.toml.
+#   cargo about generate --workspace -c .about.toml .about.hbs > THIRD-PARTY-NOTICES.html
+# Keep `accepted` in sync with `[licenses].allow` in .deny.toml.
 accepted = [
   "MIT",
   "MIT-0",

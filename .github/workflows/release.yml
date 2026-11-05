@@ -36,7 +36,7 @@ jobs:
       - name: Release notes (git-cliff)
         uses: orhun/git-cliff-action@v4
         with:
-          config: cliff.toml
+          config: .cliff.toml
           args: --latest --strip header
         env:
           OUTPUT: RELEASE_NOTES.md
@@ -144,7 +144,7 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
       - name: Third-party notices
-        run: cargo about generate --workspace about.hbs -o THIRD-PARTY-NOTICES.html
+        run: cargo about generate --workspace -c .about.toml .about.hbs -o THIRD-PARTY-NOTICES.html
       - name: SHA-256 checksums (bundles, updater manifest, SBOM, notices)
         run: |
           cp kalandra.cdx.json THIRD-PARTY-NOTICES.html dist/

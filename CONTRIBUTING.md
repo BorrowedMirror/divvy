@@ -71,7 +71,7 @@ web >= 80%; patch coverage >= 80%.
 We use conventional commits, enforced by commitlint on every commit and on the PR title.
 The allowed types and scopes are listed in
 [docs/contributing/commit-message.md](docs/contributing/commit-message.md) (generated from
-`commit-config.toml`; edit that file and run `cargo xtask gen` to change them).
+`.commit-config.toml`; edit that file and run `cargo xtask gen` to change them).
 
 - Header: `<type>(<scope>): <summary>`, at most 72 characters, imperative, lowercase, no period.
 - Body: explain **why**, not what.
