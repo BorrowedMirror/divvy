@@ -236,6 +236,35 @@ async fn fetch_chunks_ids_by_ten_and_skips_nulls() {
 }
 
 #[tokio::test]
+async fn fetch_chunks_run_concurrently_in_id_order() {
+    let server = MockServer::start().await;
+    let ids: Vec<String> = (0..20).map(|i| format!("id{i}")).collect();
+    let delay = Duration::from_millis(500);
+    let mut second = json_fixture("fetch.json");
+    second["result"] = json!([second["result"][1].clone()]);
+    Mock::given(method("GET"))
+        .and(path(format!("/api/trade2/fetch/{}", ids[..FETCH_CHUNK].join(","))))
+        .respond_with(fetch_ok().set_delay(delay))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path(format!("/api/trade2/fetch/{}", ids[FETCH_CHUNK..].join(","))))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&second).set_delay(delay))
+        .expect(1)
+        .mount(&server)
+        .await;
+    let c = client(&server);
+    let start = Instant::now();
+    let entries = c.fetch(&ids, "Q1").await.unwrap();
+    // Sequential chunks would take at least 2 * delay.
+    assert!(start.elapsed() < Duration::from_millis(900), "took {:?}", start.elapsed());
+    let first: Vec<FetchEntry> = serde_json::from_value(json_fixture("fetch.json")["result"].clone()).unwrap();
+    assert_eq!(entries.len(), first.len() + 1);
+    assert_eq!(entries.last().unwrap().id, second["result"][0]["id"].as_str().unwrap());
+}
+
+#[tokio::test]
 async fn search_listings_maps_fetch_entries() {
     let server = MockServer::start().await;
     Mock::given(method("POST")).respond_with(search_ok()).mount(&server).await;
