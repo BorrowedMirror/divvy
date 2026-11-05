@@ -46,7 +46,7 @@ jobs:
           if [ -n "$LEAGUE" ]; then args+=(--league "$LEAGUE"); fi
           cargo xtask fixtures record "${args[@]}"
       - name: Trade tests still pass on the new fixtures
-        run: cargo test --locked -p kalandra-trade
+        run: cargo test --locked -p rkl-trade
       - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           token: ${{ github.token }}

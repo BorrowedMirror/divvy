@@ -13,7 +13,7 @@ use crate::{
     tray_i18n::{self, TrayLabelsOwned},
 };
 
-pub const TRAY_ID: &str = "kalandra-tray";
+pub const TRAY_ID: &str = "rkl-tray";
 
 /// Menu item ids (stable; used by e2e).
 pub mod ids {

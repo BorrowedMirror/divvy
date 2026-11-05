@@ -1,11 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "kalandra",
+  "productName": "Rust King Ledger",
   "version": "0.1.0-rc.1",
-  "identifier": "au.nerv.kalandra",
+  "identifier": "app.rkl",
   "build": {
-    "beforeDevCommand": "pnpm --filter kalandra-web dev",
-    "beforeBuildCommand": "pnpm --filter kalandra-web build",
+    "beforeDevCommand": "pnpm --filter rkl-web dev",
+    "beforeBuildCommand": "pnpm --filter rkl-web build",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../../../web/dist"
   },
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "overlay",
-        "title": "kalandra overlay",
+        "title": "RKL overlay",
         "url": "index.html#/overlay",
         "width": 420,
         "height": 560,
@@ -29,7 +29,7 @@
       },
       {
         "label": "settings",
-        "title": "kalandra settings",
+        "title": "RKL settings",
         "url": "index.html#/settings",
         "width": 900,
         "height": 680,
@@ -72,7 +72,8 @@
       }
     },
     "longDescription": "Hover an item in Path of Exile 2 and press Ctrl+D to see its price from the official trade API in an overlay beside the cursor. Reads only the item text the game copies to the clipboard.",
-    "publisher": "kalandra contributors",
-    "copyright": "Copyright (c) 2026 kalandra contributors. MIT OR Apache-2.0."
-  }
+    "publisher": "rkl contributors",
+    "copyright": "Copyright (c) 2026 rkl contributors. MIT OR Apache-2.0."
+  },
+  "mainBinaryName": "rkl"
 }

@@ -74,7 +74,7 @@ impl WindowTracker for MacWindowTracker {
         }
         let (tx, rx) = sync_channel(CHANNEL_CAPACITY);
         std::thread::Builder::new()
-            .name("kalandra-macos-window".into())
+            .name("rkl-macos-window".into())
             .spawn(move || track(&tx))
             .map_err(|e| PlatformError::Backend(format!("spawn window tracker: {e}")))?;
         Ok(rx)

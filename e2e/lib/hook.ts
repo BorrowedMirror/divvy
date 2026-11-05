@@ -1,4 +1,4 @@
-// Client for the desktop app's debug test hook (feature `test-hook`, env KALANDRA_TEST_HOOK).
+// Client for the desktop app's debug test hook (feature `test-hook`, env RKL_TEST_HOOK).
 // Line protocol over localhost TCP; each command gets exactly one reply line:
 //   trigger <0|1>        -> ok | err <msg>
 //   state                -> {"overlay_visible":bool,"last_price":PriceSummary|null, ...}
@@ -30,8 +30,8 @@ export function hookCommand(cmd: string, timeoutMs = 5000, port = HOOK_PORT): Pr
       reject(new Error(`test hook: no reply to "${cmd}" within ${timeoutMs}ms`));
     }, timeoutMs);
     sock.setEncoding("utf8");
-    // With KALANDRA_TEST_HOOK_TOKEN set the app requires `auth <token>` first (it sends no reply).
-    const token = process.env.KALANDRA_TEST_HOOK_TOKEN;
+    // With RKL_TEST_HOOK_TOKEN set the app requires `auth <token>` first (it sends no reply).
+    const token = process.env.RKL_TEST_HOOK_TOKEN;
     sock.on("connect", () => sock.write(`${token ? `auth ${token}\n` : ""}${cmd}\n`));
     sock.on("data", (d: string) => {
       buf += d;
@@ -47,7 +47,7 @@ export function hookCommand(cmd: string, timeoutMs = 5000, port = HOOK_PORT): Pr
       reject(
         new Error(
           `test hook unreachable on 127.0.0.1:${port} (${e.message}). Is the app built with ` +
-            "`cargo build -p kalandra-desktop --features test-hook` and started with KALANDRA_TEST_HOOK?",
+            "`cargo build -p rkl-desktop --features test-hook` and started with RKL_TEST_HOOK?",
         ),
       );
     });

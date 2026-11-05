@@ -1,5 +1,5 @@
 name: Linux system dependencies
-description: Installs the Tauri/WebKitGTK, input and headless-display packages kalandra needs on Ubuntu.
+description: Installs the Tauri/WebKitGTK, input and headless-display packages rkl needs on Ubuntu.
 inputs:
   extra:
     description: Additional apt packages (space separated).
@@ -14,9 +14,9 @@ runs:
         EXTRA: ${{ inputs.extra }}
       run: |
         sudo apt-get update -q
-        # Tauri/WebKitGTK + tray; gtk-layer-shell (Wayland overlay, kalandra-desktop);
+        # Tauri/WebKitGTK + tray; gtk-layer-shell (Wayland overlay, rkl-desktop);
         # libX11/libXtst (rdev XRecord hook), libxkbcommon (enigo wayland), libdbus (tray).
-        # libei is not linked: kalandra-platform keeps enigo's libei feature off.
+        # libei is not linked: rkl-platform keeps enigo's libei feature off.
         # Xvfb + openbox give the display-server tests and e2e an X11 session.
         # shellcheck disable=SC2086 # EXTRA is a word list by design.
         sudo apt-get install -y --no-install-recommends \

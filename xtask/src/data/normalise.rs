@@ -1,11 +1,11 @@
-//! Pure normalisation from upstream JSON into the `kalandra_core::catalog` model.
+//! Pure normalisation from upstream JSON into the `rkl_core::catalog` model.
 //!
 //! Every function here is deterministic: outputs are sorted and de-duplicated so that
 //! re-running the refresh on identical inputs produces byte-identical assets.
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Context as _;
-use kalandra_core::catalog::{BaseDef, StatAlias, StatDef, StaticDef, UniqueDef};
+use rkl_core::catalog::{BaseDef, StatAlias, StatDef, StaticDef, UniqueDef};
 use serde::Deserialize;
 
 /// Host serving the relative `image` paths of `/api/trade2/data/static`.
@@ -142,7 +142,7 @@ pub fn wording_variants(text: &str) -> Vec<String> {
     }
     for i in 0..out.len() {
         let skill = out[i].strip_prefix("Grants Skill: Level # ").map(|s| format!("Grants Skill: {s}"));
-        let templated = kalandra_core::matcher::templatize(&out[i]);
+        let templated = rkl_core::matcher::templatize(&out[i]);
         push(&mut out, templated);
         if let Some(skill) = skill {
             push(&mut out, skill);

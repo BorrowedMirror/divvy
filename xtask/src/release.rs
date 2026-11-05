@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn bumps_json_top_level_version() {
-        let json = "{\n  \"name\": \"kalandra-web\",\n  \"version\": \"0.1.0-rc.1\",\n  \"dependencies\": {\n    \"x\": \"0.1.0-rc.1\"\n  }\n}\n";
+        let json = "{\n  \"name\": \"rkl-web\",\n  \"version\": \"0.1.0-rc.1\",\n  \"dependencies\": {\n    \"x\": \"0.1.0-rc.1\"\n  }\n}\n";
         let out = bump_json_version(json, "0.2.0").unwrap();
         assert_eq!(out, json.replacen("\"0.1.0-rc.1\"", "\"0.2.0\"", 1));
         assert!(out.contains("\"x\": \"0.1.0-rc.1\""));

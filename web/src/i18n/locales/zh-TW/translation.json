@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "應用程式更新",
-    "available": "kalandra {{version}} 現已推出。",
+    "available": "RKL {{version}} 現已推出。",
     "notes": "新功能",
     "later": "稍後",
     "install": "安裝並重新啟動",
@@ -31,7 +31,7 @@
     "statMax": "{{stat}} 的最大值",
     "search": "搜尋",
     "loading": "搜尋中…",
-    "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 kalandra 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。"
+    "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 RKL 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -217,21 +217,21 @@
     "clipboard": "剪貼簿存取"
   },
   "guidance": {
-    "accessibility": "macOS：開啟「系統設定」→「隱私權與安全性」→「輔助使用」並啟用 kalandra。熱鍵與複製物品需要此權限。",
-    "screenRecording": "macOS：開啟「系統設定」→「隱私權與安全性」→「螢幕錄製」並啟用 kalandra，讓它能找到遊戲視窗。完成後請重新啟動 kalandra。",
+    "accessibility": "macOS：開啟「系統設定」→「隱私權與安全性」→「輔助使用」並啟用 RKL。熱鍵與複製物品需要此權限。",
+    "screenRecording": "macOS：開啟「系統設定」→「隱私權與安全性」→「螢幕錄製」並啟用 RKL，讓它能找到遊戲視窗。完成後請重新啟動 RKL。",
     "wayland": "Wayland 原生模式：全域熱鍵透過桌面入口（portal）處理，浮動視窗會固定在螢幕輸出而非遊戲視窗上，且可能無法模擬按鍵。若你的合成器允許，請改用 X11/XWayland。",
-    "gnome": "GNOME 不支援 kalandra 所需的 Wayland 功能，因此在 GNOME 上會透過 XWayland（X11）執行。請讓遊戲也在 XWayland 下執行。",
+    "gnome": "GNOME 不支援 RKL 所需的 Wayland 功能，因此在 GNOME 上會透過 XWayland（X11）執行。請讓遊戲也在 XWayland 下執行。",
     "generic": "缺少權限：{{permission}}"
   },
   "tray": {
     "priceCheck": "查價（釘選）",
     "settings": "設定…",
     "diagnostics": "診斷",
-    "quit": "結束 kalandra",
-    "tooltip": "kalandra"
+    "quit": "結束 RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "設定 kalandra",
+    "title": "設定 RKL",
     "intro": "完成幾個依平台而定的步驟，讓查價順暢運作。你隨時可以從「診斷」回到這裡。",
     "stepsHeading": "{{platform}} 設定",
     "loadFailed": "無法檢查權限。",
@@ -240,25 +240,25 @@
     "granted": "已授權",
     "notGranted": "未授權",
     "openSettings": "開啟系統設定",
-    "relaunch": "macOS 會在 kalandra 重新啟動後套用此權限。啟用後請結束並重新開啟 kalandra。",
+    "relaunch": "macOS 會在 RKL 重新啟動後套用此權限。啟用後請結束並重新開啟 RKL。",
     "requestFailed": "無法開啟系統設定：{{message}}",
     "details": "技術細節",
-    "blockedHint": "仍缺少部分必要權限。kalandra 會繼續運作，但部分功能受限。",
+    "blockedHint": "仍缺少部分必要權限。RKL 會繼續運作，但部分功能受限。",
     "continueWithout": "略過並繼續",
     "done": "完成",
     "saveFailed": "無法儲存：{{message}}",
     "permission": {
       "accessibility": {
         "name": "輔助使用",
-        "body": "按下查價熱鍵時，kalandra 會替你按下遊戲的複製快捷鍵。macOS 需要為此授予輔助使用權限。"
+        "body": "按下查價熱鍵時，RKL 會替你按下遊戲的複製快捷鍵。macOS 需要為此授予輔助使用權限。"
       },
       "screen_recording": {
         "name": "螢幕錄製",
-        "body": "讓 kalandra 讀取視窗標題，以便穩定地找到《流亡黯道2》視窗。kalandra 絕不會擷取你的螢幕畫面。"
+        "body": "讓 RKL 讀取視窗標題，以便穩定地找到《流亡黯道2》視窗。RKL 絕不會擷取你的螢幕畫面。"
       },
       "input_monitoring": {
         "name": "輸入監控",
-        "body": "讓 kalandra 在遊戲為作用中視窗時也能用 Esc 關閉浮動視窗，並回應 Ctrl+滾輪。"
+        "body": "讓 RKL 在遊戲為作用中視窗時也能用 Esc 關閉浮動視窗，並回應 Ctrl+滾輪。"
       },
       "unknown": "權限：{{kind}}"
     },
@@ -266,15 +266,15 @@
       "windowedTitle": "使用視窗化或無邊框全螢幕",
       "windowedBody": "浮動視窗無法顯示在獨占全螢幕之上。請在遊戲的圖形選項中選擇「視窗化」或「視窗化全螢幕」（無邊框）。",
       "elevatedTitle": "是否以系統管理員身分執行遊戲？",
-      "elevatedBody": "Windows 會阻擋一般應用程式向提高權限的應用程式傳送熱鍵與模擬按鍵（UIPI）。如果遊戲以系統管理員身分執行，請也以系統管理員身分執行 kalandra。"
+      "elevatedBody": "Windows 會阻擋一般應用程式向提高權限的應用程式傳送熱鍵與模擬按鍵（UIPI）。如果遊戲以系統管理員身分執行，請也以系統管理員身分執行 RKL。"
     },
     "x11": {
       "title": "不需要額外設定",
-      "body": "X11 支援 kalandra 所需的所有功能：全域熱鍵、視窗追蹤，以及顯示在遊戲上方的浮動視窗。"
+      "body": "X11 支援 RKL 所需的所有功能：全域熱鍵、視窗追蹤，以及顯示在遊戲上方的浮動視窗。"
     },
     "gnome": {
       "title": "GNOME：僅支援 X11/XWayland",
-      "x11Body": "GNOME 缺少 kalandra 所需的 Wayland 功能，因此這裡會透過 XWayland 執行。請讓遊戲也在 XWayland 下執行（Proton 與 Wine 的預設值）。",
+      "x11Body": "GNOME 缺少 RKL 所需的 Wayland 功能，因此這裡會透過 XWayland 執行。請讓遊戲也在 XWayland 下執行（Proton 與 Wine 的預設值）。",
       "waylandBody": "GNOME 沒有 layer-shell，因此在 Wayland 原生模式下浮動視窗無法保持在遊戲上方。請在設定中將後端切換為 X11 / XWayland。"
     },
     "wayland": {
@@ -282,9 +282,9 @@
       "degradedBody": "Wayland 會將應用程式彼此隔離，因此部分功能的運作方式不同：",
       "portal": "全域熱鍵透過桌面的 GlobalShortcuts 入口（portal）處理，並會請你確認。並非所有合成器都提供此功能。",
       "layerShell": "浮動視窗會透過 layer-shell 固定在螢幕邊緣，而不會跟隨遊戲視窗。",
-      "noTracking": "kalandra 無法偵測遊戲視窗，也無法監聽 Esc，因此請使用浮動視窗本身的按鈕將其關閉。",
+      "noTracking": "RKL 無法偵測遊戲視窗，也無法監聽 Esc，因此請使用浮動視窗本身的按鈕將其關閉。",
       "triggerTitle": "在合成器中綁定查價",
-      "triggerBody": "如果熱鍵無法運作，請在合成器中新增執行 kalandra --trigger 的鍵盤快捷鍵。它會在執行中的 kalandra 裡查詢游標下物品的價格。",
+      "triggerBody": "如果熱鍵無法運作，請在合成器中新增執行 RKL --trigger 的鍵盤快捷鍵。它會在執行中的 RKL 裡查詢游標下物品的價格。",
       "pinnedHint": "加上 --pinned 即可以釘選狀態開啟浮動視窗。",
       "example": {
         "sway": "sway",
@@ -295,7 +295,7 @@
   },
   "proton": {
     "title": "Proton 滑鼠擷取",
-    "body": "在 Proton 下，全螢幕執行的《流亡黯道2》會擷取滑鼠，導致點擊和按鍵無法傳到 kalandra 面板。為這款遊戲關閉 Wine 的滑鼠擷取即可解決；之後游標將不再被鎖定在遊戲視窗內。",
+    "body": "在 Proton 下，全螢幕執行的《流亡黯道2》會擷取滑鼠，導致點擊和按鍵無法傳到 RKL 面板。為這款遊戲關閉 Wine 的滑鼠擷取即可解決；之後游標將不再被鎖定在遊戲視窗內。",
     "statusOn": "滑鼠擷取：開啟（Wine 預設）",
     "statusOff": "滑鼠擷取：關閉",
     "fix": "關閉滑鼠擷取",

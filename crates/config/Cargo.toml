@@ -1,6 +1,6 @@
 [package]
-name = "kalandra-config"
-description = "Settings schema, migrations and per-OS paths for kalandra"
+name = "rkl-config"
+description = "Settings schema, migrations and per-OS paths for rkl"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,8 +13,8 @@ workspace = true
 
 [dependencies]
 directories.workspace = true
-kalandra-core.workspace = true
-kalandra-platform.workspace = true
+rkl-core.workspace = true
+rkl-platform.workspace = true
 serde.workspace = true
 specta.workspace = true
 thiserror.workspace = true

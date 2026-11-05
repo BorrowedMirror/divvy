@@ -193,7 +193,7 @@ fn write_split(out_dir: &Path, lcov: &str, root: &str) -> anyhow::Result<()> {
 mod tests {
     use super::*;
 
-    const ROOT: &str = "/work/kalandra";
+    const ROOT: &str = "/work/rkl";
 
     fn sample() -> serde_json::Value {
         serde_json::json!({
@@ -201,11 +201,11 @@ mod tests {
             "version": "2.0.1",
             "data": [{
                 "files": [
-                    {"filename": "/work/kalandra/crates/core/src/lib.rs", "summary": {"lines": {"count": 100, "covered": 95, "percent": 95.0}}},
-                    {"filename": "/work/kalandra/crates/core/src/parser.rs", "summary": {"lines": {"count": 100, "covered": 90, "percent": 90.0}}},
-                    {"filename": "/work/kalandra/crates/trade/src/lib.rs", "summary": {"lines": {"count": 10, "covered": 8, "percent": 80.0}}},
-                    {"filename": "/work/kalandra/crates/platform/src/lib.rs", "summary": {"lines": {"count": 10, "covered": 7, "percent": 70.0}}},
-                    {"filename": "/work/kalandra/xtask/src/main.rs", "summary": {"lines": {"count": 50, "covered": 0, "percent": 0.0}}},
+                    {"filename": "/work/rkl/crates/core/src/lib.rs", "summary": {"lines": {"count": 100, "covered": 95, "percent": 95.0}}},
+                    {"filename": "/work/rkl/crates/core/src/parser.rs", "summary": {"lines": {"count": 100, "covered": 90, "percent": 90.0}}},
+                    {"filename": "/work/rkl/crates/trade/src/lib.rs", "summary": {"lines": {"count": 10, "covered": 8, "percent": 80.0}}},
+                    {"filename": "/work/rkl/crates/platform/src/lib.rs", "summary": {"lines": {"count": 10, "covered": 7, "percent": 70.0}}},
+                    {"filename": "/work/rkl/xtask/src/main.rs", "summary": {"lines": {"count": 50, "covered": 0, "percent": 0.0}}},
                     {"filename": "/home/u/.cargo/registry/src/foo/lib.rs", "summary": {"lines": {"count": 5, "covered": 0, "percent": 0.0}}}
                 ],
                 "totals": {}
@@ -215,11 +215,11 @@ mod tests {
 
     #[test]
     fn maps_paths_to_crates() {
-        assert_eq!(crate_for("/work/kalandra/crates/core/src/lib.rs", ROOT), Some("core"));
+        assert_eq!(crate_for("/work/rkl/crates/core/src/lib.rs", ROOT), Some("core"));
         assert_eq!(crate_for(r"C:\a\b\crates\data\src\lib.rs", r"C:\a\b"), Some("data"));
         assert_eq!(crate_for("crates/config/src/lib.rs", ROOT), Some("config"));
-        assert_eq!(crate_for("/work/kalandra/apps/desktop/src-tauri/src/lib.rs", "/work/kalandra/"), Some("desktop"));
-        assert_eq!(crate_for("/work/kalandra/xtask/src/main.rs", ROOT), None);
+        assert_eq!(crate_for("/work/rkl/apps/desktop/src-tauri/src/lib.rs", "/work/rkl/"), Some("desktop"));
+        assert_eq!(crate_for("/work/rkl/xtask/src/main.rs", ROOT), None);
     }
 
     #[test]
@@ -261,14 +261,14 @@ mod tests {
 
     #[test]
     fn splits_lcov_by_crate() {
-        let lcov = "TN:\nSF:/work/kalandra/crates/core/src/lib.rs\nDA:1,1\nend_of_record\n\
-                    TN:\nSF:/work/kalandra/xtask/src/main.rs\nDA:1,0\nend_of_record\n\
-                    TN:\nSF:/work/kalandra/crates/core/src/parser.rs\nDA:2,0\nend_of_record\n\
-                    TN:\nSF:/work/kalandra/crates/trade/src/lib.rs\nDA:3,1\nend_of_record\n";
+        let lcov = "TN:\nSF:/work/rkl/crates/core/src/lib.rs\nDA:1,1\nend_of_record\n\
+                    TN:\nSF:/work/rkl/xtask/src/main.rs\nDA:1,0\nend_of_record\n\
+                    TN:\nSF:/work/rkl/crates/core/src/parser.rs\nDA:2,0\nend_of_record\n\
+                    TN:\nSF:/work/rkl/crates/trade/src/lib.rs\nDA:3,1\nend_of_record\n";
         let split = split_lcov(lcov, ROOT);
         assert_eq!(split.len(), 2);
         assert_eq!(split["core"].matches("end_of_record").count(), 2);
-        assert!(split["trade"].starts_with("TN:\nSF:/work/kalandra/crates/trade/src/lib.rs\n"));
+        assert!(split["trade"].starts_with("TN:\nSF:/work/rkl/crates/trade/src/lib.rs\n"));
         assert!(!split.values().any(|v| v.contains("xtask")));
     }
 }

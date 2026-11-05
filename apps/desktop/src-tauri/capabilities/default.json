@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions for kalandra windows",
+  "description": "Permissions for rkl windows",
   "windows": ["overlay", "settings"],
   "permissions": ["core:default"]
 }

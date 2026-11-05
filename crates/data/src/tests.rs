@@ -1,8 +1,8 @@
-use kalandra_core::{
+use pretty_assertions::assert_eq;
+use rkl_core::{
     catalog::{BaseDef, Catalog, StatAlias, StatDef, StaticDef, UniqueDef},
     item::ModKind,
 };
-use pretty_assertions::assert_eq;
 
 use super::*;
 

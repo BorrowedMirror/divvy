@@ -364,7 +364,7 @@ impl FilterSet {
     /// Boolean options are the strings `"true"`/`"false"`; empty filter groups are omitted;
     /// disabled range filters are omitted while disabled stats are sent with `"disabled": true`
     /// so the trade site shows them unticked. The [`QueryRoute::Exchange`] route uses a
-    /// different endpoint body (`have`/`want` static ids) built by `kalandra-trade`; this
+    /// different endpoint body (`have`/`want` static ids) built by `rkl-trade`; this
     /// method always returns the search shape.
     pub fn to_trade_query(&self) -> TradeQuery {
         let status = match self.status {

@@ -20,7 +20,7 @@ use crate::{
 /// A display name no X server / compositor socket can have. enigo connects to *every*
 /// compiled-in protocol and sends each keystroke through all of them, so the protocol
 /// we do not want must be pointed at a name that fails to connect.
-pub(crate) const NO_DISPLAY: &str = "kalandra-disabled-display";
+pub(crate) const NO_DISPLAY: &str = "rkl-disabled-display";
 
 fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     m.lock().unwrap_or_else(PoisonError::into_inner)
@@ -293,7 +293,7 @@ impl HotkeyHost for GlobalHotkeys {
         let (tx, rx) = sync_channel(64);
         let ids = Arc::clone(&self.ids);
         std::thread::Builder::new()
-            .name("kalandra-hotkeys".into())
+            .name("rkl-hotkeys".into())
             .spawn(move || {
                 let source = GlobalHotKeyEvent::receiver();
                 while let Ok(ev) = source.recv() {

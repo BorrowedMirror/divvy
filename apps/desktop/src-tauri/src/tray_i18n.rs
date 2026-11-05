@@ -18,8 +18,8 @@ const FALLBACK: TrayLabels<'static> = TrayLabels {
     price_check: "Price check (pinned)",
     settings: "Settings…",
     diagnostics: "Diagnostics",
-    quit: "Quit kalandra",
-    tooltip: "kalandra",
+    quit: "Quit rkl",
+    tooltip: "rkl",
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -102,7 +102,7 @@ mod tests {
         assert_eq!(l.settings, "Einstellungen…");
         assert_eq!(l.quit, "Quit", "empty string falls back");
         assert_eq!(l.diagnostics, "Diag");
-        assert_eq!(l.tooltip, "kalandra", "missing everywhere -> built-in");
+        assert_eq!(l.tooltip, "rkl", "missing everywhere -> built-in");
         assert_eq!(resolve(None, None).price_check, "Price check (pinned)");
     }
 }

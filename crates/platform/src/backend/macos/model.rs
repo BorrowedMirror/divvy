@@ -282,7 +282,7 @@ mod tests {
 
     #[test]
     fn overlay_layers_do_not_steal_focus() {
-        let mut overlay = win(3, 99, Some("kalandra"), None);
+        let mut overlay = win(3, 99, Some("rkl"), None);
         overlay.layer = 25;
         let windows = vec![overlay, win(1, 10, Some("Path of Exile 2"), None)];
         assert!(find_game(&windows).expect("game").focused);

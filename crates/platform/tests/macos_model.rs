@@ -3,7 +3,7 @@
 //! so they are included here by path; `crate::types` is shimmed to the public types.
 
 mod types {
-    pub use kalandra_platform::types::*;
+    pub use rkl_platform::types::*;
 }
 
 // Some helpers are only used by the native macOS code, not by these tests.

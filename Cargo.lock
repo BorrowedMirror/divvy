@@ -3027,151 +3027,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kalandra-config"
-version = "0.1.0-rc.1"
-dependencies = [
- "directories",
- "insta",
- "kalandra-core",
- "kalandra-platform",
- "pretty_assertions",
- "proptest",
- "serde",
- "specta",
- "tempfile",
- "thiserror 2.0.21",
- "toml 0.9.12+spec-1.1.0",
-]
-
-[[package]]
-name = "kalandra-core"
-version = "0.1.0-rc.1"
-dependencies = [
- "criterion",
- "insta",
- "kalandra-data",
- "pretty_assertions",
- "proptest",
- "regex",
- "serde",
- "serde_json",
- "specta",
- "thiserror 2.0.21",
- "toml 0.9.12+spec-1.1.0",
-]
-
-[[package]]
-name = "kalandra-data"
-version = "0.1.0-rc.1"
-dependencies = [
- "criterion",
- "insta",
- "kalandra-core",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "thiserror 2.0.21",
- "zstd",
-]
-
-[[package]]
-name = "kalandra-desktop"
-version = "0.1.0-rc.1"
-dependencies = [
- "gtk",
- "gtk-layer-shell",
- "kalandra-config",
- "kalandra-core",
- "kalandra-data",
- "kalandra-platform",
- "kalandra-testkit",
- "kalandra-trade",
- "raw-window-handle",
- "serde",
- "serde_json",
- "signal-hook",
- "specta",
- "specta-typescript",
- "tauri",
- "tauri-build",
- "tauri-nspanel",
- "tauri-plugin-opener",
- "tauri-plugin-single-instance",
- "tauri-plugin-updater",
- "tauri-specta",
- "tempfile",
- "thiserror 2.0.21",
- "tracing",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
-name = "kalandra-platform"
-version = "0.1.0-rc.1"
-dependencies = [
- "arboard",
- "ashpd",
- "enigo",
- "futures",
- "global-hotkey",
- "libc",
- "mockall",
- "objc2-application-services",
- "objc2-core-foundation",
- "objc2-core-graphics",
- "pretty_assertions",
- "raw-window-handle",
- "rdev",
- "serde",
- "signal-hook",
- "specta",
- "thiserror 2.0.21",
- "tokio",
- "tracing",
- "windows 0.61.3",
- "x11rb",
-]
-
-[[package]]
-name = "kalandra-testkit"
-version = "0.1.0-rc.1"
-dependencies = [
- "kalandra-platform",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "toml 0.9.12+spec-1.1.0",
- "wiremock",
-]
-
-[[package]]
-name = "kalandra-trade"
-version = "0.1.0-rc.1"
-dependencies = [
- "async-trait",
- "futures",
- "http",
- "insta",
- "kalandra-core",
- "moka",
- "pretty_assertions",
- "proptest",
- "reqwest",
- "serde",
- "serde_json",
- "specta",
- "thiserror 2.0.21",
- "tokio",
- "tracing",
- "url",
- "wiremock",
-]
-
-[[package]]
 name = "keyboard-types"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4961,6 +4816,151 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rkl-config"
+version = "0.1.0-rc.1"
+dependencies = [
+ "directories",
+ "insta",
+ "pretty_assertions",
+ "proptest",
+ "rkl-core",
+ "rkl-platform",
+ "serde",
+ "specta",
+ "tempfile",
+ "thiserror 2.0.21",
+ "toml 0.9.12+spec-1.1.0",
+]
+
+[[package]]
+name = "rkl-core"
+version = "0.1.0-rc.1"
+dependencies = [
+ "criterion",
+ "insta",
+ "pretty_assertions",
+ "proptest",
+ "regex",
+ "rkl-data",
+ "serde",
+ "serde_json",
+ "specta",
+ "thiserror 2.0.21",
+ "toml 0.9.12+spec-1.1.0",
+]
+
+[[package]]
+name = "rkl-data"
+version = "0.1.0-rc.1"
+dependencies = [
+ "criterion",
+ "insta",
+ "pretty_assertions",
+ "rkl-core",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror 2.0.21",
+ "zstd",
+]
+
+[[package]]
+name = "rkl-desktop"
+version = "0.1.0-rc.1"
+dependencies = [
+ "gtk",
+ "gtk-layer-shell",
+ "raw-window-handle",
+ "rkl-config",
+ "rkl-core",
+ "rkl-data",
+ "rkl-platform",
+ "rkl-testkit",
+ "rkl-trade",
+ "serde",
+ "serde_json",
+ "signal-hook",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-build",
+ "tauri-nspanel",
+ "tauri-plugin-opener",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "tauri-specta",
+ "tempfile",
+ "thiserror 2.0.21",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+]
+
+[[package]]
+name = "rkl-platform"
+version = "0.1.0-rc.1"
+dependencies = [
+ "arboard",
+ "ashpd",
+ "enigo",
+ "futures",
+ "global-hotkey",
+ "libc",
+ "mockall",
+ "objc2-application-services",
+ "objc2-core-foundation",
+ "objc2-core-graphics",
+ "pretty_assertions",
+ "raw-window-handle",
+ "rdev",
+ "serde",
+ "signal-hook",
+ "specta",
+ "thiserror 2.0.21",
+ "tokio",
+ "tracing",
+ "windows 0.61.3",
+ "x11rb",
+]
+
+[[package]]
+name = "rkl-testkit"
+version = "0.1.0-rc.1"
+dependencies = [
+ "reqwest",
+ "rkl-platform",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml 0.9.12+spec-1.1.0",
+ "wiremock",
+]
+
+[[package]]
+name = "rkl-trade"
+version = "0.1.0-rc.1"
+dependencies = [
+ "async-trait",
+ "futures",
+ "http",
+ "insta",
+ "moka",
+ "pretty_assertions",
+ "proptest",
+ "reqwest",
+ "rkl-core",
+ "serde",
+ "serde_json",
+ "specta",
+ "thiserror 2.0.21",
+ "tokio",
+ "tracing",
+ "url",
+ "wiremock",
 ]
 
 [[package]]
@@ -8086,9 +8086,9 @@ version = "0.1.0-rc.1"
 dependencies = [
  "anyhow",
  "clap",
- "kalandra-core",
- "kalandra-data",
  "reqwest",
+ "rkl-core",
+ "rkl-data",
  "serde",
  "serde_json",
  "tempfile",

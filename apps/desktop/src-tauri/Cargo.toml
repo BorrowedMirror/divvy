@@ -1,20 +1,20 @@
 [package]
-name = "kalandra-desktop"
-description = "kalandra desktop shell (Tauri 2): windows, tray, IPC wiring"
+name = "rkl-desktop"
+description = "rkl desktop shell (Tauri 2): windows, tray, IPC wiring"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
-default-run = "kalandra"
+default-run = "rkl"
 
 [lib]
-name = "kalandra_desktop"
+name = "rkl_desktop"
 crate-type = ["rlib"]
 
 [[bin]]
-name = "kalandra"
+name = "rkl"
 path = "src/main.rs"
 
 [lints.rust]
@@ -27,7 +27,7 @@ all = { level = "warn", priority = -1 }
 
 [features]
 default = ["native"]
-native = ["kalandra-platform/native"]
+native = ["rkl-platform/native"]
 # Debug-only IPC test hook used by the macOS e2e harness and webdriver specs.
 test-hook = []
 
@@ -36,11 +36,11 @@ tauri-build.workspace = true
 
 [dependencies]
 raw-window-handle.workspace = true
-kalandra-config.workspace = true
-kalandra-core.workspace = true
-kalandra-data.workspace = true
-kalandra-platform.workspace = true
-kalandra-trade.workspace = true
+rkl-config.workspace = true
+rkl-core.workspace = true
+rkl-data.workspace = true
+rkl-platform.workspace = true
+rkl-trade.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 specta.workspace = true
@@ -60,7 +60,7 @@ signal-hook.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
-kalandra-testkit.workspace = true
+rkl-testkit.workspace = true
 tauri = { workspace = true, features = ["test"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]

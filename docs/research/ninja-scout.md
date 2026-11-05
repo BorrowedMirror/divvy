@@ -1,7 +1,7 @@
 # Aggregated price APIs: poe.ninja and poe2scout
 
 Captured live on **2026-11-05** with User-Agent
-`kalandra-research/0.1 (+https://github.com/nightah/kalandra)`. Trimmed fixtures live in
+`rkl-research/0.1 (+https://github.com/nightah/rust-king-ledger)`. Trimmed fixtures live in
 `crates/trade/tests/fixtures/{ninja,scout}/`.
 
 ## poe.ninja (PoE2)
@@ -80,7 +80,7 @@ We fetch `/Leagues` + `/Leagues/{league}/Items` once per league and cache both f
 
 ## Normalisation
 
-Both sources are reduced to `kalandra_core::pricing::ExchangeRates` with the doc's
+Both sources are reduced to `rkl_core::pricing::ExchangeRates` with the doc's
 semantics (`rates[c]` = value of 1 `c` in `base`):
 
 - ninja: `base = "divine"`, `rates = {divine: 1, exalted: 1/724.8, chaos: 1/9.36}`

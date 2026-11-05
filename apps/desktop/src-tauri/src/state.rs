@@ -7,11 +7,11 @@ use std::{
     },
 };
 
-use kalandra_config::{Paths, Settings};
-use kalandra_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
-use kalandra_data::GameData;
-use kalandra_platform::{BackendKind, Capabilities, Platform};
-use kalandra_trade::{
+use rkl_config::{Paths, Settings};
+use rkl_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
+use rkl_data::GameData;
+use rkl_platform::{BackendKind, Capabilities, Platform};
+use rkl_trade::{
     PriceSource, TradeClient, TradeConfig, ninja::PoeNinjaSource, ratelimit::SystemClock, scout::Poe2ScoutSource,
     types::League,
 };
@@ -54,7 +54,7 @@ fn env_url(key: &str, default: &str) -> Url {
 
 fn trade_config(settings: &Settings) -> TradeConfig {
     TradeConfig {
-        base_url: env_url("KALANDRA_TRADE_BASE_URL", "https://www.pathofexile.com"),
+        base_url: env_url("RKL_TRADE_BASE_URL", "https://www.pathofexile.com"),
         user_agent: logic::user_agent(settings),
         poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
         ..TradeConfig::default()
@@ -62,11 +62,11 @@ fn trade_config(settings: &Settings) -> TradeConfig {
 }
 
 fn ninja(ua: String) -> Arc<PoeNinjaSource> {
-    Arc::new(PoeNinjaSource::new(env_url("KALANDRA_NINJA_BASE_URL", "https://poe.ninja"), ua))
+    Arc::new(PoeNinjaSource::new(env_url("RKL_NINJA_BASE_URL", "https://poe.ninja"), ua))
 }
 
 fn scout(ua: String) -> Arc<Poe2ScoutSource> {
-    Arc::new(Poe2ScoutSource::new(env_url("KALANDRA_SCOUT_BASE_URL", "https://poe2scout.com"), ua))
+    Arc::new(Poe2ScoutSource::new(env_url("RKL_SCOUT_BASE_URL", "https://poe2scout.com"), ua))
 }
 
 impl Sources {
@@ -95,8 +95,8 @@ impl Sources {
     }
 
     /// The configured source if it supports the item, else the official trade API.
-    pub fn pick(&self, kind: kalandra_core::pricing::PriceSourceKind, item: &ParsedItem) -> Arc<dyn PriceSource> {
-        use kalandra_core::pricing::PriceSourceKind as K;
+    pub fn pick(&self, kind: rkl_core::pricing::PriceSourceKind, item: &ParsedItem) -> Arc<dyn PriceSource> {
+        use rkl_core::pricing::PriceSourceKind as K;
         let preferred: Arc<dyn PriceSource> = match kind {
             K::Trade => self.trade.clone(),
             K::PoeNinja => self.ninja.clone(),

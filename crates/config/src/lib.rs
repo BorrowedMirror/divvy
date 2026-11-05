@@ -1,8 +1,8 @@
-//! kalandra-config: settings schema (`settings.toml`), migrations, per-OS paths.
+//! rkl-config: settings schema (`settings.toml`), migrations, per-OS paths.
 use std::path::{Path, PathBuf};
 
-use kalandra_core::pricing::PriceSourceKind;
-use kalandra_platform::{BackendKind, Chord};
+use rkl_core::pricing::PriceSourceKind;
+use rkl_platform::{BackendKind, Chord};
 use serde::{Deserialize, Serialize};
 
 /// Current schema version. Increment and add a step to [`migrate`] on any breaking change.
@@ -119,7 +119,7 @@ impl Default for LeagueSettings {
 
 impl Default for HotkeySettings {
     fn default() -> Self {
-        use kalandra_platform::KeyModifier::{Alt, Ctrl};
+        use rkl_platform::KeyModifier::{Alt, Ctrl};
         Self {
             price_check: Chord::new(&[Ctrl], "KeyD"),
             price_check_pinned: Chord::new(&[Ctrl, Alt], "KeyD"),
@@ -186,10 +186,33 @@ pub struct Paths {
 }
 
 /// Environment variable that relocates every path under one root (portable mode, tests).
-pub const CONFIG_DIR_ENV: &str = "KALANDRA_CONFIG_DIR";
+pub const CONFIG_DIR_ENV: &str = "RKL_CONFIG_DIR";
+
+/// `directories::ProjectDirs` triple: `~/.config/rkl` (Linux), `%APPDATA%\\rkl` (Windows),
+/// `~/Library/Application Support/app.rkl` (macOS). Matches the bundle identifier `app.rkl`.
+pub const PROJECT_QUALIFIER: &str = "app";
+pub const PROJECT_ORG: &str = "";
+pub const PROJECT_APP: &str = "rkl";
+
+/// Where settings lived before the project was renamed from kalandra (`au.nerv.kalandra`).
+pub fn legacy_settings_file() -> Option<PathBuf> {
+    directories::ProjectDirs::from("au", "nerv", "kalandra").map(|d| d.config_dir().join("settings.toml"))
+}
+
+/// One-time move to the new location: if `paths` has no settings file yet but `legacy` does,
+/// copy it across (the old file is left in place). Returns whether a copy happened.
+pub fn adopt_legacy_settings(paths: &Paths, legacy: Option<&Path>) -> Result<bool, ConfigError> {
+    let Some(legacy) = legacy.filter(|l| l.is_file()) else { return Ok(false) };
+    if paths.settings_file.exists() {
+        return Ok(false);
+    }
+    std::fs::create_dir_all(&paths.config_dir).map_err(io_err(&paths.config_dir))?;
+    std::fs::copy(legacy, &paths.settings_file).map_err(io_err(&paths.settings_file))?;
+    Ok(true)
+}
 
 impl Paths {
-    /// From `directories::ProjectDirs` (`au.nerv.kalandra`), or `KALANDRA_CONFIG_DIR` override.
+    /// From `directories::ProjectDirs` (`app.rkl`), or `RKL_CONFIG_DIR` override.
     pub fn resolve() -> Result<Self, ConfigError> {
         Self::resolve_with(|key| std::env::var(key).ok())
     }
@@ -199,7 +222,8 @@ impl Paths {
         if let Some(root) = env(CONFIG_DIR_ENV).filter(|v| !v.trim().is_empty()) {
             return Ok(Self::under(Path::new(&root)));
         }
-        let dirs = directories::ProjectDirs::from("au", "nerv", "kalandra").ok_or(ConfigError::NoConfigDir)?;
+        let dirs = directories::ProjectDirs::from(PROJECT_QUALIFIER, PROJECT_ORG, PROJECT_APP)
+            .ok_or(ConfigError::NoConfigDir)?;
         let config_dir = dirs.config_dir().to_path_buf();
         Ok(Self {
             settings_file: config_dir.join("settings.toml"),
@@ -344,7 +368,7 @@ fn validate_chord(field: &str, chord: &Chord) -> Result<(), ConfigError> {
 }
 
 /// Canonical form for comparing chords: modifier order and duplicates don't matter.
-fn chord_key(chord: &Chord) -> (Vec<kalandra_platform::KeyModifier>, String) {
+fn chord_key(chord: &Chord) -> (Vec<rkl_platform::KeyModifier>, String) {
     let mut mods = chord.modifiers.clone();
     mods.sort_by_key(|m| *m as u8);
     mods.dedup();

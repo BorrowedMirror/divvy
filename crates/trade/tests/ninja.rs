@@ -1,19 +1,19 @@
 //! Contract tests for `PoeNinjaSource` against recorded poe.ninja fixtures.
 use std::time::Duration;
 
-use kalandra_core::{
+use rkl_core::{
     item::{ItemCategory, ItemClass, ItemStats, ParsedItem, Rarity, Requirements},
     pricing::{Price, PriceSourceKind},
     query::{FilterSet, MiscFilters, OnlineStatus, QueryRoute},
 };
-use kalandra_trade::{PriceRequest, PriceSource, TradeError, ninja::PoeNinjaSource};
+use rkl_trade::{PriceRequest, PriceSource, TradeError, ninja::PoeNinjaSource};
 use url::Url;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
     matchers::{header, method, path, query_param},
 };
 
-const UA: &str = "kalandra-test/1.0 (+ninja)";
+const UA: &str = "rkl-test/1.0 (+ninja)";
 const LEAGUE: &str = "Forbidden Rites";
 const EXCHANGE: &str = "/poe2/api/economy/exchange/current/overview";
 const STASH: &str = "/poe2/api/economy/stash/current/item/overview";

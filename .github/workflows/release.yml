@@ -56,7 +56,7 @@ jobs:
           prerelease=()
           case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
           gh release create "$TAG" --draft --verify-tag "${prerelease[@]}" \
-            --title "kalandra $TAG" --notes-file RELEASE_NOTES.md
+            --title "rkl $TAG" --notes-file RELEASE_NOTES.md
           id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id")
           echo "release_id=$id" >> "$GITHUB_OUTPUT"
 
@@ -173,14 +173,14 @@ jobs:
         with:
           path: .
           format: cyclonedx-json
-          output-file: kalandra.cdx.json
+          output-file: rkl.cdx.json
           upload-artifact: false
           upload-release-assets: false
       - name: Third-party notices
         run: cargo about generate --workspace -c .about.toml .about.hbs -o THIRD-PARTY-NOTICES.html
       - name: SHA-256 checksums (bundles, updater manifest, SBOM, notices)
         run: |
-          cp kalandra.cdx.json THIRD-PARTY-NOTICES.html dist/
+          cp rkl.cdx.json THIRD-PARTY-NOTICES.html dist/
           rm -f dist/SHA256SUMS.txt
           (cd dist && sha256sum -- *) > SHA256SUMS.txt
           cat SHA256SUMS.txt
@@ -190,4 +190,4 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           gh release upload "$TAG" --clobber \
-            SHA256SUMS.txt kalandra.cdx.json THIRD-PARTY-NOTICES.html
+            SHA256SUMS.txt rkl.cdx.json THIRD-PARTY-NOTICES.html

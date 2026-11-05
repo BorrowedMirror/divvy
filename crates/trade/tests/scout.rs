@@ -1,19 +1,19 @@
 //! poe2scout contract tests against recorded fixtures.
 use std::time::Duration;
 
-use kalandra_core::{
+use rkl_core::{
     item::{ItemCategory, ItemClass, ItemStats, ParsedItem, Rarity, Requirements},
     pricing::{Price, PriceSourceKind},
     query::{FilterSet, MiscFilters, OnlineStatus, QueryRoute},
 };
-use kalandra_trade::{PriceRequest, PriceSource, TradeError, scout::Poe2ScoutSource};
+use rkl_trade::{PriceRequest, PriceSource, TradeError, scout::Poe2ScoutSource};
 use url::Url;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
     matchers::{header, method, path},
 };
 
-const UA: &str = "kalandra-test/0 (+scout)";
+const UA: &str = "rkl-test/0 (+scout)";
 const LEAGUES: &str = include_str!("fixtures/scout/leagues.json");
 const ITEMS: &str = include_str!("fixtures/scout/items.json");
 const LEAGUE: &str = "Forbidden Rites";

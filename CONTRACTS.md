@@ -1,4 +1,4 @@
-# kalandra contracts
+# RKL contracts
 
 This file is the source of truth for every public interface between the crates, the desktop
 shell and the web UI. It describes the code as it is on `master`. Interfaces were fixed in
@@ -19,11 +19,11 @@ web edits FilterSet ──► ipc::query_price ──► trade::PriceSource::pri
 ```
 
 Other triggers feed the same flow: the tray menu (*Price check*), Unix signals
-(`kalandra --trigger [--pinned]`, see [Desktop](#appsdesktop-tauri-2)) and the debug test hook.
+(`RKL --trigger [--pinned]`, see [Desktop](#appsdesktop-tauri-2)) and the debug test hook.
 
 ## Crates
 
-### `kalandra-core` (crates/core) — pure, no I/O
+### `rkl-core` (crates/core) — pure, no I/O
 | Item | Contract |
 | --- | --- |
 | `item::{ParsedItem, ItemClass, ItemCategory, Rarity, Modifier, ModKind, AdvancedModInfo, Affix, ValueRange, Property, Requirements, ItemStats, StackSize}` | domain types; serde + specta |
@@ -35,12 +35,12 @@ Other triggers feed the same flow: the tray menu (*Price check*), Unix signals
 | `parser::looks_like_item(&str) -> bool` | cheap pre-check; accepts `Item Class:` text and text starting with `Rarity: Gem` (meta gems have no `Item Class:` line and parse as `Other("Meta Gems")`, category `Gem`) |
 | `parser::SEPARATOR` | `--------` |
 | `catalog::{StatDef, StatAlias, BaseDef, UniqueDef, StaticDef}` | data model |
-| `catalog::Catalog` trait | `stats_by_template`, `base`, `base_in_magic_name`, `unique`, `static_item` (semantics under [`kalandra-data`](#kalandra-data-cratesdata)) |
+| `catalog::Catalog` trait | `stats_by_template`, `base`, `base_in_magic_name`, `unique`, `static_item` (semantics under [`rkl-data`](#rkl-data-cratesdata)) |
 | `matcher::{templatize(&str) -> String, extract_values}` | numbers -> `#`; unsigned value extraction |
 | `matcher::StatMatcher::{new, match_item}` | fills `Modifier::stat_id`, returns `Vec<MatchOutcome>`; negated matches flip the sign of `Modifier::values`; for magic items moves the full name line from `base_type` to `name` and sets `base_type` from `Catalog::base_in_magic_name` |
 | `query::{QueryOptions, FilterSet, StatFilter, RangeFilter, MiscFilters, OnlineStatus, QueryRoute, TradeQuery}` | editable filters (IPC) and trade2 search body |
 | `query::{build_filters(&ParsedItem, &QueryOptions) -> FilterSet, widen_min, DEFAULT_ENABLED_STATS}` | defaults incl. widening |
-| `FilterSet::rewiden(&mut self, pct)`, `FilterSet::to_trade_query(&self) -> TradeQuery` | `to_trade_query` always returns the **search** body; the `QueryRoute::Exchange` body is built by `kalandra-trade` |
+| `FilterSet::rewiden(&mut self, pct)`, `FilterSet::to_trade_query(&self) -> TradeQuery` | `to_trade_query` always returns the **search** body; the `QueryRoute::Exchange` body is built by `rkl-trade` |
 | `pricing::{Price, Listing, PriceSourceKind, PriceSummary, ExchangeRates::{rate, convert}}` | |
 | `pricing::{summarise(kind, total, listings, Option<&ExchangeRates>) -> PriceSummary, trim_outliers, TRIM_MIN_LISTINGS}` | min/median/max, outlier trim |
 | `error::{ParseError, CoreError}` | |
@@ -48,7 +48,7 @@ Other triggers feed the same flow: the tray menu (*Price check*), Unix signals
 Class refinement by base name: `Stackable Currency` -> `Essence` / `DistilledEmotion` /
 `Splinter` / `Catalyst` / `Omen`; `Rune` -> `SoulCore`.
 
-### `kalandra-data` (crates/data)
+### `rkl-data` (crates/data)
 | Item | Contract |
 | --- | --- |
 | `SCHEMA_VERSION`, `MANIFEST_FILE`, `Manifest`, `AssetEntry`, `Bundle`, `DataError` | asset format: `assets/manifest.json` + `assets/{stats,bases,uniques,statics}.json.zst`; `DataError::Io(String, io::Error)` for missing/unreadable files |
@@ -73,7 +73,7 @@ Class refinement by base name: `Stackable Currency` -> `Essence` / `DistilledEmo
   applies `negate`.
 - `base_in_magic_name` matches whole-word runs only; the longest wins.
 
-### `kalandra-trade` (crates/trade)
+### `rkl-trade` (crates/trade)
 | Item | Contract |
 | --- | --- |
 | `TradeConfig { base_url, user_agent, poesessid, fetch_count, cache_ttl }` (+ `Default`) | |
@@ -92,22 +92,22 @@ Class refinement by base name: `Stackable Currency` -> `Essence` / `DistilledEmo
 | `error::{TradeError, TradeErrorInfo}` | |
 | `default_user_agent()` | descriptive UA with contact; settings may append `trade.contact` |
 
-### `kalandra-platform` (crates/platform)
+### `rkl-platform` (crates/platform)
 | Item | Contract |
 | --- | --- |
 | traits `WindowTracker`, `HotkeyHost`, `InputListener`, `InputSimulator`, `Clipboard`, `OverlayWindow` | `mockall::automock` under `cfg(test)`; streams (`subscribe`/`events`/`start`) may be taken once, later calls return `AlreadyStarted` |
 | `Platform { kind, capabilities, window_tracker, hotkeys, input_listener, input_simulator, clipboard }` | bundle returned by a backend |
 | `types::{Rect, WindowInfo, WindowEvent, KeyModifier, Chord (parse/Display), HotkeyAction, HotkeyEvent, InputEvent, Capabilities, GAME_WINDOW_TITLE}` | `HotkeyAction = PriceCheck \| PriceCheckPinned \| OpenSettings`; `Capabilities { window_tracking, overlay_always_on_top, overlay_click_through, global_hotkeys, passive_hook, keystroke_injection, clipboard, missing_permissions, notes }`. On macOS `Rect` is in points with a top-left origin |
-| `detect::{BackendKind, EnvProbe::{from_env, is_gnome}, detect(&EnvProbe, Option<BackendKind>) -> BackendKind}` | settings override > `KALANDRA_BACKEND` > OS. Linux: X11 if GNOME (`XDG_CURRENT_DESKTOP` contains `GNOME`) or `DISPLAY` set; else Wayland-native if `WAYLAND_DISPLAY` set or `XDG_SESSION_TYPE=wayland`; else X11 |
-| `BackendKind::parse(&str) -> Option<BackendKind>` | the `KALANDRA_BACKEND` grammar: `x11` \| `xwayland` \| `wayland` \| `windows` \| `macos` \| `fake`, case-insensitive, trimmed; unknown values are ignored |
+| `detect::{BackendKind, EnvProbe::{from_env, is_gnome}, detect(&EnvProbe, Option<BackendKind>) -> BackendKind}` | settings override > `RKL_BACKEND` > OS. Linux: X11 if GNOME (`XDG_CURRENT_DESKTOP` contains `GNOME`) or `DISPLAY` set; else Wayland-native if `WAYLAND_DISPLAY` set or `XDG_SESSION_TYPE=wayland`; else X11 |
+| `BackendKind::parse(&str) -> Option<BackendKind>` | the `RKL_BACKEND` grammar: `x11` \| `xwayland` \| `wayland` \| `windows` \| `macos` \| `fake`, case-insensitive, trimmed; unknown values are ignored |
 | `copy::{CopyOptions, copy_item_text(&dyn InputSimulator, &dyn Clipboard, CopyOptions, &dyn Fn(Duration)) -> Result<String, PlatformError>}` | save clipboard, clear, send chord, poll until item text or timeout, restore. `NoItemText` when the clipboard changed to non-item text, `Timeout` when nothing arrived |
 | `copy::{looks_like_item(&str) -> bool, copy_chord(advanced: bool) -> Chord}` | local `Item Class:` check (no core dependency); `Ctrl+C` / `Ctrl+Alt+C` |
-| `backend::create(BackendKind) -> Result<Platform, PlatformError>` | dispatches to `backend::{windows,macos,x11,wayland}::create()` (feature `native`); `Fake` -> `Unsupported` (fakes live in `kalandra-testkit`) |
+| `backend::create(BackendKind) -> Result<Platform, PlatformError>` | dispatches to `backend::{windows,macos,x11,wayland}::create()` (feature `native`); `Fake` -> `Unsupported` (fakes live in `rkl-testkit`) |
 | `backend::Unsupported(&'static str)` | stand-in implementing every trait (all calls -> `PlatformError::Unsupported`, `is_game_focused` -> `true`) for capabilities that are `false` |
 | `backend::{x11,windows,wayland}::overlay(RawWindowHandle, RawDisplayHandle) -> Result<Box<dyn OverlayWindow>, PlatformError>` | `x11::X11Overlay`; `wayland::overlay` always returns `Unsupported` (layer-shell is applied on the GTK window by the desktop app). macOS has no `overlay` fn: styling lives in `apps/desktop/.../overlay/macos.rs` |
 | `backend::windows` re-exports `raw_window_handle` | so `apps/desktop` can pass raw handles without a direct dependency |
 | `backend::wayland::sigusr2_trigger() -> Result<Receiver<HotkeyEvent>, _>` | SIGUSR2 -> `PriceCheck`; the Wayland `HotkeyHost::events()` always includes it (portal or not) |
-| `backend::macos::{create_with(MacosOptions), MacosOptions { copy_modifier, prompt_for_accessibility } (+ from_env), CopyModifier { Command (default), Control }, COPY_MODIFIER_ENV, recheck_permissions() -> Vec<String>, open_permission_settings(kind: &str)}` | macOS + `native`; `COPY_MODIFIER_ENV = "KALANDRA_MACOS_COPY_MODIFIER"` (`cmd` \| `ctrl`). See [docs/research/macos.md](docs/research/macos.md) |
+| `backend::macos::{create_with(MacosOptions), MacosOptions { copy_modifier, prompt_for_accessibility } (+ from_env), CopyModifier { Command (default), Control }, COPY_MODIFIER_ENV, recheck_permissions() -> Vec<String>, open_permission_settings(kind: &str)}` | macOS + `native`; `COPY_MODIFIER_ENV = "RKL_MACOS_COPY_MODIFIER"` (`cmd` \| `ctrl`). See [docs/research/macos.md](docs/research/macos.md) |
 | `PlatformError` | |
 
 Backend notes:
@@ -121,16 +121,16 @@ Backend notes:
   `zwp_virtual_keyboard_v1` protocol (wlroots compositors) via enigo, else the `ydotool` CLI;
   libei is deliberately not enabled. The clipboard uses wlr-data-control.
 
-### `kalandra-config` (crates/config)
+### `rkl-config` (crates/config)
 | Item | Contract |
 | --- | --- |
 | `Settings { version, league, hotkeys, trade, overlay, ui, platform }` + sections `LeagueSettings, HotkeySettings, TradeSettings, OverlaySettings, OverlaySide, UiSettings, Theme, PlatformSettings { backend_override }` | TOML, `#[serde(default)]` everywhere |
 | `SETTINGS_VERSION`, `migrate(toml::Table)`, `validate(&Settings)`, `load(&Paths)`, `save(&Paths, &Settings)` | atomic save; unknown newer version -> `TooNew` |
-| `Paths { config_dir, cache_dir, log_dir, settings_file }`, `Paths::resolve()`, `Paths::resolve_with(env: impl Fn(&str) -> Option<String>)`, `Paths::under(root)` | `directories::ProjectDirs::from("au", "nerv", "kalandra")`; `log_dir` = state dir (Linux) or local data dir, `/logs`. A non-empty `KALANDRA_CONFIG_DIR` puts everything under `<root>/{config,cache,logs}` |
-| `CONFIG_DIR_ENV` | `"KALANDRA_CONFIG_DIR"` |
+| `Paths { config_dir, cache_dir, log_dir, settings_file }`, `Paths::resolve()`, `Paths::resolve_with(env: impl Fn(&str) -> Option<String>)`, `Paths::under(root)` | `directories::ProjectDirs::from("app", "", "rkl")` (`~/.config/rkl`, `%APPDATA%\\rkl`, `~/Library/Application Support/app.rkl`); settings from the pre-rename `au.nerv.kalandra` location are copied over once by `adopt_legacy_settings`; `log_dir` = state dir (Linux) or local data dir, `/logs`. A non-empty `RKL_CONFIG_DIR` puts everything under `<root>/{config,cache,logs}` |
+| `CONFIG_DIR_ENV` | `"RKL_CONFIG_DIR"` |
 | `ConfigError` | |
 
-### `kalandra-testkit` (crates/testkit)
+### `rkl-testkit` (crates/testkit)
 | Item | Contract |
 | --- | --- |
 | `corpus::{CorpusEntry, corpus_dir, load, get}` | format documented in `src/corpus.rs`; `corpus/index.toml` + `corpus/<class>/<slug>.txt` |
@@ -151,7 +151,7 @@ IPC commands (Rust `src/ipc.rs`, exported to `web/src/bindings.ts` via tauri-spe
 | `list_leagues` | `() -> Result<Vec<League>, IpcError>` |
 | `price_check` | `(request: PriceCheckRequest { text: Option<String>, pinned }) -> Result<PriceCheckResponse { item, filters }, IpcError>` |
 | `query_price` | `(filters: FilterSet) -> Result<PriceSummary, IpcError>` |
-| `open_trade` | `(url: String) -> Result<(), IpcError>` (only `https://` pathofexile.com, or the `KALANDRA_TRADE_BASE_URL` host) |
+| `open_trade` | `(url: String) -> Result<(), IpcError>` (only `https://` pathofexile.com, or the `RKL_TRADE_BASE_URL` host) |
 | `hide_overlay` | `() -> Result<(), IpcError>` |
 | `set_overlay_pinned` | `(pinned: bool) -> Result<(), IpcError>` |
 | `open_settings` | `() -> Result<(), IpcError>` |
@@ -178,24 +178,24 @@ each `pub fn prepare(&tauri::WebviewWindow) -> Result<(), String>`. In addition:
 - `macos.rs`: `plugin()` (tauri-nspanel; must be registered before `setup`) and
   `set_click_through(&WebviewWindow, bool)`.
 
-CLI, single instance and signals (`src/cli.rs`, `src/lib.rs`): `kalandra [--trigger [--pinned]]`.
+CLI, single instance and signals (`src/cli.rs`, `src/lib.rs`): `RKL [--trigger [--pinned]]`.
 `tauri-plugin-single-instance` keeps one instance per user on every OS. A second launch focuses
 the settings window; with `--trigger` (`--pinned`) it forwards a price check (pinned price check)
 to the running instance and exits 0, or exits 1 with "no running instance". There is no pid
 file. The app also handles `SIGUSR1` (pinned) and, unless the Wayland-native backend owns it,
-`SIGUSR2` (price check), so `pkill -USR2 kalandra` works too. Price-check triggers from any
+`SIGUSR2` (price check), so `pkill -USR2 RKL` works too. Price-check triggers from any
 source are serialised (150 ms debounce; presses during a running copy are dropped with
 `IpcError { kind: "busy" }`). The single-instance plugin is skipped when the test hook is on.
 
-Test hook auth: when `KALANDRA_TEST_HOOK_TOKEN` is set, every connection must send
+Test hook auth: when `RKL_TEST_HOOK_TOKEN` is set, every connection must send
 `auth <token>` as its first line (no reply); lines starting with an HTTP method close the
 connection. Extra commands: `settings` (JSON) and `save_settings <json>` (`ok`/`err`).
 
-Bindings: `cargo xtask gen` (or `KALANDRA_UPDATE_BINDINGS=1 cargo test -p kalandra-desktop --test bindings`)
+Bindings: `cargo xtask gen` (or `RKL_UPDATE_BINDINGS=1 cargo test -p rkl-desktop --test bindings`)
 regenerates `web/src/bindings.ts`; the `bindings` test fails when stale.
 
 Test hook (`src/testhook.rs`): compiled into debug builds and into release builds with feature
-`test-hook`; active only when `KALANDRA_TEST_HOOK=<port>` is set. Binds `127.0.0.1:<port>`;
+`test-hook`; active only when `RKL_TEST_HOOK=<port>` is set. Binds `127.0.0.1:<port>`;
 line protocol, exactly one reply line per command (`ok`, `err <message>`, or JSON):
 
 | Command | Effect / reply |
@@ -220,7 +220,7 @@ the median amount), `settings-root` on the settings page root.
 ### `tools/fake-game`
 winit window titled `Path of Exile 2`. CLI: `--item <path>` / `--corpus-id <id>` (normal text),
 `--advanced-item <path>` / `--advanced-corpus-id <id>` (optional), `--corpus-dir` (env
-`KALANDRA_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH` (default `1280x720`). On Ctrl+C
+`RKL_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH` (default `1280x720`). On Ctrl+C
 (or Cmd+C) it puts the normal text on the clipboard; on Ctrl+Alt+C the advanced text (or the
 normal one). Prints `READY` on stdout once the window is mapped, `COPIED <n>` per copy and
 `EXIT` on shutdown. `FAKE_GAME_DEBUG=1` logs window events to stderr.
@@ -285,29 +285,29 @@ All additive; the tables above already include them.
 - **testkit / fake-game / e2e (H):** `FakePlatformBuilder` and handles, fixture helpers and
   `TradeMock`; fake-game corpus flags, `--exit-after`, `--size`, `EXIT`; web `data-testid`s.
 - **desktop (lead):** `Diagnostics` fields; overlay `linux.rs`/`macos.rs` extras; tray menu;
-  `kalandra --trigger [--pinned]` forwarded via single-instance (pid file removed; Phase 1 described it as going
+  `RKL --trigger [--pinned]` forwarded via single-instance (pid file removed; Phase 1 described it as going
   over the test-hook socket); test hook gained `text`, `settings`, `save_settings`, `tray` and
   extra `state` fields, and is compiled into every debug build; env vars
-  `KALANDRA_TRADE_BASE_URL`, `KALANDRA_NINJA_BASE_URL`, `KALANDRA_SCOUT_BASE_URL`,
-  `KALANDRA_LOG`.
+  `RKL_TRADE_BASE_URL`, `RKL_NINJA_BASE_URL`, `RKL_SCOUT_BASE_URL`,
+  `RKL_LOG`.
 - **xtask (I):** `gen --no-bindings`, `coverage --no-run/--profile`, `lint --no-web/--no-tools`,
   `release --dry-run/--allow-dirty`, `fixtures record`; root tool configs renamed to dotfiles
   (`.commit-config.toml`, `.cliff.toml`, `.deny.toml`, ...).
 ### Workstream H (testkit / fake-game / e2e) — all additive
-- `kalandra-testkit::fakes`: besides the listed fakes and `fake_platform() -> Platform`, adds
+- `rkl-testkit::fakes`: besides the listed fakes and `fake_platform() -> Platform`, adds
   `FakePlatformBuilder::{new, item_text, advanced_text, copy_delay, window, clipboard, capabilities, build -> (Platform, FakeHandles)}`,
   `FakeHandles { clipboard, input_simulator, window_tracker, hotkeys, input_listener }`, `ClipboardOp`, `OverlayCall`,
   `game_window(Rect)`, `copy_chord()`, `advanced_copy_chord()`, `fake_capabilities()`. Every fake is a cloneable handle
   over shared state. Streams (`subscribe`/`events`/`start`) may be taken once; later calls return `AlreadyStarted`.
-- `kalandra-testkit::fixtures`: `mount_trade_fixtures` is `async fn(&MockServer)`. `fixture(name)` reads
+- `rkl-testkit::fixtures`: `mount_trade_fixtures` is `async fn(&MockServer)`. `fixture(name)` reads
   `crates/trade/tests/fixtures/<name>.json`, falling back to testkit's own samples in `crates/testkit/fixtures/`.
   Adds `try_fixture`, `testkit_fixture`, `FixtureError`, `TradeMock` (prices, leagues, total, 429 injection per
   `Endpoint`, `mount`, `serve(addr)`), `MockListing`, `LEAGUES_PATH`/`SEARCH_PREFIX`/`FETCH_PREFIX`.
 - `tools/fake-game` CLI adds `--corpus-id <id>`, `--advanced-corpus-id <id>`, `--corpus-dir` (env
-  `KALANDRA_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH`; prints `EXIT` on shutdown; `FAKE_GAME_DEBUG=1` logs
+  `RKL_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH`; prints `EXIT` on shutdown; `FAKE_GAME_DEBUG=1` logs
   window events to stderr; Cmd+C counts as Ctrl+C (macOS).
-- Desktop env vars the e2e suite relies on: `KALANDRA_TRADE_BASE_URL` (overrides `TradeConfig::base_url`, no trailing
-  slash, e.g. `http://127.0.0.1:18080`), `KALANDRA_CONFIG_DIR` (already listed), `KALANDRA_TEST_HOOK=<port>`.
+- Desktop env vars the e2e suite relies on: `RKL_TRADE_BASE_URL` (overrides `TradeConfig::base_url`, no trailing
+  slash, e.g. `http://127.0.0.1:18080`), `RKL_CONFIG_DIR` (already listed), `RKL_TEST_HOOK=<port>`.
 - Test hook: every command answers with exactly one line (`ok`, `err <message>`, or JSON for `state`). New command
   `tray <menu-id>` runs the tray menu handler for `open_settings` / `quit` (unknown id -> `err ...`). `state` gains
   optional fields `overlay_pinned: bool`, `settings_visible: bool`, `tray_present: bool`; `last_price` is the
@@ -316,7 +316,7 @@ All additive; the tables above already include them.
   amount), `settings-root` on the settings page root.
 
 ### F (linux + platform common) — additive only
-- `BackendKind::parse(&str) -> Option<BackendKind>` (the `KALANDRA_BACKEND` grammar) and
+- `BackendKind::parse(&str) -> Option<BackendKind>` (the `RKL_BACKEND` grammar) and
   `EnvProbe::is_gnome(&self) -> bool`.
 - `copy::looks_like_item(&str) -> bool` (local `Item Class:` check, no core dependency) and
   `copy::copy_chord(advanced: bool) -> Chord`. `copy_item_text` returns `NoItemText` when the
@@ -333,32 +333,32 @@ All additive; the tables above already include them.
   `pre_init_with(Option<BackendKind>) -> BackendKind`, `gdk_backend_for(BackendKind)`,
   `set_click_through(&WebviewWindow, bool)`, `anchor_layer(&WebviewWindow, right, top, side)`
   in addition to `prepare`.
-- (D windows) Additive: `kalandra_platform::backend::windows` re-exports `raw_window_handle` (`pub use raw_window_handle;`) so `apps/desktop` can call `HasWindowHandle`/`HasDisplayHandle` on its Tauri window and pass the raw handles to `backend::windows::overlay` without a direct dependency or unsafe code. `backend::windows::overlay(RawWindowHandle, RawDisplayHandle)` follows the table above (the doc comment in `backend/mod.rs` still shows the older one-argument form).
+- (D windows) Additive: `rkl_platform::backend::windows` re-exports `raw_window_handle` (`pub use raw_window_handle;`) so `apps/desktop` can call `HasWindowHandle`/`HasDisplayHandle` on its Tauri window and pass the raw handles to `backend::windows::overlay` without a direct dependency or unsafe code. `backend::windows::overlay(RawWindowHandle, RawDisplayHandle)` follows the table above (the doc comment in `backend/mod.rs` still shows the older one-argument form).
 
-- **E macos (additive).** `kalandra_platform::backend::macos` (macOS + `native`) also exposes
+- **E macos (additive).** `rkl_platform::backend::macos` (macOS + `native`) also exposes
   `recheck_permissions() -> Vec<String>`, `open_permission_settings(kind: &str)`,
   `create_with(MacosOptions) -> Result<Platform, PlatformError>`,
   `MacosOptions { copy_modifier, prompt_for_accessibility }` (+ `from_env()`), `CopyModifier
-  { Command (default), Control }`, and `COPY_MODIFIER_ENV` (`KALANDRA_MACOS_COPY_MODIFIER`).
+  { Command (default), Control }`, and `COPY_MODIFIER_ENV` (`RKL_MACOS_COPY_MODIFIER`).
   `macos::overlay(...)` is not provided: overlay styling lives in `overlay/macos.rs`. That file
   also exposes `plugin()` (tauri-nspanel, which must be registered) and
   `set_click_through(&WebviewWindow, bool)`. On macOS, `Rect` is in points (logical pixels) with
   a top-left origin.
-- **kalandra-platform (review fixes, additive):** `Clipboard::has_non_text(&self) -> bool`
+- **rkl-platform (review fixes, additive):** `Clipboard::has_non_text(&self) -> bool`
   (default `false`; arboard backends report whether an image is on the clipboard).
   `copy_item_text` semantics: a clipboard holding non-text content is neither cleared nor
   restored, and the prior text is restored only while the clipboard still holds the item we
   read (or nothing after our clear); a copy the user made meanwhile is kept. An item that
   arrives after the timeout is not restored.
-- **kalandra-platform (review fixes, additive):** `backend::init_process_env()` and
+- **rkl-platform (review fixes, additive):** `backend::init_process_env()` and
   `backend::KEYBOARD_ONLY_ENV` (feature `native`): sets rdev's `KEYBOARD_ONLY` so the passive
   hook never installs a mouse hook. The desktop app should call it first thing in `main`
   (before threads); `InputListener::start` calls it as a fallback. `start` no longer blocks
   250ms: a late hook failure is logged and shows up as the receiver disconnecting. The hook
   delivers keyboard events only (`InputEvent::MouseMove`/`Wheel` are no longer produced).
-- **kalandra-platform (review fixes, semantics):** `detect` on GNOME picks X11 only when
+- **rkl-platform (review fixes, semantics):** `detect` on GNOME picks X11 only when
   `DISPLAY` is set; GNOME without `DISPLAY` is Wayland-native (supersedes "GNOME => X11").
-- **kalandra-platform (review fixes, additive):** `HotkeyHost::register_all(&self, &[(HotkeyAction,
+- **rkl-platform (review fixes, additive):** `HotkeyHost::register_all(&self, &[(HotkeyAction,
   Chord)]) -> Result<(), PlatformError>` (default: `register` each, stop at the first error;
   Wayland binds them in ONE portal `BindShortcuts` call, so one confirmation dialog) and
   `HotkeyHost::notes(&self) -> Vec<String>` (default empty; late problems such as a portal

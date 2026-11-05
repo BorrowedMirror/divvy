@@ -81,9 +81,9 @@
     },
     {
       "id": 340,
-      "itemId": "Kalandra's Touch Ring",
-      "detailsId": "kalandras-touch-ring",
-      "name": "Kalandra's Touch",
+      "itemId": "Rkl's Touch Ring",
+      "detailsId": "rkls-touch-ring",
+      "name": "Rkl's Touch",
       "baseType": "Ring",
       "levelRequired": 0,
       "category": "Ring",

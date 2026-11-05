@@ -1,10 +1,10 @@
 //! Parses every corpus item and snapshots the result; snapshots trade queries for a subset.
 //!
 //! The corpus is read straight from `crates/testkit/corpus` (rather than via a
-//! `kalandra-testkit` dev-dependency) to avoid two copies of `kalandra-core` types.
+//! `rkl-testkit` dev-dependency) to avoid two copies of `rkl-core` types.
 use std::{collections::HashMap, path::PathBuf};
 
-use kalandra_core::{
+use rkl_core::{
     catalog::{BaseDef, Catalog, StatDef, StaticDef, UniqueDef},
     item::{ModKind, ParsedItem},
     matcher::StatMatcher,

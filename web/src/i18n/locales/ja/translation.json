@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "アプリのアップデート",
-    "available": "kalandra {{version}} が利用可能です。",
+    "available": "RKL {{version}} が利用可能です。",
     "notes": "新機能",
     "later": "後で",
     "install": "インストールして再起動",
@@ -31,7 +31,7 @@
     "statMax": "{{stat}} の最大値",
     "search": "検索",
     "loading": "検索中…",
-    "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。kalandra のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。"
+    "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。RKL のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。"
   },
   "item": {
     "rarityLabel": "レアリティ:",
@@ -217,21 +217,21 @@
     "clipboard": "クリップボードへのアクセス"
   },
   "guidance": {
-    "accessibility": "macOS: システム設定 → プライバシーとセキュリティ → アクセシビリティを開き、kalandra を有効にしてください。ホットキーとアイテムのコピーに必要です。",
-    "screenRecording": "macOS: システム設定 → プライバシーとセキュリティ → 画面収録を開き、kalandra を有効にしてください。ゲームウィンドウの検出に必要です。その後 kalandra を再起動してください。",
+    "accessibility": "macOS: システム設定 → プライバシーとセキュリティ → アクセシビリティを開き、RKL を有効にしてください。ホットキーとアイテムのコピーに必要です。",
+    "screenRecording": "macOS: システム設定 → プライバシーとセキュリティ → 画面収録を開き、RKL を有効にしてください。ゲームウィンドウの検出に必要です。その後 RKL を再起動してください。",
     "wayland": "Wayland ネイティブモード: グローバルホットキーはデスクトップポータル経由になり、オーバーレイはゲームウィンドウではなく画面に固定され、キー入力の送信は使えない場合があります。コンポジターが対応していれば X11/XWayland を使用してください。",
-    "gnome": "GNOME は kalandra に必要な Wayland 機能に対応していないため、GNOME では XWayland (X11) 経由で動作します。ゲームも XWayland で実行してください。",
+    "gnome": "GNOME は RKL に必要な Wayland 機能に対応していないため、GNOME では XWayland (X11) 経由で動作します。ゲームも XWayland で実行してください。",
     "generic": "不足している権限: {{permission}}"
   },
   "tray": {
     "priceCheck": "価格チェック (固定)",
     "settings": "設定…",
     "diagnostics": "診断",
-    "quit": "kalandra を終了",
-    "tooltip": "kalandra"
+    "quit": "RKL を終了",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "kalandra のセットアップ",
+    "title": "RKL のセットアップ",
     "intro": "価格チェックをスムーズに使うための、プラットフォームごとの手順です。この画面には診断からいつでも戻れます。",
     "stepsHeading": "{{platform}} のセットアップ",
     "loadFailed": "権限を確認できませんでした。",
@@ -240,21 +240,21 @@
     "granted": "許可済み",
     "notGranted": "未許可",
     "openSettings": "システム設定を開く",
-    "relaunch": "この権限は kalandra の再起動後に macOS で反映されます。有効にしたら kalandra を終了して再度開いてください。",
+    "relaunch": "この権限は RKL の再起動後に macOS で反映されます。有効にしたら RKL を終了して再度開いてください。",
     "requestFailed": "システム設定を開けませんでした: {{message}}",
     "details": "技術的な詳細",
-    "blockedHint": "必須の権限がまだ不足しています。kalandra は一部の機能を制限した状態で動作を続けます。",
+    "blockedHint": "必須の権限がまだ不足しています。RKL は一部の機能を制限した状態で動作を続けます。",
     "continueWithout": "許可せずに続ける",
     "done": "完了",
     "saveFailed": "保存できませんでした: {{message}}",
     "permission": {
       "accessibility": {
         "name": "アクセシビリティ",
-        "body": "価格チェックのホットキーを押すと、kalandra がゲームのコピーショートカットを代わりに押します。そのために macOS ではアクセシビリティへのアクセスが必要です。"
+        "body": "価格チェックのホットキーを押すと、RKL がゲームのコピーショートカットを代わりに押します。そのために macOS ではアクセシビリティへのアクセスが必要です。"
       },
       "screen_recording": {
         "name": "画面収録",
-        "body": "kalandra がウィンドウタイトルを読み取り、Path of Exile 2 のウィンドウを確実に見つけられるようにします。kalandra が画面をキャプチャすることはありません。"
+        "body": "RKL がウィンドウタイトルを読み取り、Path of Exile 2 のウィンドウを確実に見つけられるようにします。RKL が画面をキャプチャすることはありません。"
       },
       "input_monitoring": {
         "name": "入力監視",
@@ -266,15 +266,15 @@
       "windowedTitle": "ウィンドウモードまたはボーダーレスフルスクリーンを使用",
       "windowedBody": "オーバーレイは排他的フルスクリーンの上には表示できません。ゲームのグラフィック設定で「ウィンドウ」または「ウィンドウフルスクリーン」(ボーダーレス) を選んでください。",
       "elevatedTitle": "ゲームを管理者として実行していますか?",
-      "elevatedBody": "Windows は通常のアプリから管理者権限のアプリへのホットキーやキー入力の送信をブロックします (UIPI)。ゲームを管理者として実行している場合は、kalandra も管理者として実行してください。"
+      "elevatedBody": "Windows は通常のアプリから管理者権限のアプリへのホットキーやキー入力の送信をブロックします (UIPI)。ゲームを管理者として実行している場合は、RKL も管理者として実行してください。"
     },
     "x11": {
       "title": "追加の設定は不要です",
-      "body": "X11 は kalandra に必要な機能 (グローバルホットキー、ウィンドウの追跡、ゲーム上へのオーバーレイ表示) にすべて対応しています。"
+      "body": "X11 は RKL に必要な機能 (グローバルホットキー、ウィンドウの追跡、ゲーム上へのオーバーレイ表示) にすべて対応しています。"
     },
     "gnome": {
       "title": "GNOME: X11/XWayland のみ",
-      "x11Body": "GNOME には kalandra に必要な Wayland 機能がないため、ここでは XWayland 経由で動作します。ゲームも XWayland で実行してください (Proton と Wine では既定)。",
+      "x11Body": "GNOME には RKL に必要な Wayland 機能がないため、ここでは XWayland 経由で動作します。ゲームも XWayland で実行してください (Proton と Wine では既定)。",
       "waylandBody": "GNOME には layer-shell がないため、Wayland ネイティブモードではオーバーレイをゲームの上に表示し続けられません。設定でバックエンドを X11 / XWayland に切り替えてください。"
     },
     "wayland": {
@@ -282,9 +282,9 @@
       "degradedBody": "Wayland はアプリ同士を分離するため、一部の機能の動作が異なります:",
       "portal": "グローバルホットキーはデスクトップの GlobalShortcuts ポータルを経由し、確認を求められます。すべてのコンポジターが対応しているわけではありません。",
       "layerShell": "オーバーレイはゲームウィンドウに追従せず、layer-shell で画面の端に固定されます。",
-      "noTracking": "kalandra はゲームウィンドウを認識できず Esc も検知できないため、オーバーレイは専用のボタンで閉じてください。",
+      "noTracking": "RKL はゲームウィンドウを認識できず Esc も検知できないため、オーバーレイは専用のボタンで閉じてください。",
       "triggerTitle": "コンポジターで価格チェックを割り当てる",
-      "triggerBody": "ホットキーが動作しない場合は、コンポジターに kalandra --trigger を実行するキーボードショートカットを追加してください。実行中の kalandra でカーソル下のアイテムの価格をチェックします。",
+      "triggerBody": "ホットキーが動作しない場合は、コンポジターに RKL --trigger を実行するキーボードショートカットを追加してください。実行中の RKL でカーソル下のアイテムの価格をチェックします。",
       "pinnedHint": "--pinned を付けると、オーバーレイを固定した状態で開きます。",
       "example": {
         "sway": "sway",
@@ -295,7 +295,7 @@
   },
   "proton": {
     "title": "Proton のマウスキャプチャ",
-    "body": "Proton 環境では、フルスクリーンの Path of Exile 2 がマウスをキャプチャするため、クリックやキー入力が kalandra のパネルに届きません。このゲームの Wine のマウスキャプチャをオフにすると解決します。その場合、カーソルはゲームウィンドウ内に固定されなくなります。",
+    "body": "Proton 環境では、フルスクリーンの Path of Exile 2 がマウスをキャプチャするため、クリックやキー入力が RKL のパネルに届きません。このゲームの Wine のマウスキャプチャをオフにすると解決します。その場合、カーソルはゲームウィンドウ内に固定されなくなります。",
     "statusOn": "マウスキャプチャ: オン (Wine の既定値)",
     "statusOff": "マウスキャプチャ: オフ",
     "fix": "マウスキャプチャをオフにする",

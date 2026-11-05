@@ -1,6 +1,6 @@
 [package]
-name = "kalandra-data"
-description = "Bundled, versioned PoE2 game data (stats, bases, uniques) for kalandra"
+name = "rkl-data"
+description = "Bundled, versioned PoE2 game data (stats, bases, uniques) for rkl"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,7 +12,7 @@ publish.workspace = true
 workspace = true
 
 [dependencies]
-kalandra-core.workspace = true
+rkl-core.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true

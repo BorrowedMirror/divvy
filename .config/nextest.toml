@@ -11,11 +11,11 @@ fail-fast = false
 slow-timeout = { period = "60s", terminate-after = 3 }
 
 [[profile.default.overrides]]
-filter = "package(kalandra-platform) & kind(test)"
+filter = "package(rkl-platform) & kind(test)"
 test-group = "serial-display"
 
 [[profile.default.overrides]]
-filter = "package(kalandra-desktop) & kind(test)"
+filter = "package(rkl-desktop) & kind(test)"
 test-group = "serial-display"
 
 [profile.ci]
@@ -32,7 +32,7 @@ store-failure-output = true
 # Live contract tests (`live_*`, #[ignore]d, run by contract.yml): never retried.
 # Listed first because the first matching override wins per setting.
 [[profile.ci.overrides]]
-filter = "package(kalandra-trade) & test(/live_/)"
+filter = "package(rkl-trade) & test(/live_/)"
 retries = 0
 slow-timeout = { period = "120s", terminate-after = 2 }
 
@@ -42,9 +42,9 @@ filter = "kind(test)"
 retries = { backoff = "exponential", count = 2, delay = "1s", max-delay = "10s" }
 
 [[profile.ci.overrides]]
-filter = "package(kalandra-platform) & kind(test)"
+filter = "package(rkl-platform) & kind(test)"
 test-group = "serial-display"
 
 [[profile.ci.overrides]]
-filter = "package(kalandra-desktop) & kind(test)"
+filter = "package(rkl-desktop) & kind(test)"
 test-group = "serial-display"

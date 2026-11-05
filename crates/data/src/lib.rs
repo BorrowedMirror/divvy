@@ -1,11 +1,11 @@
-//! kalandra-data: bundled game data.
+//! rkl-data: bundled game data.
 //!
 //! Assets live in `crates/data/assets/` as zstd-compressed JSON (`*.json.zst`) plus a
 //! plain `manifest.json` ([`Manifest`]) recording schema version, source URLs and sha256
 //! of each decompressed file. Assets are produced by `cargo xtask data refresh`.
 use std::{path::Path, sync::OnceLock};
 
-use kalandra_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
+use rkl_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 

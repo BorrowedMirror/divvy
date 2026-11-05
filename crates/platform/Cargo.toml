@@ -1,5 +1,5 @@
 [package]
-name = "kalandra-platform"
+name = "rkl-platform"
 description = "OS integration traits and backends (window tracking, hotkeys, input, clipboard, overlay)"
 version.workspace = true
 edition.workspace = true

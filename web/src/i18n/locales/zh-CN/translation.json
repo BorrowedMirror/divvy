@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "应用更新",
-    "available": "kalandra {{version}} 现已推出。",
+    "available": "RKL {{version}} 现已推出。",
     "notes": "新功能",
     "later": "稍后",
     "install": "安装并重启",
@@ -31,7 +31,7 @@
     "statMax": "{{stat}} 的最大值",
     "search": "搜索",
     "loading": "搜索中…",
-    "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 kalandra 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。"
+    "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 RKL 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -217,21 +217,21 @@
     "clipboard": "剪贴板访问"
   },
   "guidance": {
-    "accessibility": "macOS：打开“系统设置”→“隐私与安全性”→“辅助功能”，并启用 kalandra。快捷键和复制物品需要此权限。",
-    "screenRecording": "macOS：打开“系统设置”→“隐私与安全性”→“屏幕录制”，并启用 kalandra，以便它找到游戏窗口。之后请重启 kalandra。",
+    "accessibility": "macOS：打开“系统设置”→“隐私与安全性”→“辅助功能”，并启用 RKL。快捷键和复制物品需要此权限。",
+    "screenRecording": "macOS：打开“系统设置”→“隐私与安全性”→“屏幕录制”，并启用 RKL，以便它找到游戏窗口。之后请重启 RKL。",
     "wayland": "Wayland 原生模式：全局快捷键通过桌面门户实现，浮窗锚定在显示输出而非游戏窗口上，模拟按键可能不可用。如果你的合成器允许，请使用 X11/XWayland。",
-    "gnome": "GNOME 不支持 kalandra 所需的 Wayland 功能，因此在 GNOME 上会通过 XWayland（X11）运行。请让游戏也在 XWayland 下运行。",
+    "gnome": "GNOME 不支持 RKL 所需的 Wayland 功能，因此在 GNOME 上会通过 XWayland（X11）运行。请让游戏也在 XWayland 下运行。",
     "generic": "缺少权限：{{permission}}"
   },
   "tray": {
     "priceCheck": "查价（固定）",
     "settings": "设置…",
     "diagnostics": "诊断",
-    "quit": "退出 kalandra",
-    "tooltip": "kalandra"
+    "quit": "退出 RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "设置 kalandra",
+    "title": "设置 RKL",
     "intro": "完成几个针对当前平台的步骤，让查价顺畅运行。你随时可以从“诊断”回到这里。",
     "stepsHeading": "{{platform}} 设置",
     "loadFailed": "无法检查权限。",
@@ -240,25 +240,25 @@
     "granted": "已授权",
     "notGranted": "未授权",
     "openSettings": "打开系统设置",
-    "relaunch": "macOS 会在 kalandra 重启后应用此权限。启用后请退出并重新打开 kalandra。",
+    "relaunch": "macOS 会在 RKL 重启后应用此权限。启用后请退出并重新打开 RKL。",
     "requestFailed": "无法打开系统设置：{{message}}",
     "details": "技术详情",
-    "blockedHint": "仍缺少部分必需权限。kalandra 将继续运行，但部分功能受限。",
+    "blockedHint": "仍缺少部分必需权限。RKL 将继续运行，但部分功能受限。",
     "continueWithout": "跳过并继续",
     "done": "完成",
     "saveFailed": "无法保存：{{message}}",
     "permission": {
       "accessibility": {
         "name": "辅助功能",
-        "body": "按下查价快捷键时，kalandra 会替你按下游戏的复制快捷键。macOS 要求为此授予辅助功能权限。"
+        "body": "按下查价快捷键时，RKL 会替你按下游戏的复制快捷键。macOS 要求为此授予辅助功能权限。"
       },
       "screen_recording": {
         "name": "屏幕录制",
-        "body": "让 kalandra 读取窗口标题，以便可靠地找到《流放之路2》窗口。kalandra 绝不会捕获你的屏幕。"
+        "body": "让 RKL 读取窗口标题，以便可靠地找到《流放之路2》窗口。RKL 绝不会捕获你的屏幕。"
       },
       "input_monitoring": {
         "name": "输入监控",
-        "body": "让 kalandra 在游戏处于焦点时也能用 Esc 关闭浮窗并响应 Ctrl+滚轮。"
+        "body": "让 RKL 在游戏处于焦点时也能用 Esc 关闭浮窗并响应 Ctrl+滚轮。"
       },
       "unknown": "权限：{{kind}}"
     },
@@ -266,15 +266,15 @@
       "windowedTitle": "使用窗口化或无边框全屏",
       "windowedBody": "浮窗无法显示在独占全屏之上。请在游戏的图形选项中选择“窗口化”或“窗口化全屏”（无边框）。",
       "elevatedTitle": "是否以管理员身份运行游戏？",
-      "elevatedBody": "Windows 会阻止普通应用向提权应用发送快捷键和模拟按键（UIPI）。如果游戏以管理员身份运行，请也以管理员身份运行 kalandra。"
+      "elevatedBody": "Windows 会阻止普通应用向提权应用发送快捷键和模拟按键（UIPI）。如果游戏以管理员身份运行，请也以管理员身份运行 RKL。"
     },
     "x11": {
       "title": "无需额外设置",
-      "body": "X11 支持 kalandra 所需的全部功能：全局快捷键、窗口跟踪以及显示在游戏之上的浮窗。"
+      "body": "X11 支持 RKL 所需的全部功能：全局快捷键、窗口跟踪以及显示在游戏之上的浮窗。"
     },
     "gnome": {
       "title": "GNOME：仅支持 X11/XWayland",
-      "x11Body": "GNOME 缺少 kalandra 所需的 Wayland 功能，因此这里会通过 XWayland 运行。请让游戏也在 XWayland 下运行（Proton 和 Wine 默认如此）。",
+      "x11Body": "GNOME 缺少 RKL 所需的 Wayland 功能，因此这里会通过 XWayland 运行。请让游戏也在 XWayland 下运行（Proton 和 Wine 默认如此）。",
       "waylandBody": "GNOME 没有 layer-shell，因此在 Wayland 原生模式下浮窗无法保持在游戏之上。请在设置中将后端切换为 X11 / XWayland。"
     },
     "wayland": {
@@ -282,9 +282,9 @@
       "degradedBody": "Wayland 会将应用彼此隔离，因此部分功能的工作方式有所不同：",
       "portal": "全局快捷键通过桌面的 GlobalShortcuts 门户实现，并会请你确认。并非所有合成器都提供该门户。",
       "layerShell": "浮窗通过 layer-shell 锚定在屏幕边缘，而不是跟随游戏窗口。",
-      "noTracking": "kalandra 无法看到游戏窗口，也无法监听 Esc，因此请用浮窗自身的按钮关闭它。",
+      "noTracking": "RKL 无法看到游戏窗口，也无法监听 Esc，因此请用浮窗自身的按钮关闭它。",
       "triggerTitle": "在合成器中绑定查价",
-      "triggerBody": "如果快捷键不起作用，请在合成器中添加一个运行 kalandra --trigger 的键盘快捷键。它会在正在运行的 kalandra 中对光标下的物品查价。",
+      "triggerBody": "如果快捷键不起作用，请在合成器中添加一个运行 RKL --trigger 的键盘快捷键。它会在正在运行的 RKL 中对光标下的物品查价。",
       "pinnedHint": "添加 --pinned 可在打开浮窗时将其固定。",
       "example": {
         "sway": "sway",
@@ -295,7 +295,7 @@
   },
   "proton": {
     "title": "Proton 鼠标捕获",
-    "body": "在 Proton 下，全屏运行的《流放之路2》会捕获鼠标，导致点击和按键无法到达 kalandra 面板。为该游戏关闭 Wine 的鼠标捕获即可解决；之后光标将不再被锁定在游戏窗口内。",
+    "body": "在 Proton 下，全屏运行的《流放之路2》会捕获鼠标，导致点击和按键无法到达 RKL 面板。为该游戏关闭 Wine 的鼠标捕获即可解决；之后光标将不再被锁定在游戏窗口内。",
     "statusOn": "鼠标捕获：开启（Wine 默认）",
     "statusOff": "鼠标捕获：关闭",
     "fix": "关闭鼠标捕获",

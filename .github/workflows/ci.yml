@@ -202,7 +202,7 @@ jobs:
         with:
           shared-key: bindings
       - name: web/src/bindings.ts matches the Rust IPC types
-        run: cargo test --locked -p kalandra-desktop --test bindings
+        run: cargo test --locked -p rkl-desktop --test bindings
 
   web:
     name: web lint + typecheck + coverage (+ e2e typecheck)

@@ -7,7 +7,7 @@
 header = """
 # Changelog
 
-All notable changes to kalandra are documented here. The format follows
+All notable changes to rkl are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).\n
 """
@@ -38,7 +38,7 @@ filter_commits = false
 tag_pattern = "v[0-9].*"
 sort_commits = "oldest"
 commit_preprocessors = [
-  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/nightah/kalandra/issues/${2}))" },
+  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/nightah/rust-king-ledger/issues/${2}))" },
 ]
 # The HTML comments only order the groups (sorted as strings, hence zero-padded); they are
 # stripped in the output.

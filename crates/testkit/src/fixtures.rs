@@ -144,10 +144,10 @@ struct Injection {
 ///
 /// ```no_run
 /// # async fn demo() {
-/// use kalandra_testkit::fixtures::{Endpoint, TradeMock};
+/// use rkl_testkit::fixtures::{Endpoint, TradeMock};
 /// let server = wiremock::MockServer::start().await;
 /// TradeMock::new().price(2.0, "divine").price(3.0, "divine").rate_limited(Endpoint::Search, 1, 2).mount(&server).await;
-/// // point TradeConfig::base_url (or KALANDRA_TRADE_BASE_URL) at server.uri()
+/// // point TradeConfig::base_url (or RKL_TRADE_BASE_URL) at server.uri()
 /// # }
 /// ```
 #[derive(Debug, Clone)]
@@ -172,7 +172,7 @@ impl TradeMock {
             leagues: vec!["Standard".into(), "Hardcore".into()],
             listings: Vec::new(),
             total: None,
-            search_id: "kalandraMock".into(),
+            search_id: "rklMock".into(),
             injections: Vec::new(),
         }
     }
@@ -363,7 +363,7 @@ mod tests {
 
     #[test]
     fn invalid_json_and_io_errors() {
-        let dir = std::env::temp_dir().join(format!("kalandra-testkit-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rkl-testkit-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("dir.json")).unwrap();
         std::fs::write(dir.join("bad.json"), "{nope").unwrap();
         let e = try_fixture_in(std::slice::from_ref(&dir), "bad").unwrap_err();

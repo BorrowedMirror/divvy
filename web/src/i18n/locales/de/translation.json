@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "App-Update",
-    "available": "kalandra {{version}} ist verfügbar.",
+    "available": "RKL {{version}} ist verfügbar.",
     "notes": "Neuerungen",
     "later": "Später",
     "install": "Installieren und neu starten",
@@ -31,7 +31,7 @@
     "statMax": "Maximum für {{stat}}",
     "search": "Suchen",
     "loading": "Suche läuft…",
-    "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im kalandra-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten."
+    "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im rkl-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten."
   },
   "item": {
     "rarityLabel": "Seltenheit:",
@@ -219,21 +219,21 @@
     "clipboard": "Zugriff auf die Zwischenablage"
   },
   "guidance": {
-    "accessibility": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen öffnen und kalandra aktivieren. Erforderlich für Tastenkürzel und das Kopieren von Gegenständen.",
-    "screenRecording": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme öffnen und kalandra aktivieren, damit das Spielfenster gefunden wird. Danach kalandra neu starten.",
+    "accessibility": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen öffnen und RKL aktivieren. Erforderlich für Tastenkürzel und das Kopieren von Gegenständen.",
+    "screenRecording": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme öffnen und RKL aktivieren, damit das Spielfenster gefunden wird. Danach RKL neu starten.",
     "wayland": "Nativer Wayland-Modus: Globale Tastenkürzel laufen über das Desktop-Portal, das Overlay wird am Bildschirm statt am Spielfenster ausgerichtet, und das Senden von Tastatureingaben ist eventuell nicht verfügbar. Wenn der Compositor es erlaubt, X11/XWayland verwenden.",
-    "gnome": "GNOME unterstützt die von kalandra benötigten Wayland-Funktionen nicht, daher läuft es dort über XWayland (X11). Das Spiel ebenfalls unter XWayland ausführen.",
+    "gnome": "GNOME unterstützt die von RKL benötigten Wayland-Funktionen nicht, daher läuft es dort über XWayland (X11). Das Spiel ebenfalls unter XWayland ausführen.",
     "generic": "Fehlende Berechtigung: {{permission}}"
   },
   "tray": {
     "priceCheck": "Preisprüfung (angeheftet)",
     "settings": "Einstellungen…",
     "diagnostics": "Diagnose",
-    "quit": "kalandra beenden",
-    "tooltip": "kalandra"
+    "quit": "RKL beenden",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "kalandra einrichten",
+    "title": "RKL einrichten",
     "intro": "Ein paar plattformspezifische Schritte, damit Preisprüfungen reibungslos funktionieren. Diese Seite ist jederzeit über die Diagnose wieder erreichbar.",
     "stepsHeading": "Einrichtung für {{platform}}",
     "loadFailed": "Berechtigungen konnten nicht geprüft werden.",
@@ -242,25 +242,25 @@
     "granted": "Erteilt",
     "notGranted": "Nicht erteilt",
     "openSettings": "Systemeinstellungen öffnen",
-    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von kalandra. Nach dem Aktivieren kalandra beenden und erneut öffnen.",
+    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von RKL. Nach dem Aktivieren RKL beenden und erneut öffnen.",
     "requestFailed": "Systemeinstellungen konnten nicht geöffnet werden: {{message}}",
     "details": "Technische Details",
-    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. kalandra funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
+    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. RKL funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
     "continueWithout": "Ohne fortfahren",
     "done": "Fertig",
     "saveFailed": "Speichern fehlgeschlagen: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Bedienungshilfen",
-        "body": "Beim Tastenkürzel für die Preisprüfung drückt kalandra die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
+        "body": "Beim Tastenkürzel für die Preisprüfung drückt RKL die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
       },
       "screen_recording": {
         "name": "Bildschirmaufnahme",
-        "body": "Ermöglicht kalandra, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. kalandra nimmt den Bildschirm niemals auf."
+        "body": "Ermöglicht RKL, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. RKL nimmt den Bildschirm niemals auf."
       },
       "input_monitoring": {
         "name": "Eingabeüberwachung",
-        "body": "Ermöglicht kalandra, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
+        "body": "Ermöglicht RKL, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
       },
       "unknown": "Berechtigung: {{kind}}"
     },
@@ -268,15 +268,15 @@
       "windowedTitle": "Fenstermodus oder randloses Vollbild verwenden",
       "windowedBody": "Über exklusivem Vollbild kann das Overlay nicht erscheinen. In den Grafikoptionen des Spiels Fenster oder Fenster-Vollbild (randlos) wählen.",
       "elevatedTitle": "Läuft das Spiel als Administrator?",
-      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, kalandra ebenfalls als Administrator starten."
+      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, RKL ebenfalls als Administrator starten."
     },
     "x11": {
       "title": "Keine weitere Einrichtung nötig",
-      "body": "X11 unterstützt alles, was kalandra braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
+      "body": "X11 unterstützt alles, was RKL braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
     },
     "gnome": {
       "title": "GNOME: nur X11/XWayland",
-      "x11Body": "GNOME fehlen die von kalandra benötigten Wayland-Funktionen, daher läuft kalandra hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
+      "x11Body": "GNOME fehlen die von RKL benötigten Wayland-Funktionen, daher läuft RKL hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
       "waylandBody": "GNOME bietet kein layer-shell, daher kann das Overlay im nativen Wayland-Modus nicht über dem Spiel bleiben. In den Einstellungen das Backend auf X11 / XWayland umstellen."
     },
     "wayland": {
@@ -284,9 +284,9 @@
       "degradedBody": "Wayland isoliert Apps voneinander, daher funktionieren einige Funktionen anders:",
       "portal": "Globale Tastenkürzel laufen über das GlobalShortcuts-Portal des Desktops, das um Bestätigung bittet. Nicht jeder Compositor bietet es an.",
       "layerShell": "Das Overlay wird per layer-shell am Bildschirmrand verankert, statt dem Spielfenster zu folgen.",
-      "noTracking": "kalandra kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
+      "noTracking": "RKL kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
       "triggerTitle": "Preisprüfung im Compositor belegen",
-      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das kalandra --trigger ausführt. Damit prüft das laufende kalandra den Preis des Gegenstands unter dem Mauszeiger.",
+      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das RKL --trigger ausführt. Damit prüft das laufende RKL den Preis des Gegenstands unter dem Mauszeiger.",
       "pinnedHint": "Mit --pinned öffnet sich das Overlay angeheftet.",
       "example": {
         "sway": "sway",
@@ -297,7 +297,7 @@
   },
   "proton": {
     "title": "Proton-Mauserfassung",
-    "body": "Unter Proton fängt Path of Exile 2 im Vollbild die Maus ein, sodass Klicks und Tasten nie bei kalandras Panel ankommen. Das Ausschalten der Mauserfassung von Wine für das Spiel behebt das; der Mauszeiger ist dann nicht mehr an das Spielfenster gebunden.",
+    "body": "Unter Proton fängt Path of Exile 2 im Vollbild die Maus ein, sodass Klicks und Tasten nie bei RKLs Panel ankommen. Das Ausschalten der Mauserfassung von Wine für das Spiel behebt das; der Mauszeiger ist dann nicht mehr an das Spielfenster gebunden.",
     "statusOn": "Mauserfassung: an (Wine-Standard)",
     "statusOff": "Mauserfassung: aus",
     "fix": "Mauserfassung ausschalten",

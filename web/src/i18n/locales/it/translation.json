@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "Aggiornamento dell'app",
-    "available": "kalandra {{version}} è disponibile.",
+    "available": "RKL {{version}} è disponibile.",
     "notes": "Novità",
     "later": "Più tardi",
     "install": "Installa e riavvia",
@@ -31,7 +31,7 @@
     "statMax": "Massimo per {{stat}}",
     "search": "Cerca",
     "loading": "Ricerca…",
-    "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di kalandra nell'area di notifica e disattiva la cattura del mouse di Proton."
+    "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di RKL nell'area di notifica e disattiva la cattura del mouse di Proton."
   },
   "item": {
     "rarityLabel": "Rarità:",
@@ -221,21 +221,21 @@
     "clipboard": "Accesso agli appunti"
   },
   "guidance": {
-    "accessibility": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Accessibilità e attiva kalandra. È necessario per le scorciatoie e la copia degli oggetti.",
-    "screenRecording": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e attiva kalandra perché possa trovare la finestra di gioco. Poi riavvia kalandra.",
+    "accessibility": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Accessibilità e attiva RKL. È necessario per le scorciatoie e la copia degli oggetti.",
+    "screenRecording": "macOS: apri Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e attiva RKL perché possa trovare la finestra di gioco. Poi riavvia RKL.",
     "wayland": "Modalità Wayland nativa: le scorciatoie globali passano dal portale desktop, l'overlay è ancorato allo schermo anziché alla finestra di gioco e l'invio di tasti potrebbe non essere disponibile. Usa X11/XWayland se il compositor lo consente.",
-    "gnome": "GNOME non supporta le funzionalità Wayland di cui kalandra ha bisogno, quindi lì viene eseguito tramite XWayland (X11). Esegui anche il gioco sotto XWayland.",
+    "gnome": "GNOME non supporta le funzionalità Wayland di cui RKL ha bisogno, quindi lì viene eseguito tramite XWayland (X11). Esegui anche il gioco sotto XWayland.",
     "generic": "Autorizzazione mancante: {{permission}}"
   },
   "tray": {
     "priceCheck": "Controllo prezzi (fissato)",
     "settings": "Impostazioni…",
     "diagnostics": "Diagnostica",
-    "quit": "Esci da kalandra",
-    "tooltip": "kalandra"
+    "quit": "Esci da RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "Configura kalandra",
+    "title": "Configura RKL",
     "intro": "Alcuni passaggi specifici per la tua piattaforma per far funzionare al meglio il controllo prezzi. Puoi tornare qui in qualsiasi momento da Diagnostica.",
     "stepsHeading": "Configurazione per {{platform}}",
     "loadFailed": "Impossibile verificare le autorizzazioni.",
@@ -244,25 +244,25 @@
     "granted": "Concessa",
     "notGranted": "Non concessa",
     "openSettings": "Apri Impostazioni di Sistema",
-    "relaunch": "macOS applica questa autorizzazione dopo il riavvio di kalandra. Dopo averla attivata, chiudi e riapri kalandra.",
+    "relaunch": "macOS applica questa autorizzazione dopo il riavvio di RKL. Dopo averla attivata, chiudi e riapri RKL.",
     "requestFailed": "Impossibile aprire Impostazioni di Sistema: {{message}}",
     "details": "Dettagli tecnici",
-    "blockedHint": "Mancano ancora alcune autorizzazioni obbligatorie. kalandra continuerà a funzionare con funzionalità ridotte.",
+    "blockedHint": "Mancano ancora alcune autorizzazioni obbligatorie. RKL continuerà a funzionare con funzionalità ridotte.",
     "continueWithout": "Continua senza",
     "done": "Fine",
     "saveFailed": "Impossibile salvare: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Accessibilità",
-        "body": "Quando premi la scorciatoia del controllo prezzi, kalandra preme per te la scorciatoia di copia del gioco. Per farlo macOS richiede l'accesso ad Accessibilità."
+        "body": "Quando premi la scorciatoia del controllo prezzi, RKL preme per te la scorciatoia di copia del gioco. Per farlo macOS richiede l'accesso ad Accessibilità."
       },
       "screen_recording": {
         "name": "Registrazione schermo",
-        "body": "Permette a kalandra di leggere i titoli delle finestre per trovare in modo affidabile la finestra di Path of Exile 2. kalandra non registra mai il tuo schermo."
+        "body": "Permette a RKL di leggere i titoli delle finestre per trovare in modo affidabile la finestra di Path of Exile 2. RKL non registra mai il tuo schermo."
       },
       "input_monitoring": {
         "name": "Monitoraggio input",
-        "body": "Permette a kalandra di chiudere l'overlay con Esc e di reagire a Ctrl+rotellina quando il gioco è in primo piano."
+        "body": "Permette a RKL di chiudere l'overlay con Esc e di reagire a Ctrl+rotellina quando il gioco è in primo piano."
       },
       "unknown": "Autorizzazione: {{kind}}"
     },
@@ -270,15 +270,15 @@
       "windowedTitle": "Usa la modalità finestra o schermo intero senza bordi",
       "windowedBody": "L'overlay non può apparire sopra lo schermo intero esclusivo. Nelle opzioni grafiche del gioco scegli Finestra o Schermo intero in finestra (senza bordi).",
       "elevatedTitle": "Esegui il gioco come amministratore?",
-      "elevatedBody": "Windows blocca le scorciatoie e i tasti simulati inviati da un'app normale a un'app con privilegi elevati (UIPI). Se il gioco è in esecuzione come amministratore, esegui anche kalandra come amministratore."
+      "elevatedBody": "Windows blocca le scorciatoie e i tasti simulati inviati da un'app normale a un'app con privilegi elevati (UIPI). Se il gioco è in esecuzione come amministratore, esegui anche RKL come amministratore."
     },
     "x11": {
       "title": "Nessuna configurazione aggiuntiva",
-      "body": "X11 supporta tutto ciò di cui kalandra ha bisogno: scorciatoie globali, rilevamento della finestra e un overlay sopra il gioco."
+      "body": "X11 supporta tutto ciò di cui RKL ha bisogno: scorciatoie globali, rilevamento della finestra e un overlay sopra il gioco."
     },
     "gnome": {
       "title": "GNOME: solo X11/XWayland",
-      "x11Body": "GNOME non ha le funzionalità Wayland di cui kalandra ha bisogno, quindi qui kalandra viene eseguito tramite XWayland. Esegui anche il gioco sotto XWayland (l'impostazione predefinita di Proton e Wine).",
+      "x11Body": "GNOME non ha le funzionalità Wayland di cui RKL ha bisogno, quindi qui RKL viene eseguito tramite XWayland. Esegui anche il gioco sotto XWayland (l'impostazione predefinita di Proton e Wine).",
       "waylandBody": "GNOME non ha layer-shell, quindi in modalità Wayland nativa l'overlay non può restare sopra il gioco. Passa il backend a X11 / XWayland nelle Impostazioni."
     },
     "wayland": {
@@ -286,9 +286,9 @@
       "degradedBody": "Wayland isola le app tra loro, quindi alcune funzionalità si comportano diversamente:",
       "portal": "Le scorciatoie globali passano dal portale GlobalShortcuts del desktop, che ti chiede di confermarle. Non tutti i compositor lo offrono.",
       "layerShell": "L'overlay è ancorato al bordo dello schermo tramite layer-shell invece di seguire la finestra di gioco.",
-      "noTracking": "kalandra non può vedere la finestra di gioco né rilevare Esc, quindi chiudi l'overlay con il suo pulsante.",
+      "noTracking": "RKL non può vedere la finestra di gioco né rilevare Esc, quindi chiudi l'overlay con il suo pulsante.",
       "triggerTitle": "Assegna il controllo prezzi nel compositor",
-      "triggerBody": "Se le scorciatoie non funzionano, aggiungi nel compositor una scorciatoia da tastiera che esegua kalandra --trigger. Controlla il prezzo dell'oggetto sotto il cursore nell'istanza di kalandra in esecuzione.",
+      "triggerBody": "Se le scorciatoie non funzionano, aggiungi nel compositor una scorciatoia da tastiera che esegua RKL --trigger. Controlla il prezzo dell'oggetto sotto il cursore nell'istanza di RKL in esecuzione.",
       "pinnedHint": "Aggiungi --pinned per aprire l'overlay fissato.",
       "example": {
         "sway": "sway",
@@ -299,7 +299,7 @@
   },
   "proton": {
     "title": "Cattura del mouse di Proton",
-    "body": "Con Proton, Path of Exile 2 a schermo intero cattura il mouse, quindi clic e tasti non arrivano mai al pannello di kalandra. Disattivare la cattura del mouse di Wine per il gioco risolve il problema; il cursore non resta più bloccato nella finestra del gioco.",
+    "body": "Con Proton, Path of Exile 2 a schermo intero cattura il mouse, quindi clic e tasti non arrivano mai al pannello di RKL. Disattivare la cattura del mouse di Wine per il gioco risolve il problema; il cursore non resta più bloccato nella finestra del gioco.",
     "statusOn": "Cattura del mouse: attiva (predefinita di Wine)",
     "statusOff": "Cattura del mouse: disattivata",
     "fix": "Disattiva la cattura del mouse",

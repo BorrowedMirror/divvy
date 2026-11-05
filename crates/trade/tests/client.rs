@@ -2,18 +2,18 @@
 //! (see docs/research/trade2.md).
 use std::time::{Duration, Instant};
 
-use kalandra_core::{
+use pretty_assertions::assert_eq;
+use rkl_core::{
     pricing::PriceSourceKind,
     query::{FilterSet, MiscFilters, OnlineStatus, QueryRoute, TradeQuery},
 };
-use kalandra_trade::{
+use rkl_trade::{
     PriceRequest, PriceSource, TradeClient, TradeConfig, TradeError,
     client::{FETCH_CHUNK, exchange_body, exchange_listing, fetch_listing},
     error::TradeErrorInfo,
     ratelimit::SystemClock,
     types::{ExchangeResponse, FetchEntry},
 };
-use pretty_assertions::assert_eq;
 use serde_json::json;
 use url::Url;
 use wiremock::{
@@ -21,7 +21,7 @@ use wiremock::{
     matchers::{body_json, header, method, path, query_param},
 };
 
-const UA: &str = "kalandra-test/0.0 (+https://example.invalid)";
+const UA: &str = "rkl-test/0.0 (+https://example.invalid)";
 
 fn fixture(name: &str) -> String {
     std::fs::read_to_string(format!("{}/tests/fixtures/{name}", env!("CARGO_MANIFEST_DIR"))).expect("fixture")
@@ -137,7 +137,7 @@ async fn empty_poesessid_sends_no_cookie() {
 fn invalid_config_is_rejected() {
     let base = TradeConfig::default();
     assert_eq!(base.base_url.as_str(), "https://www.pathofexile.com/");
-    assert!(base.user_agent.starts_with("kalandra/"));
+    assert!(base.user_agent.starts_with("rkl/"));
     let bad_url = TradeConfig { base_url: Url::parse("mailto:a@b.c").unwrap(), ..base.clone() };
     assert!(matches!(TradeClient::new(bad_url, Box::new(SystemClock)), Err(TradeError::Config(_))));
     let bad_cookie = TradeConfig { poesessid: Some("a\nb".into()), ..base };
@@ -556,7 +556,7 @@ async fn price_full_search_path() {
     let c = client(&server);
     let mut f = filters(QueryRoute::Search, "Gold Ring");
     f.name = Some("Andvarius".into());
-    let item = kalandra_core::parser::parse_item(
+    let item = rkl_core::parser::parse_item(
         "Item Class: Rings\nRarity: Unique\nAndvarius\nGold Ring\n--------\nItem Level: 40\n",
     )
     .unwrap();

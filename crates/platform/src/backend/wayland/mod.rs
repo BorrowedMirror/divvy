@@ -1,8 +1,8 @@
-//! Wayland-native backend (no `DISPLAY`, or `KALANDRA_BACKEND=wayland`).
+//! Wayland-native backend (no `DISPLAY`, or `RKL_BACKEND=wayland`).
 //!
 //! What Wayland allows a regular client:
 //! - window tracking: impossible (no global window list) -> overlay anchored to the output;
-//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 (price check) / SIGUSR1 (pinned) / `kalandra --trigger`;
+//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 (price check) / SIGUSR1 (pinned) / `rkl --trigger`;
 //! - passive hook: impossible;
 //! - keystrokes: zwp_virtual_keyboard_v1 (wlroots: sway, Hyprland, river...) via enigo, else
 //!   the `ydotool` CLI, else unsupported;
@@ -117,7 +117,7 @@ pub(crate) fn create_with(probe: &EnvProbe, use_portal: bool) -> Result<Platform
     caps.global_hotkeys = hotkeys.has_portal();
     if !caps.global_hotkeys {
         caps.notes.push(
-            "No GlobalShortcuts portal: bind `kalandra --trigger` (or `pkill -USR2 kalandra`; `-USR1` to pin) in \
+            "No GlobalShortcuts portal: bind `rkl --trigger` (or `pkill -USR2 rkl`; `-USR1` to pin) in \
              your compositor"
                 .into(),
         );

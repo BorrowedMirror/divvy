@@ -7,11 +7,11 @@ import { keys, usePermissions, useRequestPermission, useSaveSettings, useSetting
 import { toIpcError } from "../../lib/ipc";
 import { ProtonMouseCard } from "../../components/ProtonMouseCard";
 
-/** Example compositor bindings for `kalandra --trigger` (code, not translated). */
+/** Example compositor bindings for `rkl --trigger` (code, not translated). */
 export const TRIGGER_EXAMPLES = [
-  { id: "sway", code: "bindsym Ctrl+d exec kalandra --trigger" },
-  { id: "hyprland", code: "bind = CTRL, D, exec, kalandra --trigger" },
-  { id: "kde", code: "kalandra --trigger --pinned" },
+  { id: "sway", code: "bindsym Ctrl+d exec rkl --trigger" },
+  { id: "hyprland", code: "bind = CTRL, D, exec, rkl --trigger" },
+  { id: "kde", code: "rkl --trigger --pinned" },
 ] as const;
 
 /** Permission kinds the backend can report; others fall back to a generic label. */

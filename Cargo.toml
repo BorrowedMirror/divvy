@@ -25,8 +25,8 @@ version = "0.1.0-rc.1"
 edition = "2024"
 rust-version = "1.98"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/nightah/kalandra"
-authors = ["kalandra contributors"]
+repository = "https://github.com/nightah/rust-king-ledger"
+authors = ["rkl contributors"]
 publish = false
 
 [workspace.lints.rust]
@@ -51,12 +51,12 @@ unused_async = "allow"
 needless_pass_by_value = "allow"
 
 [workspace.dependencies]
-kalandra-core = { path = "crates/core" }
-kalandra-data = { path = "crates/data" }
-kalandra-trade = { path = "crates/trade" }
-kalandra-platform = { path = "crates/platform" }
-kalandra-config = { path = "crates/config" }
-kalandra-testkit = { path = "crates/testkit" }
+rkl-core = { path = "crates/core" }
+rkl-data = { path = "crates/data" }
+rkl-trade = { path = "crates/trade" }
+rkl-platform = { path = "crates/platform" }
+rkl-config = { path = "crates/config" }
+rkl-testkit = { path = "crates/testkit" }
 
 anyhow = "1"
 signal-hook = "0.3"

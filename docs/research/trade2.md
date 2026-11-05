@@ -1,7 +1,7 @@
 # PoE2 official trade API (`/api/trade2`)
 
 Captured live on **2026-11-05** (UTC 12:00) from `https://www.pathofexile.com` with
-User-Agent `kalandra-research/0.1 (+https://github.com/nightah/kalandra)`, no
+User-Agent `rkl-research/0.1 (+https://github.com/nightah/rust-king-ledger)`, no
 POESESSID. Eight requests total. Cloudflare did not block us. Trimmed and
 anonymised copies are in `crates/trade/tests/fixtures/`.
 

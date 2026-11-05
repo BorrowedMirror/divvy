@@ -1,6 +1,6 @@
-# Contributing to kalandra
+# Contributing to RKL
 
-Thanks for helping! kalandra is a Path of Exile 2 price-check overlay: a Rust workspace
+Thanks for helping! RKL is a Path of Exile 2 price-check overlay: a Rust workspace
 (`crates/*`), a Tauri 2 shell (`apps/desktop`) and a React 19 + Vite web UI (`web/`).
 See [docs/architecture.md](docs/architecture.md) for how the pieces fit together.
 
@@ -54,7 +54,7 @@ pnpm install                 # web + e2e deps, commitlint, lefthook
 pnpm exec lefthook install   # hooks from .lefthook.yml: rustfmt check + eslint on commit, commitlint on commit-msg
 cargo test                   # default members (crates/*)
 pnpm --dir web dev           # web UI on http://localhost:5173 (keep running for the app)
-cargo run -p kalandra-desktop  # full app, loading the UI from the Vite dev server
+cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
                              # (or `cargo install tauri-cli` and `cargo tauri dev` in apps/desktop)
 ```
 
@@ -89,9 +89,9 @@ cargo run --manifest-path e2e/macos-harness/Cargo.toml   # macOS: hook harness
 The scripts build the web UI, the app (`--features test-hook,tauri/custom-protocol`) and
 `fake-game` themselves; `SKIP_BUILD=1` (`-SkipBuild` on Windows) reuses existing binaries. The
 macOS harness does not build: run `pnpm --dir web build`, then
-`cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol` and
+`cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol` and
 `cargo build -p fake-game` first. Each
-script lists the tools it needs in its header comment. The knobs are the `KALANDRA_E2E_*` variables in the
+script lists the tools it needs in its header comment. The knobs are the `RKL_E2E_*` variables in the
 [README](README.md#environment-variables).
 
 ## Commits and pull requests

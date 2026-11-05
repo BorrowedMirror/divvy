@@ -76,7 +76,7 @@ impl WindowTracker for X11WindowTracker {
         let (tx, rx) = channel();
         let stop = Arc::clone(&self.stop);
         std::thread::Builder::new()
-            .name("kalandra-x11-tracker".into())
+            .name("rkl-x11-tracker".into())
             .spawn(move || run(&conn, &tx, &stop))
             .map_err(|e| PlatformError::Backend(format!("spawn tracker thread: {e}")))?;
         Ok(rx)

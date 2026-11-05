@@ -1,6 +1,6 @@
 [package]
-name = "kalandra-macos-harness"
-description = "e2e harness driving kalandra over its test hook (macOS CI; runs on any OS)"
+name = "rkl-macos-harness"
+description = "e2e harness driving rkl over its test hook (macOS CI; runs on any OS)"
 version = "0.1.0-rc.1"
 edition = "2024"
 rust-version = "1.98"
@@ -14,7 +14,7 @@ publish = false
 
 [dependencies]
 anyhow = "1"
-kalandra-testkit = { path = "../../crates/testkit" }
+rkl-testkit = { path = "../../crates/testkit" }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time"] }
 

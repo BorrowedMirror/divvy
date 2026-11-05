@@ -1,13 +1,13 @@
-//! Behavioural tests for kalandra-config: paths, migration, validation, load/save.
+//! Behavioural tests for rkl-config: paths, migration, validation, load/save.
 use std::path::{Path, PathBuf};
 
-use kalandra_config::{
-    CONFIG_DIR_ENV, ConfigError, OverlaySide, Paths, SETTINGS_VERSION, Settings, Theme, load, migrate, save, validate,
-};
-use kalandra_core::pricing::PriceSourceKind;
-use kalandra_platform::{BackendKind, Chord, KeyModifier};
 use pretty_assertions::assert_eq;
 use proptest::prelude::*;
+use rkl_config::{
+    CONFIG_DIR_ENV, ConfigError, OverlaySide, Paths, SETTINGS_VERSION, Settings, Theme, load, migrate, save, validate,
+};
+use rkl_core::pricing::PriceSourceKind;
+use rkl_platform::{BackendKind, Chord, KeyModifier};
 
 fn fixture(name: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name);
@@ -34,15 +34,17 @@ fn assert_invalid(result: Result<(), ConfigError>, expected_field: &str) {
 
 #[test]
 fn resolve_honours_env_override() {
-    let paths = Paths::resolve_with(|k| (k == CONFIG_DIR_ENV).then(|| "/portable/kalandra".to_owned())).unwrap();
-    assert_eq!(paths, Paths::under(Path::new("/portable/kalandra")));
-    assert_eq!(paths.settings_file, PathBuf::from("/portable/kalandra/config/settings.toml"));
+    let paths = Paths::resolve_with(|k| (k == CONFIG_DIR_ENV).then(|| "/portable/rkl".to_owned())).unwrap();
+    assert_eq!(paths, Paths::under(Path::new("/portable/rkl")));
+    assert_eq!(paths.settings_file, PathBuf::from("/portable/rkl/config/settings.toml"));
 }
 
 #[test]
 fn resolve_ignores_blank_override_and_uses_project_dirs() {
     let paths = Paths::resolve_with(|_| Some("  ".to_owned())).unwrap();
-    let dirs = directories::ProjectDirs::from("au", "nerv", "kalandra").unwrap();
+    let dirs =
+        directories::ProjectDirs::from(rkl_config::PROJECT_QUALIFIER, rkl_config::PROJECT_ORG, rkl_config::PROJECT_APP)
+            .unwrap();
     assert_eq!(paths.config_dir, dirs.config_dir());
     assert_eq!(paths.cache_dir, dirs.cache_dir());
     assert_eq!(paths.settings_file, dirs.config_dir().join("settings.toml"));
@@ -485,9 +487,9 @@ fn save_normalises_version_and_restricts_permissions() {
     let paths = Paths::under(dir.path());
     let s = Settings { version: 0, ..Settings::default() };
     save(&paths, &s).unwrap();
-    assert_eq!(load(&paths).unwrap().version, kalandra_config::SETTINGS_VERSION);
+    assert_eq!(load(&paths).unwrap().version, rkl_config::SETTINGS_VERSION);
     let text = std::fs::read_to_string(&paths.settings_file).unwrap();
-    assert!(text.contains(&format!("version = {}", kalandra_config::SETTINGS_VERSION)));
+    assert!(text.contains(&format!("version = {}", rkl_config::SETTINGS_VERSION)));
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -534,4 +536,23 @@ fn hotkeys_can_be_cleared_and_stay_cleared() {
     // Modifiers without a key are still rejected.
     s.hotkeys.open_settings = Chord { modifiers: vec![KeyModifier::Ctrl], key: String::new() };
     assert!(validate(&s).is_err());
+}
+
+#[test]
+fn legacy_kalandra_settings_are_adopted_once() {
+    let dir = tempfile::tempdir().unwrap();
+    let paths = Paths::under(&dir.path().join("new"));
+    let legacy = dir.path().join("old/settings.toml");
+    assert!(!rkl_config::adopt_legacy_settings(&paths, Some(&legacy)).unwrap(), "no legacy file");
+    std::fs::create_dir_all(legacy.parent().unwrap()).unwrap();
+    std::fs::write(&legacy, "version = 1\n\n[trade]\nwiden_pct = 17.0\n").unwrap();
+    assert!(rkl_config::adopt_legacy_settings(&paths, Some(&legacy)).unwrap());
+    assert!((load(&paths).unwrap().trade.widen_pct - 17.0).abs() < f64::EPSILON);
+    assert!(legacy.exists(), "old file is kept");
+    // Never overwrites settings that already exist at the new location.
+    std::fs::write(&legacy, "version = 1\n\n[trade]\nwiden_pct = 3.0\n").unwrap();
+    assert!(!rkl_config::adopt_legacy_settings(&paths, Some(&legacy)).unwrap());
+    assert!((load(&paths).unwrap().trade.widen_pct - 17.0).abs() < f64::EPSILON);
+    assert!(!rkl_config::adopt_legacy_settings(&paths, None).unwrap());
+    assert!(rkl_config::legacy_settings_file().is_none_or(|p| p.ends_with("settings.toml")));
 }

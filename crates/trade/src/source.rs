@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use kalandra_core::{
+use rkl_core::{
     item::ParsedItem,
     pricing::{PriceSourceKind, PriceSummary},
     query::FilterSet,

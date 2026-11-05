@@ -201,7 +201,7 @@ impl TrackerState {
 /// notes cover the two real-world failure modes.
 pub fn capabilities(global_hotkeys: bool) -> Capabilities {
     let mut notes = vec![
-        "If Path of Exile 2 runs as administrator, kalandra must too: Windows (UIPI) blocks \
+        "If Path of Exile 2 runs as administrator, rkl must too: Windows (UIPI) blocks \
          injected Ctrl+C into elevated windows."
             .to_owned(),
         "Use windowed or borderless fullscreen; exclusive fullscreen hides the overlay.".to_owned(),

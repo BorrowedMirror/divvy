@@ -25,7 +25,7 @@ impl Default for CopyOptions {
 /// Header every PoE2 item copy starts with. Kept local so this crate never depends on core.
 const ITEM_HEADER: &str = "Item Class:";
 
-/// Cheap check equivalent to `kalandra_core::parser::looks_like_item`.
+/// Cheap check equivalent to `rkl_core::parser::looks_like_item`.
 pub fn looks_like_item(text: &str) -> bool {
     text.trim_start().starts_with(ITEM_HEADER)
 }

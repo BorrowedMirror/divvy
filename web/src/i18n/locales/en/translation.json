@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "App update",
-    "available": "kalandra {{version}} is available.",
+    "available": "RKL {{version}} is available.",
     "notes": "What's new",
     "later": "Later",
     "install": "Install and restart",
@@ -31,7 +31,7 @@
     "statMax": "Maximum for {{stat}}",
     "search": "Search",
     "loading": "Searching…",
-    "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the kalandra tray menu and turn off Proton mouse capture."
+    "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the RKL tray menu and turn off Proton mouse capture."
   },
   "item": {
     "rarityLabel": "Rarity:",
@@ -219,21 +219,21 @@
     "clipboard": "Clipboard access"
   },
   "guidance": {
-    "accessibility": "macOS: open System Settings → Privacy & Security → Accessibility and enable kalandra. This is needed for hotkeys and copying items.",
-    "screenRecording": "macOS: open System Settings → Privacy & Security → Screen Recording and enable kalandra so it can find the game window. Restart kalandra afterwards.",
+    "accessibility": "macOS: open System Settings → Privacy & Security → Accessibility and enable RKL. This is needed for hotkeys and copying items.",
+    "screenRecording": "macOS: open System Settings → Privacy & Security → Screen Recording and enable RKL so it can find the game window. Restart RKL afterwards.",
     "wayland": "Wayland-native mode: global hotkeys go through the desktop portal, the overlay is anchored to the output rather than the game window, and keystroke injection may be unavailable. Use X11/XWayland if your compositor allows it.",
-    "gnome": "GNOME does not support the Wayland features kalandra needs, so it runs through XWayland (X11) there. Run the game under XWayland too.",
+    "gnome": "GNOME does not support the Wayland features RKL needs, so it runs through XWayland (X11) there. Run the game under XWayland too.",
     "generic": "Missing permission: {{permission}}"
   },
   "tray": {
     "priceCheck": "Price check (pinned)",
     "settings": "Settings…",
     "diagnostics": "Diagnostics",
-    "quit": "Quit kalandra",
-    "tooltip": "kalandra"
+    "quit": "Quit RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "Set up kalandra",
+    "title": "Set up RKL",
     "intro": "A few platform-specific steps so price checks work smoothly. You can come back here any time from Diagnostics.",
     "stepsHeading": "Setup for {{platform}}",
     "loadFailed": "Couldn't check permissions.",
@@ -242,25 +242,25 @@
     "granted": "Granted",
     "notGranted": "Not granted",
     "openSettings": "Open System Settings",
-    "relaunch": "macOS applies this permission after kalandra restarts. Quit and reopen kalandra once you've enabled it.",
+    "relaunch": "macOS applies this permission after RKL restarts. Quit and reopen RKL once you've enabled it.",
     "requestFailed": "Couldn't open System Settings: {{message}}",
     "details": "Technical details",
-    "blockedHint": "Some required permissions are still missing. kalandra will keep working with reduced features.",
+    "blockedHint": "Some required permissions are still missing. RKL will keep working with reduced features.",
     "continueWithout": "Continue without",
     "done": "Done",
     "saveFailed": "Couldn't save: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Accessibility",
-        "body": "kalandra presses the game's copy shortcut for you when you hit the price-check hotkey. macOS requires Accessibility access for that."
+        "body": "RKL presses the game's copy shortcut for you when you hit the price-check hotkey. macOS requires Accessibility access for that."
       },
       "screen_recording": {
         "name": "Screen Recording",
-        "body": "Lets kalandra read window titles so it can find the Path of Exile 2 window reliably. kalandra never captures your screen."
+        "body": "Lets RKL read window titles so it can find the Path of Exile 2 window reliably. RKL never captures your screen."
       },
       "input_monitoring": {
         "name": "Input Monitoring",
-        "body": "Lets kalandra close the overlay with Esc and react to Ctrl+scroll while the game has focus."
+        "body": "Lets RKL close the overlay with Esc and react to Ctrl+scroll while the game has focus."
       },
       "unknown": "Permission: {{kind}}"
     },
@@ -268,15 +268,15 @@
       "windowedTitle": "Use windowed or borderless fullscreen",
       "windowedBody": "The overlay can't appear above exclusive fullscreen. In the game's graphics options pick Windowed or Windowed Fullscreen (borderless).",
       "elevatedTitle": "Running the game as administrator?",
-      "elevatedBody": "Windows blocks hotkeys and simulated keystrokes from a normal app to an elevated one (UIPI). If the game runs as administrator, run kalandra as administrator too."
+      "elevatedBody": "Windows blocks hotkeys and simulated keystrokes from a normal app to an elevated one (UIPI). If the game runs as administrator, run RKL as administrator too."
     },
     "x11": {
       "title": "No extra setup needed",
-      "body": "X11 supports everything kalandra needs: global hotkeys, window tracking and an overlay above the game."
+      "body": "X11 supports everything RKL needs: global hotkeys, window tracking and an overlay above the game."
     },
     "gnome": {
       "title": "GNOME: X11/XWayland only",
-      "x11Body": "GNOME lacks the Wayland features kalandra needs, so kalandra runs through XWayland here. Run the game under XWayland too (the default for Proton and Wine).",
+      "x11Body": "GNOME lacks the Wayland features RKL needs, so RKL runs through XWayland here. Run the game under XWayland too (the default for Proton and Wine).",
       "waylandBody": "GNOME has no layer-shell, so in Wayland-native mode the overlay can't stay above the game. Switch the backend to X11 / XWayland in Settings."
     },
     "wayland": {
@@ -284,9 +284,9 @@
       "degradedBody": "Wayland keeps apps isolated from each other, so some features work differently:",
       "portal": "Global hotkeys go through the desktop's GlobalShortcuts portal, which asks you to confirm them. Not every compositor offers it.",
       "layerShell": "The overlay is anchored to the screen edge with layer-shell instead of following the game window.",
-      "noTracking": "kalandra can't see the game window or listen for Esc, so close the overlay with its own button.",
+      "noTracking": "RKL can't see the game window or listen for Esc, so close the overlay with its own button.",
       "triggerTitle": "Bind the price check in your compositor",
-      "triggerBody": "If hotkeys don't work, add a keyboard shortcut in your compositor that runs kalandra --trigger. It price-checks the item under the cursor in the running kalandra.",
+      "triggerBody": "If hotkeys don't work, add a keyboard shortcut in your compositor that runs RKL --trigger. It price-checks the item under the cursor in the running RKL.",
       "pinnedHint": "Add --pinned to open the overlay pinned.",
       "example": {
         "sway": "sway",
@@ -297,7 +297,7 @@
   },
   "proton": {
     "title": "Proton mouse capture",
-    "body": "Under Proton, fullscreen Path of Exile 2 captures the mouse, so clicks and keys never reach kalandra's panel. Turning off Wine's mouse capture for the game fixes this; the cursor is then no longer locked to the game window.",
+    "body": "Under Proton, fullscreen Path of Exile 2 captures the mouse, so clicks and keys never reach RKL's panel. Turning off Wine's mouse capture for the game fixes this; the cursor is then no longer locked to the game window.",
     "statusOn": "Mouse capture: on (Wine default)",
     "statusOff": "Mouse capture: off",
     "fix": "Turn off mouse capture",

@@ -1,4 +1,4 @@
-//! kalandra-platform: OS integration behind traits.
+//! rkl-platform: OS integration behind traits.
 //!
 //! Rules:
 //! - Exactly one global input hook per process. Hook callbacks only push into a channel.

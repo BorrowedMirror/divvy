@@ -9,7 +9,7 @@ pub enum BackendKind {
     X11,
     /// Wayland-native (layer-shell + portals).
     Wayland,
-    /// In-process fakes (tests, `KALANDRA_BACKEND=fake`).
+    /// In-process fakes (tests, `RKL_BACKEND=fake`).
     Fake,
 }
 
@@ -20,7 +20,7 @@ pub struct EnvProbe {
     pub xdg_session_type: Option<String>,
     pub wayland_display: Option<String>,
     pub display: Option<String>,
-    /// `KALANDRA_BACKEND` value.
+    /// `RKL_BACKEND` value.
     pub override_backend: Option<String>,
     pub desktop: Option<String>,
 }
@@ -33,13 +33,13 @@ impl EnvProbe {
             xdg_session_type: var("XDG_SESSION_TYPE"),
             wayland_display: var("WAYLAND_DISPLAY"),
             display: var("DISPLAY"),
-            override_backend: var("KALANDRA_BACKEND"),
+            override_backend: var("RKL_BACKEND"),
             desktop: var("XDG_CURRENT_DESKTOP"),
         }
     }
 }
 
-/// Pick a backend. Order: explicit override (settings) > `KALANDRA_BACKEND` > OS defaults.
+/// Pick a backend. Order: explicit override (settings) > `RKL_BACKEND` > OS defaults.
 /// On Linux, X11/XWayland is preferred whenever `DISPLAY` is set; Wayland-native only when
 /// there is no X server, or when explicitly requested. GNOME with `DISPLAY` is X11 (XWayland);
 /// GNOME without `DISPLAY` is Wayland-native, since there is no X server for GTK to open.
@@ -71,7 +71,7 @@ fn linux_default(probe: &EnvProbe) -> BackendKind {
 }
 
 impl BackendKind {
-    /// Parse a `KALANDRA_BACKEND` value (`x11|wayland|windows|macos|fake`, case-insensitive).
+    /// Parse a `RKL_BACKEND` value (`x11|wayland|windows|macos|fake`, case-insensitive).
     pub fn parse(s: &str) -> Option<Self> {
         match s.trim().to_ascii_lowercase().as_str() {
             "x11" | "xwayland" => Some(Self::X11),

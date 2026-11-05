@@ -10,8 +10,8 @@ use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{Receiver, channel};
 use std::time::{Duration, Instant};
 
-use kalandra_platform::backend::macos::{self, CopyModifier, MacosOptions};
-use kalandra_platform::{Chord, GAME_WINDOW_TITLE, KeyModifier, WindowEvent};
+use rkl_platform::backend::macos::{self, CopyModifier, MacosOptions};
+use rkl_platform::{Chord, GAME_WINDOW_TITLE, KeyModifier, WindowEvent};
 
 fn workspace_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")

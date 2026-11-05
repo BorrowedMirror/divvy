@@ -10,10 +10,10 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use kalandra_platform::backend::{self, wayland};
-use kalandra_platform::{BackendKind, Chord, EnvProbe, HotkeyAction, PlatformError, detect};
+use rkl_platform::backend::{self, wayland};
+use rkl_platform::{BackendKind, Chord, EnvProbe, HotkeyAction, PlatformError, detect};
 
-const CHILD_ENV: &str = "KALANDRA_TEST_WAYLAND_CHILD";
+const CHILD_ENV: &str = "RKL_TEST_WAYLAND_CHILD";
 
 fn have(bin: &str) -> bool {
     std::env::var_os("PATH").is_some_and(|p| std::env::split_paths(&p).any(|d| d.join(bin).is_file()))
@@ -49,7 +49,7 @@ fn wayland_backend_end_to_end() {
         eprintln!("SKIP linux_wayland: sway not installed");
         return;
     }
-    let runtime = std::env::temp_dir().join(format!("kalandra-wl-{}", std::process::id()));
+    let runtime = std::env::temp_dir().join(format!("rkl-wl-{}", std::process::id()));
     std::fs::create_dir_all(&runtime).unwrap();
     std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o700)).unwrap();
     let config = runtime.join("sway.conf");
@@ -91,9 +91,9 @@ fn wayland_backend_end_to_end() {
         .env("WAYLAND_DISPLAY", &socket)
         .env("XDG_SESSION_TYPE", "wayland")
         .env("XDG_CURRENT_DESKTOP", "sway")
-        .env("DBUS_SESSION_BUS_ADDRESS", "unix:path=/nonexistent/kalandra-test-bus")
+        .env("DBUS_SESSION_BUS_ADDRESS", "unix:path=/nonexistent/rkl-test-bus")
         .env_remove("DISPLAY")
-        .env_remove("KALANDRA_BACKEND")
+        .env_remove("RKL_BACKEND")
         .status()
         .expect("run child");
     drop(sway);
@@ -128,11 +128,11 @@ fn child() {
     assert!(matches!(platform.input_listener.start(), Err(PlatformError::Unsupported(_))));
 
     // Clipboard roundtrip through wlr-data-control.
-    platform.clipboard.set_text("kalandra wayland clipboard").unwrap();
+    platform.clipboard.set_text("rkl wayland clipboard").unwrap();
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
         let got = platform.clipboard.get_text().unwrap();
-        if got.as_deref() == Some("kalandra wayland clipboard") {
+        if got.as_deref() == Some("rkl wayland clipboard") {
             break;
         }
         assert!(Instant::now() < deadline, "clipboard never round-tripped: {got:?}");

@@ -38,7 +38,7 @@ pub fn create(kind: BackendKind) -> Result<Platform, PlatformError> {
         BackendKind::Macos => macos::create(),
         #[cfg(all(target_os = "windows", feature = "native"))]
         BackendKind::Windows => windows::create(),
-        BackendKind::Fake => Err(PlatformError::Unsupported("fake backend lives in kalandra-testkit")),
+        BackendKind::Fake => Err(PlatformError::Unsupported("fake backend lives in rkl-testkit")),
         #[allow(unreachable_patterns)]
         _ => Err(PlatformError::Unsupported("backend not compiled for this OS")),
     }

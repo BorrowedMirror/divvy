@@ -1,6 +1,6 @@
 //! Per-OS native overlay styling applied to the Tauri `overlay` window.
 //! Each OS file is owned by its platform workstream (D windows, E macos, F linux).
-use kalandra_platform::BackendKind;
+use rkl_platform::BackendKind;
 
 #[cfg(target_os = "linux")]
 pub mod linux;
@@ -16,7 +16,7 @@ pub fn pre_init(settings_override: Option<BackendKind>) -> BackendKind {
     #[cfg(target_os = "linux")]
     return linux::pre_init_with(settings_override);
     #[allow(unreachable_code)]
-    kalandra_platform::detect(&kalandra_platform::EnvProbe::from_env(), settings_override)
+    rkl_platform::detect(&rkl_platform::EnvProbe::from_env(), settings_override)
 }
 
 /// Apply native styles to the overlay window. Called once at startup.
@@ -55,7 +55,7 @@ pub fn bring_to_front(window: &tauri::WebviewWindow, owner: Option<u64>, focus: 
 pub fn refocus_game(owner: Option<u64>) {
     #[cfg(all(target_os = "linux", feature = "native"))]
     if let Some(owner) = owner
-        && let Err(e) = kalandra_platform::backend::x11::activate_window(owner)
+        && let Err(e) = rkl_platform::backend::x11::activate_window(owner)
     {
         tracing::debug!("refocus game: {e}");
     }

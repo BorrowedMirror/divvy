@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn runs_a_fake_binary() {
-        let dir = std::env::temp_dir().join(format!("kalandra-ydotool-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rkl-ydotool-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let ok = YdotoolSimulator { binary: PathBuf::from("/bin/true") };
         ok.send_chord(&Chord::parse("ctrl+c").unwrap()).unwrap();
@@ -124,7 +124,7 @@ mod tests {
         let missing = YdotoolSimulator { binary: dir.join("nope") };
         assert!(missing.send_chord(&Chord::parse("ctrl+c").unwrap()).is_err());
         assert_eq!(find_in_path("true", std::ffi::OsStr::new("/nonexistent:/bin")), Some(PathBuf::from("/bin/true")));
-        assert_eq!(find_in_path("kalandra-no-such-binary", std::ffi::OsStr::new("/bin")), None);
+        assert_eq!(find_in_path("rkl-no-such-binary", std::ffi::OsStr::new("/bin")), None);
         let _ = YdotoolSimulator::detect();
         std::fs::remove_dir_all(&dir).unwrap();
     }

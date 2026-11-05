@@ -1,7 +1,7 @@
-//! Matches corpus items against the real bundled trade2 catalog from `kalandra-data`.
+//! Matches corpus items against the real bundled trade2 catalog from `rkl-data`.
 use std::path::PathBuf;
 
-use kalandra_core::{
+use rkl_core::{
     item::{ModKind, ParsedItem},
     matcher::StatMatcher,
     parser::parse_item,
@@ -33,7 +33,7 @@ fn corpus() -> Vec<(String, ParsedItem)> {
 }
 
 fn matched(id: &str) -> ParsedItem {
-    let data = kalandra_data::bundled().expect("bundled data");
+    let data = rkl_data::bundled().expect("bundled data");
     let (_, mut item) = corpus().into_iter().find(|(i, _)| i == id).unwrap();
     StatMatcher::new(&data).match_item(&mut item);
     item
@@ -65,7 +65,7 @@ fn bow_additional_arrow_matches_plural_stat() {
 
 #[test]
 fn corpus_match_rate_floor() {
-    let data = kalandra_data::bundled().expect("bundled data");
+    let data = rkl_data::bundled().expect("bundled data");
     let matcher = StatMatcher::new(&data);
     let (mut total, mut hits) = (0usize, 0usize);
     let mut misses = Vec::new();
@@ -90,7 +90,7 @@ fn corpus_match_rate_floor() {
 /// searched as explicit, and "reduced" requirements get an upper bound.
 #[test]
 fn sceptre_spirit_search_matches_trade_listings() {
-    use kalandra_core::query::{QueryOptions, build_filters};
+    use rkl_core::query::{QueryOptions, build_filters};
     let sceptre = matched("weapon/rare-sceptre-spirit-advanced");
     assert_eq!(stat_of(&sceptre, "55% increased Spirit"), Some("explicit.stat_3984865854"));
     assert_eq!(stat_of(&sceptre, "13% increased Spirit"), Some("desecrated.stat_3984865854"));
@@ -109,8 +109,8 @@ fn sceptre_spirit_search_matches_trade_listings() {
 
 #[test]
 fn global_spirit_on_amulets_stays_global() {
-    use kalandra_core::{catalog::Catalog, item::ModKind};
-    let data = kalandra_data::bundled().expect("bundled data");
+    use rkl_core::{catalog::Catalog, item::ModKind};
+    let data = rkl_data::bundled().expect("bundled data");
     let ids: Vec<_> =
         data.stats_by_template("#% increased Spirit", ModKind::Explicit).iter().map(|(s, _)| s.id.clone()).collect();
     assert!(
@@ -118,7 +118,7 @@ fn global_spirit_on_amulets_stays_global() {
         "{ids:?}"
     );
     let text = "Item Class: Amulets\nRarity: Rare\nGale Charm\nGold Amulet\n--------\nItem Level: 80\n--------\n20% increased Spirit\n";
-    let mut amulet = kalandra_core::parser::parse_item(text).unwrap();
+    let mut amulet = rkl_core::parser::parse_item(text).unwrap();
     StatMatcher::new(&data).match_item(&mut amulet);
     assert_eq!(stat_of(&amulet, "20% increased Spirit"), Some("explicit.stat_1416406066"));
 }

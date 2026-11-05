@@ -1,4 +1,4 @@
-//! kalandra-trade: network side. Official trade2 API, poe.ninja and poe2scout behind
+//! rkl-trade: network side. Official trade2 API, poe.ninja and poe2scout behind
 //! [`PriceSource`], with a header-driven [`ratelimit::RateLimiter`] and a moka cache.
 pub mod client;
 pub mod error;
@@ -17,7 +17,7 @@ pub use source::{PriceRequest, PriceSource};
 /// append their own contact e-mail via settings (`trade.contact`).
 pub fn default_user_agent() -> String {
     format!(
-        "kalandra/{} (+https://github.com/nightah/kalandra; contact: https://github.com/nightah/kalandra/issues)",
+        "rkl/{} (+https://github.com/nightah/rust-king-ledger; contact: https://github.com/nightah/rust-king-ledger/issues)",
         env!("CARGO_PKG_VERSION")
     )
 }

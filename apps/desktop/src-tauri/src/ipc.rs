@@ -1,10 +1,10 @@
 //! IPC commands. The web UI calls these only through generated `bindings.ts`.
 use std::sync::Arc;
 
-use kalandra_config::Settings;
-use kalandra_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
-use kalandra_platform::{BackendKind, Capabilities, Chord, HotkeyAction};
-use kalandra_trade::{PriceRequest, types::League};
+use rkl_config::Settings;
+use rkl_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
+use rkl_platform::{BackendKind, Capabilities, Chord, HotkeyAction};
+use rkl_trade::{PriceRequest, types::League};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 
@@ -26,22 +26,22 @@ impl IpcError {
     }
 }
 
-impl From<kalandra_trade::TradeError> for IpcError {
-    fn from(e: kalandra_trade::TradeError) -> Self {
-        let info = kalandra_trade::error::TradeErrorInfo::from(&e);
+impl From<rkl_trade::TradeError> for IpcError {
+    fn from(e: rkl_trade::TradeError) -> Self {
+        let info = rkl_trade::error::TradeErrorInfo::from(&e);
         let kind = if info.kind == "rate_limited" { "rate_limited" } else { "trade" };
         Self { kind: kind.into(), message: info.message, retry_after_ms: info.retry_after_ms }
     }
 }
 
-impl From<kalandra_config::ConfigError> for IpcError {
-    fn from(e: kalandra_config::ConfigError) -> Self {
+impl From<rkl_config::ConfigError> for IpcError {
+    fn from(e: rkl_config::ConfigError) -> Self {
         Self::new("config", e.to_string())
     }
 }
 
-impl From<kalandra_platform::PlatformError> for IpcError {
-    fn from(e: kalandra_platform::PlatformError) -> Self {
+impl From<rkl_platform::PlatformError> for IpcError {
+    fn from(e: rkl_platform::PlatformError) -> Self {
         Self::new("platform", e.to_string())
     }
 }

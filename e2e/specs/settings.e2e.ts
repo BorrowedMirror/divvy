@@ -1,4 +1,4 @@
-// Settings are saved to KALANDRA_CONFIG_DIR and survive an app restart.
+// Settings are saved to RKL_CONFIG_DIR and survive an app restart.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { $, browser, expect } from "@wdio/globals";
@@ -25,14 +25,14 @@ function findSettingsFile(dir: string): string | undefined {
 }
 
 describe("settings", () => {
-  const configDir = process.env.KALANDRA_CONFIG_DIR!;
+  const configDir = process.env.RKL_CONFIG_DIR!;
 
   before(async () => {
     await waitForHook();
     await switchToWindow("settings");
   });
 
-  it("uses the isolated config dir from KALANDRA_CONFIG_DIR", () => {
+  it("uses the isolated config dir from RKL_CONFIG_DIR", () => {
     expect(configDir).toBeTruthy();
   });
 

@@ -16,8 +16,8 @@ serde.workspace = true
 serde_json.workspace = true
 toml.workspace = true
 xshell.workspace = true
-kalandra-core.workspace = true
-kalandra-data.workspace = true
+rkl-core.workspace = true
+rkl-data.workspace = true
 reqwest = { workspace = true, features = ["blocking"] }
 time.workspace = true
 

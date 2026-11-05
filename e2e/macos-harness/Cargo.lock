@@ -460,44 +460,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
-name = "kalandra-macos-harness"
-version = "0.1.0-rc.1"
-dependencies = [
- "anyhow",
- "kalandra-testkit",
- "serde_json",
- "tokio",
- "wayland-client",
- "wayland-protocols-misc",
-]
-
-[[package]]
-name = "kalandra-platform"
-version = "0.1.0-rc.1"
-dependencies = [
- "objc2-application-services",
- "objc2-core-foundation",
- "objc2-core-graphics",
- "raw-window-handle",
- "serde",
- "specta",
- "thiserror",
- "tracing",
- "windows",
-]
-
-[[package]]
-name = "kalandra-testkit"
-version = "0.1.0-rc.1"
-dependencies = [
- "kalandra-platform",
- "serde",
- "serde_json",
- "toml",
- "wiremock",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -678,6 +640,44 @@ name = "regex-syntax"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
+
+[[package]]
+name = "rkl-macos-harness"
+version = "0.1.0-rc.1"
+dependencies = [
+ "anyhow",
+ "rkl-testkit",
+ "serde_json",
+ "tokio",
+ "wayland-client",
+ "wayland-protocols-misc",
+]
+
+[[package]]
+name = "rkl-platform"
+version = "0.1.0-rc.1"
+dependencies = [
+ "objc2-application-services",
+ "objc2-core-foundation",
+ "objc2-core-graphics",
+ "raw-window-handle",
+ "serde",
+ "specta",
+ "thiserror",
+ "tracing",
+ "windows",
+]
+
+[[package]]
+name = "rkl-testkit"
+version = "0.1.0-rc.1"
+dependencies = [
+ "rkl-platform",
+ "serde",
+ "serde_json",
+ "toml",
+ "wiremock",
+]
 
 [[package]]
 name = "rustc_version"

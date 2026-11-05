@@ -3,7 +3,7 @@
 //! - X11 / XWayland (default): GTK must use its X11 backend so window positions are global and
 //!   the EWMH always-on-top/skip-taskbar hints work. [`pre_init`] forces `GDK_BACKEND=x11`
 //!   before GTK initialises; [`prepare`] applies the hints through Tauri.
-//! - Wayland-native (no `DISPLAY`, or `KALANDRA_BACKEND=wayland`): the window becomes a
+//! - Wayland-native (no `DISPLAY`, or `RKL_BACKEND=wayland`): the window becomes a
 //!   wlr-layer-shell surface on the `OVERLAY` layer via gtk-layer-shell (not GNOME: mutter has
 //!   no layer-shell). gtk-layer-shell must be initialised *before* the GTK window is realised.
 //!   Tauri creates the `overlay` window hidden, and GTK only realises a window when it is first
@@ -12,7 +12,7 @@
 //!   re-realised with the new layer surface on the next `show()`).
 use std::sync::OnceLock;
 
-use kalandra_platform::{BackendKind, EnvProbe, detect};
+use rkl_platform::{BackendKind, EnvProbe, detect};
 
 static BACKEND: OnceLock<BackendKind> = OnceLock::new();
 
@@ -94,7 +94,7 @@ fn init_layer_shell(window: &tauri::WebviewWindow) -> Result<(), String> {
     }
     gtk_window.init_layer_shell();
     gtk_window.set_layer(Layer::Overlay);
-    gtk_window.set_namespace("kalandra-overlay");
+    gtk_window.set_namespace("rkl-overlay");
     // Keyboard only when the user clicks into the overlay (filter editing); never steal it.
     gtk_window.set_keyboard_mode(KeyboardMode::OnDemand);
     gtk_window.set_exclusive_zone(-1);
@@ -116,7 +116,7 @@ pub fn raise_above(window: &tauri::WebviewWindow, owner: Option<u64>, focus: boo
     }
     let handle = window.window_handle().map_err(|e| format!("window handle: {e}"))?.as_raw();
     let display = window.display_handle().map_err(|e| format!("display handle: {e}"))?.as_raw();
-    let styler = kalandra_platform::backend::x11::overlay(handle, display).map_err(|e| e.to_string())?;
+    let styler = rkl_platform::backend::x11::overlay(handle, display).map_err(|e| e.to_string())?;
     styler.raise_above(owner).map_err(|e| e.to_string())?;
     if focus {
         styler.activate().map_err(|e| e.to_string())?;

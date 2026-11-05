@@ -1,12 +1,12 @@
-//! Deterministic in-memory fakes for every `kalandra_platform` trait.
+//! Deterministic in-memory fakes for every `rkl_platform` trait.
 //!
 //! Every fake is a cheap cloneable *handle* over shared state (`Arc<Mutex<..>>`): box one clone
 //! into a [`Platform`] and keep another in the test to drive it (`fire`, `emit`, `set_window`)
 //! or inspect it (`calls`, `sent`, `history`).
 //!
 //! ```
-//! use kalandra_testkit::fakes::FakePlatformBuilder;
-//! use kalandra_platform::HotkeyAction;
+//! use rkl_testkit::fakes::FakePlatformBuilder;
+//! use rkl_platform::HotkeyAction;
 //!
 //! let (platform, fakes) = FakePlatformBuilder::new().item_text("Item Class: Stackable Currency\n").build();
 //! let rx = platform.hotkeys.events().unwrap();
@@ -18,7 +18,7 @@ use std::sync::mpsc::{Receiver, Sender, channel};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
-use kalandra_platform::{
+use rkl_platform::{
     BackendKind, Capabilities, Chord, Clipboard, GAME_WINDOW_TITLE, HotkeyAction, HotkeyEvent, HotkeyHost, InputEvent,
     InputListener, InputSimulator, OverlayWindow, Platform, PlatformError, Rect, WindowEvent, WindowInfo,
     WindowTracker,
@@ -541,7 +541,7 @@ pub fn fake_capabilities() -> Capabilities {
         keystroke_injection: true,
         clipboard: true,
         missing_permissions: vec![],
-        notes: vec!["fake backend (kalandra-testkit)".to_owned()],
+        notes: vec!["fake backend (rkl-testkit)".to_owned()],
     }
 }
 
@@ -644,12 +644,12 @@ impl FakePlatformBuilder {
 
 /// `Ctrl+C`.
 pub fn copy_chord() -> Chord {
-    Chord::new(&[kalandra_platform::KeyModifier::Ctrl], "KeyC")
+    Chord::new(&[rkl_platform::KeyModifier::Ctrl], "KeyC")
 }
 
 /// `Ctrl+Alt+C`.
 pub fn advanced_copy_chord() -> Chord {
-    Chord::new(&[kalandra_platform::KeyModifier::Ctrl, kalandra_platform::KeyModifier::Alt], "KeyC")
+    Chord::new(&[rkl_platform::KeyModifier::Ctrl, rkl_platform::KeyModifier::Alt], "KeyC")
 }
 
 /// A fake [`Platform`] with defaults: empty clipboard, no game window, nothing scripted.
@@ -661,7 +661,7 @@ pub fn fake_platform() -> Platform {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use kalandra_platform::KeyModifier;
+    use rkl_platform::KeyModifier;
     use std::time::Instant;
 
     const ITEM: &str = "Item Class: Stackable Currency\nRarity: Currency\nDivine Orb\n";

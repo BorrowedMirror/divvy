@@ -32,7 +32,7 @@ Signing secrets exist only in the protected `release` environment (deployment br
 | `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` | macOS code signing |
 | `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | macOS notarisation |
 
-Generate the updater key pair once with `cargo tauri signer generate -w kalandra.key` and store
+Generate the updater key pair once with `cargo tauri signer generate -w RKL.key` and store
 the private key, its password and the public key (the `.pub` file contents) as the secrets above.
 The public key is not checked in: `release.yml` writes it into a copy of
 `.github/tauri-release.conf.json`, and the build fails early when it is missing, because
@@ -48,7 +48,7 @@ never check for updates and record no errors about it. Keep the pubkey out of th
 `tauri.conf.json`; a unit test enforces this.
 
 Release builds read `plugins.updater.endpoints` from `.github/tauri-release.conf.json`
-(`https://github.com/nightah/kalandra/releases/latest/download/latest.json`). GitHub's
+(`https://github.com/nightah/rust-king-ledger/releases/latest/download/latest.json`). GitHub's
 `latest` skips drafts and pre-releases, so installs only see a release once it is published,
 and rc builds update to the next stable release. The first check runs 30 s after startup and
 then every 24 h while **Settings > General > Check for updates automatically**

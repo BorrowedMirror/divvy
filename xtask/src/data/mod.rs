@@ -1,5 +1,5 @@
 //! `cargo xtask data refresh [--offline]`: download upstream game data, normalise it into
-//! `kalandra_core::catalog` records and write `crates/data/assets/`.
+//! `rkl_core::catalog` records and write `crates/data/assets/`.
 //!
 //! Sources are documented in `docs/research/data-sources.md`.
 use std::{
@@ -9,12 +9,12 @@ use std::{
 };
 
 use anyhow::Context as _;
-use kalandra_data::{AssetSources, Bundle};
+use rkl_data::{AssetSources, Bundle};
 
 pub mod normalise;
 
 /// Descriptive UA as GGG asks for API consumers.
-const USER_AGENT: &str = "kalandra-data-refresh/0.1 (+https://github.com/nightah/kalandra)";
+const USER_AGENT: &str = "rkl-data-refresh/0.1 (+https://github.com/nightah/rust-king-ledger)";
 /// Pause between requests to the same host, to stay well under rate limits.
 const POLITE_DELAY: Duration = Duration::from_millis(1500);
 
@@ -105,9 +105,9 @@ pub fn refresh(offline: bool) -> anyhow::Result<()> {
     let generated_at = time::OffsetDateTime::now_utc().format(&time::format_description::well_known::Rfc3339)?;
     let game_version = normalise::game_version(&raw[REPOE_INDEX.cache]);
     let assets = root.join("crates/data/assets");
-    let manifest = kalandra_data::write_dir(&assets, &bundle, &sources(), generated_at, game_version)?;
+    let manifest = rkl_data::write_dir(&assets, &bundle, &sources(), generated_at, game_version)?;
     // Round-trip what we wrote so a broken asset never gets committed.
-    kalandra_data::load_dir(&assets).context("re-loading freshly written assets")?;
+    rkl_data::load_dir(&assets).context("re-loading freshly written assets")?;
     eprintln!(
         "wrote {}: {} stats, {} bases, {} uniques, {} statics (game version {})",
         assets.display(),
@@ -134,12 +134,12 @@ fn corpus_check(root: &Path) {
         }
     };
     sh.change_dir(root);
-    eprintln!("running parser corpus check (cargo nextest run -p kalandra-core)");
-    match xshell::cmd!(sh, "cargo nextest run -p kalandra-core").run() {
+    eprintln!("running parser corpus check (cargo nextest run -p rkl-core)");
+    match xshell::cmd!(sh, "cargo nextest run -p rkl-core").run() {
         Ok(()) => eprintln!("corpus check passed"),
         Err(e) => eprintln!(
             "warning: corpus check FAILED ({e}).\n\
-             This is expected while kalandra-core's parser is unimplemented (Phase 2); \
+             This is expected while rkl-core's parser is unimplemented (Phase 2); \
              otherwise inspect the failures before committing the new assets."
         ),
     }
@@ -153,7 +153,7 @@ mod tests {
     fn source_urls() {
         assert_eq!(TRADE_STATS.url(), "https://www.pathofexile.com/api/trade2/data/stats");
         assert_eq!(REPOE_INDEX.url(), "https://repoe-fork.github.io/poe2/");
-        assert!(USER_AGENT.contains("kalandra"));
+        assert!(USER_AGENT.contains("rkl"));
     }
 
     #[test]

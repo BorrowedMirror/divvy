@@ -1,7 +1,7 @@
 name: contract
 
 # Nightly live smoke against the real trade2 API (leagues, one search, one fetch). These are
-# `#[ignore]`d `live_*` tests in kalandra-trade, so they never run in normal CI.
+# `#[ignore]`d `live_*` tests in rkl-trade, so they never run in normal CI.
 on:
   schedule:
     - cron: "41 3 * * *"
@@ -39,7 +39,7 @@ jobs:
         with:
           tool: cargo-nextest
       - name: Live trade2 smoke
-        run: cargo nextest run --locked --profile ci -p kalandra-trade --run-ignored only -E 'test(live_)'
+        run: cargo nextest run --locked --profile ci -p rkl-trade --run-ignored only -E 'test(live_)'
       - name: Upload junit
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

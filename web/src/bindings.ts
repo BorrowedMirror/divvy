@@ -90,7 +90,7 @@ export type BackendKind = "windows" | "macos" |
 "x11" | 
 /**  Wayland-native (layer-shell + portals). */
 "wayland" | 
-/**  In-process fakes (tests, `KALANDRA_BACKEND=fake`). */
+/**  In-process fakes (tests, `RKL_BACKEND=fake`). */
 "fake";
 
 /**  Per-capability support report shown on the diagnostics page. */
@@ -678,7 +678,7 @@ export type ProtonMouseStatus_Deserialize = {
 	grab_fullscreen?: string | null,
 	/**  Mouse capture is turned off (both options `N`). */
 	capture_disabled: boolean,
-	/**  kalandra changed the prefix and remembers the previous values. */
+	/**  rkl changed the prefix and remembers the previous values. */
 	can_restore: boolean,
 	/**  The game (or its Wine server) is running; changes are refused until it quits. */
 	game_running: boolean,
@@ -693,7 +693,7 @@ export type ProtonMouseStatus_Serialize = {
 	grab_fullscreen: string | null,
 	/**  Mouse capture is turned off (both options `N`). */
 	capture_disabled: boolean,
-	/**  kalandra changed the prefix and remembers the previous values. */
+	/**  rkl changed the prefix and remembers the previous values. */
 	can_restore: boolean,
 	/**  The game (or its Wine server) is running; changes are refused until it quits. */
 	game_running: boolean,

@@ -7,15 +7,15 @@ use std::{
     time::{Duration, Instant},
 };
 
-use kalandra_config::Settings;
-use kalandra_core::{
+use rkl_config::Settings;
+use rkl_core::{
     ParsedItem,
     catalog::Catalog,
     matcher::StatMatcher,
     parser::parse_item,
     query::{FilterSet, QueryOptions, build_filters},
 };
-use kalandra_trade::types::League;
+use rkl_trade::types::League;
 
 use crate::ipc::IpcError;
 
@@ -102,14 +102,14 @@ pub fn overlay_position(cursor: (i32, i32), size: (i32, i32), screen: Area) -> (
 
 /// User-Agent including the optional contact from settings.
 pub fn user_agent(settings: &Settings) -> String {
-    let base = kalandra_trade::default_user_agent();
+    let base = rkl_trade::default_user_agent();
     match settings.trade.contact.as_deref().filter(|c| !c.is_empty()) {
         Some(c) => format!("{base} {c}"),
         None => base,
     }
 }
 
-/// Tracing filter: `KALANDRA_LOG` (or `info`), with the HTTP/TLS stack capped at `info` so
+/// Tracing filter: `RKL_LOG` (or `info`), with the HTTP/TLS stack capped at `info` so
 /// debug logs never contain request headers (POESESSID cookie).
 pub fn log_filter(env: Option<&str>) -> String {
     let base = env.map(str::trim).filter(|s| !s.is_empty()).unwrap_or("info");
@@ -205,7 +205,7 @@ impl Default for FlowGate {
 
 /// Show settings at startup only when the user would otherwise have no way in: neither a tray
 /// icon nor a registered hotkey. With either one the app is reachable (missing hotkeys are
-/// explained by first-run onboarding and the diagnostics page, and `kalandra --trigger` works).
+/// explained by first-run onboarding and the diagnostics page, and `rkl --trigger` works).
 pub fn must_show_settings(tray_ok: bool, hotkeys_ok: bool) -> bool {
     !tray_ok && !hotkeys_ok
 }
@@ -239,8 +239,8 @@ pub enum HotkeyEffect {
     HideSettings,
 }
 
-pub fn hotkey_effect(action: kalandra_platform::HotkeyAction, overlay_open: bool, settings_open: bool) -> HotkeyEffect {
-    use kalandra_platform::HotkeyAction as A;
+pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, settings_open: bool) -> HotkeyEffect {
+    use rkl_platform::HotkeyAction as A;
     match action {
         A::PriceCheck | A::PriceCheckPinned if overlay_open => HotkeyEffect::HideOverlay,
         A::PriceCheck => HotkeyEffect::PriceCheck { pinned: false },
@@ -256,7 +256,7 @@ mod tests {
 
     #[test]
     fn hotkeys_toggle_their_window() {
-        use kalandra_platform::HotkeyAction as A;
+        use rkl_platform::HotkeyAction as A;
         assert_eq!(hotkey_effect(A::PriceCheck, false, false), HotkeyEffect::PriceCheck { pinned: false });
         assert_eq!(hotkey_effect(A::PriceCheckPinned, false, true), HotkeyEffect::PriceCheck { pinned: true });
         assert_eq!(hotkey_effect(A::PriceCheck, true, false), HotkeyEffect::HideOverlay);
@@ -306,8 +306,8 @@ mod tests {
 
     #[test]
     fn copy_requires_focus_only_with_tracking() {
-        use kalandra_platform::{Rect, WindowTracker};
-        use kalandra_testkit::fakes::{FakeWindowTracker, game_window};
+        use rkl_platform::{Rect, WindowTracker};
+        use rkl_testkit::fakes::{FakeWindowTracker, game_window};
         assert!(may_copy(false, || false));
         let tracker = FakeWindowTracker::new();
         assert!(!may_copy(true, || tracker.is_game_focused()), "no game window");

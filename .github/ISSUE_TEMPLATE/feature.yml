@@ -1,12 +1,12 @@
 name: Feature request
-description: Suggest an idea or improvement for kalandra.
+description: Suggest an idea or improvement for RKL.
 labels: [enhancement, triage]
 body:
   - type: textarea
     id: problem
     attributes:
       label: Problem
-      description: What are you trying to do that kalandra makes hard or impossible today?
+      description: What are you trying to do that RKL makes hard or impossible today?
     validations:
       required: true
   - type: textarea

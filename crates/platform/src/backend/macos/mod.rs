@@ -22,7 +22,7 @@ pub use model::CopyModifier;
 use crate::{BackendKind, Platform, PlatformError};
 
 /// Env var selecting the copy chord modifier (`cmd` or `ctrl`), read by [`create`].
-pub const COPY_MODIFIER_ENV: &str = "KALANDRA_MACOS_COPY_MODIFIER";
+pub const COPY_MODIFIER_ENV: &str = "RKL_MACOS_COPY_MODIFIER";
 
 /// Tunables for the macOS backend.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -34,7 +34,7 @@ pub struct MacosOptions {
 }
 
 impl MacosOptions {
-    /// Defaults, with `KALANDRA_MACOS_COPY_MODIFIER` applied when set and valid.
+    /// Defaults, with `RKL_MACOS_COPY_MODIFIER` applied when set and valid.
     pub fn from_env() -> Self {
         let copy_modifier = std::env::var(COPY_MODIFIER_ENV)
             .ok()
@@ -102,9 +102,7 @@ pub fn open_permission_settings(kind: &str) {
         // Reap the child off-thread so callers (UI) never block and no zombie is left.
         // `std::thread::spawn` would panic if the thread cannot be created; log instead.
         Ok(mut child) => {
-            if let Err(e) =
-                std::thread::Builder::new().name("kalandra-open-settings".into()).spawn(move || child.wait())
-            {
+            if let Err(e) = std::thread::Builder::new().name("rkl-open-settings".into()).spawn(move || child.wait()) {
                 tracing::warn!(error = %e, "failed to spawn reaper thread for System Settings");
             }
         }

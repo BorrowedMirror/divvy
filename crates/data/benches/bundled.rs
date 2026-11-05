@@ -7,8 +7,8 @@
 use std::{hint::black_box, time::Instant};
 
 use criterion::{Criterion, criterion_group};
-use kalandra_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
-use kalandra_data::{Bundle, GameData, decode_asset, parse_manifest};
+use rkl_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
+use rkl_data::{Bundle, GameData, decode_asset, parse_manifest};
 
 const MANIFEST: &[u8] = include_bytes!("../assets/manifest.json");
 const STATS: &[u8] = include_bytes!("../assets/stats.json.zst");
@@ -16,7 +16,7 @@ const BASES: &[u8] = include_bytes!("../assets/bases.json.zst");
 const UNIQUES: &[u8] = include_bytes!("../assets/uniques.json.zst");
 const STATICS: &[u8] = include_bytes!("../assets/statics.json.zst");
 
-fn decode() -> (kalandra_data::Manifest, Bundle) {
+fn decode() -> (rkl_data::Manifest, Bundle) {
     let m = parse_manifest(MANIFEST).expect("manifest");
     let bundle = Bundle {
         stats: decode_asset::<Vec<StatDef>>(&m.stats, STATS).expect("stats"),
@@ -32,7 +32,7 @@ fn benches(c: &mut Criterion) {
     c.bench_function("decode_asset/stats", |b| b.iter(|| decode_asset::<Vec<StatDef>>(&m.stats, black_box(STATS))));
     let json = zstd::decode_all(STATS).expect("zstd");
     c.bench_function("zstd/stats", |b| b.iter(|| zstd::decode_all(black_box(STATS))));
-    c.bench_function("sha256/stats", |b| b.iter(|| kalandra_data::sha256_hex(black_box(&json))));
+    c.bench_function("sha256/stats", |b| b.iter(|| rkl_data::sha256_hex(black_box(&json))));
     c.bench_function("serde_json/stats", |b| b.iter(|| serde_json::from_slice::<Vec<StatDef>>(black_box(&json))));
     c.bench_function("decode_asset/all", |b| b.iter(decode));
     c.bench_function("index_build", |b| {
@@ -50,7 +50,7 @@ criterion_group!(group, benches);
 
 fn main() {
     let start = Instant::now();
-    let data = kalandra_data::bundled().expect("bundled");
+    let data = rkl_data::bundled().expect("bundled");
     eprintln!("bundled() cold, first call in fresh process: {:?}", start.elapsed());
     black_box(data);
     group();

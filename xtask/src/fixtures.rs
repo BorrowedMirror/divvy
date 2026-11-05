@@ -39,7 +39,7 @@ pub struct RecordArgs {
 }
 
 pub fn user_agent() -> String {
-    format!("kalandra-xtask/{} (fixture recorder; +https://github.com/nightah/kalandra)", env!("CARGO_PKG_VERSION"))
+    format!("rkl-xtask/{} (fixture recorder; +https://github.com/nightah/rust-king-ledger)", env!("CARGO_PKG_VERSION"))
 }
 
 /// The trade2 search body recorded into `search.json`.
@@ -158,7 +158,7 @@ mod tests {
     fn escapes_and_describes() {
         assert_eq!(url_escape("Dawn of the Hunt"), "Dawn%20of%20the%20Hunt");
         assert_eq!(url_escape("HC_SSF-1.0~"), "HC_SSF-1.0~");
-        assert!(user_agent().contains("github.com/nightah/kalandra"));
+        assert!(user_agent().contains("github.com/nightah/rust-king-ledger"));
         assert_eq!(search_body("Leather Belt")["query"]["type"], "Leather Belt");
     }
 }

@@ -1,10 +1,10 @@
 //! Debug-only IPC test hook (see CONTRACTS.md). Enabled in debug builds or with the
-//! `test-hook` feature, and only when `KALANDRA_TEST_HOOK=<port>` is set. Binds 127.0.0.1 only.
+//! `test-hook` feature, and only when `RKL_TEST_HOOK=<port>` is set. Binds 127.0.0.1 only.
 //!
-//! Line protocol (see e2e/lib/hook.ts): `trigger 0|1`, `text <json string>`, `state`,
+//! Line protocol (see e2e/lib/hook.ts): `trigger 0|1`, `text <json string>`, `state`, `hide`,
 //! `tray open_settings|open_diagnostics|price_check|quit`, `settings` (current settings as JSON),
 //! `save_settings <json settings>` (validate + persist, like the IPC command), `quit`. One reply line each:
-//! `ok`, `err <message>`, or a JSON object for `state`. When `KALANDRA_TEST_HOOK_TOKEN` is set, the
+//! `ok`, `err <message>`, or a JSON object for `state`. When `RKL_TEST_HOOK_TOKEN` is set, the
 //! first line must be `auth <token>` (no reply; anything else gets `err unauthorised` and the
 //! connection closes). A line that looks like an HTTP request closes the connection.
 use std::{
@@ -18,14 +18,14 @@ use tauri::{AppHandle, Manager};
 use crate::{flow, state::AppState, tray};
 
 pub fn port_from_env() -> Option<u16> {
-    std::env::var("KALANDRA_TEST_HOOK").ok()?.parse().ok()
+    std::env::var("RKL_TEST_HOOK").ok()?.parse().ok()
 }
 
 pub fn spawn(app: &AppHandle, port: u16) -> std::io::Result<u16> {
     let listener = TcpListener::bind(("127.0.0.1", port))?;
     let bound = listener.local_addr()?.port();
     let app = app.clone();
-    std::thread::Builder::new().name("kalandra-test-hook".into()).spawn(move || {
+    std::thread::Builder::new().name("rkl-test-hook".into()).spawn(move || {
         for stream in listener.incoming().flatten() {
             let app = app.clone();
             std::thread::spawn(move || serve(&app, stream));
@@ -36,7 +36,7 @@ pub fn spawn(app: &AppHandle, port: u16) -> std::io::Result<u16> {
 }
 
 /// Env var holding the shared secret; when set, a connection's first line must be `auth <token>`.
-pub const TOKEN_ENV: &str = "KALANDRA_TEST_HOOK_TOKEN";
+pub const TOKEN_ENV: &str = "RKL_TEST_HOOK_TOKEN";
 
 /// Lines that look like HTTP (a browser page doing `fetch("http://127.0.0.1:<port>")`).
 pub fn is_http_request(line: &str) -> bool {
@@ -133,6 +133,10 @@ pub fn handle(app: &AppHandle, line: &str) -> String {
             tray::handle_menu(app, id);
             "ok".into()
         }
+        "hide" => match flow::hide_overlay(app, &state) {
+            Ok(()) => "ok".into(),
+            Err(e) => format!("err {e}"),
+        },
         "quit" => {
             state.quitting.store(true, Ordering::SeqCst);
             let app = app.clone();

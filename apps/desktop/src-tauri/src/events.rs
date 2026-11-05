@@ -1,6 +1,6 @@
 //! Events pushed from Rust to the web UI. Exported to `web/src/bindings.ts`.
-use kalandra_config::Settings;
-use kalandra_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
+use rkl_config::Settings;
+use rkl_core::{ParsedItem, pricing::PriceSummary, query::FilterSet};
 use serde::{Deserialize, Serialize};
 
 use crate::ipc::IpcError;

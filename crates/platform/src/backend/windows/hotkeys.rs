@@ -19,7 +19,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use crate::backend::ghk::to_hotkey;
 use crate::{Chord, HotkeyAction, HotkeyEvent, HotkeyHost, PlatformError};
 
-const WM_KALANDRA_CMD: u32 = WM_APP + 0x4B;
+const WM_RKL_CMD: u32 = WM_APP + 0x4B;
 const REPLY_TIMEOUT: Duration = Duration::from_secs(2);
 
 type Reply = SyncSender<Result<(), PlatformError>>;
@@ -53,7 +53,7 @@ impl Win32HotkeyHost {
         let (ev_tx, ev_rx) = mpsc::channel();
         let (ready_tx, ready_rx) = mpsc::sync_channel(1);
         std::thread::Builder::new()
-            .name("kalandra-win-hotkeys".into())
+            .name("rkl-win-hotkeys".into())
             .spawn(move || hotkey_thread(&cmd_rx, &ev_tx, &ready_tx))
             .map_err(|e| PlatformError::Backend(format!("spawn hotkey thread: {e}")))?;
         let thread_id =
@@ -66,7 +66,7 @@ impl Win32HotkeyHost {
         let gone = || PlatformError::Backend("hotkey thread is not running".into());
         self.cmds.lock().map_err(|_| gone())?.send(make(reply_tx)).map_err(|_| gone())?;
         // SAFETY: posts a plain thread message with no pointer payload.
-        unsafe { PostThreadMessageW(self.thread_id, WM_KALANDRA_CMD, WPARAM(0), LPARAM(0)) }
+        unsafe { PostThreadMessageW(self.thread_id, WM_RKL_CMD, WPARAM(0), LPARAM(0)) }
             .map_err(|e| PlatformError::Backend(format!("PostThreadMessageW: {e}")))?;
         reply_rx.recv_timeout(REPLY_TIMEOUT).map_err(|_| PlatformError::Timeout(REPLY_TIMEOUT))?
     }
@@ -162,7 +162,7 @@ fn hotkey_thread(cmds: &Receiver<Cmd>, events: &Sender<HotkeyEvent>, ready: &Syn
     let mut msg = MSG::default();
     // SAFETY: `msg` is a valid out-pointer; 0 (WM_QUIT) or -1 (error) ends the loop.
     while unsafe { GetMessageW(&mut msg, None, 0, 0) }.0 > 0 {
-        if msg.message == WM_KALANDRA_CMD && msg.hwnd.is_invalid() {
+        if msg.message == WM_RKL_CMD && msg.hwnd.is_invalid() {
             while let Ok(cmd) = cmds.try_recv() {
                 handle(&manager, &mut registered, cmd);
             }

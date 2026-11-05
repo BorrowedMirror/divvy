@@ -24,8 +24,8 @@ differences under ~15 % as noise; the large changes below were stable across run
 ## Running
 
 ```sh
-cargo bench -p kalandra-core --bench pipeline   # parse / match / filters / full pipeline + p95 report
-cargo bench -p kalandra-data --bench bundled    # cold bundled(), zstd, sha256, serde_json, index build
+cargo bench -p rkl-core --bench pipeline   # parse / match / filters / full pipeline + p95 report
+cargo bench -p rkl-data --bench bundled    # cold bundled(), zstd, sha256, serde_json, index build
 ```
 
 `pipeline` prints a per-item latency distribution (every corpus item x200) before the
@@ -38,7 +38,7 @@ public API, which bypasses the cache.
 Corpus: the 80 items in `crates/testkit/corpus/index.toml`. Times are criterion medians
 for the whole corpus unless noted.
 
-### kalandra-core (`benches/pipeline.rs`)
+### rkl-core (`benches/pipeline.rs`)
 
 | Bench | Before | After | Change |
 | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ for the whole corpus unless noted.
 | per-item pipeline p99 | 13.18 µs | 13.01 µs | |
 | first call in process (max) | 335 µs | 353 µs | lazy regex compilation |
 
-### kalandra-data (`benches/bundled.rs`)
+### rkl-data (`benches/bundled.rs`)
 
 | Bench | Before | After | Change |
 | --- | --- | --- | --- |

@@ -69,7 +69,7 @@ pub fn init<R: Runtime>(app: &AppHandle<R>, state: &Arc<AppState>) {
     let app = app.clone();
     let state = Arc::clone(state);
     std::thread::Builder::new()
-        .name("kalandra-updater".into())
+        .name("rkl-updater".into())
         .spawn(move || {
             std::thread::sleep(FIRST_CHECK_DELAY);
             loop {
@@ -126,8 +126,7 @@ mod tests {
     use super::*;
 
     fn config(plugins: serde_json::Value) -> tauri::Config {
-        let mut c: tauri::Config =
-            serde_json::from_value(serde_json::json!({ "identifier": "test.kalandra" })).unwrap();
+        let mut c: tauri::Config = serde_json::from_value(serde_json::json!({ "identifier": "test.rkl" })).unwrap();
         c.plugins = serde_json::from_value(plugins).unwrap();
         c
     }
@@ -153,7 +152,7 @@ mod tests {
         let c: serde_json::Value = serde_json::from_str(text).unwrap();
         assert_eq!(
             c.pointer("/plugins/updater/endpoints/0").and_then(|e| e.as_str()),
-            Some("https://github.com/nightah/kalandra/releases/latest/download/latest.json")
+            Some("https://github.com/nightah/rust-king-ledger/releases/latest/download/latest.json")
         );
         assert!(c.pointer("/plugins/updater/pubkey").is_none(), "release.yml injects the pubkey");
     }

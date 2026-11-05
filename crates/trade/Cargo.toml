@@ -1,6 +1,6 @@
 [package]
-name = "kalandra-trade"
-description = "PoE2 trade API client, rate limiter and price sources for kalandra"
+name = "rkl-trade"
+description = "PoE2 trade API client, rate limiter and price sources for rkl"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,7 +15,7 @@ workspace = true
 async-trait.workspace = true
 futures.workspace = true
 http.workspace = true
-kalandra-core.workspace = true
+rkl-core.workspace = true
 moka.workspace = true
 reqwest.workspace = true
 serde.workspace = true

@@ -42,7 +42,7 @@ fn description(a: HotkeyAction) -> &'static str {
     match a {
         HotkeyAction::PriceCheck => "Price check the hovered item",
         HotkeyAction::PriceCheckPinned => "Price check and pin the overlay",
-        HotkeyAction::OpenSettings => "Open kalandra settings",
+        HotkeyAction::OpenSettings => "Open RKL settings",
     }
 }
 
@@ -139,7 +139,7 @@ impl PortalHotkeys {
         let notes: Arc<Mutex<Vec<String>>> = Arc::default();
         let notes_thread = Arc::clone(&notes);
         std::thread::Builder::new()
-            .name("kalandra-portal".into())
+            .name("rkl-portal".into())
             .spawn(move || {
                 let rt = match tokio::runtime::Builder::new_current_thread().enable_all().build() {
                     Ok(rt) => rt,

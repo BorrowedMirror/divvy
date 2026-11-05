@@ -1,8 +1,8 @@
-// Minimal trade2 API mock for e2e (mirrors kalandra_testkit::fixtures::TradeMock).
+// Minimal trade2 API mock for e2e (mirrors rkl_testkit::fixtures::TradeMock).
 //
 //   node e2e/mock-trade/server.ts [--port 18080]
 //
-// Trade routes (what kalandra-trade calls, base URL via KALANDRA_TRADE_BASE_URL):
+// Trade routes (what rkl-trade calls, base URL via RKL_TRADE_BASE_URL):
 //   GET  /api/trade2/data/leagues
 //   POST /api/trade2/search/poe2/:league
 //   GET  /api/trade2/fetch/:ids?query=:id
@@ -150,7 +150,7 @@ export class TradeMockServer {
         return ok({ result: c.leagues.map((id) => ({ id, realm: "poe2", text: id })) });
       case "search":
         return ok({
-          id: "kalandraMock",
+          id: "rklMock",
           complexity: 4,
           result: c.listings.map((_, i) => listingId(i)),
           total: c.total ?? c.listings.length,
@@ -242,7 +242,7 @@ async function post(base: string, path: string, body: unknown): Promise<void> {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const i = process.argv.indexOf("--port");
-  const port = i > 0 ? Number(process.argv[i + 1]) : Number(process.env.KALANDRA_E2E_MOCK_PORT ?? 18080);
+  const port = i > 0 ? Number(process.argv[i + 1]) : Number(process.env.RKL_E2E_MOCK_PORT ?? 18080);
   const m = new TradeMockServer();
   const url = await m.listen(port);
   console.log(`MOCK ${url}`);

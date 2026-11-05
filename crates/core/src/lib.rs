@@ -1,4 +1,4 @@
-//! kalandra-core: pure domain logic. No I/O, no platform, no network.
+//! rkl-core: pure domain logic. No I/O, no platform, no network.
 //!
 //! Pipeline: clipboard text --[`parser::parse_item`]--> [`item::ParsedItem`]
 //! --[`matcher::StatMatcher`]--> matched stat ids

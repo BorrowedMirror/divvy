@@ -1,5 +1,5 @@
 {
-  "name": "kalandra",
+  "name": "rust-king-ledger",
   "private": true,
   "packageManager": "pnpm@12.8.0",
   "scripts": {

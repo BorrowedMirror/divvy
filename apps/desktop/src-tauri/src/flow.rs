@@ -1,9 +1,9 @@
 //! Orchestration glue between platform, core, trade and the Tauri windows.
 use std::sync::{Arc, atomic::Ordering};
 
-use kalandra_config::Settings;
-use kalandra_core::{ParsedItem, catalog::Catalog, query::FilterSet};
-use kalandra_platform::{
+use rkl_config::Settings;
+use rkl_core::{ParsedItem, catalog::Catalog, query::FilterSet};
+use rkl_platform::{
     Chord, HotkeyAction, KeyModifier,
     copy::{CopyOptions, copy_item_text},
 };
@@ -132,7 +132,7 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
             // `show_overlay` runs on tokio workers from the hotkey/test-hook flows), so hop to
             // the main thread; the queued `show()` below is processed after it, in order.
             #[cfg(target_os = "linux")]
-            if state.backend == kalandra_platform::BackendKind::Wayland {
+            if state.backend == rkl_platform::BackendKind::Wayland {
                 let right = x > area.x + area.width / 2;
                 let side = if right { area.x + area.width - (x + size.0) } else { x - area.x };
                 let (w, handle) = (win.clone(), app.clone());
@@ -188,11 +188,11 @@ const MAX_REFOCUS: u32 = 3;
 /// grab), then check whether the game still holds the mouse and tell the panel if it does.
 #[cfg(all(target_os = "linux", feature = "native"))]
 fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
-    use kalandra_platform::backend::x11;
+    use rkl_platform::backend::x11;
     let Some(game_id) = game_id else { return };
     let seq = state.show_seq.fetch_add(1, Ordering::SeqCst) + 1;
     let app = app.clone();
-    let spawned = std::thread::Builder::new().name("kalandra-focus-guard".into()).spawn(move || {
+    let spawned = std::thread::Builder::new().name("rkl-focus-guard".into()).spawn(move || {
         let start = std::time::Instant::now();
         let mut refocused = 0;
         let mut probed = false;
@@ -232,9 +232,9 @@ fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
 }
 
 /// The tracked game window, when the backend can track it (not on Wayland-native).
-pub fn game_window(state: &AppState) -> Option<kalandra_platform::WindowInfo> {
+pub fn game_window(state: &AppState) -> Option<rkl_platform::WindowInfo> {
     let platform = state.platform.as_ref()?;
-    if !platform.capabilities.window_tracking || state.backend == kalandra_platform::BackendKind::Wayland {
+    if !platform.capabilities.window_tracking || state.backend == rkl_platform::BackendKind::Wayland {
         return None;
     }
     platform.window_tracker.game_window().filter(|g| g.rect.width > 0 && g.rect.height > 0)
@@ -242,7 +242,7 @@ pub fn game_window(state: &AppState) -> Option<kalandra_platform::WindowInfo> {
 
 /// Move/resize `win` to exactly cover the game window. Tracker rects are physical pixels
 /// everywhere except macOS, where Core Graphics reports points.
-pub fn cover_game(win: &tauri::WebviewWindow, rect: kalandra_platform::Rect) {
+pub fn cover_game(win: &tauri::WebviewWindow, rect: rkl_platform::Rect) {
     #[cfg(target_os = "macos")]
     {
         let _ = win.set_position(tauri::LogicalPosition::new(f64::from(rect.x), f64::from(rect.y)));
@@ -306,7 +306,7 @@ pub fn hide_settings(app: &AppHandle) -> Result<(), IpcError> {
 /// the game window goes away.
 pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
     let Some(platform) = state.platform.clone() else { return };
-    if !platform.capabilities.window_tracking || state.backend == kalandra_platform::BackendKind::Wayland {
+    if !platform.capabilities.window_tracking || state.backend == rkl_platform::BackendKind::Wayland {
         return;
     }
     let rx = match platform.window_tracker.subscribe() {
@@ -317,8 +317,8 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
         }
     };
     let app = app.clone();
-    let spawned = std::thread::Builder::new().name("kalandra-game-follow".into()).spawn(move || {
-        use kalandra_platform::WindowEvent;
+    let spawned = std::thread::Builder::new().name("rkl-game-follow".into()).spawn(move || {
+        use rkl_platform::WindowEvent;
         for ev in rx {
             let state = app.state::<Arc<AppState>>();
             if !state.settings_overlay.load(Ordering::SeqCst) {
@@ -345,7 +345,7 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
 
 pub fn open_trade(app: &AppHandle, url: &str) -> Result<(), IpcError> {
     use tauri_plugin_opener::OpenerExt;
-    let override_base = crate::state::env_override("KALANDRA_TRADE_BASE_URL");
+    let override_base = crate::state::env_override("RKL_TRADE_BASE_URL");
     if !logic::is_allowed_trade_url(url, override_base.as_ref()) {
         return Err(IpcError::new("internal", format!("refusing to open non-trade url {url}")));
     }
@@ -377,7 +377,7 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
 /// sources/settings and broadcast. Blocking (portal registration can take seconds): call it
 /// off the main thread. Serialised by `AppState::apply_lock`.
 pub fn apply_settings(app: &AppHandle, state: &AppState, settings: Settings) -> Result<Settings, IpcError> {
-    kalandra_config::validate(&settings)?;
+    rkl_config::validate(&settings)?;
     let _guard = state.apply_lock.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
     let previous = state.settings();
     let hotkeys_changed = previous.hotkeys != settings.hotkeys;
@@ -393,7 +393,7 @@ pub fn apply_settings(app: &AppHandle, state: &AppState, settings: Settings) -> 
     }
     let sources = state.sources().updated(&settings).map_err(|e| rollback(IpcError::new("config", e)))?;
     if let Some(paths) = state.paths.as_ref() {
-        kalandra_config::save(paths, &settings).map_err(|e| rollback(e.into()))?;
+        rkl_config::save(paths, &settings).map_err(|e| rollback(e.into()))?;
     }
     if let Some(sources) = sources {
         *state.sources.write().expect("sources lock") = Arc::new(sources);
@@ -417,7 +417,7 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
         }
     };
     let app = app.clone();
-    let spawned = std::thread::Builder::new().name("kalandra-hotkeys".into()).spawn(move || {
+    let spawned = std::thread::Builder::new().name("rkl-hotkeys".into()).spawn(move || {
         for ev in rx {
             let state = app.state::<Arc<AppState>>();
             let overlay_open = state.overlay_visible.load(Ordering::SeqCst);
@@ -461,9 +461,9 @@ pub fn spawn_input_loop(app: &AppHandle, state: &AppState) {
         }
     };
     let app = app.clone();
-    let spawned = std::thread::Builder::new().name("kalandra-input".into()).spawn(move || {
+    let spawned = std::thread::Builder::new().name("rkl-input".into()).spawn(move || {
         for ev in rx {
-            if let kalandra_platform::InputEvent::KeyDown { key } = ev
+            if let rkl_platform::InputEvent::KeyDown { key } = ev
                 && is_close_key(&key)
             {
                 let state = app.state::<Arc<AppState>>();

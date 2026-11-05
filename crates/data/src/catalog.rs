@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use kalandra_core::{
+use rkl_core::{
     catalog::{BaseDef, Catalog, StatDef, StaticDef, UniqueDef},
     item::ModKind,
 };

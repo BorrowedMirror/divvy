@@ -11,16 +11,16 @@ set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)
 
-if [ -z "${KALANDRA_E2E_IN_SESSION:-}" ]; then
+if [ -z "${RKL_E2E_IN_SESSION:-}" ]; then
   for tool in sway swaymsg xkbcli dbus-run-session; do
     command -v "$tool" >/dev/null || { echo "run-wayland: missing $tool" >&2; exit 2; }
   done
   if [ -z "${SKIP_BUILD:-}" ]; then
     (cd "$repo" && pnpm install --frozen-lockfile && pnpm --dir web build)
-    (cd "$repo" && cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game)
+    (cd "$repo" && cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game)
   fi
   (cd "$repo" && cargo build --manifest-path e2e/macos-harness/Cargo.toml --bin wl-keyboard)
-  export KALANDRA_E2E_IN_SESSION=1
+  export RKL_E2E_IN_SESSION=1
   exec dbus-run-session -- "$0" "$@"
 fi
 
@@ -74,9 +74,9 @@ else
   echo "run-wayland: xdg-desktop-portal-wlr not found in $portal_dir (set PORTAL_LIBEXEC); continuing" >&2
 fi
 
-export GDK_BACKEND=wayland KALANDRA_BACKEND=wayland KALANDRA_E2E_TRIGGER=${KALANDRA_E2E_TRIGGER:-hook}
+export GDK_BACKEND=wayland RKL_BACKEND=wayland RKL_E2E_TRIGGER=${RKL_E2E_TRIGGER:-hook}
 # The hook trigger skips the hotkey, so the specs focus the game first (e2e/lib/app.ts).
-export KALANDRA_E2E_FOCUS_CMD=${KALANDRA_E2E_FOCUS_CMD:-"swaymsg -q '[title=\"^Path of Exile 2\$\"] focus'"}
+export RKL_E2E_FOCUS_CMD=${RKL_E2E_FOCUS_CMD:-"swaymsg -q '[title=\"^Path of Exile 2\$\"] focus'"}
 cd "$repo/e2e"
 status=0
 pnpm exec wdio run ./wdio.conf.ts "$@" || status=$?

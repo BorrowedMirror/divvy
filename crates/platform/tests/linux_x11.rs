@@ -7,19 +7,17 @@
 #![cfg(all(target_os = "linux", feature = "native"))]
 
 /// Set in the child process.
-const CHILD_ENV: &str = "KALANDRA_TEST_X11_CHILD";
+const CHILD_ENV: &str = "RKL_TEST_X11_CHILD";
 
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::Receiver;
 use std::time::{Duration, Instant};
 
-use kalandra_platform::backend::{self, x11};
-use kalandra_platform::copy::{CopyOptions, copy_item_text};
-use kalandra_platform::{
-    BackendKind, Chord, GAME_WINDOW_TITLE, HotkeyAction, InputEvent, PlatformError, Rect, WindowEvent,
-};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle, XcbDisplayHandle, XcbWindowHandle};
+use rkl_platform::backend::{self, x11};
+use rkl_platform::copy::{CopyOptions, copy_item_text};
+use rkl_platform::{BackendKind, Chord, GAME_WINDOW_TITLE, HotkeyAction, InputEvent, PlatformError, Rect, WindowEvent};
 use x11rb::connection::Connection;
 use x11rb::protocol::Event;
 use x11rb::protocol::shape::{ConnectionExt as _, SK};
@@ -143,7 +141,7 @@ fn x11_backend_end_to_end() {
         .env("DISPLAY", &display)
         .env("XDG_CURRENT_DESKTOP", "openbox")
         .env_remove("WAYLAND_DISPLAY")
-        .env_remove("KALANDRA_BACKEND")
+        .env_remove("RKL_BACKEND")
         .status()
         .expect("run child");
     drop(procs);
@@ -157,7 +155,7 @@ fn child() {
     let root = conn.setup().roots[screen].root;
 
     // detect(): DISPLAY set -> X11.
-    assert_eq!(kalandra_platform::detect(&kalandra_platform::EnvProbe::from_env(), None), BackendKind::X11);
+    assert_eq!(rkl_platform::detect(&rkl_platform::EnvProbe::from_env(), None), BackendKind::X11);
 
     let platform = backend::create(BackendKind::X11).expect("x11 backend");
     assert_eq!(platform.kind, BackendKind::X11);
@@ -202,8 +200,8 @@ fn child() {
     wait_until("game focused", Duration::from_secs(5), || platform.window_tracker.is_game_focused());
 
     // Clipboard roundtrip.
-    platform.clipboard.set_text("kalandra x11 clipboard").unwrap();
-    assert_eq!(platform.clipboard.get_text().unwrap().as_deref(), Some("kalandra x11 clipboard"));
+    platform.clipboard.set_text("rkl x11 clipboard").unwrap();
+    assert_eq!(platform.clipboard.get_text().unwrap().as_deref(), Some("rkl x11 clipboard"));
     platform.clipboard.clear().unwrap();
     assert_eq!(platform.clipboard.get_text().unwrap(), None);
 
@@ -295,8 +293,8 @@ fn child() {
 
     // Active window and pointer-grab probes (Wine holds a pointer grab over fullscreen games).
     use x11rb::protocol::xproto::{EventMask as Em, GrabMode, GrabStatus};
-    assert!(kalandra_platform::backend::x11::active_window().is_ok());
-    assert!(!kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "no grab yet");
+    assert!(rkl_platform::backend::x11::active_window().is_ok());
+    assert!(!rkl_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "no grab yet");
     let (grabber, gscreen) = x11rb::connect(Some(&display)).unwrap();
     let groot = grabber.setup().roots[gscreen].root;
     let st = grabber
@@ -315,9 +313,9 @@ fn child() {
         .unwrap()
         .status;
     assert_eq!(st, GrabStatus::SUCCESS);
-    assert!(kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab held by another client");
+    assert!(rkl_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab held by another client");
     grabber.ungrab_pointer(x11rb::CURRENT_TIME).unwrap().check().unwrap();
-    assert!(!kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab released");
+    assert!(!rkl_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab released");
     drop(grabber);
 
     // Destroying the game window -> Lost.
@@ -377,7 +375,7 @@ fn key_down(conn: &RustConnection, keycode: u8) -> bool {
 
 /// Held chord modifiers stay down; extra held modifiers are released; a held non-modifier key
 /// (the hotkey's) delays the chord until it is released.
-fn held_keys_are_respected(conn: &RustConnection, root: Window, platform: &kalandra_platform::Platform) {
+fn held_keys_are_respected(conn: &RustConnection, root: Window, platform: &rkl_platform::Platform) {
     let ctrl_f5 = Chord::parse("Ctrl+F5").unwrap();
     fake_key(conn, root, KC_CTRL_L, true);
     fake_key(conn, root, KC_SHIFT_L, true);
@@ -421,8 +419,8 @@ fn hotkey_held_during_copy(
     conn: &RustConnection,
     root: Window,
     game: Window,
-    platform: &kalandra_platform::Platform,
-    hotkeys: &Receiver<kalandra_platform::HotkeyEvent>,
+    platform: &rkl_platform::Platform,
+    hotkeys: &Receiver<rkl_platform::HotkeyEvent>,
 ) {
     // Ctrl+A as the hotkey: its Ctrl is also the copy chord's.
     let hotkey = Chord::parse("Ctrl+A").unwrap();

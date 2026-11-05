@@ -32,7 +32,7 @@ jobs:
       - name: cargo xtask data refresh
         run: cargo xtask data refresh
       - name: Data crate still passes its tests
-        run: cargo test --locked -p kalandra-data
+        run: cargo test --locked -p rkl-data
       - name: Open pull request if the data changed
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:

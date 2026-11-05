@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "Aktualizacja aplikacji",
-    "available": "Dostępna jest wersja kalandra {{version}}.",
+    "available": "Dostępna jest wersja RKL {{version}}.",
     "notes": "Co nowego",
     "later": "Później",
     "install": "Zainstaluj i uruchom ponownie",
@@ -31,7 +31,7 @@
     "statMax": "Maksimum dla {{stat}}",
     "search": "Szukaj",
     "loading": "Wyszukiwanie…",
-    "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu kalandra w zasobniku i wyłącz przechwytywanie myszy przez Proton."
+    "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu RKL w zasobniku i wyłącz przechwytywanie myszy przez Proton."
   },
   "item": {
     "rarityLabel": "Rzadkość:",
@@ -223,21 +223,21 @@
     "clipboard": "Dostęp do schowka"
   },
   "guidance": {
-    "accessibility": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Dostępność i włącz aplikację kalandra. Jest to potrzebne do skrótów i kopiowania przedmiotów.",
-    "screenRecording": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Nagrywanie ekranu i włącz aplikację kalandra, aby mogła znaleźć okno gry. Następnie uruchom ponownie aplikację kalandra.",
+    "accessibility": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Dostępność i włącz aplikację RKL. Jest to potrzebne do skrótów i kopiowania przedmiotów.",
+    "screenRecording": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Nagrywanie ekranu i włącz aplikację RKL, aby mogła znaleźć okno gry. Następnie uruchom ponownie aplikację RKL.",
     "wayland": "Tryb natywny Wayland: globalne skróty działają przez portal pulpitu, nakładka jest zakotwiczona do ekranu, a nie do okna gry, a wstrzykiwanie klawiszy może być niedostępne. Użyj X11/XWayland, jeśli twój kompozytor na to pozwala.",
-    "gnome": "GNOME nie obsługuje funkcji Waylanda, których potrzebuje kalandra, więc działa tam przez XWayland (X11). Uruchom grę również przez XWayland.",
+    "gnome": "GNOME nie obsługuje funkcji Waylanda, których potrzebuje RKL, więc działa tam przez XWayland (X11). Uruchom grę również przez XWayland.",
     "generic": "Brak uprawnienia: {{permission}}"
   },
   "tray": {
     "priceCheck": "Sprawdzanie ceny (przypięte)",
     "settings": "Ustawienia…",
     "diagnostics": "Diagnostyka",
-    "quit": "Zamknij aplikację kalandra",
-    "tooltip": "kalandra"
+    "quit": "Zamknij aplikację RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "Konfiguracja aplikacji kalandra",
+    "title": "Konfiguracja aplikacji RKL",
     "intro": "Kilka kroków zależnych od platformy, aby sprawdzanie cen działało bez problemów. Możesz tu wrócić w dowolnym momencie z poziomu Diagnostyki.",
     "stepsHeading": "Konfiguracja dla: {{platform}}",
     "loadFailed": "Nie udało się sprawdzić uprawnień.",
@@ -246,25 +246,25 @@
     "granted": "Przyznano",
     "notGranted": "Nie przyznano",
     "openSettings": "Otwórz Ustawienia systemowe",
-    "relaunch": "macOS zastosuje to uprawnienie po ponownym uruchomieniu aplikacji kalandra. Po jego włączeniu zamknij i ponownie otwórz aplikację kalandra.",
+    "relaunch": "macOS zastosuje to uprawnienie po ponownym uruchomieniu aplikacji RKL. Po jego włączeniu zamknij i ponownie otwórz aplikację RKL.",
     "requestFailed": "Nie udało się otworzyć Ustawień systemowych: {{message}}",
     "details": "Szczegóły techniczne",
-    "blockedHint": "Nadal brakuje niektórych wymaganych uprawnień. kalandra będzie działać z ograniczonymi funkcjami.",
+    "blockedHint": "Nadal brakuje niektórych wymaganych uprawnień. RKL będzie działać z ograniczonymi funkcjami.",
     "continueWithout": "Kontynuuj bez nich",
     "done": "Gotowe",
     "saveFailed": "Nie udało się zapisać: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Dostępność",
-        "body": "Po naciśnięciu skrótu sprawdzania ceny kalandra naciska za ciebie skrót kopiowania w grze. macOS wymaga do tego dostępu w sekcji Dostępność."
+        "body": "Po naciśnięciu skrótu sprawdzania ceny RKL naciska za ciebie skrót kopiowania w grze. macOS wymaga do tego dostępu w sekcji Dostępność."
       },
       "screen_recording": {
         "name": "Nagrywanie ekranu",
-        "body": "Pozwala aplikacji kalandra odczytywać tytuły okien, aby niezawodnie znajdować okno Path of Exile 2. kalandra nigdy nie nagrywa twojego ekranu."
+        "body": "Pozwala aplikacji RKL odczytywać tytuły okien, aby niezawodnie znajdować okno Path of Exile 2. RKL nigdy nie nagrywa twojego ekranu."
       },
       "input_monitoring": {
         "name": "Monitorowanie wprowadzania",
-        "body": "Pozwala aplikacji kalandra zamykać nakładkę klawiszem Esc i reagować na Ctrl+kółko myszy, gdy gra jest aktywna."
+        "body": "Pozwala aplikacji RKL zamykać nakładkę klawiszem Esc i reagować na Ctrl+kółko myszy, gdy gra jest aktywna."
       },
       "unknown": "Uprawnienie: {{kind}}"
     },
@@ -272,15 +272,15 @@
       "windowedTitle": "Użyj trybu okna lub pełnego ekranu bez ramek",
       "windowedBody": "Nakładka nie może pojawić się nad wyłącznym trybem pełnoekranowym. W opcjach grafiki gry wybierz tryb okna lub pełny ekran w oknie (bez ramek).",
       "elevatedTitle": "Gra działa jako administrator?",
-      "elevatedBody": "Windows blokuje skróty i symulowane naciśnięcia klawiszy wysyłane ze zwykłej aplikacji do aplikacji z podwyższonymi uprawnieniami (UIPI). Jeśli gra działa jako administrator, uruchom aplikację kalandra również jako administrator."
+      "elevatedBody": "Windows blokuje skróty i symulowane naciśnięcia klawiszy wysyłane ze zwykłej aplikacji do aplikacji z podwyższonymi uprawnieniami (UIPI). Jeśli gra działa jako administrator, uruchom aplikację RKL również jako administrator."
     },
     "x11": {
       "title": "Nie trzeba nic więcej konfigurować",
-      "body": "X11 obsługuje wszystko, czego potrzebuje kalandra: globalne skróty, śledzenie okna i nakładkę nad grą."
+      "body": "X11 obsługuje wszystko, czego potrzebuje RKL: globalne skróty, śledzenie okna i nakładkę nad grą."
     },
     "gnome": {
       "title": "GNOME: tylko X11/XWayland",
-      "x11Body": "GNOME nie ma funkcji Waylanda, których potrzebuje kalandra, więc tutaj kalandra działa przez XWayland. Uruchom grę również przez XWayland (domyślnie w Proton i Wine).",
+      "x11Body": "GNOME nie ma funkcji Waylanda, których potrzebuje RKL, więc tutaj RKL działa przez XWayland. Uruchom grę również przez XWayland (domyślnie w Proton i Wine).",
       "waylandBody": "GNOME nie obsługuje layer-shell, więc w trybie natywnym Wayland nakładka nie może pozostać nad grą. Zmień backend na X11 / XWayland w Ustawieniach."
     },
     "wayland": {
@@ -288,9 +288,9 @@
       "degradedBody": "Wayland izoluje aplikacje od siebie, więc niektóre funkcje działają inaczej:",
       "portal": "Globalne skróty działają przez portal GlobalShortcuts pulpitu, który prosi o ich potwierdzenie. Nie każdy kompozytor go udostępnia.",
       "layerShell": "Nakładka jest zakotwiczona do krawędzi ekranu przez layer-shell zamiast podążać za oknem gry.",
-      "noTracking": "kalandra nie widzi okna gry ani nie wykrywa klawisza Esc, więc zamykaj nakładkę jej własnym przyciskiem.",
+      "noTracking": "RKL nie widzi okna gry ani nie wykrywa klawisza Esc, więc zamykaj nakładkę jej własnym przyciskiem.",
       "triggerTitle": "Przypisz sprawdzanie ceny w kompozytorze",
-      "triggerBody": "Jeśli skróty nie działają, dodaj w kompozytorze skrót klawiszowy uruchamiający kalandra --trigger. Sprawdza on cenę przedmiotu pod kursorem w działającej aplikacji kalandra.",
+      "triggerBody": "Jeśli skróty nie działają, dodaj w kompozytorze skrót klawiszowy uruchamiający RKL --trigger. Sprawdza on cenę przedmiotu pod kursorem w działającej aplikacji RKL.",
       "pinnedHint": "Dodaj --pinned, aby otworzyć przypiętą nakładkę.",
       "example": {
         "sway": "sway",
@@ -301,7 +301,7 @@
   },
   "proton": {
     "title": "Przechwytywanie myszy przez Proton",
-    "body": "W Proton pełnoekranowe Path of Exile 2 przechwytuje mysz, więc kliknięcia i klawisze nigdy nie docierają do panelu kalandra. Wyłączenie przechwytywania myszy przez Wine dla gry rozwiązuje problem; kursor nie jest już wtedy zablokowany w oknie gry.",
+    "body": "W Proton pełnoekranowe Path of Exile 2 przechwytuje mysz, więc kliknięcia i klawisze nigdy nie docierają do panelu RKL. Wyłączenie przechwytywania myszy przez Wine dla gry rozwiązuje problem; kursor nie jest już wtedy zablokowany w oknie gry.",
     "statusOn": "Przechwytywanie myszy: włączone (domyślnie w Wine)",
     "statusOff": "Przechwytywanie myszy: wyłączone",
     "fix": "Wyłącz przechwytywanie myszy",

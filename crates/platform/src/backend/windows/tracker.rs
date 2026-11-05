@@ -48,7 +48,7 @@ impl WindowTracker for Win32WindowTracker {
         let (tx, rx) = mpsc::channel();
         let (ready_tx, ready_rx) = mpsc::sync_channel(1);
         std::thread::Builder::new()
-            .name("kalandra-win-tracker".into())
+            .name("rkl-win-tracker".into())
             .spawn(move || hook_thread(tx, ready_tx))
             .map_err(|e| PlatformError::Backend(format!("spawn tracker thread: {e}")))?;
         ready_rx.recv().map_err(|_| PlatformError::Backend("tracker thread exited during setup".into()))??;

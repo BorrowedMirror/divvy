@@ -56,9 +56,7 @@ fn gen_all(no_bindings: bool) -> anyhow::Result<()> {
     if !no_bindings {
         let sh = xshell::Shell::new()?;
         sh.change_dir(commit_config::root());
-        xshell::cmd!(sh, "cargo test --quiet -p kalandra-desktop --test bindings")
-            .env("KALANDRA_UPDATE_BINDINGS", "1")
-            .run()?;
+        xshell::cmd!(sh, "cargo test --quiet -p rkl-desktop --test bindings").env("RKL_UPDATE_BINDINGS", "1").run()?;
     }
     Ok(())
 }

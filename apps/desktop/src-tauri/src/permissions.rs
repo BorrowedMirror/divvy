@@ -6,7 +6,7 @@
 //! [`PermissionsChanged`] is emitted whenever the answer changes.
 use std::sync::{Arc, Mutex};
 
-use kalandra_platform::{BackendKind, Capabilities, EnvProbe};
+use rkl_platform::{BackendKind, Capabilities, EnvProbe};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, State};
 use tauri_specta::Event;
@@ -28,7 +28,7 @@ const MACOS_PERMISSIONS: [(&str, bool, &str); 3] = [
 pub const NOTE_WAYLAND_PORTAL: &str =
     "Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it";
 pub const NOTE_WAYLAND_TRIGGER: &str =
-    "Wayland-native: without the portal, bind `kalandra --trigger` (add `--pinned` for pinned) in your compositor";
+    "Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor";
 pub const NOTE_WAYLAND_LAYER_SHELL: &str =
     "Wayland-native: the overlay is anchored to the output with layer-shell, not to the game window";
 pub const NOTE_GNOME: &str = "GNOME: only X11/XWayland is supported; run the game under XWayland";
@@ -96,10 +96,10 @@ pub struct MacProbe;
 #[cfg(all(target_os = "macos", feature = "native"))]
 impl PermissionProbe for MacProbe {
     fn missing(&self) -> Vec<String> {
-        kalandra_platform::backend::macos::recheck_permissions()
+        rkl_platform::backend::macos::recheck_permissions()
     }
     fn open_settings(&self, kind: &str) {
-        kalandra_platform::backend::macos::open_permission_settings(kind);
+        rkl_platform::backend::macos::open_permission_settings(kind);
     }
 }
 
@@ -330,7 +330,7 @@ mod tests {
         let caps_notes = strings(&["Wayland-native: no passive input hook", NOTE_WAYLAND_PORTAL]);
         let r = build_report(BackendKind::Wayland, &[], &caps_notes, false);
         assert_eq!(r.notes[..3], strings(&[NOTE_WAYLAND_PORTAL, NOTE_WAYLAND_TRIGGER, NOTE_WAYLAND_LAYER_SHELL]));
-        assert!(r.notes.iter().any(|n| n.contains("kalandra --trigger")));
+        assert!(r.notes.iter().any(|n| n.contains("rkl --trigger")));
         assert_eq!(r.notes.len(), 4, "duplicate capability notes are dropped");
         assert!(!r.gnome);
     }

@@ -1,7 +1,7 @@
 //! Exchange-rate helpers shared by the aggregated price sources.
 //!
 //! [`ExchangeRates`] semantics follow core: `rates[c]` = value of one `c` in `base`.
-use kalandra_core::{
+use rkl_core::{
     item::{ItemCategory, ParsedItem},
     pricing::{ExchangeRates, Price, PriceSourceKind, PriceSummary},
 };
@@ -55,7 +55,7 @@ pub fn exchange_name(item: &ParsedItem) -> String {
 
 #[cfg(test)]
 pub(crate) mod test_support {
-    use kalandra_core::item::{ItemCategory, ItemClass, ItemStats, ParsedItem, Rarity, Requirements};
+    use rkl_core::item::{ItemCategory, ItemClass, ItemStats, ParsedItem, Rarity, Requirements};
 
     /// Minimal parsed item for source tests.
     pub fn item(class: ItemClass, category: ItemCategory, name: Option<&str>, base: &str) -> ParsedItem {
@@ -89,7 +89,7 @@ pub(crate) mod test_support {
 
 #[cfg(test)]
 mod tests {
-    use kalandra_core::item::ItemClass;
+    use rkl_core::item::ItemClass;
 
     use super::*;
 

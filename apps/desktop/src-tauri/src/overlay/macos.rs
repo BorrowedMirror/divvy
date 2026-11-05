@@ -7,7 +7,7 @@ use tauri_nspanel::objc2_app_kit::NSWindowStyleMask;
 use tauri_nspanel::{CollectionBehavior, ManagerExt, PanelLevel, WebviewPanelManager, WebviewWindowExt, tauri_panel};
 
 tauri_panel! {
-    panel!(KalandraOverlayPanel {
+    panel!(RklOverlayPanel {
         config: {
             // Key only when a text field is clicked, so the game keeps keyboard input otherwise.
             can_become_key_window: true,
@@ -39,7 +39,7 @@ pub fn prepare(window: &tauri::WebviewWindow) -> Result<(), String> {
     }
     let panel = match window.get_webview_panel(window.label()) {
         Ok(panel) => panel,
-        Err(_) => window.to_panel::<KalandraOverlayPanel>().map_err(|e| format!("convert overlay to NSPanel: {e}"))?,
+        Err(_) => window.to_panel::<RklOverlayPanel>().map_err(|e| format!("convert overlay to NSPanel: {e}"))?,
     };
     panel
         .add_style_mask(NSWindowStyleMask::NonactivatingPanel)

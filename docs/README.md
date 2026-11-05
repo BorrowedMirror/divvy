@@ -1,4 +1,4 @@
-# kalandra documentation
+# RKL documentation
 
 - [Architecture](architecture.md): components, data flow and boundaries.
 - [Contracts](../CONTRACTS.md): the fixed public interfaces between crates, IPC and the web UI.
@@ -12,16 +12,16 @@
 
 ## Research
 
-Notes on external systems kalandra depends on (captured live; background, not a spec):
+Notes on external systems RKL depends on (captured live; background, not a spec):
 
 - [trade2 API](research/trade2.md): endpoints, payloads, rate-limit headers.
 - [poe.ninja and poe2scout](research/ninja-scout.md): aggregated price APIs.
 - [Game data sources](research/data-sources.md): inputs to `cargo xtask data refresh`.
 - [macOS](research/macos.md): permissions, window tracking, overlay panel.
 
-## Using kalandra
+## Using RKL
 
-Install requirements, the Linux session matrix, settings paths and every `KALANDRA_*`
+Install requirements, the Linux session matrix, settings paths and every `RKL_*`
 environment variable are in the [README](../README.md).
 
 ## Policies

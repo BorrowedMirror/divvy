@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Let kalandra's overlay receive clicks and keys over Path of Exile 2 under Proton/Wine (X11).
+# Let rkl's overlay receive clicks and keys over Path of Exile 2 under Proton/Wine (X11).
 #
 # In fullscreen Wine turns the game's cursor clipping (ClipCursor) into an X pointer grab, so every
 # click goes to the game even on windows drawn above it. This sets the Wine X11 driver options
@@ -14,7 +14,7 @@
 # first: Wine rewrites user.reg on exit. The change applies the next time the game starts.
 set -euo pipefail
 
-APPID=${KALANDRA_POE2_APPID:-2694490}
+APPID=${RKL_POE2_APPID:-2694490}
 cmd=${1:-status}
 prefix=${2:-}
 
@@ -39,7 +39,7 @@ if [ -z "$prefix" ]; then
   prefix=$(find_prefix) || { echo "error: no Proton prefix for app $APPID found; pass it explicitly" >&2; exit 1; }
 fi
 reg="$prefix/user.reg"
-state="$prefix/.kalandra-mouse-grab.state"
+state="$prefix/.rkl-mouse-grab.state"
 [ -f "$reg" ] || { echo "error: $reg not found" >&2; exit 1; }
 
 if [ "$cmd" != status ] && { pgrep -x wineserver || pgrep -f "PathOfExile[A-Za-z_]*\.exe"; } >/dev/null 2>&1; then
@@ -92,10 +92,10 @@ def write(new_vals):
             body.append(f'"{k}"="{new_vals[k]}"')
     body.append("")
     lines[start + 1 : end] = body
-    backup = reg + ".kalandra-backup"
+    backup = reg + ".rkl-backup"
     if not os.path.exists(backup):
         shutil.copy2(reg, backup)
-    tmp = reg + ".kalandra-tmp"
+    tmp = reg + ".rkl-tmp"
     with open(tmp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
         f.write("\n".join(lines))
     os.replace(tmp, reg)

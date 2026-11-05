@@ -47,7 +47,7 @@ pub(crate) fn start_global_hook() -> Result<Receiver<InputEvent>, PlatformError>
     }
     init_process_env();
     let (tx, rx) = sync_channel(HOOK_CHANNEL_CAPACITY);
-    let spawned = std::thread::Builder::new().name("kalandra-input-hook".into()).spawn(move || {
+    let spawned = std::thread::Builder::new().name("rkl-input-hook".into()).spawn(move || {
         // rdev::listen blocks for the life of the hook; it only returns on failure.
         let result = rdev::listen(move |event| {
             if let Some(ev) = map_event(&event.event_type) {

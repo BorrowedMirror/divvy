@@ -3,7 +3,7 @@
 
 #[cfg(feature = "native")]
 pub fn prepare(window: &tauri::WebviewWindow) -> Result<(), String> {
-    use kalandra_platform::backend::windows::{
+    use rkl_platform::backend::windows::{
         overlay,
         raw_window_handle::{HasDisplayHandle, HasWindowHandle},
     };

@@ -5,11 +5,11 @@
 #   - the pinned price panel stacks above the game and takes focus,
 #   - the settings window covers the game exactly, above it, focused.
 # Needs: Xvfb openbox xdotool wmctrl xprop xwininfo dbus-run-session python3, and binaries built
-# with `cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game`.
+# with `cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game`.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-APP=${KALANDRA_APP_BIN:-target/debug/kalandra}
-GAMEBIN=${KALANDRA_FAKE_GAME_BIN:-target/debug/fake-game}
+APP=${RKL_APP_BIN:-target/debug/rkl}
+GAMEBIN=${RKL_FAKE_GAME_BIN:-target/debug/fake-game}
 DISP=${STACK_DISPLAY:-:87}
 PORT=${STACK_HOOK_PORT:-47188}
 Xvfb "$DISP" -screen 0 1920x1080x24 >/dev/null 2>&1 &
@@ -27,7 +27,7 @@ LOG=$(mktemp -d)
 for _ in $(seq 50); do grep -q READY "$LOG/game" && break; sleep 0.1; done
 GAME=$(xdotool search --name "^Path of Exile 2$" | head -1)
 wmctrl -i -r "$GAME" -b add,fullscreen; xdotool windowactivate --sync "$GAME"; sleep 0.5
-KALANDRA_TEST_HOOK=$PORT KALANDRA_CONFIG_DIR=$CFG KALANDRA_LOG=warn "$APP" >"$LOG/app" 2>&1 & PID=$!
+RKL_TEST_HOOK=$PORT RKL_CONFIG_DIR=$CFG RKL_LOG=warn "$APP" >"$LOG/app" 2>&1 & PID=$!
 trap "kill $FG $PID 2>/dev/null || true" EXIT
 for _ in $(seq 100); do (exec 3<>/dev/tcp/127.0.0.1/$PORT) 2>/dev/null && break; sleep 0.1; done
 hook() { exec 3<>/dev/tcp/127.0.0.1/$PORT; echo "$1" >&3; head -1 <&3; exec 3>&-; }
@@ -38,37 +38,49 @@ xdotool windowactivate --sync "$GAME"; sleep 0.3
 
 hook "text $(python3 -c "import json;print(json.dumps(open(\"e2e/fixtures/rare-ring.txt\").read()))")" >/dev/null
 sleep 0.8
-[ "$(top)" = "kalandra overlay" ] || fail "unpinned panel is not above the game (top: $(top))"
-[ "$(active)" = "kalandra overlay" ] || fail "unpinned panel is not focused (active: $(active))"
+[ "$(top)" = "RKL overlay" ] || fail "unpinned panel is not above the game (top: $(top))"
+[ "$(active)" = "RKL overlay" ] || fail "unpinned panel is not focused (active: $(active))"
 echo "ok: unpinned panel above the fullscreen game and focused"
 
 xdotool windowactivate --sync "$GAME"; sleep 0.3
+hook hide >/dev/null; xdotool windowactivate --sync "$GAME"; sleep 0.3
 hook "tray price_check" >/dev/null; sleep 1.5
-[ "$(top)" = "kalandra overlay" ] || fail "pinned panel is not above the game (top: $(top))"
-[ "$(active)" = "kalandra overlay" ] || fail "pinned panel did not take focus (active: $(active))"
+[ "$(top)" = "RKL overlay" ] || fail "pinned panel is not above the game (top: $(top))"
+[ "$(active)" = "RKL overlay" ] || fail "pinned panel did not take focus (active: $(active))"
 echo "ok: pinned panel above the game and focused"
 
 for keys in ctrl+d ctrl+alt+d; do
-  hook "text_hide" >/dev/null 2>&1 || true
+  hook hide >/dev/null
   xdotool windowactivate --sync "$GAME"; sleep 0.3
   xdotool key --clearmodifiers "$keys"; sleep 1.5
-  [ "$(top)" = "kalandra overlay" ] || fail "$keys: panel is not above the game (top: $(top))"
-  [ "$(active)" = "kalandra overlay" ] || fail "$keys: panel is not focused (active: $(active))"
+  [ "$(top)" = "RKL overlay" ] || fail "$keys: panel is not above the game (top: $(top))"
+  [ "$(active)" = "RKL overlay" ] || fail "$keys: panel is not focused (active: $(active))"
   echo "ok: $keys hotkey shows the panel above the game, focused"
   if [ "$keys" = ctrl+d ]; then
     xdotool key Escape; sleep 0.8
     [ "$(active)" = "Path of Exile 2" ] || fail "Esc did not return focus to the game (active: $(active))"
     echo "ok: Esc closes the unpinned panel and the game gets focus back"
+  else
+    xdotool key --clearmodifiers "$keys"; sleep 1
+    [ "$(active)" = "Path of Exile 2" ] || fail "$keys again did not close the panel (active: $(active))"
+    echo "ok: pressing $keys again closes the panel (toggle)"
   fi
 done
 
 hook "tray open_settings" >/dev/null; sleep 0.8
-[ "$(top)" = "kalandra settings" ] || fail "settings not on top (top: $(top))"
-[ "$(active)" = "kalandra settings" ] || fail "settings not focused (active: $(active))"
+[ "$(top)" = "RKL settings" ] || fail "settings not on top (top: $(top))"
+[ "$(active)" = "RKL settings" ] || fail "settings not focused (active: $(active))"
 geo() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}/Width/{w=\$NF}/Height/{h=\$NF}END{print x\",\"y\",\"w\",\"h}"; }
-SW=$(xdotool search --name "^kalandra settings$" | head -1)
+SW=$(xdotool search --name "^RKL settings$" | head -1)
 [ "$(geo "$SW")" = "$(geo "$GAME")" ] || fail "settings $(geo "$SW") does not cover the game $(geo "$GAME")"
 echo "ok: settings overlay covers the game ($(geo "$SW")) and is focused"
+xdotool key --clearmodifiers ctrl+space; sleep 1
+[ "$(xwininfo -id "$SW" | awk "/Map State/{print \$NF}")" != IsViewable ] || fail "Ctrl+Space did not close the settings overlay"
+echo "ok: Ctrl+Space closes the settings overlay (toggle)"
+xdotool windowactivate --sync "$GAME"; sleep 0.3
+xdotool key --clearmodifiers ctrl+space; sleep 1
+[ "$(top)" = "RKL settings" ] || fail "Ctrl+Space did not open the settings overlay (top: $(top))"
+echo "ok: Ctrl+Space opens the settings overlay over the game"
 hook quit >/dev/null || true
 echo "PASS: stacking over a fullscreen game"
 '

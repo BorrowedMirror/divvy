@@ -23,7 +23,7 @@ use winit::window::{Window, WindowId};
 const TITLE: &str = "Path of Exile 2";
 
 #[derive(Debug, Parser)]
-#[command(about = "Fake Path of Exile 2 window for kalandra e2e tests")]
+#[command(about = "Fake Path of Exile 2 window for rkl e2e tests")]
 struct Args {
     /// Item text file served on Ctrl+C.
     #[arg(long, conflicts_with = "corpus_id")]
@@ -38,7 +38,7 @@ struct Args {
     #[arg(long)]
     advanced_corpus_id: Option<String>,
     /// Corpus directory (defaults to the in-repo crates/testkit/corpus).
-    #[arg(long, env = "KALANDRA_CORPUS_DIR")]
+    #[arg(long, env = "RKL_CORPUS_DIR")]
     corpus_dir: Option<PathBuf>,
     /// Exit after this many seconds (CI safety net).
     #[arg(long)]

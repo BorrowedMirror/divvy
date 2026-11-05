@@ -15,8 +15,8 @@ use crate::ipc::IpcError;
 pub const POE2_APPID: &str = "2694490";
 const SECTION: &str = r"[Software\\Wine\\X11 Driver]";
 const KEYS: [&str; 2] = ["GrabPointer", "GrabFullscreen"];
-const STATE_FILE: &str = ".kalandra-mouse-grab.state";
-const BACKUP_SUFFIX: &str = ".kalandra-backup";
+const STATE_FILE: &str = ".rkl-mouse-grab.state";
+const BACKUP_SUFFIX: &str = ".rkl-backup";
 
 /// Values of the two Wine options (`None` = unset, i.e. Wine's default).
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -50,7 +50,7 @@ pub struct ProtonMouseStatus {
     pub grab_fullscreen: Option<String>,
     /// Mouse capture is turned off (both options `N`).
     pub capture_disabled: bool,
-    /// kalandra changed the prefix and remembers the previous values.
+    /// rkl changed the prefix and remembers the previous values.
     pub can_restore: bool,
     /// The game (or its Wine server) is running; changes are refused until it quits.
     pub game_running: bool,
@@ -213,7 +213,7 @@ pub fn apply(prefix: &Path, disable: bool, running: bool, now_unix: u64) -> Resu
     if !backup.exists() {
         std::fs::copy(&reg, &backup).map_err(io)?;
     }
-    let tmp = prefix.join("user.reg.kalandra-tmp");
+    let tmp = prefix.join("user.reg.rkl-tmp");
     std::fs::write(&tmp, write_values(&text, &target, now_unix)).map_err(io)?;
     std::fs::rename(&tmp, &reg).map_err(io)?;
     if !disable {
@@ -321,7 +321,7 @@ mod tests {
         let s = apply(&pfx, false, false, 1).unwrap();
         assert!(!s.capture_disabled && !s.can_restore);
         assert_eq!(std::fs::read_to_string(pfx.join("user.reg")).unwrap(), REG);
-        assert_eq!(std::fs::read_to_string(pfx.join("user.reg.kalandra-backup")).unwrap(), REG);
+        assert_eq!(std::fs::read_to_string(pfx.join("user.reg.rkl-backup")).unwrap(), REG);
         assert!(apply(&pfx, false, false, 1).is_err(), "nothing left to restore");
     }
 

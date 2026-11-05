@@ -1,6 +1,6 @@
 //! Signal triggers: the hotkey fallback when no GlobalShortcuts portal exists.
 //! SIGUSR2 -> `PriceCheck`, SIGUSR1 -> `PriceCheckPinned`. Users bind
-//! `pkill -USR2 kalandra` / `pkill -USR1 kalandra` (or `kalandra --trigger`) in their compositor.
+//! `pkill -USR2 rkl` / `pkill -USR1 rkl` (or `rkl --trigger`) in their compositor.
 use std::sync::mpsc::{Receiver, SyncSender, TrySendError, sync_channel};
 
 use signal_hook::consts::{SIGUSR1, SIGUSR2};
@@ -29,7 +29,7 @@ pub(crate) fn spawn_sigusr2(tx: SyncSender<HotkeyEvent>) -> Result<(), PlatformE
     let mut signals =
         Signals::new([SIGUSR2, SIGUSR1]).map_err(|e| PlatformError::Backend(format!("SIGUSR1/2 handler: {e}")))?;
     std::thread::Builder::new()
-        .name("kalandra-signals".into())
+        .name("rkl-signals".into())
         .spawn(move || {
             for signal in signals.forever() {
                 let Some(action) = action_for_signal(signal) else { continue };

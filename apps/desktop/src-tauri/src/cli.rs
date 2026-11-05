@@ -1,4 +1,4 @@
-//! Minimal CLI: `kalandra [--trigger [--pinned]]`. `--trigger` asks the running instance to
+//! Minimal CLI: `rkl [--trigger [--pinned]]`. `--trigger` asks the running instance to
 //! price-check (e.g. a Wayland compositor key binding when global shortcuts are unavailable);
 //! the argv is forwarded by the single-instance plugin.
 
@@ -26,10 +26,10 @@ mod tests {
 
     #[test]
     fn parses_flags() {
-        assert_eq!(parse(["kalandra".into()]), Cli::default());
+        assert_eq!(parse(["rkl".into()]), Cli::default());
         assert_eq!(parse(["--trigger".into(), "--pinned".into()]), Cli { trigger: true, pinned: true });
         // Forwarded argv: the callback skips argv[0].
-        let argv = vec!["/usr/bin/kalandra".to_owned(), "--trigger".to_owned()];
+        let argv = vec!["/usr/bin/rkl".to_owned(), "--trigger".to_owned()];
         assert_eq!(parse(argv.into_iter().skip(1)), Cli { trigger: true, pinned: false });
     }
 }

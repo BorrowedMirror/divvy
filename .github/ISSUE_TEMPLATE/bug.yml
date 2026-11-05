@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in kalandra does not work as expected.
+description: Something in RKL does not work as expected.
 labels: [bug, triage]
 body:
   - type: markdown
@@ -19,7 +19,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Start kalandra and Path of Exile 2 (windowed fullscreen)
+        1. Start RKL and Path of Exile 2 (windowed fullscreen)
         2. Hover an item and press the price-check hotkey
         3. ...
     validations:
@@ -27,7 +27,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: kalandra version
+      label: RKL version
       description: Shown in Settings -> Diagnostics.
       placeholder: 0.1.0
     validations:

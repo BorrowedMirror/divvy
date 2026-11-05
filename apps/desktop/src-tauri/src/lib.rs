@@ -16,8 +16,8 @@ pub mod updater;
 
 use std::sync::{Arc, atomic::Ordering};
 
-use kalandra_config::{Paths, Settings};
-use kalandra_platform::{BackendKind, Platform};
+use rkl_config::{Paths, Settings};
+use rkl_platform::{BackendKind, Platform};
 use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_specta::{Builder, collect_commands, collect_events};
 
@@ -97,7 +97,7 @@ impl std::io::Write for LogFileWriter {
 
 fn init_logging() -> LogFile {
     use tracing_subscriber::{EnvFilter, fmt, prelude::*};
-    let env = std::env::var("KALANDRA_LOG").ok();
+    let env = std::env::var("RKL_LOG").ok();
     let filter = EnvFilter::try_new(logic::log_filter(env.as_deref()))
         .unwrap_or_else(|_| EnvFilter::new(logic::log_filter(None)));
     let slot = LogFile::default();
@@ -114,7 +114,7 @@ fn init_logging() -> LogFile {
 fn attach_log_file(slot: &LogFile, paths: Option<&Paths>) -> Option<std::path::PathBuf> {
     let p = paths?;
     std::fs::create_dir_all(&p.log_dir).ok()?;
-    let path = p.log_dir.join("kalandra.log");
+    let path = p.log_dir.join("rkl.log");
     let mut opts = std::fs::OpenOptions::new();
     opts.write(true).create(true).truncate(true);
     #[cfg(unix)]
@@ -128,7 +128,17 @@ fn attach_log_file(slot: &LogFile, paths: Option<&Paths>) -> Option<std::path::P
 }
 
 fn load_settings(paths: Option<&Paths>, errors: &mut Vec<String>) -> Settings {
-    match paths.map(kalandra_config::load) {
+    // Settings saved before the rename (kalandra, `au.nerv.kalandra`) are copied over once.
+    if let Some(p) = paths
+        && std::env::var_os(rkl_config::CONFIG_DIR_ENV).is_none()
+    {
+        match rkl_config::adopt_legacy_settings(p, rkl_config::legacy_settings_file().as_deref()) {
+            Ok(true) => tracing::info!("copied settings from the previous kalandra install"),
+            Ok(false) => {}
+            Err(e) => errors.push(format!("could not copy previous kalandra settings: {e}")),
+        }
+    }
+    match paths.map(rkl_config::load) {
         Some(Ok(s)) => s,
         Some(Err(e)) => {
             errors.push(format!("settings could not be loaded, using defaults: {e}"));
@@ -139,7 +149,7 @@ fn load_settings(paths: Option<&Paths>, errors: &mut Vec<String>) -> Settings {
 }
 
 fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Platform>> {
-    match kalandra_platform::backend::create(kind) {
+    match rkl_platform::backend::create(kind) {
         Ok(p) => Some(Arc::new(p)),
         Err(e) => {
             errors.push(format!("platform backend {kind:?} unavailable: {e}"));
@@ -152,14 +162,14 @@ fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Pl
 /// item parsing waits for it via [`AppState::wait_data`].
 fn spawn_data_decode(state: &Arc<AppState>) {
     let decode = |st: &AppState| {
-        let data = kalandra_data::bundled()
+        let data = rkl_data::bundled()
             .map(Arc::new)
             .inspect_err(|e| st.record_error(format!("bundled game data failed to load: {e}")))
             .ok();
         let _ = st.data.set(data);
     };
     let st = Arc::clone(state);
-    if let Err(e) = std::thread::Builder::new().name("kalandra-data".into()).spawn(move || decode(&st)) {
+    if let Err(e) = std::thread::Builder::new().name("rkl-data".into()).spawn(move || decode(&st)) {
         state.record_error(format!("spawn data thread: {e}"));
         decode(state);
     }
@@ -180,7 +190,7 @@ fn install_signal_triggers(wayland_platform: bool) -> std::io::Result<signal_hoo
 #[cfg(unix)]
 fn spawn_signal_triggers(app: &tauri::AppHandle, state: &AppState, mut signals: signal_hook::iterator::Signals) {
     let app = app.clone();
-    let spawned = std::thread::Builder::new().name("kalandra-signals".into()).spawn(move || {
+    let spawned = std::thread::Builder::new().name("rkl-signals".into()).spawn(move || {
         for sig in signals.forever() {
             flow::trigger(&app, sig == signal_hook::consts::SIGUSR1);
         }
@@ -204,15 +214,15 @@ fn single_instance_enabled() -> bool {
     true
 }
 
-/// `kalandra --trigger [--pinned]`: hand our argv to the running instance through the
+/// `rkl --trigger [--pinned]`: hand our argv to the running instance through the
 /// single-instance plugin (which exits this process during init). Reaching the end of `build`
 /// means no instance was running. Works on every OS, so Wayland compositor bindings can use it;
-/// `kill -USR2|-USR1 $(pidof kalandra)` remains a signal-based alternative on unix.
+/// `kill -USR2|-USR1 $(pidof rkl)` remains a signal-based alternative on unix.
 fn forward_trigger() -> ! {
     let built = tauri::Builder::default().plugin(tauri_plugin_single_instance::init(|_, _, _| {})).build(context());
     match built {
-        Ok(_) => eprintln!("kalandra: no running instance to trigger"),
-        Err(e) => eprintln!("kalandra: cannot reach the running instance: {e}"),
+        Ok(_) => eprintln!("rkl: no running instance to trigger"),
+        Err(e) => eprintln!("rkl: cannot reach the running instance: {e}"),
     }
     std::process::exit(1);
 }
@@ -220,7 +230,7 @@ fn forward_trigger() -> ! {
 pub fn run() {
     // Process-wide env for the input hook; must run before any thread exists.
     #[cfg(feature = "native")]
-    kalandra_platform::backend::init_process_env();
+    rkl_platform::backend::init_process_env();
     let cli = cli::parse(std::env::args().skip(1));
     if cli.trigger {
         forward_trigger();
@@ -243,7 +253,7 @@ pub fn run() {
     let state = match AppState::new(paths, settings, platform, backend) {
         Ok(s) => Arc::new(s),
         Err(e) => {
-            eprintln!("kalandra: failed to initialise: {e}");
+            eprintln!("rkl: failed to initialise: {e}");
             std::process::exit(1);
         }
     };
@@ -358,7 +368,7 @@ pub fn run() {
             }
         })
         .build(context())
-        .expect("error while building kalandra");
+        .expect("error while building rkl");
 
     app.run(|handle, event| {
         if let RunEvent::ExitRequested { api, code, .. } = event {

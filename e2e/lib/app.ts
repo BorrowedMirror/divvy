@@ -8,11 +8,11 @@ import { hookOk } from "./hook.ts";
 const run = promisify(execFile);
 
 /**
- * Focus the fake game window: `KALANDRA_E2E_FOCUS_CMD` (`sh -c`, e.g. `swaymsg ... focus` on
+ * Focus the fake game window: `RKL_E2E_FOCUS_CMD` (`sh -c`, e.g. `swaymsg ... focus` on
  * Wayland) when set, else xdotool (X11).
  */
 export async function focusGame(): Promise<void> {
-  const cmd = process.env.KALANDRA_E2E_FOCUS_CMD;
+  const cmd = process.env.RKL_E2E_FOCUS_CMD;
   if (cmd) {
     await run("sh", ["-c", cmd]);
     return;
@@ -30,7 +30,7 @@ export async function triggerPriceCheck(pinned = false): Promise<void> {
     await run("xdotool", ["key", "--clearmodifiers", pinned ? HOTKEY_PINNED : HOTKEY]);
   } else {
     // The app sends its copy chord to whatever has focus; a real user's game is focused.
-    if (process.env.KALANDRA_E2E_FOCUS_CMD) await focusGame();
+    if (process.env.RKL_E2E_FOCUS_CMD) await focusGame();
     await hookOk(`trigger ${pinned ? 1 : 0}`);
   }
 }
@@ -91,7 +91,7 @@ export async function waitForOverlayReady(timeoutMs = 20000): Promise<void> {
   if (url.startsWith("http://localhost:5173")) {
     throw new Error(
       `overlay webview loads ${url}: the app was built without \`tauri/custom-protocol\` ` +
-        "(rebuild with `cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol`)",
+        "(rebuild with `cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol`)",
     );
   }
   await browser.waitUntil(

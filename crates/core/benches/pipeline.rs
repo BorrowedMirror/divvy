@@ -10,7 +10,7 @@ use std::{
 };
 
 use criterion::{Criterion, criterion_group};
-use kalandra_core::{
+use rkl_core::{
     matcher::{StatMatcher, templatize},
     parser::parse_item,
     query::{QueryOptions, build_filters},
@@ -45,7 +45,7 @@ fn opts() -> QueryOptions {
     QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false }
 }
 
-fn pipeline(data: &kalandra_data::GameData, text: &str, opts: &QueryOptions) {
+fn pipeline(data: &rkl_data::GameData, text: &str, opts: &QueryOptions) {
     let mut item = parse_item(text).expect("corpus parses");
     let outcomes = StatMatcher::new(data).match_item(&mut item);
     let filters = build_filters(&item, opts);
@@ -54,7 +54,7 @@ fn pipeline(data: &kalandra_data::GameData, text: &str, opts: &QueryOptions) {
 
 fn benches(c: &mut Criterion) {
     let corpus = corpus();
-    let data = kalandra_data::bundled().expect("bundled data");
+    let data = rkl_data::bundled().expect("bundled data");
     let opts = opts();
     let parsed: Vec<_> = corpus.iter().map(|(_, t)| parse_item(t).expect("corpus parses")).collect();
     let matched: Vec<_> = parsed
@@ -105,7 +105,7 @@ fn benches(c: &mut Criterion) {
 /// Per-item latency distribution of the full pipeline over the corpus.
 fn report_p95() {
     let corpus = corpus();
-    let data = kalandra_data::bundled().expect("bundled data");
+    let data = rkl_data::bundled().expect("bundled data");
     let opts = opts();
     let mut samples: Vec<(Duration, &str)> = Vec::new();
     for _ in 0..200 {

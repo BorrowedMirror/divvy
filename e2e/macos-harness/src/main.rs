@@ -1,20 +1,20 @@
 //! macOS e2e harness (works on any OS). WebDriver is unavailable for WKWebView, so this
 //! drives the app purely over its debug test hook:
 //!
-//! 1. serve a mock trade2 API (`kalandra_testkit::fixtures::TradeMock`) on localhost,
+//! 1. serve a mock trade2 API (`rkl_testkit::fixtures::TradeMock`) on localhost,
 //! 2. start `fake-game` with an item and wait for `READY`,
-//! 3. start kalandra with `KALANDRA_TEST_HOOK`, `KALANDRA_TRADE_BASE_URL`, `KALANDRA_CONFIG_DIR`,
+//! 3. start rkl with `RKL_TEST_HOOK`, `RKL_TRADE_BASE_URL`, `RKL_CONFIG_DIR`,
 //! 4. `trigger 0`, wait for the game's `COPIED 1`, poll `state` until the overlay shows a price,
 //! 5. assert the median, that search + fetch hit the mock,
 //! 6. the tray exists and `tray open_settings` shows the settings window,
-//! 7. `save_settings` persists to `KALANDRA_CONFIG_DIR`, `quit` exits, and a restarted app
+//! 7. `save_settings` persists to `RKL_CONFIG_DIR`, `quit` exits, and a restarted app
 //!    reads the saved settings back, then `quit` again.
 //!
-//! Env: `KALANDRA_APP_BIN`, `KALANDRA_FAKE_GAME_BIN`, `KALANDRA_TEST_HOOK` (port, default 47123),
-//! `KALANDRA_E2E_ITEM`, `KALANDRA_E2E_TIMEOUT_SECS` (default 30),
-//! `KALANDRA_E2E_TRIGGER` (`hook` (default): test-hook `trigger 0`; `xdotool`: a real XTest
+//! Env: `RKL_APP_BIN`, `RKL_FAKE_GAME_BIN`, `RKL_TEST_HOOK` (port, default 47123),
+//! `RKL_E2E_ITEM`, `RKL_E2E_TIMEOUT_SECS` (default 30),
+//! `RKL_E2E_TRIGGER` (`hook` (default): test-hook `trigger 0`; `xdotool`: a real XTest
 //! `ctrl+d` press caught by the app's global hotkey; `signal`: SIGUSR2 to the app),
-//! `KALANDRA_E2E_FOCUS_CMD` (optional `sh -c` command run before triggering to focus the game
+//! `RKL_E2E_FOCUS_CMD` (optional `sh -c` command run before triggering to focus the game
 //! window, e.g. `swaymsg '[title="Path of Exile 2"] focus'`).
 //! The Linux wrappers are `e2e/scripts/run-hook-{x11,wayland}.sh`.
 use std::io::{BufRead, BufReader, Write};
@@ -25,7 +25,7 @@ use std::sync::mpsc::{Receiver, RecvTimeoutError, channel};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, bail, ensure};
-use kalandra_testkit::fixtures::TradeMock;
+use rkl_testkit::fixtures::TradeMock;
 use serde_json::Value;
 
 const EXE: &str = std::env::consts::EXE_SUFFIX;
@@ -91,8 +91,8 @@ impl Hook {
         let mut s = TcpStream::connect(("127.0.0.1", self.port))
             .with_context(|| format!("connecting to test hook on 127.0.0.1:{}", self.port))?;
         s.set_read_timeout(Some(Duration::from_secs(5)))?;
-        // The app requires `auth <token>` first when KALANDRA_TEST_HOOK_TOKEN is set (no reply).
-        if let Ok(token) = std::env::var("KALANDRA_TEST_HOOK_TOKEN") {
+        // The app requires `auth <token>` first when RKL_TEST_HOOK_TOKEN is set (no reply).
+        if let Ok(token) = std::env::var("RKL_TEST_HOOK_TOKEN") {
             writeln!(s, "auth {token}")?;
         }
         writeln!(s, "{cmd}")?;
@@ -116,14 +116,14 @@ impl Hook {
         let deadline = Instant::now() + timeout;
         loop {
             if let Some(status) = app.try_wait()? {
-                bail!("kalandra exited ({status}) before the test hook came up");
+                bail!("rkl exited ({status}) before the test hook came up");
             }
             match self.state() {
                 Ok(_) => return Ok(()),
                 Err(e) if Instant::now() >= deadline => {
                     return Err(e.context(format!(
                         "test hook not reachable after {timeout:?}; is the app built with \
-                         `--features test-hook` and does it honour KALANDRA_TEST_HOOK?"
+                         `--features test-hook` and does it honour RKL_TEST_HOOK?"
                     )));
                 }
                 Err(_) => std::thread::sleep(Duration::from_millis(250)),
@@ -153,17 +153,16 @@ async fn main() -> anyhow::Result<()> {
 
 async fn run() -> anyhow::Result<()> {
     let root = repo();
-    let app_bin = env_path("KALANDRA_APP_BIN", root.join(format!("target/debug/kalandra{EXE}")));
-    let game_bin = env_path("KALANDRA_FAKE_GAME_BIN", root.join(format!("target/debug/fake-game{EXE}")));
-    let item = env_path("KALANDRA_E2E_ITEM", root.join("e2e/fixtures/rare-ring.txt"));
-    let port: u16 =
-        std::env::var("KALANDRA_TEST_HOOK").ok().map_or(Ok(47123), |p| p.parse()).context("KALANDRA_TEST_HOOK")?;
+    let app_bin = env_path("RKL_APP_BIN", root.join(format!("target/debug/rkl{EXE}")));
+    let game_bin = env_path("RKL_FAKE_GAME_BIN", root.join(format!("target/debug/fake-game{EXE}")));
+    let item = env_path("RKL_E2E_ITEM", root.join("e2e/fixtures/rare-ring.txt"));
+    let port: u16 = std::env::var("RKL_TEST_HOOK").ok().map_or(Ok(47123), |p| p.parse()).context("RKL_TEST_HOOK")?;
     let timeout =
-        Duration::from_secs(std::env::var("KALANDRA_E2E_TIMEOUT_SECS").ok().and_then(|s| s.parse().ok()).unwrap_or(30));
-    let trigger = std::env::var("KALANDRA_E2E_TRIGGER").unwrap_or_else(|_| "hook".into());
-    ensure!(matches!(trigger.as_str(), "hook" | "xdotool" | "signal"), "unknown KALANDRA_E2E_TRIGGER `{trigger}`");
+        Duration::from_secs(std::env::var("RKL_E2E_TIMEOUT_SECS").ok().and_then(|s| s.parse().ok()).unwrap_or(30));
+    let trigger = std::env::var("RKL_E2E_TRIGGER").unwrap_or_else(|_| "hook".into());
+    ensure!(matches!(trigger.as_str(), "hook" | "xdotool" | "signal"), "unknown RKL_E2E_TRIGGER `{trigger}`");
     for (bin, hint) in [
-        (&app_bin, "cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol"),
+        (&app_bin, "cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol"),
         (&game_bin, "cargo build -p fake-game"),
     ] {
         ensure!(bin.is_file(), "{} not found; build it with `{hint}` (or set the env override)", bin.display());
@@ -181,20 +180,20 @@ async fn run() -> anyhow::Result<()> {
     wait_line(&game_out, "READY", Duration::from_secs(15))?;
     println!("fake-game ready");
 
-    let config_dir = std::env::temp_dir().join(format!("kalandra-harness-{}", std::process::id()));
+    let config_dir = std::env::temp_dir().join(format!("rkl-harness-{}", std::process::id()));
     std::fs::create_dir_all(config_dir.join("config"))?;
     // Mark first-run onboarding as done so the settings window stays hidden at a minimised start.
     std::fs::write(config_dir.join("config/settings.toml"), "version = 1\n\n[ui]\nonboarding_done = true\n")?;
     let launch = || -> anyhow::Result<Guard> {
-        let log = std::env::var("KALANDRA_LOG")
+        let log = std::env::var("RKL_LOG")
             .or_else(|_| std::env::var("RUST_LOG"))
-            .unwrap_or_else(|_| "kalandra=debug,kalandra_platform=debug,info".into());
+            .unwrap_or_else(|_| "rkl=debug,rkl_platform=debug,info".into());
         Ok(Guard(
             Command::new(&app_bin)
-                .env("KALANDRA_TEST_HOOK", port.to_string())
-                .env("KALANDRA_TRADE_BASE_URL", server.uri())
-                .env("KALANDRA_CONFIG_DIR", &config_dir)
-                .env("KALANDRA_LOG", log)
+                .env("RKL_TEST_HOOK", port.to_string())
+                .env("RKL_TRADE_BASE_URL", server.uri())
+                .env("RKL_CONFIG_DIR", &config_dir)
+                .env("RKL_LOG", log)
                 .spawn()
                 .with_context(|| format!("spawning {}", app_bin.display()))?,
         ))
@@ -209,8 +208,8 @@ async fn run() -> anyhow::Result<()> {
     ensure!(initial["settings_visible"] == Value::Bool(false), "settings visible at a minimised start: {initial}");
 
     // Price check: hotkey -> Ctrl+Alt+C into the game -> clipboard -> overlay -> query_price.
-    if let Ok(cmd) = std::env::var("KALANDRA_E2E_FOCUS_CMD") {
-        run_sh(&cmd).context("KALANDRA_E2E_FOCUS_CMD")?;
+    if let Ok(cmd) = std::env::var("RKL_E2E_FOCUS_CMD") {
+        run_sh(&cmd).context("RKL_E2E_FOCUS_CMD")?;
     }
     match trigger.as_str() {
         "hook" => hook.ok("trigger 0")?,

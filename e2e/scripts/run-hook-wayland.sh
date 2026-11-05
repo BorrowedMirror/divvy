@@ -5,16 +5,16 @@
 #   E2E_XWAYLAND=1 e2e/scripts/run-hook-wayland.sh
 #                                              app + fake-game as XWayland clients (X11 backend)
 # Wayland-native: global hotkeys cannot be injected, so the price check is triggered over the
-# test hook (`trigger 0`) or SIGUSR2 (KALANDRA_E2E_TRIGGER=signal); the app's own copy chord
+# test hook (`trigger 0`) or SIGUSR2 (RKL_E2E_TRIGGER=signal); the app's own copy chord
 # still has to reach the focused fake game. Under XWayland the default trigger is a real XTest
 # `ctrl+d` (xdotool) caught by the app's X11 global hotkey grab.
 # Needs: sway swaymsg dbus-run-session xkbcli (+ Xwayland xdotool for E2E_XWAYLAND=1).
-# Env: SKIP_BUILD=1; KALANDRA_E2E_TRIGGER; see e2e/macos-harness/src/main.rs.
+# Env: SKIP_BUILD=1; RKL_E2E_TRIGGER; see e2e/macos-harness/src/main.rs.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)
 
-if [ -z "${KALANDRA_E2E_IN_SESSION:-}" ]; then
+if [ -z "${RKL_E2E_IN_SESSION:-}" ]; then
   for tool in sway swaymsg dbus-run-session; do
     command -v "$tool" >/dev/null || { echo "run-hook-wayland: missing $tool" >&2; exit 2; }
   done
@@ -25,10 +25,10 @@ if [ -z "${KALANDRA_E2E_IN_SESSION:-}" ]; then
   fi
   if [ -z "${SKIP_BUILD:-}" ]; then
     (cd "$repo" && pnpm install --frozen-lockfile && pnpm --dir web build)
-    (cd "$repo" && cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game)
+    (cd "$repo" && cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game)
   fi
   (cd "$repo" && cargo build --manifest-path e2e/macos-harness/Cargo.toml)
-  export KALANDRA_E2E_IN_SESSION=1
+  export RKL_E2E_IN_SESSION=1
   exec dbus-run-session -- "$0" "$@"
 fi
 
@@ -98,14 +98,14 @@ if [ -n "${E2E_XWAYLAND:-}" ]; then
   # Both clients go through XWayland: hide the Wayland socket from them.
   wl=$WAYLAND_DISPLAY
   unset WAYLAND_DISPLAY
-  export GDK_BACKEND=x11 KALANDRA_BACKEND=x11 KALANDRA_E2E_TRIGGER=${KALANDRA_E2E_TRIGGER:-xdotool}
-  export KALANDRA_E2E_FOCUS_CMD=${KALANDRA_E2E_FOCUS_CMD:-"WAYLAND_DISPLAY=$wl $focus"}
+  export GDK_BACKEND=x11 RKL_BACKEND=x11 RKL_E2E_TRIGGER=${RKL_E2E_TRIGGER:-xdotool}
+  export RKL_E2E_FOCUS_CMD=${RKL_E2E_FOCUS_CMD:-"WAYLAND_DISPLAY=$wl $focus"}
 else
-  export GDK_BACKEND=wayland KALANDRA_BACKEND=wayland KALANDRA_E2E_TRIGGER=${KALANDRA_E2E_TRIGGER:-hook}
-  export KALANDRA_E2E_FOCUS_CMD=${KALANDRA_E2E_FOCUS_CMD:-$focus}
+  export GDK_BACKEND=wayland RKL_BACKEND=wayland RKL_E2E_TRIGGER=${RKL_E2E_TRIGGER:-hook}
+  export RKL_E2E_FOCUS_CMD=${RKL_E2E_FOCUS_CMD:-$focus}
 fi
 
 status=0
-"$repo/e2e/macos-harness/target/debug/kalandra-macos-harness" || status=$?
+"$repo/e2e/macos-harness/target/debug/rkl-macos-harness" || status=$?
 [ "$status" -eq 0 ] || { echo "--- sway.log (tail)" >&2; tail -20 "$work/sway.log" >&2; }
 exit "$status"

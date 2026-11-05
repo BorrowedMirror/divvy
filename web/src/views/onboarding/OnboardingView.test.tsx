@@ -38,7 +38,7 @@ describe("OnboardingView on macOS", () => {
     const calls = setupIpc({ recheck_permissions: () => macos(false, false, false), request_permission: () => null });
     renderWithProviders(<OnboardingView />);
 
-    expect(await screen.findByRole("heading", { name: "Set up kalandra" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Set up RKL" })).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "Setup for macOS" })).toBeInTheDocument();
     expect(await screen.findByText(/presses the game's copy shortcut/)).toBeInTheDocument();
     expect(within(card("accessibility")).getByText("required")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("OnboardingView on macOS", () => {
     expect(within(card("accessibility")).queryByText(/restarts/)).not.toBeInTheDocument();
 
     await user.click(within(card("screen_recording")).getByRole("button", { name: "Open System Settings" }));
-    expect(within(card("screen_recording")).getByText(/after kalandra restarts/)).toBeInTheDocument();
+    expect(within(card("screen_recording")).getByText(/after RKL restarts/)).toBeInTheDocument();
 
     await emitEvent("permissions-changed", { report: macos(true, true, false) });
     await waitFor(() => expect(card("accessibility")).toHaveAttribute("data-granted", "true"));
@@ -133,7 +133,7 @@ describe("OnboardingView on other platforms", () => {
     expect(screen.getByText(/GlobalShortcuts portal, which asks/)).toBeInTheDocument();
     expect(screen.getByText(/layer-shell instead of following/)).toBeInTheDocument();
     expect(screen.getByText("Bind the price check in your compositor")).toBeInTheDocument();
-    expect(screen.getByText("bindsym Ctrl+d exec kalandra --trigger")).toBeInTheDocument();
+    expect(screen.getByText("bindsym Ctrl+d exec rkl --trigger")).toBeInTheDocument();
     expect(screen.getByText("Hyprland")).toBeInTheDocument();
     expect(screen.getByText("No GlobalShortcuts portal")).toBeInTheDocument();
     expect(screen.queryByText("GNOME: X11/XWayland only")).not.toBeInTheDocument();

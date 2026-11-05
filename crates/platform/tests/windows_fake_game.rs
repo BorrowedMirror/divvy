@@ -13,8 +13,8 @@ use std::process::{Child, Command, Stdio};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use kalandra_platform::copy::{CopyOptions, copy_item_text};
-use kalandra_platform::{BackendKind, GAME_WINDOW_TITLE, WindowEvent, backend};
+use rkl_platform::copy::{CopyOptions, copy_item_text};
+use rkl_platform::{BackendKind, GAME_WINDOW_TITLE, WindowEvent, backend};
 
 const ITEM: &str = include_str!("../../testkit/corpus/currency/divine-orb.txt");
 
@@ -69,7 +69,7 @@ fn wait_until<T>(timeout: Duration, mut f: impl FnMut() -> Option<T>) -> Option<
 #[test]
 fn tracks_fake_game_and_copies_item() {
     let Some(exe) = fake_game_exe() else { return };
-    let item_path = std::env::temp_dir().join(format!("kalandra-fake-item-{}.txt", std::process::id()));
+    let item_path = std::env::temp_dir().join(format!("rkl-fake-item-{}.txt", std::process::id()));
     std::fs::write(&item_path, ITEM).unwrap();
 
     let mut child = Command::new(&exe)

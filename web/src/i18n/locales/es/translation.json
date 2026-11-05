@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "Actualización de la aplicación",
-    "available": "kalandra {{version}} está disponible.",
+    "available": "RKL {{version}} está disponible.",
     "notes": "Novedades",
     "later": "Más tarde",
     "install": "Instalar y reiniciar",
@@ -31,7 +31,7 @@
     "statMax": "Máximo de {{stat}}",
     "search": "Buscar",
     "loading": "Buscando…",
-    "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de kalandra en la bandeja y desactiva la captura del ratón de Proton."
+    "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de RKL en la bandeja y desactiva la captura del ratón de Proton."
   },
   "item": {
     "rarityLabel": "Rareza:",
@@ -221,21 +221,21 @@
     "clipboard": "Acceso al portapapeles"
   },
   "guidance": {
-    "accessibility": "macOS: abre Ajustes del Sistema → Privacidad y seguridad → Accesibilidad y activa kalandra. Es necesario para los atajos y para copiar objetos.",
-    "screenRecording": "macOS: abre Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla y activa kalandra para que encuentre la ventana del juego. Después, reinicia kalandra.",
+    "accessibility": "macOS: abre Ajustes del Sistema → Privacidad y seguridad → Accesibilidad y activa RKL. Es necesario para los atajos y para copiar objetos.",
+    "screenRecording": "macOS: abre Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla y activa RKL para que encuentre la ventana del juego. Después, reinicia RKL.",
     "wayland": "Modo Wayland nativo: los atajos globales pasan por el portal del escritorio, el overlay se ancla a la pantalla y no a la ventana del juego, y la inyección de teclas puede no estar disponible. Usa X11/XWayland si tu compositor lo permite.",
-    "gnome": "GNOME no admite las funciones de Wayland que necesita kalandra, así que allí se ejecuta mediante XWayland (X11). Ejecuta también el juego con XWayland.",
+    "gnome": "GNOME no admite las funciones de Wayland que necesita RKL, así que allí se ejecuta mediante XWayland (X11). Ejecuta también el juego con XWayland.",
     "generic": "Falta el permiso: {{permission}}"
   },
   "tray": {
     "priceCheck": "Consulta de precio (fijada)",
     "settings": "Ajustes…",
     "diagnostics": "Diagnóstico",
-    "quit": "Salir de kalandra",
-    "tooltip": "kalandra"
+    "quit": "Salir de RKL",
+    "tooltip": "RKL"
   },
   "onboarding": {
-    "title": "Configurar kalandra",
+    "title": "Configurar RKL",
     "intro": "Unos pocos pasos específicos de tu plataforma para que las consultas de precio funcionen sin problemas. Puedes volver aquí en cualquier momento desde Diagnóstico.",
     "stepsHeading": "Configuración para {{platform}}",
     "loadFailed": "No se pudieron comprobar los permisos.",
@@ -244,25 +244,25 @@
     "granted": "Concedido",
     "notGranted": "No concedido",
     "openSettings": "Abrir Ajustes del Sistema",
-    "relaunch": "macOS aplica este permiso cuando kalandra se reinicia. Cierra y vuelve a abrir kalandra después de activarlo.",
+    "relaunch": "macOS aplica este permiso cuando RKL se reinicia. Cierra y vuelve a abrir RKL después de activarlo.",
     "requestFailed": "No se pudo abrir Ajustes del Sistema: {{message}}",
     "details": "Detalles técnicos",
-    "blockedHint": "Aún faltan algunos permisos obligatorios. kalandra seguirá funcionando con funciones limitadas.",
+    "blockedHint": "Aún faltan algunos permisos obligatorios. RKL seguirá funcionando con funciones limitadas.",
     "continueWithout": "Continuar sin ellos",
     "done": "Listo",
     "saveFailed": "No se pudo guardar: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Accesibilidad",
-        "body": "kalandra pulsa por ti el atajo de copiar del juego cuando usas el atajo de consulta de precio. macOS exige acceso de Accesibilidad para ello."
+        "body": "RKL pulsa por ti el atajo de copiar del juego cuando usas el atajo de consulta de precio. macOS exige acceso de Accesibilidad para ello."
       },
       "screen_recording": {
         "name": "Grabación de pantalla",
-        "body": "Permite que kalandra lea los títulos de las ventanas para encontrar la ventana de Path of Exile 2 de forma fiable. kalandra nunca captura tu pantalla."
+        "body": "Permite que RKL lea los títulos de las ventanas para encontrar la ventana de Path of Exile 2 de forma fiable. RKL nunca captura tu pantalla."
       },
       "input_monitoring": {
         "name": "Monitorización de entrada",
-        "body": "Permite que kalandra cierre el overlay con Esc y reaccione a Ctrl+rueda mientras el juego tiene el foco."
+        "body": "Permite que RKL cierre el overlay con Esc y reaccione a Ctrl+rueda mientras el juego tiene el foco."
       },
       "unknown": "Permiso: {{kind}}"
     },
@@ -270,15 +270,15 @@
       "windowedTitle": "Usa el modo ventana o pantalla completa sin bordes",
       "windowedBody": "El overlay no puede aparecer sobre la pantalla completa exclusiva. En las opciones gráficas del juego elige Ventana o Pantalla completa en ventana (sin bordes).",
       "elevatedTitle": "¿Ejecutas el juego como administrador?",
-      "elevatedBody": "Windows bloquea los atajos y las pulsaciones simuladas de una aplicación normal hacia una con privilegios elevados (UIPI). Si el juego se ejecuta como administrador, ejecuta también kalandra como administrador."
+      "elevatedBody": "Windows bloquea los atajos y las pulsaciones simuladas de una aplicación normal hacia una con privilegios elevados (UIPI). Si el juego se ejecuta como administrador, ejecuta también RKL como administrador."
     },
     "x11": {
       "title": "No hace falta configurar nada más",
-      "body": "X11 admite todo lo que kalandra necesita: atajos globales, seguimiento de ventanas y un overlay sobre el juego."
+      "body": "X11 admite todo lo que RKL necesita: atajos globales, seguimiento de ventanas y un overlay sobre el juego."
     },
     "gnome": {
       "title": "GNOME: solo X11/XWayland",
-      "x11Body": "GNOME no tiene las funciones de Wayland que necesita kalandra, así que aquí kalandra se ejecuta mediante XWayland. Ejecuta también el juego con XWayland (lo predeterminado en Proton y Wine).",
+      "x11Body": "GNOME no tiene las funciones de Wayland que necesita RKL, así que aquí RKL se ejecuta mediante XWayland. Ejecuta también el juego con XWayland (lo predeterminado en Proton y Wine).",
       "waylandBody": "GNOME no tiene layer-shell, así que en modo Wayland nativo el overlay no puede quedarse sobre el juego. Cambia el backend a X11 / XWayland en Ajustes."
     },
     "wayland": {
@@ -286,9 +286,9 @@
       "degradedBody": "Wayland aísla las aplicaciones entre sí, así que algunas funciones se comportan de otra manera:",
       "portal": "Los atajos globales pasan por el portal GlobalShortcuts del escritorio, que te pide confirmarlos. No todos los compositores lo ofrecen.",
       "layerShell": "El overlay se ancla al borde de la pantalla con layer-shell en lugar de seguir la ventana del juego.",
-      "noTracking": "kalandra no puede ver la ventana del juego ni detectar Esc, así que cierra el overlay con su propio botón.",
+      "noTracking": "RKL no puede ver la ventana del juego ni detectar Esc, así que cierra el overlay con su propio botón.",
       "triggerTitle": "Asigna la consulta de precio en tu compositor",
-      "triggerBody": "Si los atajos no funcionan, añade en tu compositor un atajo de teclado que ejecute kalandra --trigger. Consulta el precio del objeto bajo el cursor en la instancia de kalandra en ejecución.",
+      "triggerBody": "Si los atajos no funcionan, añade en tu compositor un atajo de teclado que ejecute RKL --trigger. Consulta el precio del objeto bajo el cursor en la instancia de RKL en ejecución.",
       "pinnedHint": "Añade --pinned para abrir el overlay fijado.",
       "example": {
         "sway": "sway",
@@ -299,7 +299,7 @@
   },
   "proton": {
     "title": "Captura del ratón de Proton",
-    "body": "Con Proton, Path of Exile 2 en pantalla completa captura el ratón, así que los clics y las teclas nunca llegan al panel de kalandra. Desactivar la captura del ratón de Wine para el juego lo soluciona; el cursor deja entonces de estar bloqueado en la ventana del juego.",
+    "body": "Con Proton, Path of Exile 2 en pantalla completa captura el ratón, así que los clics y las teclas nunca llegan al panel de RKL. Desactivar la captura del ratón de Wine para el juego lo soluciona; el cursor deja entonces de estar bloqueado en la ventana del juego.",
     "statusOn": "Captura del ratón: activada (predeterminado de Wine)",
     "statusOff": "Captura del ratón: desactivada",
     "fix": "Desactivar la captura del ratón",

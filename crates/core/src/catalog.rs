@@ -1,4 +1,4 @@
-//! Game-data model consumed by the matcher. Implemented by `kalandra-data`; faked in tests.
+//! Game-data model consumed by the matcher. Implemented by `rkl-data`; faked in tests.
 use serde::{Deserialize, Serialize};
 
 use crate::item::ModKind;
