@@ -293,6 +293,33 @@ fn child() {
         Err(PlatformError::Unsupported(_))
     ));
 
+    // Active window and pointer-grab probes (Wine holds a pointer grab over fullscreen games).
+    use x11rb::protocol::xproto::{EventMask as Em, GrabMode, GrabStatus};
+    assert!(kalandra_platform::backend::x11::active_window().is_ok());
+    assert!(!kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "no grab yet");
+    let (grabber, gscreen) = x11rb::connect(Some(&display)).unwrap();
+    let groot = grabber.setup().roots[gscreen].root;
+    let st = grabber
+        .grab_pointer(
+            false,
+            groot,
+            Em::NO_EVENT,
+            GrabMode::ASYNC,
+            GrabMode::ASYNC,
+            x11rb::NONE,
+            x11rb::NONE,
+            x11rb::CURRENT_TIME,
+        )
+        .unwrap()
+        .reply()
+        .unwrap()
+        .status;
+    assert_eq!(st, GrabStatus::SUCCESS);
+    assert!(kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab held by another client");
+    grabber.ungrab_pointer(x11rb::CURRENT_TIME).unwrap().check().unwrap();
+    assert!(!kalandra_platform::backend::x11::pointer_grabbed_by_other().unwrap(), "grab released");
+    drop(grabber);
+
     // Destroying the game window -> Lost.
     conn.destroy_window(game).unwrap();
     conn.flush().unwrap();

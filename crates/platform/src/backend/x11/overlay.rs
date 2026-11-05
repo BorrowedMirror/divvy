@@ -139,3 +139,42 @@ pub fn activate_window(window: u64) -> Result<(), PlatformError> {
         .check()
         .map_err(x_err)
 }
+
+/// The window the WM reports as active (`_NET_ACTIVE_WINDOW`), if any.
+pub fn active_window() -> Result<Option<u64>, PlatformError> {
+    let conn = XConn::connect(None)?;
+    let reply = conn
+        .conn
+        .get_property(false, conn.root, conn.atoms._NET_ACTIVE_WINDOW, AtomEnum::WINDOW, 0, 1)
+        .map_err(x_err)?
+        .reply()
+        .map_err(x_err)?;
+    Ok(reply.value32().and_then(|mut v| v.next()).filter(|w| *w != 0).map(u64::from))
+}
+
+/// Whether another client currently holds an active pointer grab (e.g. Wine confining the
+/// cursor to a fullscreen game). Probes with a momentary grab that is released immediately.
+pub fn pointer_grabbed_by_other() -> Result<bool, PlatformError> {
+    use x11rb::protocol::xproto::{GrabMode, GrabStatus};
+    let conn = XConn::connect(None)?;
+    let c = &conn.conn;
+    let status = c
+        .grab_pointer(
+            false,
+            conn.root,
+            EventMask::NO_EVENT,
+            GrabMode::ASYNC,
+            GrabMode::ASYNC,
+            x11rb::NONE,
+            x11rb::NONE,
+            x11rb::CURRENT_TIME,
+        )
+        .map_err(x_err)?
+        .reply()
+        .map_err(x_err)?
+        .status;
+    if status == GrabStatus::SUCCESS {
+        c.ungrab_pointer(x11rb::CURRENT_TIME).map_err(x_err)?.check().map_err(x_err)?;
+    }
+    Ok(status == GrabStatus::ALREADY_GRABBED || status == GrabStatus::FROZEN)
+}
