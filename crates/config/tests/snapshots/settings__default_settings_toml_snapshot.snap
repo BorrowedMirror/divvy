@@ -43,6 +43,7 @@ side = "cursor"
 language = "en"
 theme = "system"
 start_minimised = true
+check_updates = true
 onboarding_done = false
 
 [platform]

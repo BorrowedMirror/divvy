@@ -39,4 +39,23 @@ The public key is not checked in: `release.yml` writes it into a copy of
 `bundle.createUpdaterArtifacts` cannot sign without it. The secret overrides any
 `plugins.updater.pubkey` in `tauri.conf.json`, so both must be the same key.
 
+## Auto-update
+
+The app's updater (`apps/desktop/src-tauri/src/updater.rs`) is opt-in by build config. It is
+registered only when the merged config has a non-empty `plugins.updater.pubkey`, which only
+release builds get. Dev builds, forks and local `cargo tauri build` runs have no key, so they
+never check for updates and record no errors about it. Keep the pubkey out of the committed
+`tauri.conf.json`; a unit test enforces this.
+
+Release builds read `plugins.updater.endpoints` from `.github/tauri-release.conf.json`
+(`https://github.com/nightah/kalandra/releases/latest/download/latest.json`). GitHub's
+`latest` skips drafts and pre-releases, so installs only see a release once it is published,
+and rc builds update to the next stable release. The first check runs 30 s after startup and
+then every 24 h while **Settings > General > Check for updates automatically**
+(`ui.check_updates`) is on. A found update is downloaded only when the user clicks
+**Install and restart**, and its signature is checked against the embedded pubkey first.
+
+Keep the private key safe. Installed builds trust only the pubkey they were built with, so
+losing or rotating the key means users must reinstall by hand to get later updates.
+
 `CODECOV_TOKEN` is a repository secret used by `ci.yml`.

@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "App update",
+    "available": "kalandra {{version}} is available.",
+    "notes": "What's new",
+    "later": "Later",
+    "install": "Install and restart",
+    "installing": "Installing…"
+  },
   "common": {
     "loading": "Loading…",
     "dismiss": "Dismiss"
@@ -112,6 +120,8 @@
     "language": "Language",
     "theme": "Theme",
     "startMinimised": "Start minimised to tray",
+    "checkUpdates": "Check for updates automatically",
+    "checkUpdatesHelp": "Looks for a new release shortly after start and once a day. Nothing is downloaded until you choose to install.",
     "source": "Price source",
     "leagueAuto": "Detect league automatically",
     "league": "League",

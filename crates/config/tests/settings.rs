@@ -106,6 +106,16 @@ fn partial_document_fills_defaults() {
     assert_eq!(s.trade, Settings::default().trade);
 }
 
+#[test]
+fn check_updates_defaults_on_and_survives_older_files() {
+    assert!(Settings::default().ui.check_updates);
+    let s: Settings = toml::from_str("version = 1\n[ui]\nlanguage = \"de\"\n").unwrap();
+    assert!(s.ui.check_updates, "files written before the field existed keep updates on");
+    let off: Settings = toml::from_str("version = 1\n[ui]\ncheck_updates = false\n").unwrap();
+    assert!(!off.ui.check_updates);
+    assert!(validate(&off).is_ok());
+}
+
 // ---------------------------------------------------------------- migrate
 
 #[test]
@@ -413,6 +423,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
         prop_oneof![Just(Theme::System), Just(Theme::Dark), Just(Theme::Light)],
         any::<bool>(),
         any::<bool>(),
+        any::<bool>(),
     );
     let platform = prop::option::of(prop_oneof![
         Just(BackendKind::Windows),
@@ -436,7 +447,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
                 s.trade.poesessid,
             ) = trade;
             (s.overlay.auto_hide_ms, s.overlay.opacity, s.overlay.side) = overlay;
-            (s.ui.language, s.ui.theme, s.ui.start_minimised, s.ui.onboarding_done) = ui;
+            (s.ui.language, s.ui.theme, s.ui.start_minimised, s.ui.check_updates, s.ui.onboarding_done) = ui;
             s.platform.backend_override = platform;
             s
         })

@@ -10,6 +10,7 @@ pub mod state;
 #[cfg(any(debug_assertions, feature = "test-hook"))]
 pub mod testhook;
 pub mod tray;
+pub mod updater;
 
 use std::sync::{Arc, atomic::Ordering};
 
@@ -38,6 +39,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             permissions::get_permissions,
             permissions::request_permission,
             permissions::recheck_permissions,
+            updater::install_update,
         ])
         .events(collect_events![
             events::ItemCopied,
@@ -46,6 +48,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             events::SettingsChanged,
             events::OverlayState,
             permissions::PermissionsChanged,
+            updater::UpdateAvailable,
         ])
         .dangerously_cast_bigints_to_number()
 }
@@ -188,6 +191,7 @@ pub fn run() {
             }
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
+            updater::init(&handle, &state);
             // The Wayland backend already maps SIGUSR2 into its hotkey stream; avoid a double trigger.
             #[cfg(unix)]
             if state.backend != BackendKind::Wayland {
