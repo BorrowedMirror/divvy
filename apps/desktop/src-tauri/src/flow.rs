@@ -96,11 +96,20 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
             };
             let (x, y) = logic::overlay_position((cursor.x as i32, cursor.y as i32), size, area);
             // Layer-shell surfaces ignore set_position; anchor them to the output edge instead.
+            // gtk-layer-shell calls GTK directly, which panics off the main thread (and
+            // `show_overlay` runs on tokio workers from the hotkey/test-hook flows), so hop to
+            // the main thread; the queued `show()` below is processed after it, in order.
             #[cfg(target_os = "linux")]
             if state.backend == kalandra_platform::BackendKind::Wayland {
                 let right = x > area.x + area.width / 2;
                 let side = if right { area.x + area.width - (x + size.0) } else { x - area.x };
-                if let Err(e) = crate::overlay::linux::anchor_layer(&win, right, y - area.y, side.max(0)) {
+                let (w, handle) = (win.clone(), app.clone());
+                let anchored = app.run_on_main_thread(move || {
+                    if let Err(e) = crate::overlay::linux::anchor_layer(&w, right, y - area.y, side.max(0)) {
+                        handle.state::<Arc<AppState>>().record_error(format!("layer-shell anchor: {e}"));
+                    }
+                });
+                if let Err(e) = anchored {
                     state.record_error(format!("layer-shell anchor: {e}"));
                 }
             }
