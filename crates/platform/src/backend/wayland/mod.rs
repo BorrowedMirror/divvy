@@ -63,6 +63,18 @@ impl HotkeyHost for WaylandHotkeys {
         self.portal.as_ref().map_or(Ok(()), |p| p.register(id, chord))
     }
 
+    /// One portal bind for all bindings (one confirmation dialog instead of one per hotkey).
+    fn register_all(&self, bindings: &[(HotkeyAction, Chord)]) -> Result<(), PlatformError> {
+        let mut registered = self.registered.lock().unwrap_or_else(PoisonError::into_inner);
+        registered.extend(bindings.iter().cloned());
+        drop(registered);
+        self.portal.as_ref().map_or(Ok(()), |p| p.register_all(bindings))
+    }
+
+    fn notes(&self) -> Vec<String> {
+        self.portal.as_ref().map_or_else(Vec::new, PortalHotkeys::notes)
+    }
+
     fn unregister(&self, id: HotkeyAction) -> Result<(), PlatformError> {
         self.registered.lock().unwrap_or_else(PoisonError::into_inner).remove(&id);
         self.portal.as_ref().map_or(Ok(()), |p| p.unregister(id))
@@ -233,6 +245,10 @@ mod tests {
         assert!(!h.has_portal());
         let chord = Chord::parse("ctrl+d").unwrap();
         h.register(HotkeyAction::PriceCheck, &chord).unwrap();
+        h.register_all(&[(HotkeyAction::OpenSettings, chord.clone()), (HotkeyAction::PriceCheckPinned, chord.clone())])
+            .unwrap();
+        assert_eq!(h.registered.lock().unwrap().len(), 3);
+        assert!(h.notes().is_empty());
         h.unregister(HotkeyAction::PriceCheck).unwrap();
         h.unregister_all().unwrap();
         assert!(h.events().is_ok());

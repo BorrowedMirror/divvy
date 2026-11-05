@@ -286,3 +286,9 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   delivers keyboard events only (`InputEvent::MouseMove`/`Wheel` are no longer produced).
 - **kalandra-platform (review fixes, semantics):** `detect` on GNOME picks X11 only when
   `DISPLAY` is set; GNOME without `DISPLAY` is Wayland-native (supersedes "GNOME => X11").
+- **kalandra-platform (review fixes, additive):** `HotkeyHost::register_all(&self, &[(HotkeyAction,
+  Chord)]) -> Result<(), PlatformError>` (default: `register` each, stop at the first error;
+  Wayland binds them in ONE portal `BindShortcuts` call, so one confirmation dialog) and
+  `HotkeyHost::notes(&self) -> Vec<String>` (default empty; late problems such as a portal
+  bind that failed after `register` returned, to show next to `Capabilities::notes`). The
+  portal bind no longer blocks hotkey activations while it waits for the user.

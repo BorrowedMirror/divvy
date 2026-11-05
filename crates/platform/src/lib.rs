@@ -31,10 +31,21 @@ pub trait WindowTracker: Send + Sync {
 #[cfg_attr(test, mockall::automock)]
 pub trait HotkeyHost: Send + Sync {
     fn register(&self, id: HotkeyAction, chord: &Chord) -> Result<(), PlatformError>;
+    /// Register several hotkeys at once. Backends where each binding is costly (the Wayland
+    /// portal shows one confirmation per bind call) override this to bind them together.
+    /// Stops at the first error.
+    fn register_all(&self, bindings: &[(HotkeyAction, Chord)]) -> Result<(), PlatformError> {
+        bindings.iter().try_for_each(|(id, chord)| self.register(*id, chord))
+    }
     fn unregister(&self, id: HotkeyAction) -> Result<(), PlatformError>;
     fn unregister_all(&self) -> Result<(), PlatformError>;
     /// Stream of fired hotkeys; may be called once.
     fn events(&self) -> Result<Receiver<HotkeyEvent>, PlatformError>;
+    /// Problems found after registration returned (e.g. a portal bind that failed later), to be
+    /// shown alongside [`Capabilities::notes`].
+    fn notes(&self) -> Vec<String> {
+        Vec::new()
+    }
 }
 
 /// Passive keyboard/mouse hook (e.g. to detect Ctrl+scroll, Esc to close).

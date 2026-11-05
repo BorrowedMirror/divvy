@@ -82,6 +82,37 @@ pub(crate) struct PortalHotkeys {
     cmd: UnboundedSender<Cmd>,
     bound: Mutex<HashMap<HotkeyAction, Chord>>,
     enabled: Arc<Mutex<HashMap<HotkeyAction, bool>>>,
+    /// Bind failures reported by the portal thread (also those after `register` returned).
+    notes: Arc<Mutex<Vec<String>>>,
+}
+
+type Bindings = Vec<(HotkeyAction, Chord)>;
+type BindFuture<'a> = std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), PlatformError>> + 'a>>;
+
+/// One `BindShortcuts` call for every binding in `list`.
+fn bind<'a>(
+    proxy: &'a GlobalShortcuts<'static>,
+    session: &'a ashpd::desktop::Session<'static, GlobalShortcuts<'static>>,
+    list: Vec<(HotkeyAction, Chord)>,
+) -> BindFuture<'a> {
+    Box::pin(async move {
+        let shortcuts = new_shortcuts(&list);
+        match proxy.bind_shortcuts(session, &shortcuts, None).await {
+            Ok(req) => req.response().map(|_| ()).map_err(portal_err),
+            Err(e) => Err(portal_err(e)),
+        }
+    })
+}
+
+fn new_shortcuts(list: &[(HotkeyAction, Chord)]) -> Vec<NewShortcut> {
+    list.iter()
+        .map(|(a, c)| NewShortcut::new(action_id(*a), description(*a)).preferred_trigger(Some(trigger(c).as_str())))
+        .collect()
+}
+
+/// `PlatformError` is not `Clone`; replies to superseded requests get an equivalent error.
+fn clone_result(r: &Result<(), PlatformError>) -> Result<(), PlatformError> {
+    r.as_ref().copied().map_err(|e| PlatformError::Backend(e.to_string()))
 }
 
 impl std::fmt::Debug for Cmd {
@@ -105,6 +136,8 @@ impl PortalHotkeys {
         let (ready_tx, ready_rx) = std::sync::mpsc::sync_channel::<Result<(), PlatformError>>(1);
         let enabled: Arc<Mutex<HashMap<HotkeyAction, bool>>> = Arc::default();
         let enabled_thread = Arc::clone(&enabled);
+        let notes: Arc<Mutex<Vec<String>>> = Arc::default();
+        let notes_thread = Arc::clone(&notes);
         std::thread::Builder::new()
             .name("kalandra-portal".into())
             .spawn(move || {
@@ -131,6 +164,12 @@ impl PortalHotkeys {
                     };
                     let _ = ready_tx.send(Ok(()));
                     let mut activated = Box::pin(activated);
+                    // The bind in flight (it may wait for a user confirmation, so it must not block
+                    // activations) and the replies waiting on it; plus the newest bind request
+                    // queued behind it (each request carries every binding, so newer supersedes).
+                    let mut in_flight: Option<BindFuture<'_>> = None;
+                    let mut waiting: Vec<Reply> = Vec::new();
+                    let mut queued: Option<(Bindings, Vec<Reply>)> = None;
                     loop {
                         tokio::select! {
                             Some(a) = activated.next() => {
@@ -142,21 +181,38 @@ impl PortalHotkeys {
                                     break;
                                 }
                             }
+                            result = async {
+                                match in_flight.as_mut() {
+                                    Some(f) => f.await,
+                                    None => std::future::pending().await,
+                                }
+                            },
+                                if in_flight.is_some() =>
+                            {
+                                in_flight = None;
+                                if let Err(e) = &result {
+                                    tracing::warn!(error = %e, "portal bind failed");
+                                    lock(&notes_thread).push(format!("Global shortcuts could not be bound: {e}"));
+                                }
+                                for reply in waiting.drain(..) {
+                                    let _ = reply.try_send(clone_result(&result));
+                                }
+                                if let Some((list, replies)) = queued.take() {
+                                    in_flight = Some(bind(&proxy, &session, list));
+                                    waiting = replies;
+                                }
+                            }
                             cmd = cmd_rx.recv() => match cmd {
                                 None => break,
                                 Some(Cmd::Bind(list, reply)) => {
-                                    let shortcuts: Vec<NewShortcut> = list
-                                        .iter()
-                                        .map(|(a, c)| {
-                                            let t = trigger(c);
-                                            NewShortcut::new(action_id(*a), description(*a)).preferred_trigger(Some(t.as_str()))
-                                        })
-                                        .collect();
-                                    let result = match proxy.bind_shortcuts(&session, &shortcuts, None).await {
-                                        Ok(req) => req.response().map(|_| ()).map_err(portal_err),
-                                        Err(e) => Err(portal_err(e)),
-                                    };
-                                    let _ = reply.try_send(result);
+                                    if in_flight.is_none() {
+                                        in_flight = Some(bind(&proxy, &session, list));
+                                        waiting.push(reply);
+                                    } else {
+                                        let mut replies = queued.take().map(|(_, r)| r).unwrap_or_default();
+                                        replies.push(reply);
+                                        queued = Some((list, replies));
+                                    }
                                 }
                             },
                         }
@@ -165,7 +221,7 @@ impl PortalHotkeys {
             })
             .map_err(|e| PlatformError::Backend(format!("spawn portal thread: {e}")))?;
         match ready_rx.recv_timeout(timeout) {
-            Ok(Ok(())) => Ok(Self { cmd: cmd_tx, bound: Mutex::default(), enabled }),
+            Ok(Ok(())) => Ok(Self { cmd: cmd_tx, bound: Mutex::default(), enabled, notes }),
             Ok(Err(e)) => Err(e),
             Err(_) => Err(PlatformError::Timeout(timeout)),
         }
@@ -185,9 +241,20 @@ impl PortalHotkeys {
 
 impl PortalHotkeys {
     pub(crate) fn register(&self, id: HotkeyAction, chord: &Chord) -> Result<(), PlatformError> {
-        lock(&self.bound).insert(id, chord.clone());
-        lock(&self.enabled).insert(id, true);
+        self.register_all(&[(id, chord.clone())])
+    }
+
+    /// Add/replace all `bindings` and send them in a single portal bind.
+    pub(crate) fn register_all(&self, bindings: &[(HotkeyAction, Chord)]) -> Result<(), PlatformError> {
+        for (id, chord) in bindings {
+            lock(&self.bound).insert(*id, chord.clone());
+            lock(&self.enabled).insert(*id, true);
+        }
         self.rebind()
+    }
+
+    pub(crate) fn notes(&self) -> Vec<String> {
+        lock(&self.notes).clone()
     }
 
     /// The portal cannot remove a single binding from a session; we stop forwarding it.
@@ -213,6 +280,18 @@ mod tests {
         assert_eq!(trigger(&Chord::parse("ctrl+Enter").unwrap()), "CTRL+Return");
         assert_eq!(trigger(&Chord::parse("ctrl+Space").unwrap()), "CTRL+space");
         assert_eq!(trigger(&Chord::parse("F5").unwrap()), "F5");
+    }
+
+    #[test]
+    fn shortcuts_carry_ids_and_triggers() {
+        let list = [
+            (HotkeyAction::PriceCheck, Chord::parse("ctrl+d").unwrap()),
+            (HotkeyAction::OpenSettings, Chord::parse("ctrl+shift+F5").unwrap()),
+        ];
+        assert_eq!(new_shortcuts(&list).len(), 2);
+        assert!(clone_result(&Ok(())).is_ok());
+        let e = clone_result(&Err(PlatformError::Timeout(Duration::from_secs(1)))).unwrap_err();
+        assert!(e.to_string().contains("timed out"));
     }
 
     #[test]
