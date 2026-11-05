@@ -557,3 +557,10 @@ class = "Weapon"
 rarity = "rare"
 advanced = false
 source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-sceptre-spirit-advanced"
+class = "Weapon"
+rarity = "rare"
+advanced = true
+source = "real PoE2 Ctrl+Alt+C copy (user report): local Spirit, desecrated mods, reduced requirements"

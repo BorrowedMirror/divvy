@@ -106,13 +106,85 @@ pub fn widen_min(v: f64, pct: f64, integral: bool) -> f64 {
     out.min(v)
 }
 
-fn widen_values(values: &[f64], pct: f64) -> Option<f64> {
+/// Upper bound for a negative stat value `v` ("30% reduced ..." is stored as -30, and more
+/// negative is better), widened by `pct` percent towards zero (never below `v`).
+pub fn widen_max_negative(v: f64, pct: f64, integral: bool) -> f64 {
+    -widen_min(-v, pct, integral)
+}
+
+/// `(min, max)` search bounds for a stat with the given item values: positive values get a
+/// widened minimum, negative ("reduced") values a widened maximum.
+pub fn widen_bounds(values: &[f64], pct: f64) -> (Option<f64>, Option<f64>) {
     if values.is_empty() {
-        return None;
+        return (None, None);
     }
     let avg = values.iter().sum::<f64>() / values.len() as f64;
     let integral = values.iter().all(|v| v.fract() == 0.0) && avg.fract() == 0.0;
-    Some(widen_min(avg, pct, integral))
+    if avg < 0.0 {
+        (None, Some(widen_max_negative(avg, pct, integral)))
+    } else {
+        (Some(widen_min(avg, pct, integral)), None)
+    }
+}
+
+/// Stat id to search with. Desecrated mods are ordinary explicit mods once revealed and sellers'
+/// items mostly carry them as plain explicits, so price them as explicit stats.
+pub fn search_stat_id(id: &str) -> String {
+    match id.strip_prefix("desecrated.") {
+        Some(rest) => format!("explicit.{rest}"),
+        None => id.to_owned(),
+    }
+}
+
+/// Render a stat template (`#% increased Spirit`) with values, e.g. for merged rows.
+fn render_template(template: &str, values: &[f64]) -> String {
+    use std::fmt::Write as _;
+    let mut out = String::with_capacity(template.len());
+    let mut vals = values.iter();
+    for ch in template.chars() {
+        if ch == '#' {
+            match vals.next() {
+                Some(v) if v.fract() == 0.0 => {
+                    let _ = write!(out, "{}", *v as i64);
+                }
+                Some(v) => {
+                    let _ = write!(out, "{v}");
+                }
+                None => out.push('#'),
+            }
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// The trade site sums every mod with the same stat on an item (e.g. a prefix and a desecrated
+/// "% increased Spirit"), so one filter per stat with the summed values is what matches.
+fn merge_same_stats(rows: Vec<(StatFilter, String)>, pct: f64) -> Vec<StatFilter> {
+    let mut out: Vec<(StatFilter, String, usize)> = Vec::new();
+    for (row, template) in rows {
+        if let Some((acc, _, count)) = out.iter_mut().find(|(a, _, _)| a.stat_id == row.stat_id)
+            && acc.item_values.len() == row.item_values.len()
+        {
+            for (a, b) in acc.item_values.iter_mut().zip(&row.item_values) {
+                *a += b;
+            }
+            acc.enabled |= row.enabled;
+            *count += 1;
+        } else {
+            out.push((row, template, 1));
+        }
+    }
+    out.into_iter()
+        .map(|(mut f, template, count)| {
+            if count > 1 {
+                f.text = render_template(&template, &f.item_values);
+                (f.min, f.max) = widen_bounds(&f.item_values, pct);
+            }
+            f
+        })
+        .collect()
 }
 
 fn range(enabled: bool, min: Option<u32>) -> RangeFilter {
@@ -169,16 +241,21 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
                     explicit_seen += 1;
                     explicit_seen <= DEFAULT_ENABLED_STATS
                 });
-            Some(StatFilter {
-                stat_id,
-                text: m.text.clone(),
-                enabled,
-                min: widen_values(&m.values, opts.widen_pct),
-                max: None,
-                item_values: m.values.clone(),
-            })
+            let (min, max) = widen_bounds(&m.values, opts.widen_pct);
+            Some((
+                StatFilter {
+                    stat_id: search_stat_id(&stat_id),
+                    text: m.text.clone(),
+                    enabled,
+                    min,
+                    max,
+                    item_values: m.values.clone(),
+                },
+                m.template.clone(),
+            ))
         })
         .collect();
+    let stats = merge_same_stats(stats, opts.widen_pct);
 
     let gem = item.category == ItemCategory::Gem;
     let base_item = matches!(item.rarity, Rarity::Normal | Rarity::Magic)
@@ -252,9 +329,8 @@ impl FilterSet {
     pub fn rewiden(&mut self, pct: f64) {
         self.widen_pct = pct;
         for s in &mut self.stats {
-            if let Some(min) = widen_values(&s.item_values, pct) {
-                s.min = Some(min);
-                s.max = None;
+            if !s.item_values.is_empty() {
+                (s.min, s.max) = widen_bounds(&s.item_values, pct);
             }
         }
     }
@@ -390,9 +466,11 @@ mod tests {
         assert_eq!(f.stats[1].min, Some(42.0));
         f.rewiden(50.0);
         assert_eq!(f.stats[1].min, Some(21.0));
-        // Negated stat (reduced movement speed -> -10) widens downwards.
+        // Negated stat ("10% reduced ..." -> -10): more negative is better, so it gets an upper
+        // bound widened towards zero instead of a minimum that would match any item.
         assert_eq!(f.stats[5].item_values, vec![-10.0]);
-        assert_eq!(f.stats[5].min, Some(-15.0));
+        assert_eq!(f.stats[5].min, None);
+        assert_eq!(f.stats[5].max, Some(-5.0));
     }
 
     #[test]
@@ -459,7 +537,7 @@ mod tests {
         assert_eq!(range_json(&RangeFilter { enabled: true, min: None, max: None }), None);
         assert_eq!(range_json(&RangeFilter { enabled: false, min: Some(1.0), max: None }), None);
         assert_eq!(range_json(&RangeFilter { enabled: true, min: None, max: Some(3.0) }), Some(json!({"max": 3.0})));
-        assert_eq!(widen_values(&[], 10.0), None);
+        assert_eq!(widen_bounds(&[], 10.0), (None, None));
     }
 
     proptest! {
@@ -471,5 +549,51 @@ mod tests {
             // Never widened beyond 100% (+ rounding slack).
             prop_assert!(min >= v - v.abs() - 1.0);
         }
+    }
+
+    #[test]
+    fn reduced_stats_get_an_upper_bound() {
+        assert_eq!(widen_bounds(&[-30.0], 10.0), (None, Some(-27.0)));
+        assert_eq!(widen_bounds(&[55.0], 10.0), (Some(49.0), None));
+        assert_eq!(widen_bounds(&[], 10.0), (None, None));
+        assert!((widen_max_negative(-2.5, 10.0, false) - -2.25).abs() < 1e-9);
+    }
+
+    #[test]
+    fn desecrated_mods_search_as_explicit() {
+        assert_eq!(search_stat_id("desecrated.stat_1050105434"), "explicit.stat_1050105434");
+        assert_eq!(search_stat_id("fractured.stat_1"), "fractured.stat_1");
+    }
+
+    #[test]
+    fn mods_with_the_same_stat_merge_into_one_summed_filter() {
+        let row = |id: &str, text: &str, v: f64, enabled: bool| {
+            (
+                StatFilter {
+                    stat_id: id.into(),
+                    text: text.into(),
+                    enabled,
+                    min: None,
+                    max: None,
+                    item_values: vec![v],
+                },
+                "#% increased Spirit".to_owned(),
+            )
+        };
+        let merged = merge_same_stats(
+            vec![
+                row("explicit.stat_1416406066", "55% increased Spirit", 55.0, false),
+                row("explicit.stat_9", "+20 to maximum Mana", 20.0, true),
+                row("explicit.stat_1416406066", "13% increased Spirit", 13.0, true),
+            ],
+            10.0,
+        );
+        assert_eq!(merged.len(), 2);
+        assert_eq!(merged[0].text, "68% increased Spirit");
+        assert_eq!(merged[0].item_values, vec![68.0]);
+        assert_eq!(merged[0].min, Some(61.0));
+        assert!(merged[0].enabled);
+        assert_eq!(render_template("Adds # to # Damage", &[1.5, 3.0]), "Adds 1.5 to 3 Damage");
+        assert_eq!(render_template("# and #", &[1.0]), "1 and #");
     }
 }

@@ -84,3 +84,41 @@ fn corpus_match_rate_floor() {
     eprintln!("match rate {hits}/{total} = {:.1}%\nunmatched:\n{}", rate * 100.0, misses.join("\n"));
     assert!(rate >= 0.85, "match rate {:.1}% below 85%", rate * 100.0);
 }
+
+/// Real user report: a sceptre search returned nothing. Spirit must use the sceptre's local
+/// stat, the prefix and desecrated Spirit mods must be one summed filter, desecrated mods are
+/// searched as explicit, and "reduced" requirements get an upper bound.
+#[test]
+fn sceptre_spirit_search_matches_trade_listings() {
+    use kalandra_core::query::{QueryOptions, build_filters};
+    let sceptre = matched("weapon/rare-sceptre-spirit-advanced");
+    assert_eq!(stat_of(&sceptre, "55% increased Spirit"), Some("explicit.stat_3984865854"));
+    assert_eq!(stat_of(&sceptre, "13% increased Spirit"), Some("desecrated.stat_3984865854"));
+    let opts = QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false };
+    let f = build_filters(&sceptre, &opts);
+    let spirit: Vec<_> = f.stats.iter().filter(|s| s.stat_id.ends_with("stat_3984865854")).collect();
+    assert_eq!(spirit.len(), 1, "one summed Spirit filter: {:?}", f.stats);
+    assert_eq!(spirit[0].stat_id, "explicit.stat_3984865854");
+    assert_eq!(spirit[0].item_values, vec![68.0]);
+    assert_eq!(spirit[0].min, Some(61.0));
+    assert_eq!(spirit[0].text, "68% increased Spirit");
+    assert!(f.stats.iter().all(|s| !s.stat_id.starts_with("desecrated.")), "{:?}", f.stats);
+    let reqs = f.stats.iter().find(|s| s.text == "30% reduced Attribute Requirements").unwrap();
+    assert_eq!((reqs.min, reqs.max), (None, Some(-27.0)));
+}
+
+#[test]
+fn global_spirit_on_amulets_stays_global() {
+    use kalandra_core::{catalog::Catalog, item::ModKind};
+    let data = kalandra_data::bundled().expect("bundled data");
+    let ids: Vec<_> =
+        data.stats_by_template("#% increased Spirit", ModKind::Explicit).iter().map(|(s, _)| s.id.clone()).collect();
+    assert!(
+        ids.contains(&"explicit.stat_1416406066".to_owned()) && ids.contains(&"explicit.stat_3984865854".to_owned()),
+        "{ids:?}"
+    );
+    let text = "Item Class: Amulets\nRarity: Rare\nGale Charm\nGold Amulet\n--------\nItem Level: 80\n--------\n20% increased Spirit\n";
+    let mut amulet = kalandra_core::parser::parse_item(text).unwrap();
+    StatMatcher::new(&data).match_item(&mut amulet);
+    assert_eq!(stat_of(&amulet, "20% increased Spirit"), Some("explicit.stat_1416406066"));
+}

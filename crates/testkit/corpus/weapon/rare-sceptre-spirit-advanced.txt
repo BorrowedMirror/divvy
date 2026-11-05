@@ -1,0 +1,22 @@
+Item Class: Sceptres
+Rarity: Rare
+Bramble Breaker
+Rattling Sceptre
+--------
+Spirit: 168 (augmented)
+--------
+Requires: Level 48
+--------
+Item Level: 80
+--------
+Grants Skill: Level 18 Skeletal Warrior Minion
+--------
+{ Prefix Modifier "Duke's" (Tier: 3) }
+55(51-55)% increased Spirit
+{ Desecrated Prefix Modifier "Advisor's" (Tier: 7) }
+13(10-14)% increased Spirit
++20(17-20) to maximum Mana
+{ Suffix Modifier "of the Skilled" (Tier: 2) }
+30% reduced Attribute Requirements
+{ Suffix Modifier "of the Lizard" (Tier: 9) — Life }
+Allies in your Presence Regenerate 2.2(2.1-3) Life per second

@@ -163,8 +163,16 @@ fn pluralise_additional(template: &str) -> Option<(String, usize)> {
     Some((plural, index))
 }
 
+/// Local stats the trade API does not mark with "(Local)": they share their text with a global
+/// stat, so text alone cannot tell them apart. Matched by the stat hash after the group prefix
+/// (`explicit.`, `desecrated.`, `fractured.`, `rune.` ...). Verified against live trade2 searches
+/// on 2026-11-06, e.g. `#% increased Spirit`: `stat_3984865854` is on 10000+ sceptres,
+/// `stat_1416406066` on none.
+const UNMARKED_LOCAL_STATS: &[&str] = &["stat_3984865854"];
+
 fn is_local(stat: &StatDef) -> bool {
     stat.text.ends_with("(Local)")
+        || stat.id.split_once('.').is_some_and(|(_, hash)| UNMARKED_LOCAL_STATS.contains(&hash))
 }
 
 /// Weapons and armour pieces use local variants of damage / defence stats.
