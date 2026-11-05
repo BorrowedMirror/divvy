@@ -46,9 +46,22 @@ struct Indexed {
 
 impl Indexed {
     fn new(bundle: Bundle) -> Self {
-        let mut stats: StatIndex = HashMap::new();
+        // Pre-size each kind's map (upper bound: templates + aliases) to avoid rehashing.
+        let mut sizes: HashMap<&str, usize> = HashMap::new();
+        for stat in &bundle.stats {
+            *sizes.entry(stat.kind.as_str()).or_default() += 1 + stat.aliases.len();
+        }
+        let mut stats: StatIndex = HashMap::with_capacity(sizes.len());
+        // Look keys up by `&str` first so only new kinds/templates allocate a `String`.
         let mut add = |kind: &str, template: &str, i: usize, negate: bool| {
-            let hits = stats.entry(kind.to_owned()).or_default().entry(template.to_owned()).or_default();
+            if !stats.contains_key(kind) {
+                stats.insert(kind.to_owned(), HashMap::with_capacity(sizes.get(kind).copied().unwrap_or_default()));
+            }
+            let by_template = stats.get_mut(kind).expect("inserted above");
+            let hits = match by_template.get_mut(template) {
+                Some(hits) => hits,
+                None => by_template.entry(template.to_owned()).or_insert_with(|| Vec::with_capacity(1)),
+            };
             if !hits.iter().any(|(j, _)| *j == i) {
                 hits.push((i, negate));
             }
@@ -73,10 +86,12 @@ impl Indexed {
 }
 
 /// Map each key to the index of its first occurrence.
-fn first_index<'a>(keys: impl Iterator<Item = &'a str>) -> HashMap<String, usize> {
-    let mut map = HashMap::new();
+fn first_index<'a>(keys: impl ExactSizeIterator<Item = &'a str>) -> HashMap<String, usize> {
+    let mut map = HashMap::with_capacity(keys.len());
     for (i, key) in keys.enumerate() {
-        map.entry(key.to_owned()).or_insert(i);
+        if !map.contains_key(key) {
+            map.insert(key.to_owned(), i);
+        }
     }
     map
 }
@@ -125,15 +140,25 @@ impl Catalog for GameData {
     /// Longest base name that appears as a whole-word run inside `full_name`
     /// (e.g. `Hunter Hood` in `Sturdy Hunter Hood of the Fox`).
     fn base_in_magic_name(&self, full_name: &str) -> Option<&BaseDef> {
-        let words: Vec<&str> = full_name.split_whitespace().collect();
+        // Normalise whitespace once so every word run is a plain `&str` slice of `joined`
+        // (no per-candidate allocation); `bounds[i]` is the byte range of word `i`.
+        let mut joined = String::with_capacity(full_name.len());
+        let mut bounds: Vec<(usize, usize)> = Vec::new();
+        for word in full_name.split_whitespace() {
+            if !joined.is_empty() {
+                joined.push(' ');
+            }
+            bounds.push((joined.len(), joined.len() + word.len()));
+            joined.push_str(word);
+        }
         let mut best: Option<&BaseDef> = None;
-        for start in 0..words.len() {
-            for end in (start + 1)..=words.len() {
-                let candidate = words[start..end].join(" ");
+        for (start, &(from, _)) in bounds.iter().enumerate() {
+            for &(_, to) in &bounds[start..] {
+                let candidate = &joined[from..to];
                 if best.is_some_and(|b| b.name.len() >= candidate.len()) {
                     continue;
                 }
-                if let Some(base) = self.base(&candidate) {
+                if let Some(base) = self.base(candidate) {
                     best = Some(base);
                 }
             }

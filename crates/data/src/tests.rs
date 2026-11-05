@@ -286,6 +286,8 @@ fn base_lookups() {
     // Whole words only: `Hoodie` must not match `Hood`.
     assert!(d.base_in_magic_name("Cosy Hoodie").is_none());
     assert!(d.base_in_magic_name("").is_none());
+    // Irregular whitespace is normalised before matching word runs.
+    assert_eq!(d.base_in_magic_name("Sturdy  Hunter\tHood of the Fox").unwrap().name, "Hunter Hood");
 }
 
 #[test]

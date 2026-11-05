@@ -13,6 +13,7 @@ workspace = true
 
 [dependencies]
 async-trait.workspace = true
+futures.workspace = true
 http.workspace = true
 kalandra-core.workspace = true
 moka.workspace = true
