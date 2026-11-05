@@ -57,7 +57,7 @@ cargo run -p kalandra-desktop  # full app, loading the UI from the Vite dev serv
 
 | Command | What it does |
 | --- | --- |
-| `cargo xtask lint` | rustfmt check, clippy `-D warnings`, cargo-deny, cargo-machete, eslint, tsc (`--no-web`, `--no-tools` to skip groups) |
+| `cargo xtask lint` | rustfmt check, clippy `-D warnings` (workspace and `e2e/macos-harness`), cargo-deny, cargo-machete, eslint, tsc for web and e2e (`--no-web`, `--no-tools` to skip groups) |
 | `cargo xtask coverage [--check]` | nextest under llvm-cov; prints per-crate line coverage, writes `target/coverage/<crate>.lcov`, `--check` enforces the gates |
 | `cargo xtask gen` | regenerates `.commitlintrc.json`, `docs/contributing/commit-message.md` and `web/src/bindings.ts` |
 | `cargo nextest run` | tests (profiles in `.config/nextest.toml`) |
