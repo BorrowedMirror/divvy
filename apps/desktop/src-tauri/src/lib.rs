@@ -212,6 +212,9 @@ fn forward_trigger() -> ! {
 }
 
 pub fn run() {
+    // Process-wide env for the input hook; must run before any thread exists.
+    #[cfg(feature = "native")]
+    kalandra_platform::backend::init_process_env();
     let cli = cli::parse(std::env::args().skip(1));
     if cli.trigger {
         forward_trigger();

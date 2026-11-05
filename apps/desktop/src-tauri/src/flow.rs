@@ -195,13 +195,12 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
         return Ok(());
     }
     platform.hotkeys.unregister_all()?;
-    for (action, chord) in [
-        (HotkeyAction::PriceCheck, &settings.hotkeys.price_check),
-        (HotkeyAction::PriceCheckPinned, &settings.hotkeys.price_check_pinned),
-        (HotkeyAction::OpenSettings, &settings.hotkeys.open_settings),
-    ] {
-        platform.hotkeys.register(action, chord)?;
-    }
+    // One call so the Wayland portal binds (and confirms) all shortcuts together.
+    platform.hotkeys.register_all(&[
+        (HotkeyAction::PriceCheck, settings.hotkeys.price_check.clone()),
+        (HotkeyAction::PriceCheckPinned, settings.hotkeys.price_check_pinned.clone()),
+        (HotkeyAction::OpenSettings, settings.hotkeys.open_settings.clone()),
+    ])?;
     Ok(())
 }
 

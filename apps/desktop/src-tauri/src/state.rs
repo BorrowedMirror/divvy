@@ -174,6 +174,15 @@ impl AppState {
         self.platform.as_ref().map(|p| p.capabilities.clone()).unwrap_or_default()
     }
 
+    /// Capabilities plus problems the hotkey host found after registration (diagnostics).
+    pub fn capabilities_with_notes(&self) -> Capabilities {
+        let mut caps = self.capabilities();
+        if let Some(p) = self.platform.as_ref() {
+            caps.notes.extend(p.hotkeys.notes());
+        }
+        caps
+    }
+
     pub fn record_error(&self, e: impl std::fmt::Display) {
         tracing::warn!("{e}");
         let mut errs = self.errors.lock().expect("errors lock");

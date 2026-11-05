@@ -103,7 +103,7 @@ pub fn get_diagnostics(state: State<'_, Arc<AppState>>) -> Diagnostics {
         version: env!("CARGO_PKG_VERSION").into(),
         os: std::env::consts::OS.into(),
         backend: state.backend,
-        capabilities: state.capabilities(),
+        capabilities: state.capabilities_with_notes(),
         data_version: state
             .data()
             .map(|d| d.manifest.game_version.clone().unwrap_or_else(|| d.manifest.generated_at.clone())),
