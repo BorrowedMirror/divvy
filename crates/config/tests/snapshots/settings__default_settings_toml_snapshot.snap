@@ -22,11 +22,8 @@ modifiers = [
 key = "KeyD"
 
 [hotkeys.open_settings]
-modifiers = [
-    "ctrl",
-    "alt",
-]
-key = "KeyS"
+modifiers = ["ctrl"]
+key = "Space"
 
 [trade]
 source = "trade"

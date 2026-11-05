@@ -50,6 +50,17 @@ impl Chord {
         Self { modifiers: modifiers.to_vec(), key: key.to_owned() }
     }
 
+    /// A hotkey the user has explicitly cleared ("Not set"). Stored as an empty key so it is
+    /// saved and never silently replaced by the default.
+    pub fn unbound() -> Self {
+        Self { modifiers: Vec::new(), key: String::new() }
+    }
+
+    /// True for [`Chord::unbound`] (no key).
+    pub fn is_unbound(&self) -> bool {
+        self.key.trim().is_empty()
+    }
+
     /// Parse `Ctrl+Alt+D` / `ctrl+shift+F5` style strings.
     pub fn parse(s: &str) -> Result<Self, crate::PlatformError> {
         let mut modifiers = Vec::new();

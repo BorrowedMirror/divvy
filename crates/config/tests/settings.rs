@@ -517,3 +517,21 @@ fn concurrent_saves_never_corrupt() {
     }
     assert!(load(&paths).is_ok());
 }
+
+#[test]
+fn hotkeys_can_be_cleared_and_stay_cleared() {
+    let dir = tempfile::tempdir().unwrap();
+    let paths = Paths::under(dir.path());
+    let mut s = Settings::default();
+    assert_eq!(s.hotkeys.open_settings, Chord::new(&[KeyModifier::Ctrl], "Space"));
+    s.hotkeys.open_settings = Chord::unbound();
+    s.hotkeys.price_check_pinned = Chord::unbound(); // two cleared hotkeys are not duplicates
+    validate(&s).unwrap();
+    save(&paths, &s).unwrap();
+    let loaded = load(&paths).unwrap();
+    assert!(loaded.hotkeys.open_settings.is_unbound(), "cleared hotkey must not reset to the default");
+    assert!(loaded.hotkeys.price_check_pinned.is_unbound());
+    // Modifiers without a key are still rejected.
+    s.hotkeys.open_settings = Chord { modifiers: vec![KeyModifier::Ctrl], key: String::new() };
+    assert!(validate(&s).is_err());
+}

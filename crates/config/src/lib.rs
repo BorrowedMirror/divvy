@@ -123,7 +123,7 @@ impl Default for HotkeySettings {
         Self {
             price_check: Chord::new(&[Ctrl], "KeyD"),
             price_check_pinned: Chord::new(&[Ctrl, Alt], "KeyD"),
-            open_settings: Chord::new(&[Ctrl, Alt], "KeyS"),
+            open_settings: Chord::new(&[Ctrl], "Space"),
             advanced_copy: true,
         }
     }
@@ -334,7 +334,8 @@ const MODIFIER_KEY_CODES: &[&str] = &[
 fn validate_chord(field: &str, chord: &Chord) -> Result<(), ConfigError> {
     let key = chord.key.trim();
     if key.is_empty() {
-        return Err(invalid(field, "chord has no key"));
+        // An explicitly cleared hotkey ("Not set"); modifiers alone are not a chord.
+        return if chord.modifiers.is_empty() { Ok(()) } else { Err(invalid(field, "chord has no key")) };
     }
     if MODIFIER_KEY_CODES.iter().any(|m| m.eq_ignore_ascii_case(key)) {
         return Err(invalid(field, format!("`{key}` is a modifier; a chord needs a non-modifier key")));
@@ -376,7 +377,9 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
     ];
     for (i, (field, chord)) in hotkeys.iter().enumerate() {
         validate_chord(field, chord)?;
-        if let Some((other, _)) = hotkeys[..i].iter().find(|(_, c)| chord_key(c) == chord_key(chord)) {
+        if let Some((other, _)) =
+            hotkeys[..i].iter().filter(|_| !chord.is_unbound()).find(|(_, c)| chord_key(c) == chord_key(chord))
+        {
             return Err(invalid(*field, format!("`{chord}` is already bound to {other}")));
         }
     }
