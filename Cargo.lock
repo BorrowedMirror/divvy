@@ -3101,6 +3101,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "tauri-specta",
+ "tempfile",
  "thiserror 2.0.21",
  "tracing",
  "tracing-subscriber",

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus } from "../../bindings";
 import { commands, events } from "../../bindings";
@@ -92,6 +92,9 @@ export function OverlayView() {
     useOverlayStore.getState().priceFailed(p.error);
   });
   useTauriEvent(events.overlayState, (p) => useOverlayStore.getState().setOverlayState(p));
+  // Linux/Proton: the game holds the mouse, so this panel cannot be clicked; say how to fix it.
+  const [mouseCaptured, setMouseCaptured] = useState(false);
+  useTauriEvent(events.mouseCaptured, (p) => setMouseCaptured(p.captured));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -123,6 +126,11 @@ export function OverlayView() {
         onMouseLeave={autoHide.onMouseLeave}
         className="flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
       >
+        {mouseCaptured && (
+          <p role="alert" data-testid="mouse-captured" className="rounded-md border border-bad/40 bg-bad/10 p-2 text-xs text-bad">
+            {t("overlay.mouseCaptured")}
+          </p>
+        )}
         <header className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">kalandra</h1>}

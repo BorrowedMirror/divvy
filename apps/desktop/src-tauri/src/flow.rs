@@ -153,10 +153,12 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     // A focused fullscreen game can sit above "always on top" windows (openbox and other X11
     // WMs), so explicitly stack the panel above the game and give it keyboard focus (Esc,
     // scrolling, filter editing). `hide_overlay` hands focus back to the game.
-    if let Err(e) = crate::overlay::bring_to_front(&win, game_window(state).map(|g| g.native_id), true) {
+    let game_id = game_window(state).map(|g| g.native_id);
+    if let Err(e) = crate::overlay::bring_to_front(&win, game_id, true) {
         state.record_error(format!("overlay raise: {e}"));
     }
     state.overlay_visible.store(true, Ordering::SeqCst);
+    spawn_focus_guard(app, state, game_id);
     emit_overlay_state(app, state);
 }
 
@@ -172,6 +174,61 @@ pub fn hide_overlay(app: &AppHandle, state: &AppState) -> Result<(), IpcError> {
     set_pinned(app, state, false);
     emit_overlay_state(app, state);
     Ok(())
+}
+
+/// How long after showing the panel the focus guard watches for the game taking focus back.
+const FOCUS_GUARD: std::time::Duration = std::time::Duration::from_millis(1500);
+/// When to check whether the game still holds the mouse.
+const CAPTURE_PROBE_AFTER: std::time::Duration = std::time::Duration::from_millis(500);
+/// Re-focus attempts per show (avoid a focus tug-of-war with the game).
+const MAX_REFOCUS: u32 = 3;
+
+/// Linux/X11: Wine re-activates a fullscreen game shortly after it loses focus, and holds an X
+/// pointer grab while it is active. Keep focus on the panel for a moment (so Wine releases its
+/// grab), then check whether the game still holds the mouse and tell the panel if it does.
+#[cfg(all(target_os = "linux", feature = "native"))]
+fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
+    use kalandra_platform::backend::x11;
+    let Some(game_id) = game_id else { return };
+    let seq = state.show_seq.fetch_add(1, Ordering::SeqCst) + 1;
+    let app = app.clone();
+    let spawned = std::thread::Builder::new().name("kalandra-focus-guard".into()).spawn(move || {
+        let start = std::time::Instant::now();
+        let mut refocused = 0;
+        let mut probed = false;
+        while start.elapsed() < FOCUS_GUARD {
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            let state = app.state::<Arc<AppState>>();
+            if state.show_seq.load(Ordering::SeqCst) != seq || !state.overlay_visible.load(Ordering::SeqCst) {
+                return;
+            }
+            let game_active = x11::active_window().ok().flatten() == Some(game_id);
+            if game_active && refocused < MAX_REFOCUS {
+                refocused += 1;
+                tracing::debug!("game took focus back; re-focusing the panel ({refocused})");
+                if let Some(win) = app.get_webview_window(OVERLAY) {
+                    let _ = crate::overlay::bring_to_front(&win, Some(game_id), true);
+                }
+            }
+            if !probed && start.elapsed() >= CAPTURE_PROBE_AFTER {
+                probed = true;
+                let captured = x11::pointer_grabbed_by_other().unwrap_or(false);
+                state.mouse_captured.store(captured, Ordering::SeqCst);
+                if captured {
+                    state.record_error("the game is capturing the mouse; clicks cannot reach the panel (see Diagnostics → Proton mouse capture)");
+                }
+                let _ = (crate::events::MouseCaptured { captured }).emit(&app);
+            }
+        }
+    });
+    if let Err(e) = spawned {
+        state.record_error(format!("spawn focus guard: {e}"));
+    }
+}
+
+#[cfg(not(all(target_os = "linux", feature = "native")))]
+fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
+    let _ = (app, state, game_id);
 }
 
 /// The tracked game window, when the backend can track it (not on Wayland-native).

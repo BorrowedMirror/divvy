@@ -33,3 +33,10 @@ pub struct OverlayState {
     pub visible: bool,
     pub pinned: bool,
 }
+
+/// The game holds an X pointer grab (Wine fullscreen mouse capture) while the panel is open, so
+/// clicks cannot reach it. The panel shows how to fix it.
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type, tauri_specta::Event)]
+pub struct MouseCaptured {
+    pub captured: bool,
+}
