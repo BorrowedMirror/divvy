@@ -14,6 +14,7 @@ import { DiagnosticsView } from "./views/diagnostics/DiagnosticsView";
 import { OnboardingView } from "./views/onboarding/OnboardingView";
 import { OverlayView } from "./views/overlay/OverlayView";
 import { SettingsView } from "./views/settings/SettingsView";
+import { UpdateBanner, UpdateSync } from "./views/update/UpdateBanner";
 
 /** Keeps the settings query in sync with `settings-changed` and applies language + theme. */
 function SettingsSync() {
@@ -69,6 +70,7 @@ export function AppProviders({ children, client }: { children: ReactNode; client
       <Toast.Provider>
         <Tooltip.Provider delay={400}>
           <SettingsSync />
+          <UpdateSync />
           {children}
           <Toasts />
         </Tooltip.Provider>
@@ -99,6 +101,7 @@ export function Routes() {
   const { t } = useTranslation();
   return (
     <main data-route={route} className="min-h-screen">
+      {(route === "settings" || route === "diagnostics") && <UpdateBanner />}
       {route === "overlay" && <OverlayView />}
       {route === "settings" && <SettingsView onOpenDiagnostics={() => navigate("diagnostics")} />}
       {route === "onboarding" && <OnboardingView onDone={() => navigate("settings")} />}

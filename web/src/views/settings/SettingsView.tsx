@@ -196,6 +196,12 @@ function GeneralTab({ s, update }: TabProps) {
         checked={s.ui.start_minimised}
         onChange={(start_minimised) => update((d) => ({ ...d, ui: { ...d.ui, start_minimised } }))}
       />
+      <SwitchField
+        label={t("settings.checkUpdates")}
+        description={t("settings.checkUpdatesHelp")}
+        checked={s.ui.check_updates}
+        onChange={(check_updates) => update((d) => ({ ...d, ui: { ...d.ui, check_updates } }))}
+      />
     </div>
   );
 }
