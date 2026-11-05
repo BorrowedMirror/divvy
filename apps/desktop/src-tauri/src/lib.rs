@@ -1,10 +1,23 @@
 //! Tauri shell. Wiring only: business logic lives in the crates.
+pub mod cli;
 pub mod events;
+pub mod flow;
 pub mod ipc;
+pub mod logic;
 pub mod overlay;
 pub mod state;
+#[cfg(any(debug_assertions, feature = "test-hook"))]
+pub mod testhook;
+pub mod tray;
 
+use std::sync::{Arc, atomic::Ordering};
+
+use kalandra_config::{Paths, Settings};
+use kalandra_platform::{BackendKind, EnvProbe, Platform};
+use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_specta::{Builder, collect_commands, collect_events};
+
+use crate::state::AppState;
 
 /// Single place listing every command and event. Used by `run()` and by `export_bindings()`.
 pub fn specta_builder() -> Builder<tauri::Wry> {
@@ -44,16 +57,171 @@ pub fn export_bindings(path: &std::path::Path) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
+fn init_logging(paths: Option<&Paths>) -> Option<std::path::PathBuf> {
+    use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+    let filter = EnvFilter::try_from_env("KALANDRA_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
+    let file = paths.and_then(|p| {
+        std::fs::create_dir_all(&p.log_dir).ok()?;
+        let path = p.log_dir.join("kalandra.log");
+        std::fs::File::create(&path).ok().map(|f| (path, f))
+    });
+    let registry = tracing_subscriber::registry().with(filter).with(fmt::layer().with_writer(std::io::stderr));
+    match file {
+        Some((path, f)) => {
+            let _ = registry.with(fmt::layer().with_ansi(false).with_writer(std::sync::Mutex::new(f))).try_init();
+            Some(path)
+        }
+        None => {
+            let _ = registry.try_init();
+            None
+        }
+    }
+}
+
+fn load_settings(paths: Option<&Paths>, errors: &mut Vec<String>) -> Settings {
+    match paths.map(kalandra_config::load) {
+        Some(Ok(s)) => s,
+        Some(Err(e)) => {
+            errors.push(format!("settings could not be loaded, using defaults: {e}"));
+            Settings::default()
+        }
+        None => Settings::default(),
+    }
+}
+
+fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Platform>> {
+    match kalandra_platform::backend::create(kind) {
+        Ok(p) => Some(Arc::new(p)),
+        Err(e) => {
+            errors.push(format!("platform backend {kind:?} unavailable: {e}"));
+            None
+        }
+    }
+}
+
+#[cfg(unix)]
+fn spawn_signal_triggers(app: &tauri::AppHandle) {
+    use signal_hook::{
+        consts::{SIGUSR1, SIGUSR2},
+        iterator::Signals,
+    };
+    let Ok(mut signals) = Signals::new([SIGUSR1, SIGUSR2]) else { return };
+    let app = app.clone();
+    std::thread::Builder::new()
+        .name("kalandra-signals".into())
+        .spawn(move || {
+            for sig in signals.forever() {
+                flow::trigger(&app, sig == SIGUSR1);
+            }
+        })
+        .ok();
+}
+
 pub fn run() {
+    let cli = cli::parse(std::env::args().skip(1));
+    let paths = Paths::resolve().ok();
+    if cli.trigger {
+        let code = match paths.as_ref().map(|p| cli::send_trigger(&p.cache_dir, cli.pinned)) {
+            Some(Ok(())) => 0,
+            Some(Err(e)) => {
+                eprintln!("kalandra: {e}");
+                1
+            }
+            None => {
+                eprintln!("kalandra: cannot resolve cache directory");
+                1
+            }
+        };
+        std::process::exit(code);
+    }
+
+    let log_path = init_logging(paths.as_ref());
+    let mut errors = Vec::new();
+    let settings = load_settings(paths.as_ref(), &mut errors);
+    let backend = kalandra_platform::detect(&EnvProbe::from_env(), settings.platform.backend_override);
+    overlay::pre_init(backend);
+    let platform = create_platform(backend, &mut errors);
+    let data = match kalandra_data::bundled() {
+        Ok(d) => Some(Arc::new(d)),
+        Err(e) => {
+            errors.push(format!("bundled game data failed to load: {e}"));
+            None
+        }
+    };
+    let state = match AppState::new(paths, settings, data, platform, backend, log_path) {
+        Ok(s) => Arc::new(s),
+        Err(e) => {
+            eprintln!("kalandra: failed to initialise: {e}");
+            std::process::exit(1);
+        }
+    };
+    for e in errors {
+        state.record_error(e);
+    }
+
     let builder = specta_builder();
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(state::AppState::new())
+        .manage(Arc::clone(&state))
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            let handle = app.handle().clone();
+            let state = Arc::clone(&app.state::<Arc<AppState>>());
+            if let Err(e) = tray::build(&handle) {
+                state.record_error(format!("tray unavailable: {e}"));
+            }
+            if let Some(win) = app.get_webview_window(flow::OVERLAY)
+                && let Err(e) = overlay::prepare(&win)
+            {
+                state.record_error(format!("overlay styling failed: {e}"));
+            }
+            if let Err(e) = flow::register_hotkeys(&state, &state.settings()) {
+                state.record_error(format!("hotkeys: {e}"));
+            }
+            flow::spawn_hotkey_loop(&handle, &state);
+            #[cfg(unix)]
+            spawn_signal_triggers(&handle);
+            if let Some(p) = state.paths.as_ref()
+                && let Err(e) = cli::write_pid(&p.cache_dir)
+            {
+                state.record_error(format!("pid file: {e}"));
+            }
+            #[cfg(any(debug_assertions, feature = "test-hook"))]
+            if let Some(port) = testhook::port_from_env()
+                && let Err(e) = testhook::spawn(&handle, port)
+            {
+                state.record_error(format!("test hook: {e}"));
+            }
+            if !state.settings().ui.start_minimised {
+                let _ = flow::show_settings(&handle, "settings");
+            }
+            let st = Arc::clone(&state);
+            tauri::async_runtime::spawn(async move {
+                match st.sources().trade.leagues().await {
+                    Ok(l) => *st.leagues.lock().expect("leagues lock") = Some(l),
+                    Err(e) => st.record_error(format!("league auto-detect failed: {e}")),
+                }
+            });
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running kalandra");
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event
+                && window.label() == flow::SETTINGS
+            {
+                api.prevent_close();
+                let _ = window.hide();
+            }
+        })
+        .build(tauri::generate_context!())
+        .expect("error while building kalandra");
+
+    app.run(|handle, event| {
+        if let RunEvent::ExitRequested { api, code, .. } = event {
+            let quitting = handle.state::<Arc<AppState>>().quitting.load(Ordering::SeqCst);
+            if code.is_none() && !quitting {
+                api.prevent_exit();
+            }
+        }
+    });
 }

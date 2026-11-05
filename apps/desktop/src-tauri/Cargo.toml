@@ -51,6 +51,10 @@ thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+url.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+signal-hook.workspace = true
 
 [dev-dependencies]
 kalandra-testkit.workspace = true

@@ -59,6 +59,7 @@ kalandra-config = { path = "crates/config" }
 kalandra-testkit = { path = "crates/testkit" }
 
 anyhow = "1"
+signal-hook = "0.3"
 async-trait = "0.1"
 clap = { version = "4.6", features = ["derive", "env"] }
 directories = "6"
