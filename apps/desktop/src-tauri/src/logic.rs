@@ -210,9 +210,45 @@ pub fn must_show_settings(tray_ok: bool, hotkeys_ok: bool) -> bool {
     !tray_ok && !hotkeys_ok
 }
 
+/// Smallest overlay height we allow (logical px), so the header and empty state always fit.
+pub const MIN_OVERLAY_HEIGHT: f64 = 120.0;
+/// Gap kept between the overlay and the top/bottom of the monitor (logical px).
+pub const OVERLAY_SCREEN_MARGIN: f64 = 8.0;
+
+/// Height (logical px) to give the overlay for content of `wanted` px on a monitor that is
+/// `monitor_height` logical px tall: as tall as the content, never taller than the screen.
+pub fn fit_overlay_height(wanted: f64, monitor_height: f64) -> f64 {
+    let max = (monitor_height - 2.0 * OVERLAY_SCREEN_MARGIN).max(MIN_OVERLAY_HEIGHT);
+    if wanted.is_finite() { wanted.ceil().clamp(MIN_OVERLAY_HEIGHT, max) } else { MIN_OVERLAY_HEIGHT }
+}
+
+/// Top edge (physical px) that keeps a window of `height` starting at `y` inside the monitor
+/// spanning `screen_y .. screen_y + screen_height`.
+pub fn keep_on_screen_y(y: i32, height: i32, screen_y: i32, screen_height: i32) -> i32 {
+    let bottom = screen_y + screen_height;
+    if y + height > bottom { (bottom - height).max(screen_y) } else { y.max(screen_y) }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn overlay_height_fits_content_within_the_screen() {
+        assert_eq!(fit_overlay_height(431.2, 1440.0), 432.0);
+        assert_eq!(fit_overlay_height(50.0, 1440.0), MIN_OVERLAY_HEIGHT);
+        assert_eq!(fit_overlay_height(5000.0, 1440.0), 1440.0 - 2.0 * OVERLAY_SCREEN_MARGIN);
+        assert_eq!(fit_overlay_height(f64::NAN, 1440.0), MIN_OVERLAY_HEIGHT);
+        assert_eq!(fit_overlay_height(500.0, 100.0), MIN_OVERLAY_HEIGHT);
+    }
+
+    #[test]
+    fn keeps_window_inside_the_monitor_vertically() {
+        assert_eq!(keep_on_screen_y(100, 400, 0, 1440), 100);
+        assert_eq!(keep_on_screen_y(1200, 400, 0, 1440), 1040);
+        assert_eq!(keep_on_screen_y(-20, 400, 0, 1440), 0);
+        assert_eq!(keep_on_screen_y(100, 2000, 0, 1440), 0);
+    }
 
     #[test]
     fn settings_shown_when_unreachable() {

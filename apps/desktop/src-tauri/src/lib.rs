@@ -38,6 +38,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::get_overlay_snapshot,
             ipc::open_settings,
             ipc::close_settings,
+            ipc::resize_overlay,
             ipc::rebind_hotkey,
             permissions::get_permissions,
             permissions::request_permission,

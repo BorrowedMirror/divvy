@@ -15,6 +15,7 @@ import { useOverlayStore } from "../../stores/overlay";
 import { MiscFilters, StatFilters } from "./Filters";
 import { ItemHeader } from "./ItemHeader";
 import { ErrorNotice, Results } from "./Results";
+import { useFitWindowHeight } from "../../hooks/useFitWindowHeight";
 
 /**
  * Runs `query_price`, discarding responses that a newer query (or a `price-failed` event, via
@@ -110,15 +111,17 @@ export function OverlayView() {
 
   const opacity = settings?.overlay.opacity ?? 1;
   const busy = phase === "loading";
+  // The window grows with the number of stats instead of scrolling them.
+  const fitRef = useFitWindowHeight<HTMLDivElement>();
 
   return (
-    <div className="flex h-screen w-full items-start justify-center p-1.5">
+    <div ref={fitRef} className="flex w-full items-start justify-center p-1.5">
       <article
         aria-label={t("overlay.title")}
         style={{ opacity }}
         onMouseEnter={autoHide.onMouseEnter}
         onMouseLeave={autoHide.onMouseLeave}
-        className="flex max-h-full w-full max-w-[420px] flex-col gap-3 overflow-hidden rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
+        className="flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
       >
         <header className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
@@ -146,7 +149,7 @@ export function OverlayView() {
           </div>
         ) : (
           <>
-            <div className="flex max-h-[38vh] min-h-24 shrink-0 flex-col gap-3 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-3">
               <Toolbar filters={filters} />
               <StatFilters filters={filters} />
               <MiscFilters filters={filters} item={item} />
@@ -161,7 +164,7 @@ export function OverlayView() {
               {secondsLeft > 0 ? t("errors.retryIn", { count: secondsLeft }) : t("overlay.search")}
             </Button>
 
-            <div className={cx("flex min-h-0 flex-1 flex-col gap-2", busy && "opacity-70")} aria-live="polite">
+            <div className={cx("flex flex-col gap-2", busy && "opacity-70")} aria-live="polite">
               {busy && <Spinner label={t("overlay.loading")} />}
               {error && !busy && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
               {summary && !busy && !error && <Results summary={summary} />}

@@ -21,7 +21,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
   const command = useCommand();
 
   return (
-    <section aria-labelledby="results-heading" className="flex min-h-0 flex-1 flex-col gap-2">
+    <section aria-labelledby="results-heading" className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <h2 id="results-heading" className="text-[11px] font-semibold tracking-wider text-muted uppercase">
           {t("results.heading", { source: t(`source.${summary.source}`) })}
@@ -63,7 +63,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
               </div>
             ))}
           </dl>
-          <div className="min-h-16 flex-1 overflow-auto rounded-md border border-line">
+          <div className="max-h-56 overflow-auto rounded-md border border-line">
             <table className="w-full text-xs">
               <caption className="sr-only">{t("results.listings")}</caption>
               <thead className="sticky top-0 bg-surface-2 text-muted">

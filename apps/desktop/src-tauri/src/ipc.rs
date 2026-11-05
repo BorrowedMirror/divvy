@@ -201,6 +201,33 @@ pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinne
     Ok(())
 }
 
+/// Resize the price panel window to fit its content (`height` in logical px, measured by the
+/// web view). Width is unchanged; the height is clamped to the monitor and the window is kept
+/// on screen.
+#[tauri::command]
+#[specta::specta]
+pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
+    let win = tauri::Manager::get_webview_window(&app, flow::OVERLAY)
+        .ok_or_else(|| IpcError::new("internal", "overlay window missing"))?;
+    let internal = |e: tauri::Error| IpcError::new("internal", e.to_string());
+    let scale = win.scale_factor().map_err(internal)?;
+    let monitor = win.current_monitor().map_err(internal)?;
+    let width = win.inner_size().map_err(internal)?.to_logical::<f64>(scale).width;
+    let screen_h = monitor.as_ref().map_or(f64::INFINITY, |m| f64::from(m.size().height) / scale);
+    let h = crate::logic::fit_overlay_height(height, screen_h);
+    win.set_size(tauri::LogicalSize::new(width, h)).map_err(internal)?;
+    if let Some(m) = monitor
+        && let Ok(pos) = win.outer_position()
+    {
+        let h_phys = (h * scale).round() as i32;
+        let y = crate::logic::keep_on_screen_y(pos.y, h_phys, m.position().y, m.size().height as i32);
+        if y != pos.y {
+            win.set_position(tauri::PhysicalPosition::new(pos.x, y)).map_err(internal)?;
+        }
+    }
+    Ok(())
+}
+
 /// Hide the settings window (overlay mode: Esc or a click on the backdrop).
 #[tauri::command]
 #[specta::specta]

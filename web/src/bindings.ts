@@ -25,6 +25,12 @@ export const commands = {
 	openSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings")),
 	/**  Hide the settings window (overlay mode: Esc or a click on the backdrop). */
 	closeSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("close_settings")),
+	/**
+	 *  Resize the price panel window to fit its content (`height` in logical px, measured by the
+	 *  web view). Width is unchanged; the height is clamped to the monitor and the window is kept
+	 *  on screen.
+	 */
+	resizeOverlay: (height: number | null) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("resize_overlay", { height })),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
 	getPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("get_permissions"),
 	requestPermission: (kind: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("request_permission", { kind })),

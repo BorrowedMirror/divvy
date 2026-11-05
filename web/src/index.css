@@ -128,7 +128,12 @@ html[data-overlay="1"] .k-overlay-close:hover {
 html[data-route="overlay"],
 html[data-route="overlay"] body {
   background: transparent;
-  overflow: hidden;
+  overflow-x: hidden;
+}
+/* The window is sized to the panel; it only scrolls when the panel is taller than the screen. */
+html[data-route="overlay"] body {
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 @media (prefers-reduced-motion: reduce) {
