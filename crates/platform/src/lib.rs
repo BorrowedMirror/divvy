@@ -84,6 +84,18 @@ pub trait OverlayWindow: Send + Sync {
     fn show_at(&self, rect: Rect) -> Result<(), PlatformError>;
     fn hide(&self) -> Result<(), PlatformError>;
     fn set_click_through(&self, enabled: bool) -> Result<(), PlatformError>;
+    /// Stack the overlay directly above `owner` (the game window's `WindowInfo::native_id`) and
+    /// keep it there. Needed where the WM puts a focused fullscreen game in a layer above
+    /// "always on top" windows (openbox, xfwm, many X11 WMs). Default: no-op.
+    fn raise_above(&self, owner: Option<u64>) -> Result<(), PlatformError> {
+        let _ = owner;
+        Ok(())
+    }
+    /// Give the overlay keyboard focus, bypassing focus-stealing prevention where the
+    /// platform allows it (pinned panel, settings). Default: no-op.
+    fn activate(&self) -> Result<(), PlatformError> {
+        Ok(())
+    }
 }
 
 /// Everything a backend provides, plus what it can actually do here.

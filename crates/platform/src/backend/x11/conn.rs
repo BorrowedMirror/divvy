@@ -8,6 +8,7 @@ use crate::{GAME_WINDOW_TITLE, PlatformError, Rect, WindowInfo};
 x11rb::atom_manager! {
     pub(crate) Atoms: AtomsCookie {
         _NET_ACTIVE_WINDOW,
+        _NET_RESTACK_WINDOW,
         _NET_CLIENT_LIST,
         _NET_WM_NAME,
         _NET_WM_STATE,

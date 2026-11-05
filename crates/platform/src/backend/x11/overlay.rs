@@ -78,6 +78,38 @@ impl OverlayWindow for X11Overlay {
         self.conn.conn.unmap_window(self.window).map_err(x_err)?.check().map_err(x_err)
     }
 
+    fn raise_above(&self, owner: Option<u64>) -> Result<(), PlatformError> {
+        let c = &self.conn.conn;
+        let owner = owner.and_then(|o| u32::try_from(o).ok()).filter(|o| *o != 0 && *o != self.window);
+        if let Some(owner) = owner {
+            // Transients are kept above their parent, including a focused fullscreen parent.
+            c.change_property32(PropMode::REPLACE, self.window, AtomEnum::WM_TRANSIENT_FOR, AtomEnum::WINDOW, &[owner])
+                .map_err(x_err)?;
+        }
+        // EWMH restack request (source 2 = pager, so WMs honour it), sibling = owner, Above.
+        let data = [2, owner.unwrap_or(x11rb::NONE), 0, 0, 0];
+        let ev = ClientMessageEvent::new(32, self.window, self.conn.atoms._NET_RESTACK_WINDOW, data);
+        c.send_event(false, self.conn.root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, ev)
+            .map_err(x_err)?;
+        // Fallback for WMs without _NET_RESTACK_WINDOW.
+        let aux = ConfigureWindowAux::new().stack_mode(x11rb::protocol::xproto::StackMode::ABOVE);
+        c.configure_window(self.window, &aux).map_err(x_err)?.check().map_err(x_err)
+    }
+
+    fn activate(&self) -> Result<(), PlatformError> {
+        let c = &self.conn.conn;
+        let mut hints = WmHints::new();
+        hints.input = Some(true);
+        hints.set(c, self.window).map_err(x_err)?;
+        // Source 2 (pager) bypasses focus-stealing prevention; timestamp 0 = current time.
+        let data = [2, 0, 0, 0, 0];
+        let ev = ClientMessageEvent::new(32, self.window, self.conn.atoms._NET_ACTIVE_WINDOW, data);
+        c.send_event(false, self.conn.root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, ev)
+            .map_err(x_err)?
+            .check()
+            .map_err(x_err)
+    }
+
     fn set_click_through(&self, enabled: bool) -> Result<(), PlatformError> {
         let c = &self.conn.conn;
         c.xfixes_query_version(5, 0).map_err(x_err)?.reply().map_err(x_err)?;
