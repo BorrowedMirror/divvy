@@ -1,0 +1,2 @@
+# Keep CRLF fixtures byte-exact (they test Windows clipboard line endings).
+*-crlf.txt -text
