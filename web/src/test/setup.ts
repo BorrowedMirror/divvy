@@ -5,6 +5,7 @@ import { afterEach, beforeEach } from "vitest";
 import i18n from "../i18n";
 import { useOverlayStore } from "../stores/overlay";
 import { useSettingsStore } from "../stores/settings";
+import { useUpdateStore } from "../stores/update";
 
 // jsdom gaps that Base UI's floating/positioning code touches.
 class ResizeObserverStub {
@@ -35,4 +36,5 @@ afterEach(() => {
   clearMocks();
   useOverlayStore.getState().reset();
   useSettingsStore.setState({ base: null, draft: null, externalChange: false });
+  useUpdateStore.setState({ available: null, dismissed: null, installing: false });
 });

@@ -1,1 +1,282 @@
-{}
+{
+  "common": {
+    "loading": "加载中…",
+    "dismiss": "关闭"
+  },
+  "overlay": {
+    "title": "查价",
+    "empty": "在游戏中将鼠标悬停在物品上，按 {{hotkey}} 查价。",
+    "openSettings": "打开设置",
+    "pin": "固定浮窗",
+    "unpin": "取消固定",
+    "close": "关闭浮窗",
+    "league": "赛季",
+    "widen": "放宽 ±%",
+    "widenAria": "按百分比放宽属性范围",
+    "status": "卖家",
+    "stats": "属性",
+    "misc": "物品特性",
+    "itemValue": "物品上：{{value}}",
+    "min": "最小",
+    "max": "最大",
+    "statMin": "{{stat}} 的最小值",
+    "statMax": "{{stat}} 的最大值",
+    "search": "搜索",
+    "loading": "搜索中…"
+  },
+  "item": {
+    "rarityLabel": "稀有度：",
+    "ilvl": "物等 {{value}}",
+    "quality": "品质 {{value}}%",
+    "gemLevel": "等级 {{value}}",
+    "waystoneTier": "{{value}} 阶",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "已腐化",
+    "unidentified": "未鉴定"
+  },
+  "rarity": {
+    "normal": "普通",
+    "magic": "魔法",
+    "rare": "稀有",
+    "unique": "传奇",
+    "currency": "通货",
+    "gem": "宝石",
+    "other": "其他"
+  },
+  "misc": {
+    "item_level": "物品等级",
+    "quality": "品质",
+    "gem_level": "宝石等级",
+    "waystone_tier": "引路石阶级",
+    "sockets": "插槽",
+    "corrupted": "已腐化",
+    "any": "任意",
+    "yes": "是",
+    "no": "否"
+  },
+  "status": {
+    "securable": "即时购买",
+    "online": "在线",
+    "any": "任意"
+  },
+  "source": {
+    "trade": "交易网站",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "价格 · {{source}}",
+    "total_other": "{{count}} 条在售",
+    "empty": "没有符合条件的在售物品。请尝试停用部分属性或放宽范围。",
+    "min": "最低",
+    "median": "中位数",
+    "max": "最高",
+    "listings": "在售",
+    "price": "价格",
+    "seller": "卖家",
+    "age": "上架时间",
+    "unknownSeller": "未知",
+    "openTrade": "打开交易网站"
+  },
+  "age": {
+    "now": "刚刚"
+  },
+  "currency": {
+    "divine": "神圣",
+    "exalted": "崇高",
+    "chaos": "混沌",
+    "gold": "金币"
+  },
+  "errors": {
+    "parse": "无法识别该物品",
+    "trade": "交易网站返回错误",
+    "rate_limited": "交易网站请求过于频繁",
+    "config": "设置有误",
+    "platform": "平台错误",
+    "no_item": "剪贴板中没有物品",
+    "internal": "出错了",
+    "commandFailed": "操作失败",
+    "retryIn_other": "{{count}} 秒后重试"
+  },
+  "settings": {
+    "title": "设置",
+    "tabs": {
+      "general": "常规",
+      "hotkeys": "快捷键",
+      "trade": "交易",
+      "overlay": "浮窗",
+      "platform": "平台"
+    },
+    "language": "语言",
+    "theme": "主题",
+    "startMinimised": "启动时最小化到托盘",
+    "source": "价格来源",
+    "leagueAuto": "自动检测赛季",
+    "league": "赛季",
+    "leaguesFailed": "无法加载赛季：{{message}}",
+    "onlineOnly": "仅限在线卖家",
+    "widenPct": "放宽属性范围（%）",
+    "enableAllStats": "默认启用所有属性",
+    "contact": "联系邮箱",
+    "contactHelp": "可选。会附加到 User-Agent 中，以便 GGG 在出现异常时联系你。",
+    "autoHide": "自动隐藏延迟（毫秒）",
+    "opacity": "不透明度（0.1–1）",
+    "side": "位置",
+    "backend": "平台后端",
+    "backendHelp": "除非诊断建议更改，否则请保持自动。重启后生效。",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "设置已保存",
+    "discard": "放弃更改",
+    "saveFailed": "保存失败：{{message}}",
+    "loadFailed": "无法加载设置。",
+    "fixErrors": "保存前请修正标出的字段。",
+    "externalChange": "设置已在其他地方被修改。",
+    "reload": "加载最新"
+  },
+  "theme": {
+    "system": "跟随系统",
+    "dark": "深色",
+    "light": "浅色"
+  },
+  "side": {
+    "cursor": "光标旁",
+    "left": "左边缘",
+    "right": "右边缘"
+  },
+  "backend": {
+    "auto": "自动",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland（原生）",
+    "fake": "模拟（测试用）"
+  },
+  "hotkeys": {
+    "help": "点击一个快捷键，然后按下新的组合键。按 Esc 取消。",
+    "price_check": "查价",
+    "price_check_pinned": "查价（固定）",
+    "open_settings": "打开设置",
+    "pressKeys": "请按键…",
+    "needsModifier": "请加上 Ctrl、Alt、Shift 或 Meta（只有 F 键可单独使用）。",
+    "rebindFailed": "无法绑定该快捷键：{{message}}",
+    "advancedCopy": "高级物品复制",
+    "advancedCopyHelp": "使用 Ctrl+Alt+C，以获取词缀阶级和数值范围。"
+  },
+  "validation": {
+    "widen": "请输入 0 到 100 之间的值。",
+    "email": "请输入有效的邮箱地址，或留空。",
+    "league": "请选择赛季或开启自动检测。",
+    "autoHide": "请输入 0 到 10000 之间的整数（0 表示不自动隐藏）。",
+    "opacity": "请输入 0.1 到 1 之间的值。",
+    "hotkeyClash": "该快捷键已被其他操作占用。",
+    "poesessid": "只能使用字母和数字。"
+  },
+  "diagnostics": {
+    "title": "诊断",
+    "version": "版本",
+    "os": "操作系统",
+    "backend": "后端",
+    "dataVersion": "游戏数据",
+    "league": "赛季",
+    "settingsPath": "设置文件",
+    "logPath": "日志文件",
+    "capabilities": "功能",
+    "supported": "支持",
+    "unsupported": "不支持",
+    "missingPermissions": "缺少权限",
+    "recentErrors": "最近错误",
+    "noErrors": "没有错误记录。",
+    "copyReport": "复制报告",
+    "copied": "报告已复制到剪贴板",
+    "copyFailed": "无法访问剪贴板",
+    "loadFailed": "无法加载诊断信息。",
+    "onboardingLink": "打开设置向导"
+  },
+  "capability": {
+    "window_tracking": "游戏窗口跟踪",
+    "overlay_always_on_top": "浮窗置顶",
+    "overlay_click_through": "浮窗点击穿透",
+    "global_hotkeys": "全局快捷键",
+    "passive_hook": "被动输入钩子",
+    "keystroke_injection": "模拟按键（复制物品）",
+    "clipboard": "剪贴板访问"
+  },
+  "guidance": {
+    "accessibility": "macOS：打开“系统设置”→“隐私与安全性”→“辅助功能”，并启用 kalandra。快捷键和复制物品需要此权限。",
+    "screenRecording": "macOS：打开“系统设置”→“隐私与安全性”→“屏幕录制”，并启用 kalandra，以便它找到游戏窗口。之后请重启 kalandra。",
+    "wayland": "Wayland 原生模式：全局快捷键通过桌面门户实现，浮窗锚定在显示输出而非游戏窗口上，模拟按键可能不可用。如果你的合成器允许，请使用 X11/XWayland。",
+    "gnome": "GNOME 不支持 kalandra 所需的 Wayland 功能，因此在 GNOME 上会通过 XWayland（X11）运行。请让游戏也在 XWayland 下运行。",
+    "generic": "缺少权限：{{permission}}"
+  },
+  "tray": {
+    "priceCheck": "查价（固定）",
+    "settings": "设置…",
+    "diagnostics": "诊断",
+    "quit": "退出 kalandra",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "设置 kalandra",
+    "intro": "完成几个针对当前平台的步骤，让查价顺畅运行。你随时可以从“诊断”回到这里。",
+    "stepsHeading": "{{platform}} 设置",
+    "loadFailed": "无法检查权限。",
+    "required": "必需",
+    "optional": "可选",
+    "granted": "已授权",
+    "notGranted": "未授权",
+    "openSettings": "打开系统设置",
+    "relaunch": "macOS 会在 kalandra 重启后应用此权限。启用后请退出并重新打开 kalandra。",
+    "requestFailed": "无法打开系统设置：{{message}}",
+    "details": "技术详情",
+    "blockedHint": "仍缺少部分必需权限。kalandra 将继续运行，但部分功能受限。",
+    "continueWithout": "跳过并继续",
+    "done": "完成",
+    "saveFailed": "无法保存：{{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "辅助功能",
+        "body": "按下查价快捷键时，kalandra 会替你按下游戏的复制快捷键。macOS 要求为此授予辅助功能权限。"
+      },
+      "screen_recording": {
+        "name": "屏幕录制",
+        "body": "让 kalandra 读取窗口标题，以便可靠地找到《流放之路2》窗口。kalandra 绝不会捕获你的屏幕。"
+      },
+      "input_monitoring": {
+        "name": "输入监控",
+        "body": "让 kalandra 在游戏处于焦点时也能用 Esc 关闭浮窗并响应 Ctrl+滚轮。"
+      },
+      "unknown": "权限：{{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "使用窗口化或无边框全屏",
+      "windowedBody": "浮窗无法显示在独占全屏之上。请在游戏的图形选项中选择“窗口化”或“窗口化全屏”（无边框）。",
+      "elevatedTitle": "是否以管理员身份运行游戏？",
+      "elevatedBody": "Windows 会阻止普通应用向提权应用发送快捷键和模拟按键（UIPI）。如果游戏以管理员身份运行，请也以管理员身份运行 kalandra。"
+    },
+    "x11": {
+      "title": "无需额外设置",
+      "body": "X11 支持 kalandra 所需的全部功能：全局快捷键、窗口跟踪以及显示在游戏之上的浮窗。"
+    },
+    "gnome": {
+      "title": "GNOME：仅支持 X11/XWayland",
+      "x11Body": "GNOME 缺少 kalandra 所需的 Wayland 功能，因此这里会通过 XWayland 运行。请让游戏也在 XWayland 下运行（Proton 和 Wine 默认如此）。",
+      "waylandBody": "GNOME 没有 layer-shell，因此在 Wayland 原生模式下浮窗无法保持在游戏之上。请在设置中将后端切换为 X11 / XWayland。"
+    },
+    "wayland": {
+      "degradedTitle": "Wayland 原生模式存在限制",
+      "degradedBody": "Wayland 会将应用彼此隔离，因此部分功能的工作方式有所不同：",
+      "portal": "全局快捷键通过桌面的 GlobalShortcuts 门户实现，并会请你确认。并非所有合成器都提供该门户。",
+      "layerShell": "浮窗通过 layer-shell 锚定在屏幕边缘，而不是跟随游戏窗口。",
+      "noTracking": "kalandra 无法看到游戏窗口，也无法监听 Esc，因此请用浮窗自身的按钮关闭它。",
+      "triggerTitle": "在合成器中绑定查价",
+      "triggerBody": "如果快捷键不起作用，请在合成器中添加一个运行 kalandra --trigger 的键盘快捷键。它会在正在运行的 kalandra 中对光标下的物品查价。",
+      "pinnedHint": "添加 --pinned 可在打开浮窗时将其固定。",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE（自定义快捷键命令）"
+      }
+    }
+  }
+}

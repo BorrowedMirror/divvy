@@ -1,6 +1,13 @@
 # macOS backend research and first-run permission guide
 
 Workstream E. Code: `crates/platform/src/backend/macos/`, `apps/desktop/src-tauri/src/overlay/macos.rs`.
+Interfaces: [CONTRACTS.md](../../CONTRACTS.md#kalandra-platform-cratesplatform); user-facing
+summary: [README](../../README.md#macos-13).
+
+> **Status:** the permission model, window tracking and overlay below are implemented. The
+> first-run Permissions step is a design: today the app shows missing permissions on the
+> Diagnostics page, and `recheck_permissions` / `open_permission_settings` are not yet exposed
+> over IPC. The passive hook now uses the shared `backend/hook.rs`.
 
 ## Permissions (TCC)
 

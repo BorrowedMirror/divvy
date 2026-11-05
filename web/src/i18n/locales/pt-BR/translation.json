@@ -1,1 +1,296 @@
-{}
+{
+  "update": {
+    "title": "Atualização do app",
+    "available": "O kalandra {{version}} está disponível.",
+    "notes": "Novidades",
+    "later": "Mais tarde",
+    "install": "Instalar e reiniciar",
+    "installing": "Instalando…"
+  },
+  "common": {
+    "loading": "Carregando…",
+    "dismiss": "Dispensar"
+  },
+  "overlay": {
+    "title": "Consulta de preço",
+    "empty": "Passe o mouse sobre um item no jogo e pressione {{hotkey}} para consultar o preço.",
+    "openSettings": "Abrir configurações",
+    "pin": "Fixar overlay",
+    "unpin": "Desafixar overlay",
+    "close": "Fechar overlay",
+    "league": "Liga",
+    "widen": "Ampliar ±%",
+    "widenAria": "Ampliar os intervalos dos atributos em porcentagem",
+    "status": "Vendedores",
+    "stats": "Atributos",
+    "misc": "Propriedades do item",
+    "itemValue": "no item: {{value}}",
+    "min": "mín.",
+    "max": "máx.",
+    "statMin": "Mínimo de {{stat}}",
+    "statMax": "Máximo de {{stat}}",
+    "search": "Buscar",
+    "loading": "Buscando…"
+  },
+  "item": {
+    "rarityLabel": "Raridade:",
+    "ilvl": "nv. item {{value}}",
+    "quality": "{{value}}% de qualidade",
+    "gemLevel": "nível {{value}}",
+    "waystoneTier": "nível {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Corrompido",
+    "unidentified": "Não identificado"
+  },
+  "rarity": {
+    "normal": "Normal",
+    "magic": "Mágico",
+    "rare": "Raro",
+    "unique": "Único",
+    "currency": "Moeda",
+    "gem": "Gema",
+    "other": "Outro"
+  },
+  "misc": {
+    "item_level": "Nível do item",
+    "quality": "Qualidade",
+    "gem_level": "Nível da gema",
+    "waystone_tier": "Nível da pedra-guia",
+    "sockets": "Encaixes",
+    "corrupted": "Corrompido",
+    "any": "Qualquer",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "status": {
+    "securable": "Instantâneo",
+    "online": "Online",
+    "any": "Qualquer"
+  },
+  "source": {
+    "trade": "Site de trocas",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Preços · {{source}}",
+    "total_one": "{{count}} anúncio",
+    "total_many": "{{count}} anúncios",
+    "total_other": "{{count}} anúncios",
+    "empty": "Nenhum anúncio corresponde a esses filtros. Desative alguns atributos ou amplie os intervalos.",
+    "min": "Mín.",
+    "median": "Mediana",
+    "max": "Máx.",
+    "listings": "Anúncios",
+    "price": "Preço",
+    "seller": "Vendedor",
+    "age": "Anunciado",
+    "unknownSeller": "desconhecido",
+    "openTrade": "Abrir trocas"
+  },
+  "age": {
+    "now": "agora mesmo"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "caos",
+    "gold": "ouro"
+  },
+  "errors": {
+    "parse": "Não foi possível ler o item",
+    "trade": "O site de trocas retornou um erro",
+    "rate_limited": "Limite de requisições do site de trocas",
+    "config": "Problema nas configurações",
+    "platform": "Erro de plataforma",
+    "no_item": "Nenhum item na área de transferência",
+    "internal": "Algo deu errado",
+    "commandFailed": "A ação falhou",
+    "retryIn_one": "Tentar de novo em {{count}} segundo",
+    "retryIn_many": "Tentar de novo em {{count}} segundos",
+    "retryIn_other": "Tentar de novo em {{count}} segundos"
+  },
+  "settings": {
+    "title": "Configurações",
+    "tabs": {
+      "general": "Geral",
+      "hotkeys": "Atalhos",
+      "trade": "Trocas",
+      "overlay": "Overlay",
+      "platform": "Plataforma"
+    },
+    "language": "Idioma",
+    "theme": "Tema",
+    "startMinimised": "Iniciar minimizado na bandeja",
+    "checkUpdates": "Verificar atualizações automaticamente",
+    "checkUpdatesHelp": "Procura uma nova versão logo após iniciar e uma vez por dia. Nada é baixado até você escolher instalar.",
+    "source": "Fonte de preços",
+    "leagueAuto": "Detectar a liga automaticamente",
+    "league": "Liga",
+    "leaguesFailed": "Não foi possível carregar as ligas: {{message}}",
+    "onlineOnly": "Apenas vendedores online",
+    "widenPct": "Ampliar intervalos dos atributos (%)",
+    "enableAllStats": "Ativar todos os atributos por padrão",
+    "contact": "E-mail de contato",
+    "contactHelp": "Opcional. Adicionado ao User-Agent para que a GGG possa contatar você se algo der errado.",
+    "autoHide": "Atraso para ocultar (ms)",
+    "opacity": "Opacidade (0,1–1)",
+    "side": "Posição",
+    "backend": "Backend da plataforma",
+    "backendHelp": "Deixe no automático, a menos que o diagnóstico recomende outra opção. Vale após reiniciar.",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "saved": "Configurações salvas",
+    "discard": "Descartar alterações",
+    "saveFailed": "Não foi possível salvar: {{message}}",
+    "loadFailed": "Não foi possível carregar as configurações.",
+    "fixErrors": "Corrija os campos destacados antes de salvar.",
+    "externalChange": "As configurações foram alteradas em outro lugar.",
+    "reload": "Carregar a mais recente"
+  },
+  "theme": {
+    "system": "Sistema",
+    "dark": "Escuro",
+    "light": "Claro"
+  },
+  "side": {
+    "cursor": "Ao lado do cursor",
+    "left": "Borda esquerda",
+    "right": "Borda direita"
+  },
+  "backend": {
+    "auto": "Automático",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (nativo)",
+    "fake": "Simulado (testes)"
+  },
+  "hotkeys": {
+    "help": "Clique em um atalho e pressione a nova combinação de teclas. Esc cancela.",
+    "price_check": "Consulta de preço",
+    "price_check_pinned": "Consulta de preço (fixada)",
+    "open_settings": "Abrir configurações",
+    "pressKeys": "Pressione as teclas…",
+    "needsModifier": "Adicione Ctrl, Alt, Shift ou Meta (só as teclas F funcionam sozinhas).",
+    "rebindFailed": "Não foi possível definir o atalho: {{message}}",
+    "advancedCopy": "Cópia avançada de itens",
+    "advancedCopyHelp": "Usa Ctrl+Alt+C para incluir os níveis e intervalos dos modificadores."
+  },
+  "validation": {
+    "widen": "Insira um valor entre 0 e 100.",
+    "email": "Insira um e-mail válido ou deixe em branco.",
+    "league": "Escolha uma liga ou ative a detecção automática.",
+    "autoHide": "Insira um número inteiro entre 0 e 10000 (0 desativa a ocultação).",
+    "opacity": "Insira um valor entre 0,1 e 1.",
+    "hotkeyClash": "Este atalho já é usado por outra ação.",
+    "poesessid": "Use apenas letras e dígitos."
+  },
+  "diagnostics": {
+    "title": "Diagnóstico",
+    "version": "Versão",
+    "os": "SO",
+    "backend": "Backend",
+    "dataVersion": "Dados do jogo",
+    "league": "Liga",
+    "settingsPath": "Arquivo de configurações",
+    "logPath": "Arquivo de log",
+    "capabilities": "Recursos",
+    "supported": "compatível",
+    "unsupported": "incompatível",
+    "missingPermissions": "Permissões ausentes",
+    "recentErrors": "Erros recentes",
+    "noErrors": "Nenhum erro registrado.",
+    "copyReport": "Copiar relatório",
+    "copied": "Relatório copiado para a área de transferência",
+    "copyFailed": "Não foi possível acessar a área de transferência",
+    "loadFailed": "Não foi possível carregar o diagnóstico.",
+    "onboardingLink": "Abrir o guia de configuração"
+  },
+  "capability": {
+    "window_tracking": "Rastreamento da janela do jogo",
+    "overlay_always_on_top": "Overlay sempre visível",
+    "overlay_click_through": "Overlay transparente a cliques",
+    "global_hotkeys": "Atalhos globais",
+    "passive_hook": "Captura passiva de entrada",
+    "keystroke_injection": "Injeção de teclas (copiar item)",
+    "clipboard": "Acesso à área de transferência"
+  },
+  "guidance": {
+    "accessibility": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Acessibilidade e ative o kalandra. Isso é necessário para os atalhos e para copiar itens.",
+    "screenRecording": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e ative o kalandra para que ele encontre a janela do jogo. Depois, reinicie o kalandra.",
+    "wayland": "Modo Wayland nativo: os atalhos globais passam pelo portal da área de trabalho, o overlay é ancorado à tela e não à janela do jogo, e a injeção de teclas pode não estar disponível. Use X11/XWayland se o seu compositor permitir.",
+    "gnome": "O GNOME não oferece os recursos do Wayland de que o kalandra precisa, então ele roda via XWayland (X11) nesse caso. Rode o jogo no XWayland também.",
+    "generic": "Permissão ausente: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Consulta de preço (fixada)",
+    "settings": "Configurações…",
+    "diagnostics": "Diagnóstico",
+    "quit": "Sair do kalandra",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "Configurar o kalandra",
+    "intro": "Alguns passos específicos da sua plataforma para que as consultas de preço funcionem sem problemas. Você pode voltar aqui a qualquer momento pelo Diagnóstico.",
+    "stepsHeading": "Configuração para {{platform}}",
+    "loadFailed": "Não foi possível verificar as permissões.",
+    "required": "obrigatória",
+    "optional": "opcional",
+    "granted": "Concedida",
+    "notGranted": "Não concedida",
+    "openSettings": "Abrir Ajustes do Sistema",
+    "relaunch": "O macOS aplica esta permissão depois que o kalandra é reiniciado. Feche e abra o kalandra novamente depois de ativá-la.",
+    "requestFailed": "Não foi possível abrir os Ajustes do Sistema: {{message}}",
+    "details": "Detalhes técnicos",
+    "blockedHint": "Algumas permissões obrigatórias ainda estão faltando. O kalandra continuará funcionando com recursos reduzidos.",
+    "continueWithout": "Continuar sem elas",
+    "done": "Concluído",
+    "saveFailed": "Não foi possível salvar: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Acessibilidade",
+        "body": "O kalandra pressiona o atalho de copiar do jogo por você quando você usa o atalho de consulta de preço. O macOS exige acesso de Acessibilidade para isso."
+      },
+      "screen_recording": {
+        "name": "Gravação de Tela",
+        "body": "Permite que o kalandra leia os títulos das janelas para encontrar a janela do Path of Exile 2 com confiabilidade. O kalandra nunca captura a sua tela."
+      },
+      "input_monitoring": {
+        "name": "Monitoramento de Entrada",
+        "body": "Permite que o kalandra feche o overlay com Esc e reaja a Ctrl+rolagem enquanto o jogo está em foco."
+      },
+      "unknown": "Permissão: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Use o modo janela ou tela cheia sem bordas",
+      "windowedBody": "O overlay não consegue aparecer sobre a tela cheia exclusiva. Nas opções gráficas do jogo, escolha Janela ou Tela cheia em janela (sem bordas).",
+      "elevatedTitle": "O jogo está rodando como administrador?",
+      "elevatedBody": "O Windows bloqueia atalhos e teclas simuladas de um app comum para um app com privilégios elevados (UIPI). Se o jogo roda como administrador, rode o kalandra como administrador também."
+    },
+    "x11": {
+      "title": "Nenhuma configuração extra necessária",
+      "body": "O X11 oferece tudo de que o kalandra precisa: atalhos globais, rastreamento de janela e um overlay sobre o jogo."
+    },
+    "gnome": {
+      "title": "GNOME: apenas X11/XWayland",
+      "x11Body": "O GNOME não oferece os recursos do Wayland de que o kalandra precisa, então aqui o kalandra roda via XWayland. Rode o jogo no XWayland também (o padrão no Proton e no Wine).",
+      "waylandBody": "O GNOME não tem layer-shell, então no modo Wayland nativo o overlay não consegue ficar sobre o jogo. Mude o backend para X11 / XWayland nas Configurações."
+    },
+    "wayland": {
+      "degradedTitle": "O modo Wayland nativo tem limitações",
+      "degradedBody": "O Wayland isola os apps uns dos outros, então alguns recursos funcionam de outro jeito:",
+      "portal": "Os atalhos globais passam pelo portal GlobalShortcuts da área de trabalho, que pede para você confirmá-los. Nem todo compositor oferece esse portal.",
+      "layerShell": "O overlay é ancorado na borda da tela com layer-shell em vez de acompanhar a janela do jogo.",
+      "noTracking": "O kalandra não consegue ver a janela do jogo nem detectar o Esc, então feche o overlay pelo botão dele.",
+      "triggerTitle": "Vincule a consulta de preço no seu compositor",
+      "triggerBody": "Se os atalhos não funcionarem, adicione no seu compositor um atalho de teclado que execute kalandra --trigger. Ele consulta o preço do item sob o cursor no kalandra em execução.",
+      "pinnedHint": "Adicione --pinned para abrir o overlay fixado.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (comando de atalho personalizado)"
+      }
+    }
+  }
+}

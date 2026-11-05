@@ -14,7 +14,7 @@ use crate::{flow, state::AppState};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, thiserror::Error)]
 #[error("{kind}: {message}")]
 pub struct IpcError {
-    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `internal`.
+    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `update`, `internal`.
     pub kind: String,
     pub message: String,
     pub retry_after_ms: Option<u64>,

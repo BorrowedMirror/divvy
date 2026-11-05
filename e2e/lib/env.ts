@@ -29,6 +29,11 @@ export const MOCK_URL = `http://127.0.0.1:${MOCK_PORT}`;
 
 /** Item text the fake game serves; a rare ring routes through trade2 search/fetch. */
 export const ITEM_FILE = process.env.KALANDRA_E2E_ITEM ?? join(E2E_DIR, "fixtures", "rare-ring.txt");
+/**
+ * A second rare ring with different rolls. The app caches trade2 searches by query for minutes,
+ * so a re-check of the same item never reaches the mock; a different item forces a fresh query.
+ */
+export const ITEM_FILE_2 = process.env.KALANDRA_E2E_ITEM_2 ?? join(E2E_DIR, "fixtures", "rare-ring-2.txt");
 
 /**
  * How the price-check hotkey is pressed:

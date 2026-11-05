@@ -7,7 +7,7 @@
 // each worker owns one tauri-driver and a fresh KALANDRA_CONFIG_DIR, which survives
 // `browser.reloadSession()` so restart-persistence can be tested.
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { connect } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -90,6 +90,10 @@ export const config: WebdriverIO.Config = {
   beforeSession: async () => {
     configDir = mkdtempSync(join(tmpdir(), "kalandra-e2e-config-"));
     process.env.KALANDRA_CONFIG_DIR = configDir;
+    // Skip the first-run onboarding screen so the settings window opens on #/settings.
+    // Onboarding itself is covered by web/src/views/onboarding tests.
+    mkdirSync(join(configDir, "config"), { recursive: true });
+    writeFileSync(join(configDir, "config", "settings.toml"), "version = 1\n\n[ui]\nonboarding_done = true\n");
     driver = spawn(TAURI_DRIVER, ["--port", String(DRIVER_PORT), ...nativeDriverArgs()], {
       stdio: ["ignore", "inherit", "inherit"],
     });

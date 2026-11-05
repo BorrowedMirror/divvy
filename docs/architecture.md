@@ -8,8 +8,8 @@ page is the overview.
 ## Data flow
 
 ```text
-hotkey (platform::HotkeyHost)
-  -> desktop copy flow (platform::copy::copy_item_text: save clipboard, send Ctrl+C, poll, restore)
+hotkey (platform::HotkeyHost), tray, or `kalandra --trigger` (SIGUSR2/SIGUSR1)
+  -> desktop copy flow (platform::copy::copy_item_text: save clipboard, send Ctrl+C (Cmd+C on macOS), poll, restore)
   -> core::parser::parse_item            text -> ParsedItem
   -> core::matcher::StatMatcher          mod lines -> trade stat ids (via data::GameData: Catalog)
   -> core::query::build_filters          ParsedItem -> editable FilterSet
@@ -30,7 +30,7 @@ web edits FilterSet -> ipc `query_price` -> trade::PriceSource::price -> event `
 | `apps/desktop/src-tauri` | `kalandra-desktop` | Tauri 2 shell: windows (`overlay`, `settings`), tray, IPC commands and events, per-OS overlay styling. |
 | `web/` | `kalandra-web` | React 19 UI for the overlay, settings and diagnostics; talks to Rust only through generated `src/bindings.ts`. |
 | `tools/fake-game` | `fake-game` | A window titled `Path of Exile 2` that serves item text on Ctrl+C, for e2e tests. |
-| `e2e/` | | End-to-end suites per OS (WebDriver on Windows/Linux, a Rust harness on macOS). |
+| `e2e/` | | End-to-end suites per OS: WebDriver specs on Windows/Linux, a Rust hook harness (`e2e/macos-harness`) on macOS and, via `e2e/scripts/run-hook-x11.sh`, on X11. |
 | `xtask/` | `xtask` | Repo tooling: `gen`, `data`, `coverage`, `lint`, `release`, `fixtures`. |
 
 ## Boundaries

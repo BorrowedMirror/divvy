@@ -1,1 +1,294 @@
-{}
+{
+  "update": {
+    "title": "Uygulama güncellemesi",
+    "available": "kalandra {{version}} kullanıma sunuldu.",
+    "notes": "Yenilikler",
+    "later": "Daha sonra",
+    "install": "Yükle ve yeniden başlat",
+    "installing": "Yükleniyor…"
+  },
+  "common": {
+    "loading": "Yükleniyor…",
+    "dismiss": "Kapat"
+  },
+  "overlay": {
+    "title": "Fiyat kontrolü",
+    "empty": "Oyunda bir eşyanın üzerine gelin ve fiyatını görmek için {{hotkey}} tuşuna basın.",
+    "openSettings": "Ayarları aç",
+    "pin": "Arayüzü sabitle",
+    "unpin": "Sabitlemeyi kaldır",
+    "close": "Arayüzü kapat",
+    "league": "Lig",
+    "widen": "Genişlet ±%",
+    "widenAria": "Özellik aralıklarını yüzde olarak genişlet",
+    "status": "Satıcılar",
+    "stats": "Özellikler",
+    "misc": "Eşya nitelikleri",
+    "itemValue": "eşyada: {{value}}",
+    "min": "min",
+    "max": "maks",
+    "statMin": "{{stat}} için en az",
+    "statMax": "{{stat}} için en çok",
+    "search": "Ara",
+    "loading": "Aranıyor…"
+  },
+  "item": {
+    "rarityLabel": "Nadirlik:",
+    "ilvl": "eşya sv. {{value}}",
+    "quality": "%{{value}} kalite",
+    "gemLevel": "seviye {{value}}",
+    "waystoneTier": "kademe {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Bozulmuş",
+    "unidentified": "Tanımlanmamış"
+  },
+  "rarity": {
+    "normal": "Normal",
+    "magic": "Büyülü",
+    "rare": "Nadir",
+    "unique": "Eşsiz",
+    "currency": "Para birimi",
+    "gem": "Taş",
+    "other": "Diğer"
+  },
+  "misc": {
+    "item_level": "Eşya seviyesi",
+    "quality": "Kalite",
+    "gem_level": "Taş seviyesi",
+    "waystone_tier": "Waystone kademesi",
+    "sockets": "Yuvalar",
+    "corrupted": "Bozulmuş",
+    "any": "Herhangi",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "status": {
+    "securable": "Anında",
+    "online": "Çevrimiçi",
+    "any": "Herhangi"
+  },
+  "source": {
+    "trade": "Ticaret sitesi",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Fiyatlar · {{source}}",
+    "total_one": "{{count}} ilan",
+    "total_other": "{{count}} ilan",
+    "empty": "Bu filtrelere uyan ilan yok. Bazı özellikleri kapatmayı veya aralıkları genişletmeyi deneyin.",
+    "min": "Min",
+    "median": "Medyan",
+    "max": "Maks",
+    "listings": "İlanlar",
+    "price": "Fiyat",
+    "seller": "Satıcı",
+    "age": "İlan tarihi",
+    "unknownSeller": "bilinmiyor",
+    "openTrade": "Ticareti aç"
+  },
+  "age": {
+    "now": "az önce"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "chaos",
+    "gold": "gold"
+  },
+  "errors": {
+    "parse": "Eşya okunamadı",
+    "trade": "Ticaret sitesi bir hata döndürdü",
+    "rate_limited": "Ticaret sitesinin istek sınırına ulaşıldı",
+    "config": "Ayar sorunu",
+    "platform": "Platform hatası",
+    "no_item": "Panoda eşya yok",
+    "internal": "Bir şeyler ters gitti",
+    "commandFailed": "İşlem başarısız oldu",
+    "retryIn_one": "{{count}} saniye sonra yeniden denenecek",
+    "retryIn_other": "{{count}} saniye sonra yeniden denenecek"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "tabs": {
+      "general": "Genel",
+      "hotkeys": "Kısayollar",
+      "trade": "Ticaret",
+      "overlay": "Arayüz",
+      "platform": "Platform"
+    },
+    "language": "Dil",
+    "theme": "Tema",
+    "startMinimised": "Sistem tepsisinde küçültülmüş başlat",
+    "checkUpdates": "Güncellemeleri otomatik denetle",
+    "checkUpdatesHelp": "Başlatmadan kısa süre sonra ve günde bir kez yeni sürüm arar. Siz yüklemeyi seçene kadar hiçbir şey indirilmez.",
+    "source": "Fiyat kaynağı",
+    "leagueAuto": "Ligi otomatik algıla",
+    "league": "Lig",
+    "leaguesFailed": "Ligler yüklenemedi: {{message}}",
+    "onlineOnly": "Yalnızca çevrimiçi satıcılar",
+    "widenPct": "Özellik aralıklarını genişlet (%)",
+    "enableAllStats": "Tüm özellikleri varsayılan olarak etkinleştir",
+    "contact": "İletişim e-postası",
+    "contactHelp": "İsteğe bağlı. Bir sorun olursa GGG size ulaşabilsin diye User-Agent'a eklenir.",
+    "autoHide": "Otomatik gizleme gecikmesi (ms)",
+    "opacity": "Opaklık (0.1–1)",
+    "side": "Konum",
+    "backend": "Platform altyapısı",
+    "backendHelp": "Tanılama aksini önermedikçe otomatikte bırakın. Yeniden başlatmadan sonra geçerli olur.",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "saved": "Ayarlar kaydedildi",
+    "discard": "Değişiklikleri at",
+    "saveFailed": "Kaydedilemedi: {{message}}",
+    "loadFailed": "Ayarlar yüklenemedi.",
+    "fixErrors": "Kaydetmeden önce işaretli alanları düzeltin.",
+    "externalChange": "Ayarlar başka bir yerde değiştirildi.",
+    "reload": "Son hâlini yükle"
+  },
+  "theme": {
+    "system": "Sistem",
+    "dark": "Koyu",
+    "light": "Açık"
+  },
+  "side": {
+    "cursor": "İmlecin yanında",
+    "left": "Sol kenar",
+    "right": "Sağ kenar"
+  },
+  "backend": {
+    "auto": "Otomatik",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (yerel)",
+    "fake": "Sahte (test için)"
+  },
+  "hotkeys": {
+    "help": "Bir kısayola tıklayın, ardından yeni tuş birleşimine basın. Esc iptal eder.",
+    "price_check": "Fiyat kontrolü",
+    "price_check_pinned": "Fiyat kontrolü (sabit)",
+    "open_settings": "Ayarları aç",
+    "pressKeys": "Tuşlara basın…",
+    "needsModifier": "Ctrl, Alt, Shift veya Meta ekleyin (yalnızca F tuşları tek başına çalışır).",
+    "rebindFailed": "Kısayol atanamadı: {{message}}",
+    "advancedCopy": "Gelişmiş eşya kopyalama",
+    "advancedCopyHelp": "Mod kademeleri ve aralıkları için Ctrl+Alt+C kullanır."
+  },
+  "validation": {
+    "widen": "0 ile 100 arasında bir değer girin.",
+    "email": "Geçerli bir e-posta adresi girin veya boş bırakın.",
+    "league": "Bir lig seçin veya otomatik algılamayı açın.",
+    "autoHide": "0 ile 10000 arasında bir tam sayı girin (0 otomatik gizlemeyi kapatır).",
+    "opacity": "0.1 ile 1 arasında bir değer girin.",
+    "hotkeyClash": "Bu kısayol başka bir işlem tarafından kullanılıyor.",
+    "poesessid": "Yalnızca harf ve rakam kullanın."
+  },
+  "diagnostics": {
+    "title": "Tanılama",
+    "version": "Sürüm",
+    "os": "İşletim sistemi",
+    "backend": "Altyapı",
+    "dataVersion": "Oyun verisi",
+    "league": "Lig",
+    "settingsPath": "Ayar dosyası",
+    "logPath": "Günlük dosyası",
+    "capabilities": "Yetenekler",
+    "supported": "destekleniyor",
+    "unsupported": "desteklenmiyor",
+    "missingPermissions": "Eksik izinler",
+    "recentErrors": "Son hatalar",
+    "noErrors": "Kayıtlı hata yok.",
+    "copyReport": "Raporu kopyala",
+    "copied": "Rapor panoya kopyalandı",
+    "copyFailed": "Panoya erişilemedi",
+    "loadFailed": "Tanılama yüklenemedi.",
+    "onboardingLink": "Kurulum rehberini aç"
+  },
+  "capability": {
+    "window_tracking": "Oyun penceresi takibi",
+    "overlay_always_on_top": "Arayüz her zaman üstte",
+    "overlay_click_through": "Tıklamaları geçiren arayüz",
+    "global_hotkeys": "Genel kısayollar",
+    "passive_hook": "Pasif giriş dinleme",
+    "keystroke_injection": "Tuş vuruşu gönderme (eşya kopyalama)",
+    "clipboard": "Pano erişimi"
+  },
+  "guidance": {
+    "accessibility": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünü açın ve kalandra'yı etkinleştirin. Kısayollar ve eşya kopyalama için gereklidir.",
+    "screenRecording": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Ekran Kaydı bölümünü açın ve oyun penceresini bulabilmesi için kalandra'yı etkinleştirin. Ardından kalandra'yı yeniden başlatın.",
+    "wayland": "Yerel Wayland modu: genel kısayollar masaüstü portalı üzerinden çalışır, arayüz oyun penceresine değil ekrana sabitlenir ve tuş vuruşu gönderme kullanılamayabilir. Compositor'ünüz izin veriyorsa X11/XWayland kullanın.",
+    "gnome": "GNOME, kalandra'nın ihtiyaç duyduğu Wayland özelliklerini desteklemez; bu yüzden orada XWayland (X11) üzerinden çalışır. Oyunu da XWayland altında çalıştırın.",
+    "generic": "Eksik izin: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Fiyat kontrolü (sabit)",
+    "settings": "Ayarlar…",
+    "diagnostics": "Tanılama",
+    "quit": "kalandra'dan çık",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "kalandra'yı kur",
+    "intro": "Fiyat kontrollerinin sorunsuz çalışması için platformunuza özel birkaç adım. Buraya istediğiniz zaman Tanılama'dan geri dönebilirsiniz.",
+    "stepsHeading": "{{platform}} için kurulum",
+    "loadFailed": "İzinler kontrol edilemedi.",
+    "required": "gerekli",
+    "optional": "isteğe bağlı",
+    "granted": "Verildi",
+    "notGranted": "Verilmedi",
+    "openSettings": "Sistem Ayarları'nı aç",
+    "relaunch": "macOS bu izni kalandra yeniden başlatıldıktan sonra uygular. İzni etkinleştirdikten sonra kalandra'dan çıkıp yeniden açın.",
+    "requestFailed": "Sistem Ayarları açılamadı: {{message}}",
+    "details": "Teknik ayrıntılar",
+    "blockedHint": "Bazı gerekli izinler hâlâ eksik. kalandra kısıtlı özelliklerle çalışmaya devam edecek.",
+    "continueWithout": "İzin vermeden devam et",
+    "done": "Bitti",
+    "saveFailed": "Kaydedilemedi: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Erişilebilirlik",
+        "body": "Fiyat kontrolü kısayoluna bastığınızda kalandra oyunun kopyalama kısayoluna sizin yerinize basar. macOS bunun için Erişilebilirlik erişimi gerektirir."
+      },
+      "screen_recording": {
+        "name": "Ekran Kaydı",
+        "body": "kalandra'nın Path of Exile 2 penceresini güvenilir şekilde bulabilmesi için pencere başlıklarını okumasına izin verir. kalandra ekranınızı asla kaydetmez."
+      },
+      "input_monitoring": {
+        "name": "Girdi İzleme",
+        "body": "Oyun odaktayken kalandra'nın arayüzü Esc ile kapatmasına ve Ctrl+kaydırmaya tepki vermesine izin verir."
+      },
+      "unknown": "İzin: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Pencereli veya kenarlıksız tam ekran kullanın",
+      "windowedBody": "Arayüz, özel tam ekran modunun üzerinde görünemez. Oyunun grafik seçeneklerinde Pencereli veya Pencereli Tam Ekran'ı (kenarlıksız) seçin.",
+      "elevatedTitle": "Oyunu yönetici olarak mı çalıştırıyorsunuz?",
+      "elevatedBody": "Windows, normal bir uygulamadan yükseltilmiş bir uygulamaya giden kısayolları ve benzetilmiş tuş vuruşlarını engeller (UIPI). Oyun yönetici olarak çalışıyorsa kalandra'yı da yönetici olarak çalıştırın."
+    },
+    "x11": {
+      "title": "Ek kurulum gerekmez",
+      "body": "X11, kalandra'nın ihtiyaç duyduğu her şeyi destekler: genel kısayollar, pencere takibi ve oyunun üzerinde bir arayüz."
+    },
+    "gnome": {
+      "title": "GNOME: yalnızca X11/XWayland",
+      "x11Body": "GNOME'da kalandra'nın ihtiyaç duyduğu Wayland özellikleri yok; bu yüzden kalandra burada XWayland üzerinden çalışır. Oyunu da XWayland altında çalıştırın (Proton ve Wine'da varsayılan).",
+      "waylandBody": "GNOME'da layer-shell yok; bu yüzden yerel Wayland modunda arayüz oyunun üzerinde kalamaz. Ayarlar'dan altyapıyı X11 / XWayland olarak değiştirin."
+    },
+    "wayland": {
+      "degradedTitle": "Yerel Wayland modunun sınırları var",
+      "degradedBody": "Wayland uygulamaları birbirinden yalıtır, bu yüzden bazı özellikler farklı çalışır:",
+      "portal": "Genel kısayollar masaüstünün GlobalShortcuts portalı üzerinden çalışır ve portal bunları onaylamanızı ister. Her compositor bu portalı sunmaz.",
+      "layerShell": "Arayüz, oyun penceresini takip etmek yerine layer-shell ile ekran kenarına sabitlenir.",
+      "noTracking": "kalandra oyun penceresini göremez ve Esc tuşunu dinleyemez; bu yüzden arayüzü kendi düğmesiyle kapatın.",
+      "triggerTitle": "Fiyat kontrolünü compositor'ünüzde atayın",
+      "triggerBody": "Kısayollar çalışmıyorsa compositor'ünüzde kalandra --trigger komutunu çalıştıran bir klavye kısayolu ekleyin. Bu komut, çalışan kalandra'da imlecin altındaki eşyanın fiyatını kontrol eder.",
+      "pinnedHint": "Arayüzü sabitlenmiş olarak açmak için --pinned ekleyin.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (özel kısayol komutu)"
+      }
+    }
+  }
+}

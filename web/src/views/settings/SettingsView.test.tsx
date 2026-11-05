@@ -36,13 +36,22 @@ describe("SettingsView", () => {
     await user.click(screen.getByRole("combobox", { name: "Theme" }));
     await user.click(await screen.findByRole("option", { name: "Light" }));
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true });
+    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false });
 
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
     expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize).ui.theme).toBe("light");
     expect(await screen.findByText("Settings saved")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  test("check for updates switch toggles ui.check_updates", async () => {
+    const user = userEvent.setup();
+    await mount();
+    const toggle = screen.getByRole("switch", { name: /Check for updates automatically/ });
+    expect(toggle).toBeChecked();
+    await user.click(toggle);
+    expect(draft().ui.check_updates).toBe(false);
   });
 
   test("discard reverts edits", async () => {
@@ -160,7 +169,7 @@ describe("SettingsView", () => {
   test("settings-changed adopts external settings when clean", async () => {
     await mount();
     await flush();
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true } }) });
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false } }) });
     expect(screen.getByRole("switch", { name: "Start minimised to tray" })).toBeChecked();
   });
 
@@ -183,9 +192,9 @@ describe("SettingsView", () => {
     await mount();
     await flush();
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false } }) });
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false, check_updates: true, onboarding_done: false } }) });
     expect(screen.queryByText("Settings were changed elsewhere.")).toBeNull();
-    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true });
+    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true, check_updates: true, onboarding_done: false });
   });
 });
 

@@ -1,58 +1,110 @@
 {
+  "update": {
+    "title": "App-Update",
+    "available": "kalandra {{version}} ist verfügbar.",
+    "notes": "Neuerungen",
+    "later": "Später",
+    "install": "Installieren und neu starten",
+    "installing": "Wird installiert…"
+  },
   "common": {
-    "loading": "Lädt…",
+    "loading": "Wird geladen…",
     "dismiss": "Schließen"
   },
   "overlay": {
     "title": "Preisprüfung",
-    "empty": "Fahre im Spiel über einen Gegenstand und drücke {{hotkey}}.",
+    "empty": "Im Spiel auf einen Gegenstand zeigen und {{hotkey}} drücken, um den Preis zu prüfen.",
     "openSettings": "Einstellungen öffnen",
     "pin": "Overlay anheften",
     "unpin": "Overlay lösen",
     "close": "Overlay schließen",
     "league": "Liga",
     "widen": "Spanne ±%",
+    "widenAria": "Wertebereiche um Prozent erweitern",
     "status": "Verkäufer",
     "stats": "Werte",
-    "misc": "Eigenschaften",
+    "misc": "Gegenstandseigenschaften",
+    "itemValue": "auf Gegenstand: {{value}}",
     "min": "min",
     "max": "max",
+    "statMin": "Minimum für {{stat}}",
+    "statMax": "Maximum für {{stat}}",
     "search": "Suchen",
-    "loading": "Suche…"
+    "loading": "Suche läuft…"
   },
   "item": {
+    "rarityLabel": "Seltenheit:",
+    "ilvl": "GS {{value}}",
+    "quality": "{{value}} % Qualität",
+    "gemLevel": "Stufe {{value}}",
+    "waystoneTier": "Level {{value}}",
+    "stack": "{{current}}/{{max}}",
     "corrupted": "Verderbt",
     "unidentified": "Nicht identifiziert"
+  },
+  "rarity": {
+    "normal": "Normal",
+    "magic": "Magisch",
+    "rare": "Selten",
+    "unique": "Einzigartig",
+    "currency": "Währung",
+    "gem": "Gemme",
+    "other": "Sonstige"
   },
   "misc": {
     "item_level": "Gegenstandsstufe",
     "quality": "Qualität",
+    "gem_level": "Gemmenstufe",
+    "waystone_tier": "Wegstein-Level",
     "sockets": "Fassungen",
     "corrupted": "Verderbt",
-    "any": "Egal",
+    "any": "Beliebig",
     "yes": "Ja",
     "no": "Nein"
   },
   "status": {
-    "securable": "Sofort",
+    "securable": "Sofortkauf",
     "online": "Online",
     "any": "Alle"
   },
+  "source": {
+    "trade": "Handelsseite",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
   "results": {
+    "heading": "Preise · {{source}}",
     "total_one": "{{count}} Angebot",
     "total_other": "{{count}} Angebote",
-    "empty": "Keine Angebote gefunden.",
+    "empty": "Keine Angebote für diese Filter. Einige Werte deaktivieren oder die Spannen erweitern.",
     "min": "Min",
     "median": "Median",
     "max": "Max",
+    "listings": "Angebote",
     "price": "Preis",
     "seller": "Verkäufer",
-    "age": "Gelistet",
-    "openTrade": "Im Handel öffnen"
+    "age": "Eingestellt",
+    "unknownSeller": "unbekannt",
+    "openTrade": "Handel öffnen"
+  },
+  "age": {
+    "now": "gerade eben"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "chaos",
+    "gold": "Gold"
   },
   "errors": {
+    "parse": "Gegenstand konnte nicht gelesen werden",
+    "trade": "Die Handelsseite hat einen Fehler gemeldet",
     "rate_limited": "Von der Handelsseite gedrosselt",
+    "config": "Problem mit den Einstellungen",
+    "platform": "Plattformfehler",
+    "no_item": "Kein Gegenstand in der Zwischenablage",
     "internal": "Etwas ist schiefgelaufen",
+    "commandFailed": "Aktion fehlgeschlagen",
     "retryIn_one": "Erneut in {{count}} Sekunde",
     "retryIn_other": "Erneut in {{count}} Sekunden"
   },
@@ -67,19 +119,176 @@
     },
     "language": "Sprache",
     "theme": "Design",
+    "startMinimised": "Minimiert im Infobereich starten",
+    "checkUpdates": "Automatisch nach Updates suchen",
+    "checkUpdatesHelp": "Sucht kurz nach dem Start und einmal täglich nach einer neuen Version. Heruntergeladen wird erst, wenn die Installation bestätigt wird.",
+    "source": "Preisquelle",
+    "leagueAuto": "Liga automatisch erkennen",
     "league": "Liga",
+    "leaguesFailed": "Ligen konnten nicht geladen werden: {{message}}",
+    "onlineOnly": "Nur Verkäufer, die online sind",
+    "widenPct": "Wertebereiche erweitern (%)",
+    "enableAllStats": "Standardmäßig alle Werte aktivieren",
+    "contact": "Kontakt-E-Mail",
+    "contactHelp": "Optional. Wird dem User-Agent hinzugefügt, damit GGG bei Problemen Kontakt aufnehmen kann.",
+    "autoHide": "Automatisch ausblenden nach (ms)",
+    "opacity": "Deckkraft (0,1–1)",
+    "side": "Position",
+    "backend": "Plattform-Backend",
+    "backendHelp": "Auf „Automatisch“ lassen, sofern die Diagnose nichts anderes empfiehlt. Wirkt nach einem Neustart.",
     "save": "Speichern",
+    "saving": "Wird gespeichert…",
     "saved": "Einstellungen gespeichert",
-    "discard": "Änderungen verwerfen"
+    "discard": "Änderungen verwerfen",
+    "saveFailed": "Speichern fehlgeschlagen: {{message}}",
+    "loadFailed": "Einstellungen konnten nicht geladen werden.",
+    "fixErrors": "Vor dem Speichern die markierten Felder korrigieren.",
+    "externalChange": "Die Einstellungen wurden an anderer Stelle geändert.",
+    "reload": "Neueste laden"
   },
   "theme": {
     "system": "System",
     "dark": "Dunkel",
     "light": "Hell"
   },
+  "side": {
+    "cursor": "Neben dem Mauszeiger",
+    "left": "Linker Rand",
+    "right": "Rechter Rand"
+  },
+  "backend": {
+    "auto": "Automatisch",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (nativ)",
+    "fake": "Fake (Test)"
+  },
+  "hotkeys": {
+    "help": "Ein Tastenkürzel anklicken, dann die neue Tastenkombination drücken. Esc bricht ab.",
+    "price_check": "Preisprüfung",
+    "price_check_pinned": "Preisprüfung (angeheftet)",
+    "open_settings": "Einstellungen öffnen",
+    "pressKeys": "Tasten drücken…",
+    "needsModifier": "Strg, Alt, Umschalt oder Meta hinzufügen (nur F-Tasten funktionieren allein).",
+    "rebindFailed": "Tastenkürzel konnte nicht belegt werden: {{message}}",
+    "advancedCopy": "Erweitertes Kopieren",
+    "advancedCopyHelp": "Verwendet Strg+Alt+C, damit Modifikatorstufen und Wertebereiche verfügbar sind."
+  },
+  "validation": {
+    "widen": "Einen Wert zwischen 0 und 100 eingeben.",
+    "email": "Eine gültige E-Mail-Adresse eingeben oder das Feld leer lassen.",
+    "league": "Eine Liga wählen oder die automatische Erkennung aktivieren.",
+    "autoHide": "Eine ganze Zahl zwischen 0 und 10000 eingeben (0 deaktiviert das Ausblenden).",
+    "opacity": "Einen Wert zwischen 0,1 und 1 eingeben.",
+    "hotkeyClash": "Dieses Tastenkürzel wird bereits von einer anderen Aktion verwendet.",
+    "poesessid": "Nur Buchstaben und Ziffern verwenden."
+  },
   "diagnostics": {
     "title": "Diagnose",
+    "version": "Version",
+    "os": "Betriebssystem",
+    "backend": "Backend",
+    "dataVersion": "Spieldaten",
+    "league": "Liga",
+    "settingsPath": "Einstellungsdatei",
+    "logPath": "Protokolldatei",
+    "capabilities": "Funktionen",
+    "supported": "unterstützt",
+    "unsupported": "nicht unterstützt",
+    "missingPermissions": "Fehlende Berechtigungen",
+    "recentErrors": "Letzte Fehler",
+    "noErrors": "Keine Fehler aufgezeichnet.",
     "copyReport": "Bericht kopieren",
-    "recentErrors": "Letzte Fehler"
+    "copied": "Bericht in die Zwischenablage kopiert",
+    "copyFailed": "Kein Zugriff auf die Zwischenablage",
+    "loadFailed": "Diagnose konnte nicht geladen werden.",
+    "onboardingLink": "Einrichtungsassistent öffnen"
+  },
+  "capability": {
+    "window_tracking": "Spielfenster-Verfolgung",
+    "overlay_always_on_top": "Overlay bleibt im Vordergrund",
+    "overlay_click_through": "Klickdurchlässiges Overlay",
+    "global_hotkeys": "Globale Tastenkürzel",
+    "passive_hook": "Passiver Eingabe-Hook",
+    "keystroke_injection": "Tastatureingaben senden (Gegenstand kopieren)",
+    "clipboard": "Zugriff auf die Zwischenablage"
+  },
+  "guidance": {
+    "accessibility": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen öffnen und kalandra aktivieren. Erforderlich für Tastenkürzel und das Kopieren von Gegenständen.",
+    "screenRecording": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme öffnen und kalandra aktivieren, damit das Spielfenster gefunden wird. Danach kalandra neu starten.",
+    "wayland": "Nativer Wayland-Modus: Globale Tastenkürzel laufen über das Desktop-Portal, das Overlay wird am Bildschirm statt am Spielfenster ausgerichtet, und das Senden von Tastatureingaben ist eventuell nicht verfügbar. Wenn der Compositor es erlaubt, X11/XWayland verwenden.",
+    "gnome": "GNOME unterstützt die von kalandra benötigten Wayland-Funktionen nicht, daher läuft es dort über XWayland (X11). Das Spiel ebenfalls unter XWayland ausführen.",
+    "generic": "Fehlende Berechtigung: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Preisprüfung (angeheftet)",
+    "settings": "Einstellungen…",
+    "diagnostics": "Diagnose",
+    "quit": "kalandra beenden",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "kalandra einrichten",
+    "intro": "Ein paar plattformspezifische Schritte, damit Preisprüfungen reibungslos funktionieren. Diese Seite ist jederzeit über die Diagnose wieder erreichbar.",
+    "stepsHeading": "Einrichtung für {{platform}}",
+    "loadFailed": "Berechtigungen konnten nicht geprüft werden.",
+    "required": "erforderlich",
+    "optional": "optional",
+    "granted": "Erteilt",
+    "notGranted": "Nicht erteilt",
+    "openSettings": "Systemeinstellungen öffnen",
+    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von kalandra. Nach dem Aktivieren kalandra beenden und erneut öffnen.",
+    "requestFailed": "Systemeinstellungen konnten nicht geöffnet werden: {{message}}",
+    "details": "Technische Details",
+    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. kalandra funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
+    "continueWithout": "Ohne fortfahren",
+    "done": "Fertig",
+    "saveFailed": "Speichern fehlgeschlagen: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Bedienungshilfen",
+        "body": "Beim Tastenkürzel für die Preisprüfung drückt kalandra die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
+      },
+      "screen_recording": {
+        "name": "Bildschirmaufnahme",
+        "body": "Ermöglicht kalandra, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. kalandra nimmt den Bildschirm niemals auf."
+      },
+      "input_monitoring": {
+        "name": "Eingabeüberwachung",
+        "body": "Ermöglicht kalandra, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
+      },
+      "unknown": "Berechtigung: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Fenstermodus oder randloses Vollbild verwenden",
+      "windowedBody": "Über exklusivem Vollbild kann das Overlay nicht erscheinen. In den Grafikoptionen des Spiels Fenster oder Fenster-Vollbild (randlos) wählen.",
+      "elevatedTitle": "Läuft das Spiel als Administrator?",
+      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, kalandra ebenfalls als Administrator starten."
+    },
+    "x11": {
+      "title": "Keine weitere Einrichtung nötig",
+      "body": "X11 unterstützt alles, was kalandra braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
+    },
+    "gnome": {
+      "title": "GNOME: nur X11/XWayland",
+      "x11Body": "GNOME fehlen die von kalandra benötigten Wayland-Funktionen, daher läuft kalandra hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
+      "waylandBody": "GNOME bietet kein layer-shell, daher kann das Overlay im nativen Wayland-Modus nicht über dem Spiel bleiben. In den Einstellungen das Backend auf X11 / XWayland umstellen."
+    },
+    "wayland": {
+      "degradedTitle": "Der native Wayland-Modus hat Einschränkungen",
+      "degradedBody": "Wayland isoliert Apps voneinander, daher funktionieren einige Funktionen anders:",
+      "portal": "Globale Tastenkürzel laufen über das GlobalShortcuts-Portal des Desktops, das um Bestätigung bittet. Nicht jeder Compositor bietet es an.",
+      "layerShell": "Das Overlay wird per layer-shell am Bildschirmrand verankert, statt dem Spielfenster zu folgen.",
+      "noTracking": "kalandra kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
+      "triggerTitle": "Preisprüfung im Compositor belegen",
+      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das kalandra --trigger ausführt. Damit prüft das laufende kalandra den Preis des Gegenstands unter dem Mauszeiger.",
+      "pinnedHint": "Mit --pinned öffnet sich das Overlay angeheftet.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (Befehl für eigenes Tastenkürzel)"
+      }
+    }
   }
 }

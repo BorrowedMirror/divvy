@@ -1,1 +1,298 @@
-{}
+{
+  "update": {
+    "title": "Aktualizacja aplikacji",
+    "available": "Dostępna jest wersja kalandra {{version}}.",
+    "notes": "Co nowego",
+    "later": "Później",
+    "install": "Zainstaluj i uruchom ponownie",
+    "installing": "Instalowanie…"
+  },
+  "common": {
+    "loading": "Ładowanie…",
+    "dismiss": "Zamknij"
+  },
+  "overlay": {
+    "title": "Sprawdzanie ceny",
+    "empty": "Najedź w grze na przedmiot i naciśnij {{hotkey}}, aby sprawdzić jego cenę.",
+    "openSettings": "Otwórz ustawienia",
+    "pin": "Przypnij nakładkę",
+    "unpin": "Odepnij nakładkę",
+    "close": "Zamknij nakładkę",
+    "league": "Liga",
+    "widen": "Poszerz ±%",
+    "widenAria": "Poszerz zakresy statystyk o procent",
+    "status": "Sprzedający",
+    "stats": "Statystyki",
+    "misc": "Właściwości przedmiotu",
+    "itemValue": "na przedmiocie: {{value}}",
+    "min": "min",
+    "max": "maks",
+    "statMin": "Minimum dla {{stat}}",
+    "statMax": "Maksimum dla {{stat}}",
+    "search": "Szukaj",
+    "loading": "Wyszukiwanie…"
+  },
+  "item": {
+    "rarityLabel": "Rzadkość:",
+    "ilvl": "ilvl {{value}}",
+    "quality": "{{value}}% jakości",
+    "gemLevel": "poziom {{value}}",
+    "waystoneTier": "tier {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Corrupted",
+    "unidentified": "Niezidentyfikowany"
+  },
+  "rarity": {
+    "normal": "Zwykły",
+    "magic": "Magiczny",
+    "rare": "Rzadki",
+    "unique": "Unikatowy",
+    "currency": "Waluta",
+    "gem": "Klejnot",
+    "other": "Inne"
+  },
+  "misc": {
+    "item_level": "Poziom przedmiotu",
+    "quality": "Jakość",
+    "gem_level": "Poziom klejnotu",
+    "waystone_tier": "Tier Waystone'a",
+    "sockets": "Gniazda",
+    "corrupted": "Corrupted",
+    "any": "Dowolne",
+    "yes": "Tak",
+    "no": "Nie"
+  },
+  "status": {
+    "securable": "Natychmiastowy",
+    "online": "Online",
+    "any": "Dowolny"
+  },
+  "source": {
+    "trade": "Strona handlu",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Ceny · {{source}}",
+    "total_one": "{{count}} oferta",
+    "total_few": "{{count}} oferty",
+    "total_many": "{{count}} ofert",
+    "total_other": "{{count}} oferty",
+    "empty": "Brak ofert pasujących do filtrów. Wyłącz niektóre statystyki lub poszerz zakresy.",
+    "min": "Min",
+    "median": "Mediana",
+    "max": "Maks",
+    "listings": "Oferty",
+    "price": "Cena",
+    "seller": "Sprzedający",
+    "age": "Wystawiono",
+    "unknownSeller": "nieznany",
+    "openTrade": "Otwórz handel"
+  },
+  "age": {
+    "now": "przed chwilą"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "chaos",
+    "gold": "złoto"
+  },
+  "errors": {
+    "parse": "Nie udało się odczytać przedmiotu",
+    "trade": "Strona handlu zwróciła błąd",
+    "rate_limited": "Przekroczono limit zapytań strony handlu",
+    "config": "Problem z ustawieniami",
+    "platform": "Błąd platformy",
+    "no_item": "Brak przedmiotu w schowku",
+    "internal": "Coś poszło nie tak",
+    "commandFailed": "Akcja się nie powiodła",
+    "retryIn_one": "Ponów za {{count}} sekundę",
+    "retryIn_few": "Ponów za {{count}} sekundy",
+    "retryIn_many": "Ponów za {{count}} sekund",
+    "retryIn_other": "Ponów za {{count}} sekundy"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "tabs": {
+      "general": "Ogólne",
+      "hotkeys": "Skróty",
+      "trade": "Handel",
+      "overlay": "Nakładka",
+      "platform": "Platforma"
+    },
+    "language": "Język",
+    "theme": "Motyw",
+    "startMinimised": "Uruchamiaj zminimalizowany do zasobnika",
+    "checkUpdates": "Automatycznie sprawdzaj aktualizacje",
+    "checkUpdatesHelp": "Szuka nowej wersji krótko po uruchomieniu i raz dziennie. Nic nie jest pobierane, dopóki nie zdecydujesz się zainstalować.",
+    "source": "Źródło cen",
+    "leagueAuto": "Wykrywaj ligę automatycznie",
+    "league": "Liga",
+    "leaguesFailed": "Nie udało się wczytać lig: {{message}}",
+    "onlineOnly": "Tylko sprzedający online",
+    "widenPct": "Poszerz zakresy statystyk (%)",
+    "enableAllStats": "Domyślnie włączaj wszystkie statystyki",
+    "contact": "E-mail kontaktowy",
+    "contactHelp": "Opcjonalnie. Dodawany do User-Agenta, aby GGG mogło się z tobą skontaktować, gdy coś działa źle.",
+    "autoHide": "Opóźnienie autoukrywania (ms)",
+    "opacity": "Krycie (0,1–1)",
+    "side": "Położenie",
+    "backend": "Backend platformy",
+    "backendHelp": "Zostaw automatyczny, chyba że diagnostyka zaleca inaczej. Zmiana działa po ponownym uruchomieniu.",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano ustawienia",
+    "discard": "Odrzuć zmiany",
+    "saveFailed": "Nie udało się zapisać: {{message}}",
+    "loadFailed": "Nie udało się wczytać ustawień.",
+    "fixErrors": "Popraw wyróżnione pola przed zapisaniem.",
+    "externalChange": "Ustawienia zostały zmienione gdzie indziej.",
+    "reload": "Wczytaj najnowsze"
+  },
+  "theme": {
+    "system": "Systemowy",
+    "dark": "Ciemny",
+    "light": "Jasny"
+  },
+  "side": {
+    "cursor": "Obok kursora",
+    "left": "Lewa krawędź",
+    "right": "Prawa krawędź"
+  },
+  "backend": {
+    "auto": "Automatyczny",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (natywny)",
+    "fake": "Atrapa (testy)"
+  },
+  "hotkeys": {
+    "help": "Kliknij skrót, a potem naciśnij nową kombinację klawiszy. Esc anuluje.",
+    "price_check": "Sprawdzanie ceny",
+    "price_check_pinned": "Sprawdzanie ceny (przypięte)",
+    "open_settings": "Otwórz ustawienia",
+    "pressKeys": "Naciśnij klawisze…",
+    "needsModifier": "Dodaj Ctrl, Alt, Shift lub Meta (same działają tylko klawisze F).",
+    "rebindFailed": "Nie udało się przypisać skrótu: {{message}}",
+    "advancedCopy": "Zaawansowane kopiowanie przedmiotu",
+    "advancedCopyHelp": "Używa Ctrl+Alt+C, aby udostępnić tiery i zakresy modów."
+  },
+  "validation": {
+    "widen": "Wpisz wartość od 0 do 100.",
+    "email": "Wpisz poprawny adres e-mail lub zostaw pole puste.",
+    "league": "Wybierz ligę lub włącz automatyczne wykrywanie.",
+    "autoHide": "Wpisz liczbę całkowitą od 0 do 10000 (0 wyłącza autoukrywanie).",
+    "opacity": "Wpisz wartość od 0,1 do 1.",
+    "hotkeyClash": "Ten skrót jest już używany przez inną akcję.",
+    "poesessid": "Używaj tylko liter i cyfr."
+  },
+  "diagnostics": {
+    "title": "Diagnostyka",
+    "version": "Wersja",
+    "os": "System",
+    "backend": "Backend",
+    "dataVersion": "Dane gry",
+    "league": "Liga",
+    "settingsPath": "Plik ustawień",
+    "logPath": "Plik logu",
+    "capabilities": "Możliwości",
+    "supported": "obsługiwane",
+    "unsupported": "nieobsługiwane",
+    "missingPermissions": "Brakujące uprawnienia",
+    "recentErrors": "Ostatnie błędy",
+    "noErrors": "Brak zarejestrowanych błędów.",
+    "copyReport": "Kopiuj raport",
+    "copied": "Skopiowano raport do schowka",
+    "copyFailed": "Brak dostępu do schowka",
+    "loadFailed": "Nie udało się wczytać diagnostyki.",
+    "onboardingLink": "Otwórz przewodnik konfiguracji"
+  },
+  "capability": {
+    "window_tracking": "Śledzenie okna gry",
+    "overlay_always_on_top": "Nakładka zawsze na wierzchu",
+    "overlay_click_through": "Nakładka przepuszczająca kliknięcia",
+    "global_hotkeys": "Globalne skróty",
+    "passive_hook": "Pasywne przechwytywanie wejścia",
+    "keystroke_injection": "Wstrzykiwanie klawiszy (kopiowanie przedmiotu)",
+    "clipboard": "Dostęp do schowka"
+  },
+  "guidance": {
+    "accessibility": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Dostępność i włącz aplikację kalandra. Jest to potrzebne do skrótów i kopiowania przedmiotów.",
+    "screenRecording": "macOS: otwórz Ustawienia systemowe → Prywatność i ochrona → Nagrywanie ekranu i włącz aplikację kalandra, aby mogła znaleźć okno gry. Następnie uruchom ponownie aplikację kalandra.",
+    "wayland": "Tryb natywny Wayland: globalne skróty działają przez portal pulpitu, nakładka jest zakotwiczona do ekranu, a nie do okna gry, a wstrzykiwanie klawiszy może być niedostępne. Użyj X11/XWayland, jeśli twój kompozytor na to pozwala.",
+    "gnome": "GNOME nie obsługuje funkcji Waylanda, których potrzebuje kalandra, więc działa tam przez XWayland (X11). Uruchom grę również przez XWayland.",
+    "generic": "Brak uprawnienia: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Sprawdzanie ceny (przypięte)",
+    "settings": "Ustawienia…",
+    "diagnostics": "Diagnostyka",
+    "quit": "Zamknij aplikację kalandra",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "Konfiguracja aplikacji kalandra",
+    "intro": "Kilka kroków zależnych od platformy, aby sprawdzanie cen działało bez problemów. Możesz tu wrócić w dowolnym momencie z poziomu Diagnostyki.",
+    "stepsHeading": "Konfiguracja dla: {{platform}}",
+    "loadFailed": "Nie udało się sprawdzić uprawnień.",
+    "required": "wymagane",
+    "optional": "opcjonalne",
+    "granted": "Przyznano",
+    "notGranted": "Nie przyznano",
+    "openSettings": "Otwórz Ustawienia systemowe",
+    "relaunch": "macOS zastosuje to uprawnienie po ponownym uruchomieniu aplikacji kalandra. Po jego włączeniu zamknij i ponownie otwórz aplikację kalandra.",
+    "requestFailed": "Nie udało się otworzyć Ustawień systemowych: {{message}}",
+    "details": "Szczegóły techniczne",
+    "blockedHint": "Nadal brakuje niektórych wymaganych uprawnień. kalandra będzie działać z ograniczonymi funkcjami.",
+    "continueWithout": "Kontynuuj bez nich",
+    "done": "Gotowe",
+    "saveFailed": "Nie udało się zapisać: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Dostępność",
+        "body": "Po naciśnięciu skrótu sprawdzania ceny kalandra naciska za ciebie skrót kopiowania w grze. macOS wymaga do tego dostępu w sekcji Dostępność."
+      },
+      "screen_recording": {
+        "name": "Nagrywanie ekranu",
+        "body": "Pozwala aplikacji kalandra odczytywać tytuły okien, aby niezawodnie znajdować okno Path of Exile 2. kalandra nigdy nie nagrywa twojego ekranu."
+      },
+      "input_monitoring": {
+        "name": "Monitorowanie wprowadzania",
+        "body": "Pozwala aplikacji kalandra zamykać nakładkę klawiszem Esc i reagować na Ctrl+kółko myszy, gdy gra jest aktywna."
+      },
+      "unknown": "Uprawnienie: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Użyj trybu okna lub pełnego ekranu bez ramek",
+      "windowedBody": "Nakładka nie może pojawić się nad wyłącznym trybem pełnoekranowym. W opcjach grafiki gry wybierz tryb okna lub pełny ekran w oknie (bez ramek).",
+      "elevatedTitle": "Gra działa jako administrator?",
+      "elevatedBody": "Windows blokuje skróty i symulowane naciśnięcia klawiszy wysyłane ze zwykłej aplikacji do aplikacji z podwyższonymi uprawnieniami (UIPI). Jeśli gra działa jako administrator, uruchom aplikację kalandra również jako administrator."
+    },
+    "x11": {
+      "title": "Nie trzeba nic więcej konfigurować",
+      "body": "X11 obsługuje wszystko, czego potrzebuje kalandra: globalne skróty, śledzenie okna i nakładkę nad grą."
+    },
+    "gnome": {
+      "title": "GNOME: tylko X11/XWayland",
+      "x11Body": "GNOME nie ma funkcji Waylanda, których potrzebuje kalandra, więc tutaj kalandra działa przez XWayland. Uruchom grę również przez XWayland (domyślnie w Proton i Wine).",
+      "waylandBody": "GNOME nie obsługuje layer-shell, więc w trybie natywnym Wayland nakładka nie może pozostać nad grą. Zmień backend na X11 / XWayland w Ustawieniach."
+    },
+    "wayland": {
+      "degradedTitle": "Tryb natywny Wayland ma ograniczenia",
+      "degradedBody": "Wayland izoluje aplikacje od siebie, więc niektóre funkcje działają inaczej:",
+      "portal": "Globalne skróty działają przez portal GlobalShortcuts pulpitu, który prosi o ich potwierdzenie. Nie każdy kompozytor go udostępnia.",
+      "layerShell": "Nakładka jest zakotwiczona do krawędzi ekranu przez layer-shell zamiast podążać za oknem gry.",
+      "noTracking": "kalandra nie widzi okna gry ani nie wykrywa klawisza Esc, więc zamykaj nakładkę jej własnym przyciskiem.",
+      "triggerTitle": "Przypisz sprawdzanie ceny w kompozytorze",
+      "triggerBody": "Jeśli skróty nie działają, dodaj w kompozytorze skrót klawiszowy uruchamiający kalandra --trigger. Sprawdza on cenę przedmiotu pod kursorem w działającej aplikacji kalandra.",
+      "pinnedHint": "Dodaj --pinned, aby otworzyć przypiętą nakładkę.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (polecenie własnego skrótu)"
+      }
+    }
+  }
+}

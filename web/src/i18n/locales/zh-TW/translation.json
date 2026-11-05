@@ -1,1 +1,282 @@
-{}
+{
+  "common": {
+    "loading": "載入中…",
+    "dismiss": "關閉"
+  },
+  "overlay": {
+    "title": "查價",
+    "empty": "在遊戲中將滑鼠游標停在物品上，按下 {{hotkey}} 即可查價。",
+    "openSettings": "開啟設定",
+    "pin": "釘選浮動視窗",
+    "unpin": "取消釘選",
+    "close": "關閉浮動視窗",
+    "league": "聯盟",
+    "widen": "放寬 ±%",
+    "widenAria": "依百分比放寬屬性範圍",
+    "status": "賣家",
+    "stats": "屬性",
+    "misc": "物品特性",
+    "itemValue": "物品上：{{value}}",
+    "min": "最小",
+    "max": "最大",
+    "statMin": "{{stat}} 的最小值",
+    "statMax": "{{stat}} 的最大值",
+    "search": "搜尋",
+    "loading": "搜尋中…"
+  },
+  "item": {
+    "rarityLabel": "稀有度：",
+    "ilvl": "物等 {{value}}",
+    "quality": "品質 {{value}}%",
+    "gemLevel": "等級 {{value}}",
+    "waystoneTier": "階級 {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "已汙染",
+    "unidentified": "未鑑定"
+  },
+  "rarity": {
+    "normal": "普通",
+    "magic": "魔法",
+    "rare": "稀有",
+    "unique": "傳奇",
+    "currency": "通貨",
+    "gem": "寶石",
+    "other": "其他"
+  },
+  "misc": {
+    "item_level": "物品等級",
+    "quality": "品質",
+    "gem_level": "寶石等級",
+    "waystone_tier": "換界石階級",
+    "sockets": "插槽",
+    "corrupted": "已汙染",
+    "any": "任意",
+    "yes": "是",
+    "no": "否"
+  },
+  "status": {
+    "securable": "即時購買",
+    "online": "線上",
+    "any": "任意"
+  },
+  "source": {
+    "trade": "交易網站",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "價格 · {{source}}",
+    "total_other": "{{count}} 筆刊登",
+    "empty": "沒有符合條件的刊登。請試著停用部分屬性或放寬範圍。",
+    "min": "最低",
+    "median": "中位數",
+    "max": "最高",
+    "listings": "刊登",
+    "price": "價格",
+    "seller": "賣家",
+    "age": "刊登時間",
+    "unknownSeller": "未知",
+    "openTrade": "開啟交易網站"
+  },
+  "age": {
+    "now": "剛剛"
+  },
+  "currency": {
+    "divine": "神聖",
+    "exalted": "崇高",
+    "chaos": "混沌",
+    "gold": "金幣"
+  },
+  "errors": {
+    "parse": "無法讀取該物品",
+    "trade": "交易網站傳回錯誤",
+    "rate_limited": "交易網站請求次數過多",
+    "config": "設定有誤",
+    "platform": "平台錯誤",
+    "no_item": "剪貼簿中沒有物品",
+    "internal": "發生錯誤",
+    "commandFailed": "操作失敗",
+    "retryIn_other": "{{count}} 秒後重試"
+  },
+  "settings": {
+    "title": "設定",
+    "tabs": {
+      "general": "一般",
+      "hotkeys": "熱鍵",
+      "trade": "交易",
+      "overlay": "浮動視窗",
+      "platform": "平台"
+    },
+    "language": "語言",
+    "theme": "主題",
+    "startMinimised": "啟動時最小化至系統匣",
+    "source": "價格來源",
+    "leagueAuto": "自動偵測聯盟",
+    "league": "聯盟",
+    "leaguesFailed": "無法載入聯盟：{{message}}",
+    "onlineOnly": "僅限線上賣家",
+    "widenPct": "放寬屬性範圍（%）",
+    "enableAllStats": "預設啟用所有屬性",
+    "contact": "聯絡電子郵件",
+    "contactHelp": "選填。會加入 User-Agent，讓 GGG 在出現異常時能聯絡你。",
+    "autoHide": "自動隱藏延遲（毫秒）",
+    "opacity": "不透明度（0.1–1）",
+    "side": "位置",
+    "backend": "平台後端",
+    "backendHelp": "除非診斷建議變更，否則請維持自動。重新啟動後生效。",
+    "save": "儲存",
+    "saving": "儲存中…",
+    "saved": "設定已儲存",
+    "discard": "捨棄變更",
+    "saveFailed": "無法儲存：{{message}}",
+    "loadFailed": "無法載入設定。",
+    "fixErrors": "儲存前請修正標示的欄位。",
+    "externalChange": "設定已在其他地方變更。",
+    "reload": "載入最新"
+  },
+  "theme": {
+    "system": "依系統",
+    "dark": "深色",
+    "light": "淺色"
+  },
+  "side": {
+    "cursor": "游標旁",
+    "left": "左側邊緣",
+    "right": "右側邊緣"
+  },
+  "backend": {
+    "auto": "自動",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland（原生）",
+    "fake": "模擬（測試用）"
+  },
+  "hotkeys": {
+    "help": "點選一個熱鍵，再按下新的按鍵組合。按 Esc 取消。",
+    "price_check": "查價",
+    "price_check_pinned": "查價（釘選）",
+    "open_settings": "開啟設定",
+    "pressKeys": "請按鍵…",
+    "needsModifier": "請加上 Ctrl、Alt、Shift 或 Meta（只有 F 鍵可單獨使用）。",
+    "rebindFailed": "無法綁定該熱鍵：{{message}}",
+    "advancedCopy": "進階物品複製",
+    "advancedCopyHelp": "使用 Ctrl+Alt+C，以取得詞綴階級與數值範圍。"
+  },
+  "validation": {
+    "widen": "請輸入 0 到 100 之間的值。",
+    "email": "請輸入有效的電子郵件地址，或留空。",
+    "league": "請選擇聯盟或開啟自動偵測。",
+    "autoHide": "請輸入 0 到 10000 之間的整數（0 表示不自動隱藏）。",
+    "opacity": "請輸入 0.1 到 1 之間的值。",
+    "hotkeyClash": "此熱鍵已被其他動作使用。",
+    "poesessid": "只能使用英文字母和數字。"
+  },
+  "diagnostics": {
+    "title": "診斷",
+    "version": "版本",
+    "os": "作業系統",
+    "backend": "後端",
+    "dataVersion": "遊戲資料",
+    "league": "聯盟",
+    "settingsPath": "設定檔",
+    "logPath": "記錄檔",
+    "capabilities": "功能",
+    "supported": "支援",
+    "unsupported": "不支援",
+    "missingPermissions": "缺少權限",
+    "recentErrors": "最近的錯誤",
+    "noErrors": "沒有錯誤記錄。",
+    "copyReport": "複製報告",
+    "copied": "報告已複製到剪貼簿",
+    "copyFailed": "無法存取剪貼簿",
+    "loadFailed": "無法載入診斷資訊。",
+    "onboardingLink": "開啟設定指南"
+  },
+  "capability": {
+    "window_tracking": "遊戲視窗追蹤",
+    "overlay_always_on_top": "浮動視窗置頂",
+    "overlay_click_through": "浮動視窗點擊穿透",
+    "global_hotkeys": "全域熱鍵",
+    "passive_hook": "被動輸入掛鉤",
+    "keystroke_injection": "模擬按鍵（複製物品）",
+    "clipboard": "剪貼簿存取"
+  },
+  "guidance": {
+    "accessibility": "macOS：開啟「系統設定」→「隱私權與安全性」→「輔助使用」並啟用 kalandra。熱鍵與複製物品需要此權限。",
+    "screenRecording": "macOS：開啟「系統設定」→「隱私權與安全性」→「螢幕錄製」並啟用 kalandra，讓它能找到遊戲視窗。完成後請重新啟動 kalandra。",
+    "wayland": "Wayland 原生模式：全域熱鍵透過桌面入口（portal）處理，浮動視窗會固定在螢幕輸出而非遊戲視窗上，且可能無法模擬按鍵。若你的合成器允許，請改用 X11/XWayland。",
+    "gnome": "GNOME 不支援 kalandra 所需的 Wayland 功能，因此在 GNOME 上會透過 XWayland（X11）執行。請讓遊戲也在 XWayland 下執行。",
+    "generic": "缺少權限：{{permission}}"
+  },
+  "tray": {
+    "priceCheck": "查價（釘選）",
+    "settings": "設定…",
+    "diagnostics": "診斷",
+    "quit": "結束 kalandra",
+    "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "設定 kalandra",
+    "intro": "完成幾個依平台而定的步驟，讓查價順暢運作。你隨時可以從「診斷」回到這裡。",
+    "stepsHeading": "{{platform}} 設定",
+    "loadFailed": "無法檢查權限。",
+    "required": "必要",
+    "optional": "選用",
+    "granted": "已授權",
+    "notGranted": "未授權",
+    "openSettings": "開啟系統設定",
+    "relaunch": "macOS 會在 kalandra 重新啟動後套用此權限。啟用後請結束並重新開啟 kalandra。",
+    "requestFailed": "無法開啟系統設定：{{message}}",
+    "details": "技術細節",
+    "blockedHint": "仍缺少部分必要權限。kalandra 會繼續運作，但部分功能受限。",
+    "continueWithout": "略過並繼續",
+    "done": "完成",
+    "saveFailed": "無法儲存：{{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "輔助使用",
+        "body": "按下查價熱鍵時，kalandra 會替你按下遊戲的複製快捷鍵。macOS 需要為此授予輔助使用權限。"
+      },
+      "screen_recording": {
+        "name": "螢幕錄製",
+        "body": "讓 kalandra 讀取視窗標題，以便穩定地找到《流亡黯道2》視窗。kalandra 絕不會擷取你的螢幕畫面。"
+      },
+      "input_monitoring": {
+        "name": "輸入監控",
+        "body": "讓 kalandra 在遊戲為作用中視窗時也能用 Esc 關閉浮動視窗，並回應 Ctrl+滾輪。"
+      },
+      "unknown": "權限：{{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "使用視窗化或無邊框全螢幕",
+      "windowedBody": "浮動視窗無法顯示在獨占全螢幕之上。請在遊戲的圖形選項中選擇「視窗化」或「視窗化全螢幕」（無邊框）。",
+      "elevatedTitle": "是否以系統管理員身分執行遊戲？",
+      "elevatedBody": "Windows 會阻擋一般應用程式向提高權限的應用程式傳送熱鍵與模擬按鍵（UIPI）。如果遊戲以系統管理員身分執行，請也以系統管理員身分執行 kalandra。"
+    },
+    "x11": {
+      "title": "不需要額外設定",
+      "body": "X11 支援 kalandra 所需的所有功能：全域熱鍵、視窗追蹤，以及顯示在遊戲上方的浮動視窗。"
+    },
+    "gnome": {
+      "title": "GNOME：僅支援 X11/XWayland",
+      "x11Body": "GNOME 缺少 kalandra 所需的 Wayland 功能，因此這裡會透過 XWayland 執行。請讓遊戲也在 XWayland 下執行（Proton 與 Wine 的預設值）。",
+      "waylandBody": "GNOME 沒有 layer-shell，因此在 Wayland 原生模式下浮動視窗無法保持在遊戲上方。請在設定中將後端切換為 X11 / XWayland。"
+    },
+    "wayland": {
+      "degradedTitle": "Wayland 原生模式有所限制",
+      "degradedBody": "Wayland 會將應用程式彼此隔離，因此部分功能的運作方式不同：",
+      "portal": "全域熱鍵透過桌面的 GlobalShortcuts 入口（portal）處理，並會請你確認。並非所有合成器都提供此功能。",
+      "layerShell": "浮動視窗會透過 layer-shell 固定在螢幕邊緣，而不會跟隨遊戲視窗。",
+      "noTracking": "kalandra 無法偵測遊戲視窗，也無法監聽 Esc，因此請使用浮動視窗本身的按鈕將其關閉。",
+      "triggerTitle": "在合成器中綁定查價",
+      "triggerBody": "如果熱鍵無法運作，請在合成器中新增執行 kalandra --trigger 的鍵盤快捷鍵。它會在執行中的 kalandra 裡查詢游標下物品的價格。",
+      "pinnedHint": "加上 --pinned 即可以釘選狀態開啟浮動視窗。",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE（自訂快捷鍵指令）"
+      }
+    }
+  }
+}

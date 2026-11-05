@@ -21,6 +21,18 @@ export function installDevMock(route: string): void {
           return diagnostics();
         case "list_leagues":
           return leagues;
+        case "get_permissions":
+        case "recheck_permissions":
+          return {
+            platform: "macos",
+            missing: [
+              { kind: "accessibility", granted: false, required: true, settings_url: null },
+              { kind: "screen_recording", granted: true, required: true, settings_url: null },
+              { kind: "input_monitoring", granted: false, required: false, settings_url: null },
+            ],
+            notes: [],
+            gnome: false,
+          };
         case "query_price":
           return new Promise((r) => setTimeout(() => r(priceSummary()), 400));
         default:
