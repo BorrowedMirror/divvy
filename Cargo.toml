@@ -105,6 +105,7 @@ proptest = "1"
 wiremock = "0.6"
 pretty_assertions = "1"
 tempfile = "3"
+signal-hook = "0.3"
 
 [profile.release]
 lto = true
