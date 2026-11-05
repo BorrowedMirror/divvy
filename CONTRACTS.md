@@ -167,3 +167,18 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
 
 ## Contract changes
 (append here)
+- **kalandra-data (C, additive):** `DataError::Io(String, std::io::Error)` variant (missing /
+  unreadable asset files in `load_dir`); `GameData::manifest()` accessor alongside the `pub
+  manifest` field; `bundled_static() -> &'static GameData` (process-wide cache, `bundled()`
+  now returns a cheap `Arc`-backed clone of it); `MANIFEST_FILE`, `sha256_hex`,
+  `encode_asset` (inverse of `decode_asset`), `parse_manifest` (JSON + schema check),
+  `write_dir(&Path, &Bundle, &AssetSources, generated_at, game_version) -> Result<Manifest, _>`
+  and `AssetSources`, shared by `xtask data refresh` and tests.
+- **kalandra-data (C, semantics):** `Catalog::stats_by_template` searches `StatDef::kind` =
+  trade2 stats group id: `Implicit->implicit`, `Explicit|Sanctified->explicit`,
+  `Enchant->enchant`, `Rune->rune`, `Crafted->crafted`, `Fractured->fractured`,
+  `Desecrated->desecrated`, `Skill->skill`. Explicit trade templates are unsigned
+  (`# to maximum Life`); aliases `+# ...` (negate=false) and `-# ...` (negate=true) are
+  generated, plus `#% increased`<->`#% reduced` / `#% more`<->`#% less` (negate=true). The
+  matcher should therefore extract unsigned numbers and apply `negate`.
+  `base_in_magic_name` matches whole-word runs only, longest wins.
