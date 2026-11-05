@@ -41,7 +41,7 @@ describe("rewiden", () => {
     expect(widenValue([null], 10)).toBeNull();
   });
 
-  test("rewiden updates every stat min and widen_pct, keeps max/enabled", () => {
+  test("rewiden updates every stat min and widen_pct, clears max like Rust, keeps enabled", () => {
     const f = filterSet();
     const out = rewiden(f, 20);
     expect(out.widen_pct).toBe(20);
@@ -54,6 +54,12 @@ describe("rewiden", () => {
   test("rewidenStat leaves stats without values alone", () => {
     const s = { stat_id: "x", text: "x", enabled: true, min: 3, max: null, item_values: [] };
     expect(rewidenStat(s, 10)).toBe(s);
+  });
+
+  test("rewidenStat clears an explicit max and never exceeds the value", () => {
+    const s = { stat_id: "x", text: "x", enabled: true, min: 1, max: 50, item_values: [5.5] };
+    expect(rewidenStat(s, 10)).toMatchObject({ min: 4.95, max: null });
+    expect(widenValue([3, 4], 0)).toBe(3.5);
   });
 });
 
