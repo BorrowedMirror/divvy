@@ -1,0 +1,47 @@
+name: contract
+
+# Nightly live smoke against the real trade2 API (leagues, one search, one fetch). These are
+# `#[ignore]`d `live_*` tests in kalandra-trade, so they never run in normal CI.
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - crates/trade/**
+      - .github/workflows/contract.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  live:
+    # Forks get no network budget from us and must not hammer the API.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: contract
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - name: Live trade2 smoke
+        run: cargo nextest run --locked --profile ci -p kalandra-trade --run-ignored only -E 'test(live_)'
+      - name: Upload junit
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-contract
+          path: target/nextest/ci/junit.xml
+          if-no-files-found: ignore
