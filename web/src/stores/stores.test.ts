@@ -82,7 +82,7 @@ describe("settings store", () => {
 
   test("external change replaces a clean draft", () => {
     s().load(settings());
-    s().external(settings({ ui: { language: "de", theme: "dark", start_minimised: false } }));
+    s().external(settings({ ui: { language: "de", theme: "dark", start_minimised: false, onboarding_done: false } }));
     expect(s().draft?.ui.language).toBe("de");
     expect(s().externalChange).toBe(false);
   });
@@ -90,8 +90,8 @@ describe("settings store", () => {
   test("external change rebases unsaved edits onto untouched fields", () => {
     s().load(settings());
     s().update((d) => ({ ...d, ui: { ...d.ui, theme: "light" } }));
-    s().external(settings({ ui: { language: "de", theme: "dark", start_minimised: false } }));
-    expect(s().draft?.ui).toEqual({ language: "de", theme: "light", start_minimised: false });
+    s().external(settings({ ui: { language: "de", theme: "dark", start_minimised: false, onboarding_done: false } }));
+    expect(s().draft?.ui).toEqual({ language: "de", theme: "light", start_minimised: false, onboarding_done: false });
     expect(s().base?.ui.language).toBe("de");
     expect(s().externalChange).toBe(false);
   });
@@ -99,7 +99,7 @@ describe("settings store", () => {
   test("external change to a field the user edited flags a conflict", () => {
     s().load(settings());
     s().update((d) => ({ ...d, ui: { ...d.ui, theme: "light" } }));
-    s().external(settings({ ui: { language: "en", theme: "system", start_minimised: false } }));
+    s().external(settings({ ui: { language: "en", theme: "system", start_minimised: false, onboarding_done: false } }));
     expect(s().draft?.ui.theme).toBe("light");
     expect(s().externalChange).toBe(true);
     s().discard();

@@ -45,13 +45,32 @@ test("hashchange switches routes", async () => {
 });
 
 test("applies theme and language from settings, and follows settings-changed", async () => {
-  setupIpc({ get_settings: () => settings({ ui: { language: "de", theme: "light", start_minimised: false } }) });
+  setupIpc({ get_settings: () => settings({ ui: { language: "de", theme: "light", start_minimised: false, onboarding_done: false } }) });
   render(<App />);
   await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
   await waitFor(() => expect(i18n.language).toBe("de"));
   expect(await screen.findByRole("heading", { name: "Einstellungen" })).toBeInTheDocument();
   await flush();
-  await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "dark", start_minimised: false } }) });
+  await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "dark", start_minimised: false, onboarding_done: false } }) });
   await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
   expect(i18n.language).toBe("en");
+});
+
+test("onboarding route: diagnostics links to it and Done returns to settings", async () => {
+  const user = userEvent.setup();
+  window.location.hash = "#/diagnostics";
+  setupIpc({ recheck_permissions: () => ({ platform: "x11", missing: [], notes: [], gnome: false }) });
+  render(<App />);
+  expect(routeFromHash("#/onboarding")).toBe("onboarding");
+  const link = await screen.findByRole("link", { name: "Open the setup guide" });
+  expect(link).toHaveAttribute("href", "#/onboarding");
+  await act(async () => {
+    window.location.hash = "#/onboarding";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+  expect(screen.getByRole("main")).toHaveAttribute("data-route", "onboarding");
+  const done = await screen.findByRole("button", { name: "Done" });
+  await waitFor(() => expect(done).toBeEnabled());
+  await user.click(done);
+  await waitFor(() => expect(screen.getByRole("main")).toHaveAttribute("data-route", "settings"));
 });
