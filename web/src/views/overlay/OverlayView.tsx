@@ -9,7 +9,7 @@ import { useAutoHide } from "../../hooks/useAutoHide";
 import { useCommand } from "../../hooks/useCommand";
 import { useCountdown } from "../../hooks/useCountdown";
 import { useTauriEvent } from "../../hooks/useTauriEvent";
-import { formatChord } from "../../lib/chord";
+import { formatChord, isUnbound } from "../../lib/chord";
 import { toIpcError } from "../../lib/ipc";
 import { useOverlayStore } from "../../stores/overlay";
 import { MiscFilters, StatFilters } from "./Filters";
@@ -151,7 +151,7 @@ export function OverlayView() {
             {error && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
             <p className="py-4 text-center text-sm text-muted">
               {t("overlay.empty", {
-                hotkey: settings ? formatChord(settings.hotkeys.price_check) : "Ctrl+D",
+                hotkey: settings && !isUnbound(settings.hotkeys.price_check) ? formatChord(settings.hotkeys.price_check) : "Ctrl+D",
               })}
             </p>
           </div>

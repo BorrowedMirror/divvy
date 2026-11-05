@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import type { Chord, HotkeyAction } from "../../bindings";
 import { commands } from "../../bindings";
 import { cx } from "../../components/ui";
-import { captureChord, formatChord, sameChord } from "../../lib/chord";
+import { captureChord, formatChord, isUnbound, sameChord, UNBOUND } from "../../lib/chord";
 
 type Props = {
   action: HotkeyAction;
@@ -44,20 +44,25 @@ export function HotkeyRecorder({ action, chord, others, onBound, error }: Props)
           setMessage(t("validation.hotkeyClash"));
           return;
         }
-        setBusy(true);
-        const out = await commands.rebindHotkey(action, res.chord);
-        setBusy(false);
-        if (out.status === "ok") {
-          setMessage(null);
-          onBound(res.chord);
-        } else {
-          setMessage(t("hotkeys.rebindFailed", { message: out.error.message }));
-        }
+        await bind(res.chord);
       }
     }
   };
 
+  const bind = async (next: Chord) => {
+    setBusy(true);
+    const out = await commands.rebindHotkey(action, next);
+    setBusy(false);
+    if (out.status === "ok") {
+      setMessage(null);
+      onBound(next);
+    } else {
+      setMessage(t("hotkeys.rebindFailed", { message: out.error.message }));
+    }
+  };
+
   const shown = message ?? (error ? t(error) : null);
+  const unbound = isUnbound(chord);
 
   return (
     <div className="flex flex-col gap-1 py-1.5">
@@ -65,6 +70,7 @@ export function HotkeyRecorder({ action, chord, others, onBound, error }: Props)
         <span className="text-sm" id={`hotkey-${action}-label`}>
           {label}
         </span>
+        <span className="flex items-center gap-1">
         <button
           type="button"
           aria-labelledby={`hotkey-${action}-label hotkey-${action}-btn`}
@@ -84,8 +90,21 @@ export function HotkeyRecorder({ action, chord, others, onBound, error }: Props)
             recording ? "animate-pulse border-gold bg-gold/10 text-gold" : "border-line bg-surface-2",
           )}
         >
-          {recording ? t("hotkeys.pressKeys") : formatChord(chord)}
+          {recording ? t("hotkeys.pressKeys") : unbound ? t("hotkeys.notSet") : formatChord(chord)}
         </button>
+        <button
+          type="button"
+          aria-label={t("hotkeys.clearAria", { action: label })}
+          disabled={busy || unbound}
+          onClick={() => void bind(UNBOUND)}
+          className={cx(
+            "rounded-md px-2 py-1.5 text-xs text-muted hover:text-fg disabled:cursor-not-allowed disabled:opacity-40",
+            "outline-none focus-visible:ring-2 focus-visible:ring-gold",
+          )}
+        >
+          {t("hotkeys.clear")}
+        </button>
+        </span>
       </div>
       {shown && (
         <p id={msgId} className="text-xs text-bad" role="alert">

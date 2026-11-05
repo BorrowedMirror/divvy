@@ -360,11 +360,16 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
     }
     platform.hotkeys.unregister_all()?;
     // One call so the Wayland portal binds (and confirms) all shortcuts together.
-    platform.hotkeys.register_all(&[
+    // Cleared ("Not set") hotkeys are simply not registered.
+    let bindings: Vec<_> = [
         (HotkeyAction::PriceCheck, settings.hotkeys.price_check.clone()),
         (HotkeyAction::PriceCheckPinned, settings.hotkeys.price_check_pinned.clone()),
         (HotkeyAction::OpenSettings, settings.hotkeys.open_settings.clone()),
-    ])?;
+    ]
+    .into_iter()
+    .filter(|(_, chord)| !chord.is_unbound())
+    .collect();
+    platform.hotkeys.register_all(&bindings)?;
     Ok(())
 }
 
@@ -414,11 +419,19 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
     let app = app.clone();
     let spawned = std::thread::Builder::new().name("kalandra-hotkeys".into()).spawn(move || {
         for ev in rx {
-            match ev.action {
-                HotkeyAction::PriceCheck => trigger(&app, false),
-                HotkeyAction::PriceCheckPinned => trigger(&app, true),
-                HotkeyAction::OpenSettings => {
+            let state = app.state::<Arc<AppState>>();
+            let overlay_open = state.overlay_visible.load(Ordering::SeqCst);
+            let settings_open = app.get_webview_window(SETTINGS).and_then(|w| w.is_visible().ok()).unwrap_or(false);
+            match logic::hotkey_effect(ev.action, overlay_open, settings_open) {
+                logic::HotkeyEffect::PriceCheck { pinned } => trigger(&app, pinned),
+                logic::HotkeyEffect::HideOverlay => {
+                    let _ = hide_overlay(&app, &state);
+                }
+                logic::HotkeyEffect::ShowSettings => {
                     let _ = show_settings(&app, "settings");
+                }
+                logic::HotkeyEffect::HideSettings => {
+                    let _ = hide_settings(&app);
                 }
             }
         }

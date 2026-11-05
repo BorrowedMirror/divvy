@@ -60,7 +60,15 @@ export function formatChord(chord: Chord): string {
   return [...mods, keyLabel(chord.key)].join("+");
 }
 
+/** A hotkey the user cleared ("Not set"); saved as an empty key so it never resets. */
+export const UNBOUND: Chord = { modifiers: [], key: "" };
+
+export function isUnbound(chord: Chord): boolean {
+  return chord.key.trim() === "";
+}
+
 export function sameChord(a: Chord, b: Chord): boolean {
+  if (isUnbound(a) || isUnbound(b)) return false;
   if (a.key !== b.key || a.modifiers.length !== b.modifiers.length) return false;
   return a.modifiers.every((m) => b.modifiers.includes(m));
 }

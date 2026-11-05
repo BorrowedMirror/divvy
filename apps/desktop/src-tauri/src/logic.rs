@@ -229,9 +229,41 @@ pub fn keep_on_screen_y(y: i32, height: i32, screen_y: i32, screen_height: i32) 
     if y + height > bottom { (bottom - height).max(screen_y) } else { y.max(screen_y) }
 }
 
+/// What a global hotkey press does. Every hotkey toggles: pressing it while its window is open
+/// closes it (like Esc), otherwise it opens it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HotkeyEffect {
+    PriceCheck { pinned: bool },
+    HideOverlay,
+    ShowSettings,
+    HideSettings,
+}
+
+pub fn hotkey_effect(action: kalandra_platform::HotkeyAction, overlay_open: bool, settings_open: bool) -> HotkeyEffect {
+    use kalandra_platform::HotkeyAction as A;
+    match action {
+        A::PriceCheck | A::PriceCheckPinned if overlay_open => HotkeyEffect::HideOverlay,
+        A::PriceCheck => HotkeyEffect::PriceCheck { pinned: false },
+        A::PriceCheckPinned => HotkeyEffect::PriceCheck { pinned: true },
+        A::OpenSettings if settings_open => HotkeyEffect::HideSettings,
+        A::OpenSettings => HotkeyEffect::ShowSettings,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hotkeys_toggle_their_window() {
+        use kalandra_platform::HotkeyAction as A;
+        assert_eq!(hotkey_effect(A::PriceCheck, false, false), HotkeyEffect::PriceCheck { pinned: false });
+        assert_eq!(hotkey_effect(A::PriceCheckPinned, false, true), HotkeyEffect::PriceCheck { pinned: true });
+        assert_eq!(hotkey_effect(A::PriceCheck, true, false), HotkeyEffect::HideOverlay);
+        assert_eq!(hotkey_effect(A::PriceCheckPinned, true, false), HotkeyEffect::HideOverlay);
+        assert_eq!(hotkey_effect(A::OpenSettings, true, false), HotkeyEffect::ShowSettings);
+        assert_eq!(hotkey_effect(A::OpenSettings, false, true), HotkeyEffect::HideSettings);
+    }
 
     #[test]
     fn overlay_height_fits_content_within_the_screen() {

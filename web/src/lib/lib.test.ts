@@ -110,6 +110,15 @@ describe("chord capture", () => {
   });
 });
 
+describe("unbound chords", () => {
+  test("never clash and are recognised", async () => {
+    const { UNBOUND, isUnbound, sameChord } = await import("./chord");
+    expect(isUnbound(UNBOUND)).toBe(true);
+    expect(isUnbound({ modifiers: ["ctrl"], key: "KeyD" })).toBe(false);
+    expect(sameChord(UNBOUND, { modifiers: [], key: "" })).toBe(false);
+  });
+});
+
 describe("format", () => {
   test("amounts and prices", () => {
     expect(formatAmount(null, "en")).toBe("?");

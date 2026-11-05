@@ -166,11 +166,14 @@
     "fake": "Fake (testing)"
   },
   "hotkeys": {
-    "help": "Click a shortcut, then press the new key combination. Esc cancels.",
+    "help": "Click a shortcut, then press the new key combination. Esc cancels, Clear removes it. Pressing a shortcut again closes the window it opened.",
     "price_check": "Price check",
     "price_check_pinned": "Price check (pinned)",
     "open_settings": "Open settings",
     "pressKeys": "Press keys…",
+    "notSet": "Not set",
+    "clear": "Clear",
+    "clearAria": "Clear the {{action}} shortcut",
     "needsModifier": "Add Ctrl, Alt, Shift or Meta (only F-keys work alone).",
     "rebindFailed": "Couldn't bind that shortcut: {{message}}",
     "advancedCopy": "Advanced item copy",

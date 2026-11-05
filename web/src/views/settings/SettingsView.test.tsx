@@ -206,6 +206,19 @@ describe("hotkeys tab", () => {
     return { user, ...res };
   }
 
+  test("clears a hotkey so it shows Not set and frees its chord", async () => {
+    const { user, calls } = await openHotkeys();
+    await user.click(screen.getByRole("button", { name: "Clear the Price check shortcut" }));
+    await waitFor(() => expect(callsOf(calls, "rebind_hotkey")).toHaveLength(1));
+    expect(callsOf(calls, "rebind_hotkey")[0]?.args).toEqual({
+      action: "price_check",
+      chord: { modifiers: [], key: "" },
+    });
+    expect(await screen.findByRole("button", { name: /^Price check Not set$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear the Price check shortcut" })).toBeDisabled();
+    expect(draft().hotkeys.price_check).toEqual({ modifiers: [], key: "" });
+  });
+
   test("records a chord from keydown and rebinds it", async () => {
     const { user, calls } = await openHotkeys();
     const btn = screen.getByRole("button", { name: /^Price check Ctrl\+D$/ });
