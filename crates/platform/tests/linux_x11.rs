@@ -210,12 +210,16 @@ fn child() {
     // Passive hook (XRecord) + keystroke injection (XTEST).
     let input = platform.input_listener.start().expect("hook");
     assert!(matches!(platform.input_listener.start(), Err(PlatformError::AlreadyStarted)));
-    platform.input_simulator.send_chord(&Chord::parse("Shift+F5").unwrap()).unwrap();
+    assert!(std::env::var_os(backend::KEYBOARD_ONLY_ENV).is_some(), "rdev must hook the keyboard only");
+    // start() does not wait for XRecord to be live, so resend until the hook sees the key.
     let deadline = Instant::now() + Duration::from_secs(5);
-    loop {
-        let ev = input.recv_timeout(deadline.saturating_duration_since(Instant::now())).expect("hook event");
-        if ev == (InputEvent::KeyDown { key: "F5".into() }) {
-            break;
+    'hooked: loop {
+        assert!(Instant::now() < deadline, "hook never saw F5");
+        platform.input_simulator.send_chord(&Chord::parse("Shift+F5").unwrap()).unwrap();
+        while let Ok(ev) = input.recv_timeout(Duration::from_millis(100)) {
+            if ev == (InputEvent::KeyDown { key: "F5".into() }) {
+                break 'hooked;
+            }
         }
     }
 

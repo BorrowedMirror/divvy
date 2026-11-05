@@ -16,6 +16,8 @@ pub(crate) mod chord_plan;
 pub(crate) mod ghk;
 #[cfg(feature = "native")]
 pub(crate) mod hook;
+#[cfg(feature = "native")]
+pub use hook::{KEYBOARD_ONLY_ENV, init_process_env};
 #[cfg(all(target_os = "macos", feature = "native"))]
 pub mod macos;
 #[cfg(all(target_os = "linux", feature = "native"))]

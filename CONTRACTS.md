@@ -278,3 +278,9 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   restored, and the prior text is restored only while the clipboard still holds the item we
   read (or nothing after our clear); a copy the user made meanwhile is kept. An item that
   arrives after the timeout is not restored.
+- **kalandra-platform (review fixes, additive):** `backend::init_process_env()` and
+  `backend::KEYBOARD_ONLY_ENV` (feature `native`): sets rdev's `KEYBOARD_ONLY` so the passive
+  hook never installs a mouse hook. The desktop app should call it first thing in `main`
+  (before threads); `InputListener::start` calls it as a fallback. `start` no longer blocks
+  250ms: a late hook failure is logged and shows up as the receiver disconnecting. The hook
+  delivers keyboard events only (`InputEvent::MouseMove`/`Wheel` are no longer produced).
