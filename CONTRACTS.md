@@ -167,3 +167,5 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
 
 ## Contract changes
 (append here)
+- config (J): additive `Paths::resolve_with(env: impl Fn(&str) -> Option<String>)` (injectable
+  env lookup; `Paths::resolve()` delegates to it) and `pub const CONFIG_DIR_ENV: &str = "KALANDRA_CONFIG_DIR"`.
