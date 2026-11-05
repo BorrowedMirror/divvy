@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "アプリのアップデート",
+    "available": "kalandra {{version}} が利用可能です。",
+    "notes": "新機能",
+    "later": "後で",
+    "install": "インストールして再起動",
+    "installing": "インストール中…"
+  },
   "common": {
     "loading": "読み込み中…",
     "dismiss": "閉じる"
@@ -132,7 +140,9 @@
     "loadFailed": "設定を読み込めませんでした。",
     "fixErrors": "保存する前に、強調表示された項目を修正してください。",
     "externalChange": "設定が別の場所で変更されました。",
-    "reload": "最新を読み込む"
+    "reload": "最新を読み込む",
+    "checkUpdates": "アップデートを自動的に確認",
+    "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。"
   },
   "theme": {
     "system": "システム",

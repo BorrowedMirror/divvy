@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "应用更新",
+    "available": "kalandra {{version}} 现已推出。",
+    "notes": "新功能",
+    "later": "稍后",
+    "install": "安装并重启",
+    "installing": "正在安装…"
+  },
   "common": {
     "loading": "加载中…",
     "dismiss": "关闭"
@@ -132,7 +140,9 @@
     "loadFailed": "无法加载设置。",
     "fixErrors": "保存前请修正标出的字段。",
     "externalChange": "设置已在其他地方被修改。",
-    "reload": "加载最新"
+    "reload": "加载最新",
+    "checkUpdates": "自动检查更新",
+    "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。"
   },
   "theme": {
     "system": "跟随系统",
