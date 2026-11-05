@@ -9,6 +9,7 @@ pub mod state;
 #[cfg(any(debug_assertions, feature = "test-hook"))]
 pub mod testhook;
 pub mod tray;
+pub mod tray_i18n;
 
 use std::sync::{Arc, atomic::Ordering};
 
@@ -220,7 +221,7 @@ pub fn run() {
             builder.mount_events(app);
             let handle = app.handle().clone();
             let state = Arc::clone(&app.state::<Arc<AppState>>());
-            let tray_ok = match tray::build(&handle) {
+            let tray_ok = match tray::build(&handle, &state.settings().ui.language) {
                 Ok(()) => true,
                 Err(e) => {
                     state.record_error(format!("tray unavailable: {e}"));

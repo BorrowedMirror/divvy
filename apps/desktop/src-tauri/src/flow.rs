@@ -216,6 +216,9 @@ pub fn apply_settings(app: &AppHandle, state: &AppState, settings: Settings) -> 
         *state.sources.write().expect("sources lock") = Arc::new(sources);
     }
     *state.settings.write().expect("settings lock") = settings.clone();
+    if previous.ui.language != settings.ui.language {
+        crate::tray::relabel(app, &settings.ui.language);
+    }
     let _ = (SettingsChanged { settings: settings.clone() }).emit(app);
     Ok(settings)
 }
