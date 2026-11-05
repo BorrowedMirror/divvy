@@ -17,6 +17,11 @@ export const commands = {
 	openTrade: (url: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_trade", { url })),
 	hideOverlay: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("hide_overlay")),
 	setOverlayPinned: (pinned: boolean) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("set_overlay_pinned", { pinned })),
+	/**
+	 *  The last copied item as an `item-copied` payload. The overlay calls it once its listeners
+	 *  are registered, so an item copied before the webview was listening is not lost.
+	 */
+	getOverlaySnapshot: () => __TAURI_INVOKE<ItemCopied_Serialize | null>("get_overlay_snapshot"),
 	openSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings")),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
 	getPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("get_permissions"),

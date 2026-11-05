@@ -8,7 +8,7 @@ use kalandra_trade::{PriceRequest, types::League};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 
-use crate::{flow, state::AppState};
+use crate::{events::ItemCopied, flow, state::AppState};
 
 /// Error shape for every command.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, thiserror::Error)]
@@ -171,6 +171,19 @@ pub fn open_trade(app: AppHandle, url: String) -> Result<(), IpcError> {
 #[specta::specta]
 pub fn hide_overlay(app: AppHandle, state: State<'_, Arc<AppState>>) -> Result<(), IpcError> {
     flow::hide_overlay(&app, &state)
+}
+
+/// The last copied item as an `item-copied` payload. The overlay calls it once its listeners
+/// are registered, so an item copied before the webview was listening is not lost.
+#[tauri::command]
+#[specta::specta]
+pub fn get_overlay_snapshot(state: State<'_, Arc<AppState>>) -> Option<ItemCopied> {
+    overlay_snapshot(&state)
+}
+
+pub fn overlay_snapshot(state: &AppState) -> Option<ItemCopied> {
+    let last = state.last_item.lock().expect("last item lock").clone();
+    last.map(|(item, filters)| ItemCopied { item, filters, pinned: state.is_pinned() })
 }
 
 #[tauri::command]

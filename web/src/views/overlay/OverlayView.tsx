@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import type { FilterSet_Serialize, OnlineStatus } from "../../bindings";
+import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus } from "../../bindings";
 import { commands, events } from "../../bindings";
 import { CloseIcon, GearIcon, PinIcon } from "../../components/icons";
 import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "../../components/ui";
@@ -48,6 +48,8 @@ function usePriceRunner() {
 
 const isPinned = () => useOverlayStore.getState().pinned;
 
+const sameItem = (a: unknown, b: unknown) => a === b || JSON.stringify(a) === JSON.stringify(b);
+
 export function OverlayView() {
   const { t } = useTranslation();
   const item = useOverlayStore((s) => s.item);
@@ -64,10 +66,24 @@ export function OverlayView() {
   const hide = useCallback(() => void command(commands.hideOverlay()), [command]);
   const autoHide = useAutoHide(settings?.overlay.auto_hide_ms ?? 0, isPinned, hide);
 
-  useTauriEvent(events.itemCopied, (p) => {
-    useOverlayStore.getState().itemCopied(p);
-    run(p.filters);
-  });
+  const onItemCopied = useCallback(
+    (p: ItemCopied_Serialize) => {
+      useOverlayStore.getState().itemCopied(p);
+      run(p.filters);
+    },
+    [run],
+  );
+  // `item-copied` is emitted once; a hotkey pressed before this listener was registered (first
+  // second after launch) would be lost, so catch up from the backend's snapshot once listening.
+  const catchUp = useCallback(() => {
+    commands.getOverlaySnapshot().then(
+      (snap) => {
+        if (snap && !sameItem(snap.item, useOverlayStore.getState().item)) onItemCopied(snap);
+      },
+      () => {},
+    );
+  }, [onItemCopied]);
+  useTauriEvent(events.itemCopied, onItemCopied, catchUp);
   useTauriEvent(events.priceReady, (p) => useOverlayStore.getState().priceReady(p.summary));
   useTauriEvent(events.priceFailed, (p) => {
     // Rust shows the overlay on copy/query failure; an in-flight result must not overwrite it.

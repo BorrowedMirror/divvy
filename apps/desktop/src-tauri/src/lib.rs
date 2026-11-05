@@ -35,6 +35,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::open_trade,
             ipc::hide_overlay,
             ipc::set_overlay_pinned,
+            ipc::get_overlay_snapshot,
             ipc::open_settings,
             ipc::rebind_hotkey,
             permissions::get_permissions,
