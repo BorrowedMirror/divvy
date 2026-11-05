@@ -1,0 +1,69 @@
+# Codecov: one flag per crate (uploaded from target/coverage/<crate>.lcov by ci.yml) plus web.
+# Project targets mirror the gates in CONTRACTS.md; `cargo xtask coverage --check` enforces them
+# in CI independently of Codecov.
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...95"
+  status:
+    patch:
+      default:
+        target: 80%
+        threshold: 0%
+        only_pulls: true
+    project:
+      default:
+        target: auto
+        threshold: 1%
+      core:
+        flags: [core]
+        target: 90%
+      data:
+        flags: [data]
+        target: 90%
+      trade:
+        flags: [trade]
+        target: 90%
+      config:
+        flags: [config]
+        target: 90%
+      platform:
+        flags: [platform]
+        target: 70%
+      web:
+        flags: [web]
+        target: 80%
+
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: core
+      paths: [crates/core/]
+    - name: data
+      paths: [crates/data/]
+    - name: trade
+      paths: [crates/trade/]
+    - name: platform
+      paths: [crates/platform/]
+    - name: config
+      paths: [crates/config/]
+    - name: web
+      paths: [web/src/]
+
+ignore:
+  - "xtask/**"
+  - "tools/**"
+  - "e2e/**"
+  - "web/src/bindings.ts"
+  - "**/tests/**"
+
+comment:
+  layout: "condensed_header, diff, flags, files"
+  behavior: default
+  require_changes: true
