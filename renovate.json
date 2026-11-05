@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits", ":dependencyDashboard"],
+  "enabledManagers": ["cargo", "npm", "github-actions"],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "build",
+  "semanticCommitScope": "deps",
+  "commitMessageLowerCase": "auto",
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "prConcurrentLimit": 10,
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "postUpdateOptions": ["pnpmDedupe"],
+  "packageRules": [
+    {
+      "description": "Keep action updates on major tags, as the workflows pin them.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "matchUpdateTypes": ["minor", "patch", "digest"]
+    },
+    {
+      "description": "Tauri crates and JS packages must move together.",
+      "matchPackageNames": ["tauri", "tauri-build", "tauri-plugin-*", "@tauri-apps/*", "tauri-specta", "specta", "specta-typescript"],
+      "groupName": "tauri"
+    },
+    {
+      "description": "Pre-release specta/tauri-specta pins are bumped by hand together with bindings regeneration.",
+      "matchPackageNames": ["specta", "specta-typescript", "tauri-specta"],
+      "matchManagers": ["cargo"],
+      "enabled": false
+    },
+    {
+      "description": "Lint/test tooling minor+patch in one PR.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "web dev tooling"
+    },
+    {
+      "description": "The rdev fork tracks a branch; update its lock entry weekly.",
+      "matchPackageNames": ["rdev"],
+      "schedule": ["before 6am on monday"]
+    }
+  ]
+}
