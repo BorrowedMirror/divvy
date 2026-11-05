@@ -22,6 +22,25 @@ describe("OverlayView", () => {
     expect(await screen.findByText(/press Ctrl\+D/)).toBeInTheDocument();
   });
 
+  test("catches up from the snapshot when item-copied fired before listening", async () => {
+    const calls = setupIpc({ query_price: () => priceSummary(), get_overlay_snapshot: () => itemCopied() });
+    renderWithProviders(<OverlayView />);
+    await flush();
+    expect(await screen.findByTestId("price-median")).toHaveTextContent("2.75 div");
+    expect(callsOf(calls, "get_overlay_snapshot")).toHaveLength(1);
+    expect(callsOf(calls, "query_price")).toHaveLength(1);
+  });
+
+  test("snapshot of the item already shown does not re-run the query", async () => {
+    useOverlayStore.getState().itemCopied(itemCopied());
+    const calls = setupIpc({ query_price: () => priceSummary(), get_overlay_snapshot: () => itemCopied() });
+    renderWithProviders(<OverlayView />);
+    await flush();
+    await waitFor(() => expect(callsOf(calls, "get_overlay_snapshot")).toHaveLength(1));
+    await flush();
+    expect(callsOf(calls, "query_price")).toHaveLength(0);
+  });
+
   test("item-copied renders the item and auto-runs the query", async () => {
     const calls = await mountWithItem();
     const header = screen.getByTestId("item-header");

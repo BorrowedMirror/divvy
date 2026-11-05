@@ -21,6 +21,7 @@ const defaults: Record<string, Handler> = {
   list_leagues: () => leagues,
   hide_overlay: () => null,
   set_overlay_pinned: () => null,
+  get_overlay_snapshot: () => null,
   open_trade: () => null,
   open_settings: () => null,
 };

@@ -2,7 +2,7 @@
 use std::{
     collections::VecDeque,
     sync::{
-        Arc, Mutex, RwLock,
+        Arc, Mutex, OnceLock, RwLock,
         atomic::{AtomicBool, Ordering},
     },
 };
@@ -29,28 +29,69 @@ pub struct Sources {
     pub scout: Arc<Poe2ScoutSource>,
 }
 
+/// Endpoint override from `key` (e2e / wiremock). Only debug or `test-hook` builds honour it, and
+/// only for https or loopback URLs, so a release build can't be pointed at another host.
+pub fn env_override(key: &str) -> Option<Url> {
+    #[cfg(any(debug_assertions, feature = "test-hook"))]
+    {
+        let url = std::env::var(key).ok().and_then(|v| Url::parse(&v).ok())?;
+        if logic::is_safe_override(&url) {
+            return Some(url);
+        }
+        tracing::warn!("ignoring {key}: only https or loopback http URLs are allowed");
+        None
+    }
+    #[cfg(not(any(debug_assertions, feature = "test-hook")))]
+    {
+        let _ = key;
+        None
+    }
+}
+
 fn env_url(key: &str, default: &str) -> Url {
-    std::env::var(key)
-        .ok()
-        .and_then(|v| Url::parse(&v).ok())
-        .unwrap_or_else(|| Url::parse(default).expect("static url"))
+    env_override(key).unwrap_or_else(|| Url::parse(default).expect("static url"))
+}
+
+fn trade_config(settings: &Settings) -> TradeConfig {
+    TradeConfig {
+        base_url: env_url("KALANDRA_TRADE_BASE_URL", "https://www.pathofexile.com"),
+        user_agent: logic::user_agent(settings),
+        poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
+        ..TradeConfig::default()
+    }
+}
+
+fn ninja(ua: String) -> Arc<PoeNinjaSource> {
+    Arc::new(PoeNinjaSource::new(env_url("KALANDRA_NINJA_BASE_URL", "https://poe.ninja"), ua))
+}
+
+fn scout(ua: String) -> Arc<Poe2ScoutSource> {
+    Arc::new(Poe2ScoutSource::new(env_url("KALANDRA_SCOUT_BASE_URL", "https://poe2scout.com"), ua))
 }
 
 impl Sources {
     pub fn from_settings(settings: &Settings) -> Result<Self, String> {
-        let ua = logic::user_agent(settings);
-        let config = TradeConfig {
-            base_url: env_url("KALANDRA_TRADE_BASE_URL", "https://www.pathofexile.com"),
-            user_agent: ua.clone(),
-            poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
-            ..TradeConfig::default()
-        };
+        let config = trade_config(settings);
+        let ua = config.user_agent.clone();
         let trade = TradeClient::new(config, Box::new(SystemClock)).map_err(|e| e.to_string())?;
-        Ok(Self {
-            trade: Arc::new(trade),
-            ninja: Arc::new(PoeNinjaSource::new(env_url("KALANDRA_NINJA_BASE_URL", "https://poe.ninja"), ua.clone())),
-            scout: Arc::new(Poe2ScoutSource::new(env_url("KALANDRA_SCOUT_BASE_URL", "https://poe2scout.com"), ua)),
-        })
+        Ok(Self { trade: Arc::new(trade), ninja: ninja(ua.clone()), scout: scout(ua) })
+    }
+
+    /// Sources for new `settings`, reusing every client whose inputs are unchanged so a save
+    /// keeps the trade rate-limiter state and the price caches. `None` = nothing to rebuild.
+    pub fn updated(&self, settings: &Settings) -> Result<Option<Self>, String> {
+        let config = trade_config(settings);
+        let old = self.trade.config();
+        let ua_changed = old.user_agent != config.user_agent;
+        let trade_changed = ua_changed || old.base_url != config.base_url || old.poesessid != config.poesessid;
+        if !trade_changed {
+            return Ok(None);
+        }
+        let ua = config.user_agent.clone();
+        let trade = Arc::new(TradeClient::new(config, Box::new(SystemClock)).map_err(|e| e.to_string())?);
+        let (ninja, scout) =
+            if ua_changed { (ninja(ua.clone()), scout(ua)) } else { (self.ninja.clone(), self.scout.clone()) };
+        Ok(Some(Self { trade, ninja, scout }))
     }
 
     /// The configured source if it supports the item, else the official trade API.
@@ -70,7 +111,8 @@ impl Sources {
 pub struct AppState {
     pub paths: Option<Paths>,
     pub settings: RwLock<Settings>,
-    pub data: Option<Arc<GameData>>,
+    /// Bundled game data, decoded on a background thread at startup (`None` inside = failed).
+    pub data: OnceLock<Option<Arc<GameData>>>,
     pub sources: RwLock<Arc<Sources>>,
     pub platform: Option<Arc<Platform>>,
     pub backend: BackendKind,
@@ -81,23 +123,28 @@ pub struct AppState {
     pub pinned: AtomicBool,
     pub overlay_visible: AtomicBool,
     pub quitting: AtomicBool,
-    pub log_path: Option<std::path::PathBuf>,
+    /// Closing settings quits the app (set when there is no tray to quit from).
+    pub close_quits: AtomicBool,
+    /// Serialises copy flows (hotkey, signal, tray, test hook, IPC).
+    pub flow_gate: Arc<logic::FlowGate>,
+    /// Held for a whole settings apply (register hotkeys, persist, swap state).
+    pub apply_lock: Mutex<()>,
+    /// Set once the primary instance has opened its log file.
+    pub log_path: OnceLock<std::path::PathBuf>,
 }
 
 impl AppState {
     pub fn new(
         paths: Option<Paths>,
         settings: Settings,
-        data: Option<Arc<GameData>>,
         platform: Option<Arc<Platform>>,
         backend: BackendKind,
-        log_path: Option<std::path::PathBuf>,
     ) -> Result<Self, String> {
         let sources = Sources::from_settings(&settings)?;
         Ok(Self {
             paths,
             settings: RwLock::new(settings),
-            data,
+            data: OnceLock::new(),
             sources: RwLock::new(Arc::new(sources)),
             platform,
             backend,
@@ -108,7 +155,10 @@ impl AppState {
             pinned: AtomicBool::new(false),
             overlay_visible: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
-            log_path,
+            close_quits: AtomicBool::new(false),
+            flow_gate: Arc::default(),
+            apply_lock: Mutex::new(()),
+            log_path: OnceLock::new(),
         })
     }
 
@@ -122,6 +172,15 @@ impl AppState {
 
     pub fn capabilities(&self) -> Capabilities {
         self.platform.as_ref().map(|p| p.capabilities.clone()).unwrap_or_default()
+    }
+
+    /// Capabilities plus problems the hotkey host found after registration (diagnostics).
+    pub fn capabilities_with_notes(&self) -> Capabilities {
+        let mut caps = self.capabilities();
+        if let Some(p) = self.platform.as_ref() {
+            caps.notes.extend(p.hotkeys.notes());
+        }
+        caps
     }
 
     pub fn record_error(&self, e: impl std::fmt::Display) {
@@ -139,11 +198,78 @@ impl AppState {
         logic::resolve_league(&settings, leagues.as_deref())
     }
 
+    /// Game data if decoding has finished (diagnostics; never blocks).
+    pub fn data(&self) -> Option<Arc<GameData>> {
+        self.data.get().cloned().flatten()
+    }
+
+    /// Game data, waiting for the startup decode to finish (item parsing needs the catalog).
+    pub fn wait_data(&self) -> Option<Arc<GameData>> {
+        self.data.wait().clone()
+    }
+
+    /// Store the auto-detected league list unless a newer `list_leagues` result is already there.
+    pub fn set_leagues_if_unset(&self, leagues: Vec<League>) {
+        self.leagues.lock().expect("leagues lock").get_or_insert(leagues);
+    }
+
     pub fn set_pinned(&self, pinned: bool) {
         self.pinned.store(pinned, Ordering::SeqCst);
     }
 
     pub fn is_pinned(&self) -> bool {
         self.pinned.load(Ordering::SeqCst)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn state() -> AppState {
+        AppState::new(None, Settings::default(), None, BackendKind::X11).unwrap()
+    }
+
+    fn league(id: &str) -> League {
+        League { id: id.into(), realm: None, text: None }
+    }
+
+    #[test]
+    fn auto_detect_does_not_overwrite_newer_leagues() {
+        let st = state();
+        *st.leagues.lock().unwrap() = Some(vec![league("Fresh")]);
+        st.set_leagues_if_unset(vec![league("Stale")]);
+        assert_eq!(st.leagues.lock().unwrap().as_ref().unwrap()[0].id, "Fresh");
+        let empty = state();
+        empty.set_leagues_if_unset(vec![league("Dawn")]);
+        assert_eq!(empty.league(), "Dawn");
+    }
+
+    #[test]
+    fn data_is_absent_until_decoded() {
+        let st = state();
+        assert!(st.data().is_none());
+        st.data.set(None).unwrap();
+        assert!(st.wait_data().is_none(), "a failed decode unblocks waiters");
+    }
+
+    #[test]
+    fn updated_sources_keep_unchanged_clients() {
+        let mut s = Settings::default();
+        let base = Sources::from_settings(&s).unwrap();
+        s.league.league = Some("Dawn".into());
+        s.trade.widen_pct = 25.0;
+        assert!(base.updated(&s).unwrap().is_none(), "unrelated change keeps everything");
+
+        s.trade.poesessid = Some("abc".into());
+        let next = base.updated(&s).unwrap().expect("poesessid rebuilds trade");
+        assert!(!Arc::ptr_eq(&base.trade, &next.trade));
+        assert!(Arc::ptr_eq(&base.ninja, &next.ninja) && Arc::ptr_eq(&base.scout, &next.scout));
+        assert_eq!(next.trade.config().poesessid.as_deref(), Some("abc"));
+
+        s.trade.contact = Some("me@example.com".into());
+        let ua = next.updated(&s).unwrap().expect("user agent rebuilds all");
+        assert!(!Arc::ptr_eq(&next.trade, &ua.trade) && !Arc::ptr_eq(&next.ninja, &ua.ninja));
+        assert!(ua.updated(&s).unwrap().is_none());
     }
 }

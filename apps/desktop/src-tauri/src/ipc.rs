@@ -8,13 +8,13 @@ use kalandra_trade::{PriceRequest, types::League};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 
-use crate::{flow, state::AppState};
+use crate::{events::ItemCopied, flow, state::AppState};
 
 /// Error shape for every command.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, thiserror::Error)]
 #[error("{kind}: {message}")]
 pub struct IpcError {
-    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `update`, `internal`.
+    /// `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `update`, `internal`.
     pub kind: String,
     pub message: String,
     pub retry_after_ms: Option<u64>,
@@ -80,12 +80,20 @@ pub fn get_settings(state: State<'_, Arc<AppState>>) -> Settings {
 
 #[tauri::command]
 #[specta::specta]
-pub fn save_settings(
+pub async fn save_settings(
     app: AppHandle,
     state: State<'_, Arc<AppState>>,
     settings: Settings,
 ) -> Result<Settings, IpcError> {
-    flow::apply_settings(&app, &state, settings)
+    apply_off_main(app, Arc::clone(&state), settings).await
+}
+
+/// Sync Tauri commands run on the main thread, and hotkey registration (XDG portal) can block
+/// for seconds, so settings are applied on the blocking pool.
+async fn apply_off_main(app: AppHandle, state: Arc<AppState>, settings: Settings) -> Result<Settings, IpcError> {
+    tauri::async_runtime::spawn_blocking(move || flow::apply_settings(&app, &state, settings))
+        .await
+        .map_err(|e| IpcError::new("internal", e.to_string()))?
 }
 
 #[tauri::command]
@@ -95,14 +103,13 @@ pub fn get_diagnostics(state: State<'_, Arc<AppState>>) -> Diagnostics {
         version: env!("CARGO_PKG_VERSION").into(),
         os: std::env::consts::OS.into(),
         backend: state.backend,
-        capabilities: state.capabilities(),
+        capabilities: state.capabilities_with_notes(),
         data_version: state
-            .data
-            .as_ref()
+            .data()
             .map(|d| d.manifest.game_version.clone().unwrap_or_else(|| d.manifest.generated_at.clone())),
         league: Some(state.league()),
         settings_path: state.paths.as_ref().map(|p| p.settings_file.display().to_string()),
-        log_path: state.log_path.as_ref().map(|p| p.display().to_string()),
+        log_path: state.log_path.get().map(|p| p.display().to_string()),
         recent_errors: state.errors.lock().expect("errors lock").iter().cloned().collect(),
     }
 }
@@ -166,10 +173,23 @@ pub fn hide_overlay(app: AppHandle, state: State<'_, Arc<AppState>>) -> Result<(
     flow::hide_overlay(&app, &state)
 }
 
+/// The last copied item as an `item-copied` payload. The overlay calls it once its listeners
+/// are registered, so an item copied before the webview was listening is not lost.
+#[tauri::command]
+#[specta::specta]
+pub fn get_overlay_snapshot(state: State<'_, Arc<AppState>>) -> Option<ItemCopied> {
+    overlay_snapshot(&state)
+}
+
+pub fn overlay_snapshot(state: &AppState) -> Option<ItemCopied> {
+    let last = state.last_item.lock().expect("last item lock").clone();
+    last.map(|(item, filters)| ItemCopied { item, filters, pinned: state.is_pinned() })
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinned: bool) -> Result<(), IpcError> {
-    state.set_pinned(pinned);
+    flow::set_pinned(&app, &state, pinned);
     flow::emit_overlay_state(&app, &state);
     Ok(())
 }
@@ -182,7 +202,7 @@ pub fn open_settings(app: AppHandle) -> Result<(), IpcError> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn rebind_hotkey(
+pub async fn rebind_hotkey(
     app: AppHandle,
     state: State<'_, Arc<AppState>>,
     action: HotkeyAction,
@@ -194,5 +214,5 @@ pub fn rebind_hotkey(
         HotkeyAction::PriceCheckPinned => settings.hotkeys.price_check_pinned = chord,
         HotkeyAction::OpenSettings => settings.hotkeys.open_settings = chord,
     }
-    flow::apply_settings(&app, &state, settings).map(|_| ())
+    apply_off_main(app, Arc::clone(&state), settings).await.map(|_| ())
 }

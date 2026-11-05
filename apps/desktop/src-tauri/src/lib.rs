@@ -10,6 +10,7 @@ pub mod state;
 #[cfg(any(debug_assertions, feature = "test-hook"))]
 pub mod testhook;
 pub mod tray;
+pub mod tray_i18n;
 pub mod updater;
 
 use std::sync::{Arc, atomic::Ordering};
@@ -34,6 +35,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::open_trade,
             ipc::hide_overlay,
             ipc::set_overlay_pinned,
+            ipc::get_overlay_snapshot,
             ipc::open_settings,
             ipc::rebind_hotkey,
             permissions::get_permissions,
@@ -65,25 +67,58 @@ pub fn export_bindings(path: &std::path::Path) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-fn init_logging(paths: Option<&Paths>) -> Option<std::path::PathBuf> {
-    use tracing_subscriber::{EnvFilter, fmt, prelude::*};
-    let filter = EnvFilter::try_from_env("KALANDRA_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
-    let file = paths.and_then(|p| {
-        std::fs::create_dir_all(&p.log_dir).ok()?;
-        let path = p.log_dir.join("kalandra.log");
-        std::fs::File::create(&path).ok().map(|f| (path, f))
-    });
-    let registry = tracing_subscriber::registry().with(filter).with(fmt::layer().with_writer(std::io::stderr));
-    match file {
-        Some((path, f)) => {
-            let _ = registry.with(fmt::layer().with_ansi(false).with_writer(std::sync::Mutex::new(f))).try_init();
-            Some(path)
-        }
-        None => {
-            let _ = registry.try_init();
-            None
+/// Log file slot: the subscriber is installed early, the file is attached once this process is
+/// known to be the primary instance (a second launch must not truncate the running one's log).
+type LogFile = Arc<std::sync::Mutex<Option<std::fs::File>>>;
+
+struct LogFileWriter(LogFile);
+
+impl std::io::Write for LogFileWriter {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        match self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_mut() {
+            Some(f) => f.write(buf),
+            None => Ok(buf.len()),
         }
     }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        match self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_mut() {
+            Some(f) => f.flush(),
+            None => Ok(()),
+        }
+    }
+}
+
+fn init_logging() -> LogFile {
+    use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+    let env = std::env::var("KALANDRA_LOG").ok();
+    let filter = EnvFilter::try_new(logic::log_filter(env.as_deref()))
+        .unwrap_or_else(|_| EnvFilter::new(logic::log_filter(None)));
+    let slot = LogFile::default();
+    let writer = Arc::clone(&slot);
+    let _ = tracing_subscriber::registry()
+        .with(filter)
+        .with(fmt::layer().with_writer(std::io::stderr))
+        .with(fmt::layer().with_ansi(false).with_writer(move || LogFileWriter(Arc::clone(&writer))))
+        .try_init();
+    slot
+}
+
+/// Create (truncate) the log file, owner-only on unix, and start writing to it.
+fn attach_log_file(slot: &LogFile, paths: Option<&Paths>) -> Option<std::path::PathBuf> {
+    let p = paths?;
+    std::fs::create_dir_all(&p.log_dir).ok()?;
+    let path = p.log_dir.join("kalandra.log");
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut opts, 0o600);
+    let file = opts.open(&path).ok()?;
+    // `mode` only applies on creation; tighten a pre-existing file too.
+    #[cfg(unix)]
+    let _ = std::fs::set_permissions(&path, std::os::unix::fs::PermissionsExt::from_mode(0o600));
+    *slot.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(file);
+    Some(path)
 }
 
 fn load_settings(paths: Option<&Paths>, errors: &mut Vec<String>) -> Settings {
@@ -107,55 +142,99 @@ fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Pl
     }
 }
 
-#[cfg(unix)]
-fn spawn_signal_triggers(app: &tauri::AppHandle) {
-    use signal_hook::{
-        consts::{SIGUSR1, SIGUSR2},
-        iterator::Signals,
+/// Decode the bundled game data off the main thread so the event loop starts immediately;
+/// item parsing waits for it via [`AppState::wait_data`].
+fn spawn_data_decode(state: &Arc<AppState>) {
+    let decode = |st: &AppState| {
+        let data = kalandra_data::bundled()
+            .map(Arc::new)
+            .inspect_err(|e| st.record_error(format!("bundled game data failed to load: {e}")))
+            .ok();
+        let _ = st.data.set(data);
     };
-    let Ok(mut signals) = Signals::new([SIGUSR1, SIGUSR2]) else { return };
+    let st = Arc::clone(state);
+    if let Err(e) = std::thread::Builder::new().name("kalandra-data".into()).spawn(move || decode(&st)) {
+        state.record_error(format!("spawn data thread: {e}"));
+        decode(state);
+    }
+}
+
+/// Install the shell's signal handlers. SIGUSR1 (pinned) is always ours: unhandled, its default
+/// action terminates the process. SIGUSR2 is ours unless a Wayland platform already maps it.
+#[cfg(unix)]
+fn install_signal_triggers(wayland_platform: bool) -> std::io::Result<signal_hook::iterator::Signals> {
+    use signal_hook::consts::{SIGUSR1, SIGUSR2};
+    let mut sigs = vec![SIGUSR1];
+    if logic::shell_handles_sigusr2(wayland_platform) {
+        sigs.push(SIGUSR2);
+    }
+    signal_hook::iterator::Signals::new(sigs)
+}
+
+#[cfg(unix)]
+fn spawn_signal_triggers(app: &tauri::AppHandle, state: &AppState, mut signals: signal_hook::iterator::Signals) {
     let app = app.clone();
-    std::thread::Builder::new()
-        .name("kalandra-signals".into())
-        .spawn(move || {
-            for sig in signals.forever() {
-                flow::trigger(&app, sig == SIGUSR1);
-            }
-        })
-        .ok();
+    let spawned = std::thread::Builder::new().name("kalandra-signals".into()).spawn(move || {
+        for sig in signals.forever() {
+            flow::trigger(&app, sig == signal_hook::consts::SIGUSR1);
+        }
+    });
+    if let Err(e) = spawned {
+        state.record_error(format!("spawn signal thread: {e}"));
+    }
+}
+
+/// Embedded config + assets, expanded once so both startup paths share it.
+fn context() -> tauri::Context<tauri::Wry> {
+    tauri::generate_context!()
+}
+
+/// Isolated e2e instances (test hook set) may run beside a user's instance.
+fn single_instance_enabled() -> bool {
+    #[cfg(any(debug_assertions, feature = "test-hook"))]
+    if testhook::port_from_env().is_some() {
+        return false;
+    }
+    true
+}
+
+/// `kalandra --trigger [--pinned]`: hand our argv to the running instance through the
+/// single-instance plugin (which exits this process during init). Reaching the end of `build`
+/// means no instance was running. Works on every OS, so Wayland compositor bindings can use it;
+/// `kill -USR2|-USR1 $(pidof kalandra)` remains a signal-based alternative on unix.
+fn forward_trigger() -> ! {
+    let built = tauri::Builder::default().plugin(tauri_plugin_single_instance::init(|_, _, _| {})).build(context());
+    match built {
+        Ok(_) => eprintln!("kalandra: no running instance to trigger"),
+        Err(e) => eprintln!("kalandra: cannot reach the running instance: {e}"),
+    }
+    std::process::exit(1);
 }
 
 pub fn run() {
+    // Process-wide env for the input hook; must run before any thread exists.
+    #[cfg(feature = "native")]
+    kalandra_platform::backend::init_process_env();
     let cli = cli::parse(std::env::args().skip(1));
-    let paths = Paths::resolve().ok();
     if cli.trigger {
-        let code = match paths.as_ref().map(|p| cli::send_trigger(&p.cache_dir, cli.pinned)) {
-            Some(Ok(())) => 0,
-            Some(Err(e)) => {
-                eprintln!("kalandra: {e}");
-                1
-            }
-            None => {
-                eprintln!("kalandra: cannot resolve cache directory");
-                1
-            }
-        };
-        std::process::exit(code);
+        forward_trigger();
     }
-
-    let log_path = init_logging(paths.as_ref());
+    let paths = Paths::resolve().ok();
+    let log_slot = init_logging();
     let mut errors = Vec::new();
     let settings = load_settings(paths.as_ref(), &mut errors);
     let backend = overlay::pre_init(settings.platform.backend_override);
     let platform = create_platform(backend, &mut errors);
-    let data = match kalandra_data::bundled() {
-        Ok(d) => Some(Arc::new(d)),
+    // Installed before the event loop so an early SIGUSR1 can't kill the app.
+    #[cfg(unix)]
+    let signals = match install_signal_triggers(platform.is_some() && backend == BackendKind::Wayland) {
+        Ok(s) => Some(s),
         Err(e) => {
-            errors.push(format!("bundled game data failed to load: {e}"));
+            errors.push(format!("signal triggers unavailable: {e}"));
             None
         }
     };
-    let state = match AppState::new(paths, settings, data, platform, backend, log_path) {
+    let state = match AppState::new(paths, settings, platform, backend) {
         Ok(s) => Arc::new(s),
         Err(e) => {
             eprintln!("kalandra: failed to initialise: {e}");
@@ -167,7 +246,21 @@ pub fn run() {
     }
 
     let builder = specta_builder();
-    let app = tauri::Builder::default().plugin(tauri_plugin_opener::init());
+    // Single instance first: a second launch exits during plugin init, before any setup below
+    // (and before it could truncate the running instance's log). It focuses settings, or with
+    // `--trigger [--pinned]` runs a price check in the running instance.
+    let mut app = tauri::Builder::default();
+    if single_instance_enabled() {
+        app = app.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            let cli = cli::parse(argv.into_iter().skip(1));
+            if cli.trigger {
+                flow::trigger(app, cli.pinned);
+            } else {
+                let _ = flow::show_settings(app, "settings");
+            }
+        }));
+    }
+    let app = app.plugin(tauri_plugin_opener::init());
     // The NSPanel plugin must be registered before `setup` so `overlay::prepare` can convert the window.
     #[cfg(target_os = "macos")]
     let app = app.plugin(overlay::macos::plugin());
@@ -178,29 +271,49 @@ pub fn run() {
             builder.mount_events(app);
             let handle = app.handle().clone();
             let state = Arc::clone(&app.state::<Arc<AppState>>());
-            if let Err(e) = tray::build(&handle) {
-                state.record_error(format!("tray unavailable: {e}"));
+            // Past single-instance init: this is the primary instance.
+            if let Some(path) = attach_log_file(&log_slot, state.paths.as_ref()) {
+                let _ = state.log_path.set(path);
             }
+            spawn_data_decode(&state);
+            let tray_ok = match tray::build(&handle, &state.settings().ui.language) {
+                Ok(()) => true,
+                Err(e) => {
+                    state.record_error(format!("tray unavailable: {e}"));
+                    false
+                }
+            };
+            // Without a tray there is no Quit item: closing settings must quit instead of hiding.
+            state.close_quits.store(!tray_ok, Ordering::SeqCst);
             if let Some(win) = app.get_webview_window(flow::OVERLAY)
                 && let Err(e) = overlay::prepare(&win)
             {
                 state.record_error(format!("overlay styling failed: {e}"));
             }
-            if let Err(e) = flow::register_hotkeys(&state, &state.settings()) {
-                state.record_error(format!("hotkeys: {e}"));
-            }
+            // Windows: start non-focusable; `flow::set_pinned` toggles it.
+            flow::set_pinned(&handle, &state, false);
+            // Portal registration can block for seconds; keep the main thread free.
+            let (st, h) = (Arc::clone(&state), handle.clone());
+            tauri::async_runtime::spawn_blocking(move || {
+                let _guard = st.apply_lock.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                let hotkeys_ok = match flow::register_hotkeys(&st, &st.settings()) {
+                    Ok(()) => st.capabilities().global_hotkeys,
+                    Err(e) => {
+                        st.record_error(format!("hotkeys: {e}"));
+                        false
+                    }
+                };
+                // No tray or no hotkey: the settings window is the only way in.
+                if logic::must_show_settings(tray_ok, hotkeys_ok) {
+                    let _ = flow::show_settings(&h, "settings");
+                }
+            });
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
             updater::init(&handle, &state);
-            // The Wayland backend already maps SIGUSR2 into its hotkey stream; avoid a double trigger.
             #[cfg(unix)]
-            if state.backend != BackendKind::Wayland {
-                spawn_signal_triggers(&handle);
-            }
-            if let Some(p) = state.paths.as_ref()
-                && let Err(e) = cli::write_pid(&p.cache_dir)
-            {
-                state.record_error(format!("pid file: {e}"));
+            if let Some(signals) = signals {
+                spawn_signal_triggers(&handle, &state, signals);
             }
             #[cfg(any(debug_assertions, feature = "test-hook"))]
             if let Some(port) = testhook::port_from_env()
@@ -216,7 +329,7 @@ pub fn run() {
             let st = Arc::clone(&state);
             tauri::async_runtime::spawn(async move {
                 match st.sources().trade.leagues().await {
-                    Ok(l) => *st.leagues.lock().expect("leagues lock") = Some(l),
+                    Ok(l) => st.set_leagues_if_unset(l),
                     Err(e) => st.record_error(format!("league auto-detect failed: {e}")),
                 }
             });
@@ -227,10 +340,17 @@ pub fn run() {
                 && window.label() == flow::SETTINGS
             {
                 api.prevent_close();
-                let _ = window.hide();
+                let app = window.app_handle();
+                let state = app.state::<Arc<AppState>>();
+                if state.close_quits.load(Ordering::SeqCst) {
+                    state.quitting.store(true, Ordering::SeqCst);
+                    app.exit(0);
+                } else {
+                    let _ = window.hide();
+                }
             }
         })
-        .build(tauri::generate_context!())
+        .build(context())
         .expect("error while building kalandra");
 
     app.run(|handle, event| {

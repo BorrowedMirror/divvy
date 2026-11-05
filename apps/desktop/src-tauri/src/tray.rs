@@ -7,7 +7,11 @@ use tauri::{
     tray::TrayIconBuilder,
 };
 
-use crate::{flow, state::AppState};
+use crate::{
+    flow,
+    state::AppState,
+    tray_i18n::{self, TrayLabelsOwned},
+};
 
 pub const TRAY_ID: &str = "kalandra-tray";
 
@@ -36,19 +40,35 @@ pub fn handle_menu(app: &AppHandle, id: &str) {
     }
 }
 
-pub fn build(app: &AppHandle) -> tauri::Result<()> {
-    let menu = Menu::with_items(
+fn menu(app: &AppHandle, l: &TrayLabelsOwned) -> tauri::Result<Menu<tauri::Wry>> {
+    Menu::with_items(
         app,
         &[
-            &MenuItem::with_id(app, ids::PRICE_CHECK, "Price check (pinned)", true, None::<&str>)?,
-            &MenuItem::with_id(app, ids::SETTINGS, "Settings…", true, None::<&str>)?,
-            &MenuItem::with_id(app, ids::DIAGNOSTICS, "Diagnostics", true, None::<&str>)?,
+            &MenuItem::with_id(app, ids::PRICE_CHECK, &l.price_check, true, None::<&str>)?,
+            &MenuItem::with_id(app, ids::SETTINGS, &l.settings, true, None::<&str>)?,
+            &MenuItem::with_id(app, ids::DIAGNOSTICS, &l.diagnostics, true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, ids::QUIT, "Quit kalandra", true, None::<&str>)?,
+            &MenuItem::with_id(app, ids::QUIT, &l.quit, true, None::<&str>)?,
         ],
-    )?;
+    )
+}
+
+/// Rebuild the tray menu in `language` (after `settings.ui.language` changed).
+pub fn relabel(app: &AppHandle, language: &str) {
+    let Some(tray) = app.tray_by_id(TRAY_ID) else { return };
+    let labels = tray_i18n::labels(language);
+    let result =
+        menu(app, &labels).and_then(|m| tray.set_menu(Some(m))).and_then(|()| tray.set_tooltip(Some(&labels.tooltip)));
+    if let Err(e) = result {
+        app.state::<Arc<AppState>>().record_error(format!("tray relabel: {e}"));
+    }
+}
+
+pub fn build(app: &AppHandle, language: &str) -> tauri::Result<()> {
+    let labels = tray_i18n::labels(language);
+    let menu = menu(app, &labels)?;
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
-        .tooltip("kalandra")
+        .tooltip(&labels.tooltip)
         .menu(&menu)
         .on_menu_event(|app, event| handle_menu(app, event.id().as_ref()));
     if let Some(icon) = app.default_window_icon() {
