@@ -5,7 +5,7 @@ mod keystate;
 mod overlay;
 mod tracker;
 
-pub use overlay::{X11Overlay, overlay};
+pub use overlay::{X11Overlay, activate_window, overlay};
 
 use crate::backend::Unsupported;
 use crate::detect::{BackendKind, EnvProbe};

@@ -101,15 +101,10 @@ pub fn trigger(app: &AppHandle, pinned: bool) {
 /// Record the pinned flag. On Windows the overlay is non-focusable (tao rewrites the ex-style on
 /// `show()`, wiping `WS_EX_NOACTIVATE`) except while pinned, so the filters can be typed into.
 pub fn set_pinned(app: &AppHandle, state: &AppState, pinned: bool) {
-    state.set_pinned(pinned);
-    #[cfg(target_os = "windows")]
-    if let Some(win) = app.get_webview_window(OVERLAY)
-        && let Err(e) = win.set_focusable(pinned)
-    {
-        state.record_error(format!("overlay focusable: {e}"));
-    }
-    #[cfg(not(target_os = "windows"))]
+    // The panel takes focus in both modes now (Esc, scrolling, typing); pinning only disables
+    // auto-hide and Esc-to-close.
     let _ = app;
+    state.set_pinned(pinned);
 }
 
 pub fn emit_overlay_state(app: &AppHandle, state: &AppState) {
@@ -156,9 +151,9 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     let _ = win.set_ignore_cursor_events(false);
     let _ = win.show();
     // A focused fullscreen game can sit above "always on top" windows (openbox and other X11
-    // WMs), so explicitly stack the panel above the game; pinned panels also take focus so
-    // their filters can be edited.
-    if let Err(e) = crate::overlay::bring_to_front(&win, game_window(state).map(|g| g.native_id), state.is_pinned()) {
+    // WMs), so explicitly stack the panel above the game and give it keyboard focus (Esc,
+    // scrolling, filter editing). `hide_overlay` hands focus back to the game.
+    if let Err(e) = crate::overlay::bring_to_front(&win, game_window(state).map(|g| g.native_id), true) {
         state.record_error(format!("overlay raise: {e}"));
     }
     state.overlay_visible.store(true, Ordering::SeqCst);
@@ -167,7 +162,11 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
 
 pub fn hide_overlay(app: &AppHandle, state: &AppState) -> Result<(), IpcError> {
     if let Some(win) = app.get_webview_window(OVERLAY) {
+        let had_focus = win.is_focused().unwrap_or(false);
         win.hide().map_err(|e| IpcError::new("internal", e.to_string()))?;
+        if had_focus {
+            crate::overlay::refocus_game(game_window(state).map(|g| g.native_id));
+        }
     }
     state.overlay_visible.store(false, Ordering::SeqCst);
     set_pinned(app, state, false);

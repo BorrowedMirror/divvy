@@ -49,3 +49,16 @@ pub fn bring_to_front(window: &tauri::WebviewWindow, owner: Option<u64>, focus: 
     }
     Ok(())
 }
+
+/// Return keyboard focus to the game window after the overlay closes (X11; elsewhere the OS
+/// gives focus back to the previously active window by itself).
+pub fn refocus_game(owner: Option<u64>) {
+    #[cfg(all(target_os = "linux", feature = "native"))]
+    if let Some(owner) = owner
+        && let Err(e) = kalandra_platform::backend::x11::activate_window(owner)
+    {
+        tracing::debug!("refocus game: {e}");
+    }
+    #[cfg(not(all(target_os = "linux", feature = "native")))]
+    let _ = owner;
+}

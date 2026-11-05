@@ -126,3 +126,16 @@ impl OverlayWindow for X11Overlay {
         }
     }
 }
+
+/// Give keyboard focus back to another client (the game) with a pager-source
+/// `_NET_ACTIVE_WINDOW` request, without touching that client's hints.
+pub fn activate_window(window: u64) -> Result<(), PlatformError> {
+    let window = u32::try_from(window).map_err(|_| PlatformError::Backend("x11 window id out of range".into()))?;
+    let conn = XConn::connect(None)?;
+    let ev = ClientMessageEvent::new(32, window, conn.atoms._NET_ACTIVE_WINDOW, [2, 0, 0, 0, 0]);
+    conn.conn
+        .send_event(false, conn.root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, ev)
+        .map_err(x_err)?
+        .check()
+        .map_err(x_err)
+}
