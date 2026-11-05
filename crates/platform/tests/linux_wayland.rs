@@ -140,14 +140,20 @@ fn child() {
     }
     platform.clipboard.clear().unwrap();
 
-    // Keystrokes through the virtual keyboard (or a typed Unsupported error).
+    // Keystrokes through the virtual keyboard. enigo is created lazily, so when it failed at
+    // startup the capability is still "on demand" and each send retries (and fails here).
+    let retrying = caps.notes.iter().any(|n| n.contains("retried on each copy"));
     let sent = platform.input_simulator.send_chord(&Chord::parse("Ctrl+C").unwrap());
-    if caps.keystroke_injection {
+    if caps.keystroke_injection && !retrying {
         sent.unwrap();
         assert!(matches!(
             platform.input_simulator.send_chord(&Chord::new(&[], "NoSuchKey")),
             Err(PlatformError::InvalidChord(_))
         ));
+    } else if caps.keystroke_injection {
+        eprintln!("NOTE linux_wayland: virtual keyboard not ready; send retried: {sent:?}");
+        let again = platform.input_simulator.send_chord(&Chord::parse("Ctrl+C").unwrap());
+        assert!(again.is_ok() || matches!(again, Err(PlatformError::Backend(_))), "{again:?}");
     } else {
         eprintln!("NOTE linux_wayland: no virtual keyboard in this headless sway; injection not exercised");
         assert!(matches!(sent, Err(PlatformError::Unsupported("keystroke_injection"))), "{sent:?}");

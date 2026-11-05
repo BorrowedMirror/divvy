@@ -136,35 +136,6 @@ pub fn modifier_vk(m: KeyModifier) -> u16 {
     }
 }
 
-/// How to synthesise a chord given the modifiers the user is physically holding right now
-/// (typically the hotkey's own modifiers, e.g. Ctrl from Ctrl+D).
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct ChordPlan {
-    /// Held modifiers that are *not* part of the chord: key-up them first or the game would see
-    /// e.g. Ctrl+Shift+C.
-    pub release_first: Vec<KeyModifier>,
-    /// Chord modifiers not already held: press before the key, release after (reverse order).
-    pub press: Vec<KeyModifier>,
-}
-
-/// Plan a chord. Chord modifiers the user already holds are left alone: releasing Ctrl while the
-/// user still holds Ctrl+D would let the D auto-repeat reach the game as plain `D` (RegisterHotKey
-/// only swallows D while Ctrl is logically down).
-pub fn plan_chord(chord: &[KeyModifier], held: &[KeyModifier]) -> ChordPlan {
-    let mut plan = ChordPlan::default();
-    for &m in held {
-        if !chord.contains(&m) && !plan.release_first.contains(&m) {
-            plan.release_first.push(m);
-        }
-    }
-    for &m in chord {
-        if !held.contains(&m) && !plan.press.contains(&m) {
-            plan.press.push(m);
-        }
-    }
-    plan
-}
-
 /// Event diffing for the window tracker. The Win32 hook thread feeds raw observations in and
 /// forwards whatever events come out.
 #[derive(Debug, Default)]
@@ -322,24 +293,6 @@ mod tests {
         assert_eq!(modifier_vk(KeyModifier::Alt), VK_MENU);
         assert_eq!(modifier_vk(KeyModifier::Shift), VK_SHIFT);
         assert_eq!(modifier_vk(KeyModifier::Meta), VK_LWIN);
-    }
-
-    #[test]
-    fn chord_plan_keeps_held_chord_modifiers() {
-        use KeyModifier::{Alt, Ctrl, Shift};
-        // Hotkey Ctrl+D held, sending Ctrl+C: nothing to press or release.
-        assert_eq!(plan_chord(&[Ctrl], &[Ctrl]), ChordPlan::default());
-        // Sending Ctrl+Alt+C while Ctrl held: press Alt only.
-        assert_eq!(plan_chord(&[Ctrl, Alt], &[Ctrl]), ChordPlan { release_first: vec![], press: vec![Alt] });
-        // Hotkey Ctrl+Shift+D: Shift must go up first.
-        assert_eq!(plan_chord(&[Ctrl], &[Ctrl, Shift]), ChordPlan { release_first: vec![Shift], press: vec![] });
-        // Nothing held.
-        assert_eq!(plan_chord(&[Ctrl, Alt], &[]), ChordPlan { release_first: vec![], press: vec![Ctrl, Alt] });
-        // Duplicates collapse.
-        assert_eq!(
-            plan_chord(&[Ctrl, Ctrl], &[Shift, Shift]),
-            ChordPlan { release_first: vec![Shift], press: vec![Ctrl] }
-        );
     }
 
     #[test]

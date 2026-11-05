@@ -7,12 +7,17 @@ use crate::{
     Platform, PlatformError, WindowEvent, WindowInfo, WindowTracker,
 };
 
+// Pure chord planning shared by every backend (unit-tested on all OSes).
+#[cfg_attr(not(feature = "native"), allow(dead_code))]
+pub(crate) mod chord_plan;
 // Shared by the x11, windows and macos backends: the single process-wide rdev hook and the
 // Chord -> global-hotkey mapping.
 #[cfg(feature = "native")]
 pub(crate) mod ghk;
 #[cfg(feature = "native")]
 pub(crate) mod hook;
+#[cfg(feature = "native")]
+pub use hook::{KEYBOARD_ONLY_ENV, init_process_env};
 #[cfg(all(target_os = "macos", feature = "native"))]
 pub mod macos;
 #[cfg(all(target_os = "linux", feature = "native"))]
