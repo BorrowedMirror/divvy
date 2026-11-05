@@ -63,3 +63,7 @@ pretty_assertions.workspace = true
 [target.'cfg(target_os = "linux")'.dev-dependencies]
 x11rb = { workspace = true, features = ["allow-unsafe-code", "shape"] }
 arboard.workspace = true
+
+# Windows backend (workstream D): raw Win32 calls for window tracking and overlay styling.
+[target.'cfg(windows)'.dependencies]
+windows.workspace = true
