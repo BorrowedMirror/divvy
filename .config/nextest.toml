@@ -1,0 +1,50 @@
+# cargo-nextest configuration. CI runs `cargo nextest run --profile ci`.
+# https://nexte.st/docs/configuration/
+
+[test-groups]
+# Tests that talk to a real display server / global input hook must not run concurrently:
+# they share one X server, one clipboard and one passive keyboard hook.
+serial-display = { max-threads = 1 }
+
+[profile.default]
+fail-fast = false
+slow-timeout = { period = "60s", terminate-after = 3 }
+
+[[profile.default.overrides]]
+filter = "package(kalandra-platform) & kind(test)"
+test-group = "serial-display"
+
+[[profile.default.overrides]]
+filter = "package(kalandra-desktop) & kind(test)"
+test-group = "serial-display"
+
+[profile.ci]
+fail-fast = false
+status-level = "skip"
+final-status-level = "flaky"
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[profile.ci.junit]
+path = "junit.xml"
+store-success-output = false
+store-failure-output = true
+
+# Live contract tests (`live_*`, #[ignore]d, run by contract.yml): never retried.
+# Listed first because the first matching override wins per setting.
+[[profile.ci.overrides]]
+filter = "package(kalandra-trade) & test(/live_/)"
+retries = 0
+slow-timeout = { period = "120s", terminate-after = 2 }
+
+# Integration tests touch the OS (windows, clipboard, sockets): retry, but report as flaky.
+[[profile.ci.overrides]]
+filter = "kind(test)"
+retries = { backoff = "exponential", count = 2, delay = "1s", max-delay = "10s" }
+
+[[profile.ci.overrides]]
+filter = "package(kalandra-platform) & kind(test)"
+test-group = "serial-display"
+
+[[profile.ci.overrides]]
+filter = "package(kalandra-desktop) & kind(test)"
+test-group = "serial-display"
