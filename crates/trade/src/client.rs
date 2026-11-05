@@ -108,6 +108,8 @@ impl TradeClient {
         limiter.seed(policy::SEARCH, &rules("5:10:60,15:60:300,30:300:1800"));
         limiter.seed(policy::FETCH, &rules("12:4:10,16:12:300,50:300:300"));
         limiter.seed(policy::EXCHANGE, &rules("5:15:60,10:90:300,30:300:1800"));
+        // Data endpoints are CDN-cached and send no headers; stay conservative anyway.
+        limiter.seed(policy::DATA, &rules("5:10:60"));
         let ttl = config.cache_ttl;
         Ok(Self {
             config,

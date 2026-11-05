@@ -359,6 +359,23 @@ async fn cancelled_waits_release_their_slot() {
 }
 
 #[tokio::test]
+async fn data_endpoints_are_throttled_before_any_headers() {
+    let server = MockServer::start().await;
+    Mock::given(path("/api/trade2/data/stats"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(fixture("stats.sample.json")))
+        .mount(&server)
+        .await;
+    let c =
+        TradeClient::new(TradeConfig { cache_ttl: Duration::ZERO, ..config(&server) }, Box::new(SystemClock)).unwrap();
+    for _ in 0..5 {
+        c.data("stats").await.unwrap();
+    }
+    // Seeded 5:10 rule: the sixth call inside 10s would queue ~10.5s > MAX_QUEUE_WAIT.
+    let err = c.data("stats").await.unwrap_err();
+    assert!(matches!(err, TradeError::RateLimited { .. }), "{err:?}");
+}
+
+#[tokio::test]
 async fn short_waits_are_slept_through() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
