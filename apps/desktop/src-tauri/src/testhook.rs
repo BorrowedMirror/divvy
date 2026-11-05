@@ -1,8 +1,9 @@
 //! Debug-only IPC test hook (see CONTRACTS.md). Enabled in debug builds or with the
 //! `test-hook` feature, and only when `KALANDRA_TEST_HOOK=<port>` is set. Binds 127.0.0.1 only.
 //!
-//! Line protocol: `trigger 0|1`, `paste <base64?>` is not supported — use `text <json string>`,
-//! `state`, `tray <menu-id>`, `settings`, `quit`. Each command answers one JSON line.
+//! Line protocol (see e2e/lib/hook.ts): `trigger 0|1`, `text <json string>`, `state`,
+//! `tray open_settings|open_diagnostics|price_check|quit`, `quit`. One reply line each:
+//! `ok`, `err <message>`, or a JSON object for `state`.
 use std::{
     io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
@@ -42,42 +43,62 @@ fn serve(app: &AppHandle, stream: TcpStream) {
     }
 }
 
-pub fn handle(app: &AppHandle, line: &str) -> serde_json::Value {
+/// One reply line per command: `ok`, `err <message>`, or JSON for `state`.
+pub fn handle(app: &AppHandle, line: &str) -> String {
     let state = app.state::<Arc<AppState>>();
     let (cmd, arg) = line.split_once(' ').unwrap_or((line, ""));
+    let arg = arg.trim();
     match cmd {
         "trigger" => {
-            flow::trigger(app, arg.trim() == "1");
-            serde_json::json!({"ok": true})
+            flow::trigger(app, arg == "1");
+            "ok".into()
         }
         "text" => match serde_json::from_str::<String>(arg) {
             Ok(text) => match flow::handle_item_text(app, &state, &text, false) {
-                Ok((item, _)) => serde_json::json!({"ok": true, "base_type": item.base_type}),
-                Err(e) => serde_json::json!({"ok": false, "error": e.to_string()}),
+                Ok(_) => "ok".into(),
+                Err(e) => format!("err {e}"),
             },
-            Err(e) => serde_json::json!({"ok": false, "error": e.to_string()}),
+            Err(e) => format!("err {e}"),
         },
         "state" => {
             let last_item = state.last_item.lock().expect("lock").as_ref().map(|(i, _)| i.base_type.clone());
             let last_price = state.last_price.lock().expect("lock").clone();
+            let settings_visible =
+                app.get_webview_window(flow::SETTINGS).and_then(|w| w.is_visible().ok()).unwrap_or(false);
             serde_json::json!({
-                "ok": true,
                 "overlay_visible": state.overlay_visible.load(Ordering::SeqCst),
-                "pinned": state.is_pinned(),
+                "overlay_pinned": state.is_pinned(),
+                "settings_visible": settings_visible,
+                "tray_present": app.tray_by_id(tray::TRAY_ID).is_some(),
                 "last_item": last_item,
                 "last_price": last_price,
-                "settings": state.settings(),
             })
+            .to_string()
         }
         "tray" => {
-            tray::handle_menu(app, arg.trim());
-            serde_json::json!({"ok": true})
+            let id = match arg {
+                "open_settings" => tray::ids::SETTINGS,
+                "open_diagnostics" => tray::ids::DIAGNOSTICS,
+                "price_check" => tray::ids::PRICE_CHECK,
+                "quit" => tray::ids::QUIT,
+                other => return format!("err unknown tray item `{other}`"),
+            };
+            if app.tray_by_id(tray::TRAY_ID).is_none() {
+                return "err tray is not available".into();
+            }
+            tray::handle_menu(app, id);
+            "ok".into()
         }
         "quit" => {
             state.quitting.store(true, Ordering::SeqCst);
-            app.exit(0);
-            serde_json::json!({"ok": true})
+            let app = app.clone();
+            // Reply first, then exit.
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(50));
+                app.exit(0);
+            });
+            "ok".into()
         }
-        other => serde_json::json!({"ok": false, "error": format!("unknown command `{other}`")}),
+        other => format!("err unknown command `{other}`"),
     }
 }

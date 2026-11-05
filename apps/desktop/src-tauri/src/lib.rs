@@ -180,6 +180,7 @@ pub fn run() {
                 state.record_error(format!("hotkeys: {e}"));
             }
             flow::spawn_hotkey_loop(&handle, &state);
+            flow::spawn_input_loop(&handle, &state);
             #[cfg(unix)]
             spawn_signal_triggers(&handle);
             if let Some(p) = state.paths.as_ref()

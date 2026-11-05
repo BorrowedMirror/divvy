@@ -67,6 +67,9 @@ pub fn trigger(app: &AppHandle, pinned: bool) {
     let state = Arc::clone(&app.state::<Arc<AppState>>());
     tauri::async_runtime::spawn(async move {
         if let Err(e) = run_price_check(app.clone(), state.clone(), pinned).await {
+            // Surface copy/parse failures in the overlay instead of failing silently.
+            state.set_pinned(pinned);
+            show_overlay(&app, &state);
             let _ = (crate::events::PriceFailed { error: e }).emit(&app);
         }
     });
@@ -204,6 +207,43 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
         .expect("spawn hotkey thread");
 }
 
+/// Key names that close an unpinned overlay when seen by the passive input hook.
+pub fn is_close_key(key: &str) -> bool {
+    matches!(key, "Escape" | "Esc")
+}
+
+/// Use the passive hook (where supported) so Esc closes the overlay even though it never
+/// takes keyboard focus from the game.
+pub fn spawn_input_loop(app: &AppHandle, state: &AppState) {
+    let Some(platform) = state.platform.clone() else { return };
+    if !platform.capabilities.passive_hook {
+        return;
+    }
+    let rx = match platform.input_listener.start() {
+        Ok(rx) => rx,
+        Err(e) => {
+            state.record_error(format!("passive input hook unavailable: {e}"));
+            return;
+        }
+    };
+    let app = app.clone();
+    std::thread::Builder::new()
+        .name("kalandra-input".into())
+        .spawn(move || {
+            for ev in rx {
+                if let kalandra_platform::InputEvent::KeyDown { key } = ev
+                    && is_close_key(&key)
+                {
+                    let state = app.state::<Arc<AppState>>();
+                    if state.overlay_visible.load(Ordering::SeqCst) && !state.is_pinned() {
+                        let _ = hide_overlay(&app, &state);
+                    }
+                }
+            }
+        })
+        .expect("spawn input thread");
+}
+
 /// Copy chord for the current settings (`Ctrl+C` / `Ctrl+Alt+C`).
 pub fn copy_chord(advanced: bool) -> Chord {
     if advanced {
@@ -223,6 +263,12 @@ mod tests {
         assert!(!is_allowed_trade_url("http://www.pathofexile.com/trade2"));
         assert!(!is_allowed_trade_url("https://evil.example.com/"));
         assert!(!is_allowed_trade_url("not a url"));
+    }
+
+    #[test]
+    fn close_keys() {
+        assert!(is_close_key("Escape"));
+        assert!(!is_close_key("KeyD"));
     }
 
     #[test]
