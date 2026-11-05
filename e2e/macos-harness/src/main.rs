@@ -182,7 +182,9 @@ async fn run() -> anyhow::Result<()> {
     println!("fake-game ready");
 
     let config_dir = std::env::temp_dir().join(format!("kalandra-harness-{}", std::process::id()));
-    std::fs::create_dir_all(&config_dir)?;
+    std::fs::create_dir_all(config_dir.join("config"))?;
+    // Mark first-run onboarding as done so the settings window stays hidden at a minimised start.
+    std::fs::write(config_dir.join("config/settings.toml"), "version = 1\n\n[ui]\nonboarding_done = true\n")?;
     let launch = || -> anyhow::Result<Guard> {
         let log = std::env::var("KALANDRA_LOG")
             .or_else(|_| std::env::var("RUST_LOG"))
