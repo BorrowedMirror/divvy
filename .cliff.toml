@@ -1,7 +1,7 @@
 # git-cliff: CHANGELOG.md and release notes from conventional commits.
 #   git cliff --tag v<version> -o CHANGELOG.md     (cargo xtask release does this)
 #   git cliff --latest --strip header              (release.yml release notes)
-# Types mirror .commit-config.toml.
+# Groups cover every type in .commit-config.toml (`release` commits are skipped).
 
 [changelog]
 header = """
@@ -40,19 +40,20 @@ sort_commits = "oldest"
 commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/nightah/kalandra/issues/${2}))" },
 ]
-# The HTML comments only order the groups; they are stripped in the output.
+# The HTML comments only order the groups (sorted as strings, hence zero-padded); they are
+# stripped in the output.
 commit_parsers = [
   { message = "^release", skip = true },
-  { message = "^feat", group = "<!-- 0 -->Features" },
-  { message = "^fix", group = "<!-- 1 -->Bug fixes" },
-  { message = "^perf", group = "<!-- 2 -->Performance" },
-  { message = "^refactor", group = "<!-- 3 -->Refactoring" },
-  { message = "^docs", group = "<!-- 4 -->Documentation" },
-  { message = "^build\\(data\\)", group = "<!-- 5 -->Game data" },
-  { message = "^build\\(deps\\)", group = "<!-- 6 -->Dependencies" },
-  { message = "^build", group = "<!-- 7 -->Build" },
-  { message = "^test", group = "<!-- 8 -->Tests" },
-  { message = "^ci", group = "<!-- 9 -->CI" },
-  { message = "^revert", group = "<!-- 10 -->Reverts" },
-  { body = ".*security", group = "<!-- 11 -->Security" },
+  # Before the type groups: the first matching parser wins.
+  { body = ".*security", group = "<!-- 00 -->Security" },
+  { message = "^feat", group = "<!-- 01 -->Features" },
+  { message = "^fix", group = "<!-- 02 -->Bug fixes" },
+  { message = "^perf", group = "<!-- 03 -->Performance" },
+  { message = "^refactor", group = "<!-- 04 -->Refactoring" },
+  { message = "^docs", group = "<!-- 05 -->Documentation" },
+  { message = "^build\\(data\\)", group = "<!-- 06 -->Game data" },
+  { message = "^build\\(deps\\)", group = "<!-- 07 -->Dependencies" },
+  { message = "^build", group = "<!-- 08 -->Build" },
+  { message = "^test", group = "<!-- 09 -->Tests" },
+  { message = "^ci", group = "<!-- 10 -->CI" },
 ]
