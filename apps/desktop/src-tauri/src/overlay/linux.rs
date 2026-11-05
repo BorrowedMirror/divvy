@@ -105,6 +105,25 @@ fn init_layer_shell(window: &tauri::WebviewWindow) -> Result<(), String> {
     Ok(())
 }
 
+/// X11: keep `window` above the game window (`owner` = its X id) even when the game is a
+/// focused fullscreen client (openbox and other WMs stack those above "always on top"), and
+/// optionally give it keyboard focus. No-op on the Wayland-native backend (layer-shell already
+/// sits in the overlay layer).
+pub fn raise_above(window: &tauri::WebviewWindow, owner: Option<u64>, focus: bool) -> Result<(), String> {
+    use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
+    if backend() == BackendKind::Wayland {
+        return Ok(());
+    }
+    let handle = window.window_handle().map_err(|e| format!("window handle: {e}"))?.as_raw();
+    let display = window.display_handle().map_err(|e| format!("display handle: {e}"))?.as_raw();
+    let styler = kalandra_platform::backend::x11::overlay(handle, display).map_err(|e| e.to_string())?;
+    styler.raise_above(owner).map_err(|e| e.to_string())?;
+    if focus {
+        styler.activate().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

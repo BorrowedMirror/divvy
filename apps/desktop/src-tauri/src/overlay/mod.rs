@@ -33,3 +33,19 @@ pub fn prepare(window: &tauri::WebviewWindow) -> Result<(), String> {
         Ok(())
     }
 }
+
+/// Bring `window` in front of the game window (`owner` = `WindowInfo::native_id`), optionally
+/// taking keyboard focus. Call after `show()`.
+pub fn bring_to_front(window: &tauri::WebviewWindow, owner: Option<u64>, focus: bool) -> Result<(), String> {
+    let _ = window.set_always_on_top(true);
+    #[cfg(target_os = "linux")]
+    linux::raise_above(window, owner, focus)?;
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = owner;
+        if focus {
+            window.set_focus().map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}

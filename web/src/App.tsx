@@ -5,7 +5,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { events } from "./bindings";
+import { commands, events } from "./bindings";
 import { createQueryClient, keys, useSettingsQuery } from "./hooks/queries";
 import { useTauriEvent } from "./hooks/useTauriEvent";
 import i18n, { supportedLanguage } from "./i18n";
@@ -96,25 +96,77 @@ function useRoute(): [Route, (r: Route) => void] {
   return [route, navigate];
 }
 
+/** True while Rust shows the settings window as an overlay covering the game window. */
+export function isGameOverlay(): boolean {
+  return document.documentElement.dataset.overlay === "1";
+}
+
+/**
+ * Settings-window chrome. In overlay mode (`html[data-overlay="1"]`, set by Rust when the
+ * window covers the game) the page is a transparent, dimmed backdrop with the content in a
+ * centred card; Esc or a click on the backdrop closes it. Otherwise it is a plain page.
+ */
+function SettingsShell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Popups, selects and the hotkey recorder handle (and prevent) their own Escape.
+      if (e.key !== "Escape" || e.defaultPrevented || !isGameOverlay()) return;
+      void commands.closeSettings();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  return (
+    <div
+      className="k-shell"
+      data-testid="settings-shell"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && isGameOverlay()) void commands.closeSettings();
+      }}
+    >
+      <div className="k-card" role="dialog" aria-label={t("settings.title")}>
+        <button
+          type="button"
+          className="k-overlay-close"
+          aria-label={t("overlay.close")}
+          onClick={() => void commands.closeSettings()}
+        >
+          ×
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function Routes() {
   const [route, navigate] = useRoute();
   const { t } = useTranslation();
+  if (route === "overlay") {
+    return (
+      <main data-route={route} className="min-h-screen">
+        <OverlayView />
+      </main>
+    );
+  }
   return (
     <main data-route={route} className="min-h-screen">
-      {(route === "settings" || route === "diagnostics") && <UpdateBanner />}
-      {route === "overlay" && <OverlayView />}
-      {route === "settings" && <SettingsView onOpenDiagnostics={() => navigate("diagnostics")} />}
-      {route === "onboarding" && <OnboardingView onDone={() => navigate("settings")} />}
-      {route === "diagnostics" && (
-        <>
-          <nav className="mx-auto max-w-2xl px-6 pt-4">
-            <button type="button" className="text-sm text-muted underline hover:text-fg" onClick={() => navigate("settings")}>
-              ← {t("settings.title")}
-            </button>
-          </nav>
-          <DiagnosticsView />
-        </>
-      )}
+      <SettingsShell>
+        {(route === "settings" || route === "diagnostics") && <UpdateBanner />}
+        {route === "settings" && <SettingsView onOpenDiagnostics={() => navigate("diagnostics")} />}
+        {route === "onboarding" && <OnboardingView onDone={() => navigate("settings")} />}
+        {route === "diagnostics" && (
+          <>
+            <nav className="mx-auto max-w-2xl px-6 pt-4">
+              <button type="button" className="text-sm text-muted underline hover:text-fg" onClick={() => navigate("settings")}>
+                ← {t("settings.title")}
+              </button>
+            </nav>
+            <DiagnosticsView />
+          </>
+        )}
+      </SettingsShell>
     </main>
   );
 }

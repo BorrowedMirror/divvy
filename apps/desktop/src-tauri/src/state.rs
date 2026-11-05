@@ -122,6 +122,8 @@ pub struct AppState {
     pub errors: Mutex<VecDeque<String>>,
     pub pinned: AtomicBool,
     pub overlay_visible: AtomicBool,
+    /// The settings window is currently shown as an overlay covering the game window.
+    pub settings_overlay: AtomicBool,
     pub quitting: AtomicBool,
     /// Closing settings quits the app (set when there is no tray to quit from).
     pub close_quits: AtomicBool,
@@ -154,6 +156,7 @@ impl AppState {
             errors: Mutex::new(VecDeque::new()),
             pinned: AtomicBool::new(false),
             overlay_visible: AtomicBool::new(false),
+            settings_overlay: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
             close_quits: AtomicBool::new(false),
             flow_gate: Arc::default(),

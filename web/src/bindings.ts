@@ -23,6 +23,8 @@ export const commands = {
 	 */
 	getOverlaySnapshot: () => __TAURI_INVOKE<ItemCopied_Serialize | null>("get_overlay_snapshot"),
 	openSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings")),
+	/**  Hide the settings window (overlay mode: Esc or a click on the backdrop). */
+	closeSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("close_settings")),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
 	getPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("get_permissions"),
 	requestPermission: (kind: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("request_permission", { kind })),

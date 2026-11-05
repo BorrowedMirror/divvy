@@ -3088,6 +3088,7 @@ dependencies = [
  "kalandra-platform",
  "kalandra-testkit",
  "kalandra-trade",
+ "raw-window-handle",
  "serde",
  "serde_json",
  "signal-hook",

@@ -155,7 +155,12 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     }
     let _ = win.set_ignore_cursor_events(false);
     let _ = win.show();
-    let _ = win.set_always_on_top(true);
+    // A focused fullscreen game can sit above "always on top" windows (openbox and other X11
+    // WMs), so explicitly stack the panel above the game; pinned panels also take focus so
+    // their filters can be edited.
+    if let Err(e) = crate::overlay::bring_to_front(&win, game_window(state).map(|g| g.native_id), state.is_pinned()) {
+        state.record_error(format!("overlay raise: {e}"));
+    }
     state.overlay_visible.store(true, Ordering::SeqCst);
     emit_overlay_state(app, state);
 }
@@ -170,13 +175,116 @@ pub fn hide_overlay(app: &AppHandle, state: &AppState) -> Result<(), IpcError> {
     Ok(())
 }
 
-/// Show the settings window on `route` (`settings` or `diagnostics`).
+/// The tracked game window, when the backend can track it (not on Wayland-native).
+pub fn game_window(state: &AppState) -> Option<kalandra_platform::WindowInfo> {
+    let platform = state.platform.as_ref()?;
+    if !platform.capabilities.window_tracking || state.backend == kalandra_platform::BackendKind::Wayland {
+        return None;
+    }
+    platform.window_tracker.game_window().filter(|g| g.rect.width > 0 && g.rect.height > 0)
+}
+
+/// Move/resize `win` to exactly cover the game window. Tracker rects are physical pixels
+/// everywhere except macOS, where Core Graphics reports points.
+pub fn cover_game(win: &tauri::WebviewWindow, rect: kalandra_platform::Rect) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = win.set_position(tauri::LogicalPosition::new(f64::from(rect.x), f64::from(rect.y)));
+        let _ = win.set_size(tauri::LogicalSize::new(f64::from(rect.width), f64::from(rect.height)));
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = win.set_position(PhysicalPosition::new(rect.x, rect.y));
+        let _ = win.set_size(tauri::PhysicalSize::new(rect.width, rect.height));
+    }
+}
+
+/// Default size of the settings window when it is not bound to the game.
+const SETTINGS_SIZE: (f64, f64) = (900.0, 680.0);
+
+/// Show the settings window on `route` (`settings`, `diagnostics`, `onboarding`).
+///
+/// With a tracked game window the settings become an overlay that covers the game exactly
+/// (undecorated, transparent backdrop, card centred, kept above the game); otherwise it is a
+/// normal decorated window.
 pub fn show_settings(app: &AppHandle, route: &str) -> Result<(), IpcError> {
     let win = app.get_webview_window(SETTINGS).ok_or_else(|| IpcError::new("internal", "settings window missing"))?;
-    let _ = win.eval(format!("window.location.hash = '#/{route}'"));
+    let state = app.state::<Arc<AppState>>();
+    let game = game_window(&state);
+    let overlay = game.is_some();
+    let was_overlay = state.settings_overlay.swap(overlay, Ordering::SeqCst);
+    if let Some(g) = &game {
+        let _ = win.set_decorations(false);
+        let _ = win.set_shadow(false);
+        let _ = win.set_skip_taskbar(true);
+        cover_game(&win, g.rect);
+    } else if was_overlay {
+        let _ = win.set_always_on_top(false);
+        let _ = win.set_skip_taskbar(false);
+        let _ = win.set_decorations(true);
+        let _ = win.set_size(tauri::LogicalSize::new(SETTINGS_SIZE.0, SETTINGS_SIZE.1));
+        let _ = win.center();
+    }
+    let _ = win.eval(format!(
+        "document.documentElement.dataset.overlay = '{}'; window.location.hash = '#/{route}'",
+        if overlay { "1" } else { "0" }
+    ));
     win.show().map_err(|e| IpcError::new("internal", e.to_string()))?;
-    let _ = win.set_focus();
+    if let Some(g) = game {
+        if let Err(e) = crate::overlay::bring_to_front(&win, Some(g.native_id), true) {
+            state.record_error(format!("settings raise: {e}"));
+        }
+    } else {
+        let _ = win.set_focus();
+    }
     Ok(())
+}
+
+/// Hide the settings window (Esc / backdrop click in overlay mode, close button).
+pub fn hide_settings(app: &AppHandle) -> Result<(), IpcError> {
+    let win = app.get_webview_window(SETTINGS).ok_or_else(|| IpcError::new("internal", "settings window missing"))?;
+    win.hide().map_err(|e| IpcError::new("internal", e.to_string()))
+}
+
+/// Keep the settings overlay glued to the game window while it moves or resizes; hide it when
+/// the game window goes away.
+pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
+    let Some(platform) = state.platform.clone() else { return };
+    if !platform.capabilities.window_tracking || state.backend == kalandra_platform::BackendKind::Wayland {
+        return;
+    }
+    let rx = match platform.window_tracker.subscribe() {
+        Ok(rx) => rx,
+        Err(e) => {
+            state.record_error(format!("game window tracking unavailable: {e}"));
+            return;
+        }
+    };
+    let app = app.clone();
+    let spawned = std::thread::Builder::new().name("kalandra-game-follow".into()).spawn(move || {
+        use kalandra_platform::WindowEvent;
+        for ev in rx {
+            let state = app.state::<Arc<AppState>>();
+            if !state.settings_overlay.load(Ordering::SeqCst) {
+                continue;
+            }
+            let Some(win) = app.get_webview_window(SETTINGS) else { continue };
+            if !win.is_visible().unwrap_or(false) {
+                continue;
+            }
+            match ev {
+                WindowEvent::Found(info) => cover_game(&win, info.rect),
+                WindowEvent::Moved { rect } => cover_game(&win, rect),
+                WindowEvent::FocusChanged { .. } => {}
+                WindowEvent::Lost => {
+                    let _ = win.hide();
+                }
+            }
+        }
+    });
+    if let Err(e) = spawned {
+        state.record_error(format!("spawn game follower: {e}"));
+    }
 }
 
 pub fn open_trade(app: &AppHandle, url: &str) -> Result<(), IpcError> {

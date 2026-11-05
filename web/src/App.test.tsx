@@ -1,11 +1,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { App } from "./App";
 import i18n from "./i18n";
 import { routeFromHash } from "./route";
 import { settings } from "./test/fixtures";
-import { emitEvent, flush, setupIpc } from "./test/ipc";
+import { callsOf, emitEvent, flush, setupIpc } from "./test/ipc";
 
 test("routeFromHash", () => {
   expect(routeFromHash("#/overlay")).toBe("overlay");
@@ -73,4 +73,57 @@ test("onboarding route: diagnostics links to it and Done returns to settings", a
   await waitFor(() => expect(done).toBeEnabled());
   await user.click(done);
   await waitFor(() => expect(screen.getByRole("main")).toHaveAttribute("data-route", "settings"));
+});
+
+describe("settings as a game overlay", () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.overlay;
+  });
+
+  test("Esc and a backdrop click close the settings overlay", async () => {
+    window.location.hash = "#/settings";
+    document.documentElement.dataset.overlay = "1";
+    const calls = setupIpc({ close_settings: () => null });
+    render(<App />);
+    const shell = await screen.findByTestId("settings-shell");
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+    expect(callsOf(calls, "close_settings")).toHaveLength(1);
+    // Clicks inside the card do not close it.
+    await userEvent.setup().click(screen.getByRole("dialog"));
+    expect(callsOf(calls, "close_settings")).toHaveLength(1);
+    await act(async () => {
+      shell.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    });
+    expect(callsOf(calls, "close_settings")).toHaveLength(2);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Close overlay" }));
+    expect(callsOf(calls, "close_settings")).toHaveLength(3);
+  });
+
+  test("a normal settings window ignores Esc and backdrop clicks", async () => {
+    window.location.hash = "#/settings";
+    const calls = setupIpc({ close_settings: () => null });
+    render(<App />);
+    const shell = await screen.findByTestId("settings-shell");
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      shell.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    });
+    expect(callsOf(calls, "close_settings")).toHaveLength(0);
+  });
+
+  test("an already handled Escape (popup, hotkey recorder) is ignored", async () => {
+    window.location.hash = "#/settings";
+    document.documentElement.dataset.overlay = "1";
+    const calls = setupIpc({ close_settings: () => null });
+    render(<App />);
+    await screen.findByTestId("settings-shell");
+    await act(async () => {
+      const e = new KeyboardEvent("keydown", { key: "Escape", cancelable: true });
+      e.preventDefault();
+      window.dispatchEvent(e);
+    });
+    expect(callsOf(calls, "close_settings")).toHaveLength(0);
+  });
 });

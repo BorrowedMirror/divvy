@@ -35,6 +35,7 @@ test-hook = []
 tauri-build.workspace = true
 
 [dependencies]
+raw-window-handle.workspace = true
 kalandra-config.workspace = true
 kalandra-core.workspace = true
 kalandra-data.workspace = true

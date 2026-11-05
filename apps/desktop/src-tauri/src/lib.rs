@@ -37,6 +37,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::set_overlay_pinned,
             ipc::get_overlay_snapshot,
             ipc::open_settings,
+            ipc::close_settings,
             ipc::rebind_hotkey,
             permissions::get_permissions,
             permissions::request_permission,
@@ -310,6 +311,7 @@ pub fn run() {
             });
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
+            flow::spawn_game_follower(&handle, &state);
             updater::init(&handle, &state);
             #[cfg(unix)]
             if let Some(signals) = signals {

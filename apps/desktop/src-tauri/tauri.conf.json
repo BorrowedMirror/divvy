@@ -33,7 +33,8 @@
         "url": "index.html#/settings",
         "width": 900,
         "height": 680,
-        "visible": false
+        "visible": false,
+        "transparent": true
       }
     ],
     "security": {

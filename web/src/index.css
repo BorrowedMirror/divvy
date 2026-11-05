@@ -78,6 +78,52 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Settings window bound over the game: transparent window, dimmed backdrop, centred card. */
+html[data-overlay="1"],
+html[data-overlay="1"] body {
+  background: transparent;
+}
+.k-overlay-close {
+  display: none;
+}
+html[data-overlay="1"] .k-shell {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgb(0 0 0 / 0.6);
+}
+html[data-overlay="1"] .k-card {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: var(--k-bg);
+  border: 1px solid color-mix(in srgb, var(--k-gold) 35%, transparent);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+}
+html[data-overlay="1"] .k-overlay-close {
+  display: block;
+  position: sticky;
+  top: 0.5rem;
+  float: right;
+  margin: 0.5rem 0.75rem 0 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  color: var(--k-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  z-index: 10;
+}
+html[data-overlay="1"] .k-overlay-close:hover {
+  color: var(--k-fg);
+  background: var(--k-surface-2);
+}
+
 /* The overlay window is transparent; only the panel card is opaque. */
 html[data-route="overlay"],
 html[data-route="overlay"] body {

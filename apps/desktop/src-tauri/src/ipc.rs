@@ -190,8 +190,22 @@ pub fn overlay_snapshot(state: &AppState) -> Option<ItemCopied> {
 #[specta::specta]
 pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinned: bool) -> Result<(), IpcError> {
     flow::set_pinned(&app, &state, pinned);
+    // Pinning from the panel means the user wants to edit filters: take keyboard focus.
+    if pinned
+        && let Some(win) = tauri::Manager::get_webview_window(&app, flow::OVERLAY)
+        && let Err(e) = crate::overlay::bring_to_front(&win, flow::game_window(&state).map(|g| g.native_id), true)
+    {
+        state.record_error(format!("overlay focus: {e}"));
+    }
     flow::emit_overlay_state(&app, &state);
     Ok(())
+}
+
+/// Hide the settings window (overlay mode: Esc or a click on the backdrop).
+#[tauri::command]
+#[specta::specta]
+pub fn close_settings(app: AppHandle) -> Result<(), IpcError> {
+    flow::hide_settings(&app)
 }
 
 #[tauri::command]
