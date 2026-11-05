@@ -81,10 +81,7 @@
     "openTrade": "Abrir trocas"
   },
   "age": {
-    "now": "agora mesmo",
-    "minutes": "há {{count}} min",
-    "hours": "há {{count}} h",
-    "days": "há {{count}} d"
+    "now": "agora mesmo"
   },
   "currency": {
     "divine": "div",

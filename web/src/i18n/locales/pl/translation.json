@@ -82,10 +82,7 @@
     "openTrade": "Otwórz handel"
   },
   "age": {
-    "now": "przed chwilą",
-    "minutes": "{{count}} min temu",
-    "hours": "{{count}} godz. temu",
-    "days": "{{count}} dni temu"
+    "now": "przed chwilą"
   },
   "currency": {
     "divine": "div",

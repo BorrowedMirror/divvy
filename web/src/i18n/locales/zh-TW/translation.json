@@ -79,10 +79,7 @@
     "openTrade": "開啟交易網站"
   },
   "age": {
-    "now": "剛剛",
-    "minutes": "{{count}} 分鐘前",
-    "hours": "{{count}} 小時前",
-    "days": "{{count}} 天前"
+    "now": "剛剛"
   },
   "currency": {
     "divine": "神聖",

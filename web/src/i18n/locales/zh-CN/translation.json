@@ -79,10 +79,7 @@
     "openTrade": "打开交易网站"
   },
   "age": {
-    "now": "刚刚",
-    "minutes": "{{count}} 分钟前",
-    "hours": "{{count}} 小时前",
-    "days": "{{count}} 天前"
+    "now": "刚刚"
   },
   "currency": {
     "divine": "神圣",

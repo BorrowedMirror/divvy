@@ -80,10 +80,7 @@
     "openTrade": "Open trade"
   },
   "age": {
-    "now": "just now",
-    "minutes": "{{count}}m ago",
-    "hours": "{{count}}h ago",
-    "days": "{{count}}d ago"
+    "now": "just now"
   },
   "currency": {
     "divine": "div",

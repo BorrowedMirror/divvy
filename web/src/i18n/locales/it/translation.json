@@ -81,10 +81,7 @@
     "openTrade": "Apri scambio"
   },
   "age": {
-    "now": "proprio ora",
-    "minutes": "{{count}} min fa",
-    "hours": "{{count}} h fa",
-    "days": "{{count}} g fa"
+    "now": "proprio ora"
   },
   "currency": {
     "divine": "div",

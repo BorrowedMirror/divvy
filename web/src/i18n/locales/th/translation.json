@@ -79,10 +79,7 @@
     "openTrade": "เปิดเว็บเทรด"
   },
   "age": {
-    "now": "เมื่อสักครู่",
-    "minutes": "{{count}} นาทีที่แล้ว",
-    "hours": "{{count}} ชม. ที่แล้ว",
-    "days": "{{count}} วันที่แล้ว"
+    "now": "เมื่อสักครู่"
   },
   "currency": {
     "divine": "div",

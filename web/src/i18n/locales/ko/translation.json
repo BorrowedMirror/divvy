@@ -79,10 +79,7 @@
     "openTrade": "거래소 열기"
   },
   "age": {
-    "now": "방금",
-    "minutes": "{{count}}분 전",
-    "hours": "{{count}}시간 전",
-    "days": "{{count}}일 전"
+    "now": "방금"
   },
   "currency": {
     "divine": "신성",

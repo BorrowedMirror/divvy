@@ -82,10 +82,7 @@
     "openTrade": "Открыть торговлю"
   },
   "age": {
-    "now": "только что",
-    "minutes": "{{count}} мин назад",
-    "hours": "{{count}} ч назад",
-    "days": "{{count}} дн. назад"
+    "now": "только что"
   },
   "currency": {
     "divine": "бож.",

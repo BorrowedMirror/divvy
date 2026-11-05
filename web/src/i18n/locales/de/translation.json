@@ -80,10 +80,7 @@
     "openTrade": "Handel öffnen"
   },
   "age": {
-    "now": "gerade eben",
-    "minutes": "vor {{count}} Min.",
-    "hours": "vor {{count}} Std.",
-    "days": "vor {{count}} T."
+    "now": "gerade eben"
   },
   "currency": {
     "divine": "div",

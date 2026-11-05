@@ -80,10 +80,7 @@
     "openTrade": "Ticareti aç"
   },
   "age": {
-    "now": "az önce",
-    "minutes": "{{count}} dk önce",
-    "hours": "{{count}} sa önce",
-    "days": "{{count}} g önce"
+    "now": "az önce"
   },
   "currency": {
     "divine": "div",

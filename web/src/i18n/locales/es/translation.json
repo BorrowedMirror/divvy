@@ -81,10 +81,7 @@
     "openTrade": "Abrir comercio"
   },
   "age": {
-    "now": "ahora mismo",
-    "minutes": "hace {{count}} min",
-    "hours": "hace {{count}} h",
-    "days": "hace {{count}} d"
+    "now": "ahora mismo"
   },
   "currency": {
     "divine": "div",
