@@ -1,0 +1,71 @@
+name: Price check is wrong
+description: The overlay parsed an item incorrectly or the price/filters look wrong.
+labels: [price-check, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The item text is the most useful thing you can give us: it becomes a regression test in our corpus.
+        In game, hover the item and press **Ctrl+Alt+C** (advanced copy) — or Ctrl+C — then paste below.
+  - type: textarea
+    id: item-text
+    attributes:
+      label: Item text
+      description: Paste the copied item text exactly as copied.
+      render: text
+      placeholder: |
+        Item Class: Rings
+        Rarity: Rare
+        ...
+        --------
+    validations:
+      required: true
+  - type: dropdown
+    id: what-wrong
+    attributes:
+      label: What is wrong?
+      multiple: true
+      options:
+        - Item was not recognised / parse error
+        - A modifier is missing or matched to the wrong stat
+        - Default filters are too strict or too loose
+        - Price is far off from the trade site
+        - Opening the trade site shows a different search
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      description: What did kalandra show, and what did you expect? A link to the equivalent trade-site search helps.
+    validations:
+      required: true
+  - type: input
+    id: league
+    attributes:
+      label: League
+      placeholder: Standard
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: kalandra version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Game client language
+      options:
+        - English
+        - Other (please say which below)
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot of the overlay
+      description: Optional, drag and drop an image.

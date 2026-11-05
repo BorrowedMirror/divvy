@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in kalandra does not work as expected.
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! For wrong prices on a specific item, use the **Price check is wrong** form instead.
+        Security issues: please follow [SECURITY.md](../blob/master/SECURITY.md) and do not open a public issue.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start kalandra and Path of Exile 2 (windowed fullscreen)
+        2. Hover an item and press the price-check hotkey
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: kalandra version
+      description: Shown in Settings -> Diagnostics.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Linux (X11)
+        - Linux (Wayland)
+        - Linux (Steam Deck / gamescope)
+    validations:
+      required: true
+  - type: input
+    id: os-details
+    attributes:
+      label: OS / desktop details
+      description: Version, desktop environment or compositor (e.g. GNOME 47, KDE 6.2, sway 1.10), Proton version if relevant.
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Paste the output of "Copy diagnostics" from Settings -> Diagnostics.
+      render: json
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant lines from the log file (location shown in Diagnostics). Remove your POESESSID if present.
+      render: text
