@@ -115,29 +115,110 @@ pub fn stat_aliases(text: &str) -> Vec<StatAlias> {
     out
 }
 
-/// `/api/trade2/data/stats` -> stats sorted by `(kind, id)`, with aliases.
+/// Exact alternative wordings of a trade template as it appears on items (never negated):
 ///
-/// `kind` is the trade2 group id (`explicit`, `implicit`, `rune`, ...). Aliases that
-/// collide with a real template of the same kind are dropped so they cannot create false
-/// ambiguities.
-pub fn stats(json: &str) -> anyhow::Result<Vec<StatDef>> {
-    let env: Envelope<StatGroup> = serde_json::from_str(json).context("parsing trade2 stats")?;
-    let mut by_id: BTreeMap<(String, String), StatDef> = BTreeMap::new();
-    for group in env.result {
-        for e in group.entries {
-            by_id.entry((group.id.clone(), e.id.clone())).or_insert_with(|| StatDef {
-                aliases: stat_aliases(&e.text),
-                id: e.id,
-                text: e.text,
-                kind: group.id.clone(),
-            });
+/// * a trailing disambiguation suffix is dropped: `#% increased Armour (Local)` ->
+///   `#% increased Armour`, `#% increased Duration (Charm)` -> `#% increased Duration`
+///   (items never print these suffixes; the matcher disambiguates local/global by item);
+/// * map-device wording: `... in Map` -> `... in your Maps` (tablets print the latter);
+/// * literal numbers baked into the template are templatized the way the matcher does
+///   (`... per 10 Dexterity` -> `... per # Dexterity`, `for 60 seconds` -> `for # seconds`);
+/// * level-less skill grants: `Grants Skill: Level # Parry` -> `Grants Skill: Parry`.
+pub fn wording_variants(text: &str) -> Vec<String> {
+    let mut out: Vec<String> = vec![text.to_owned()];
+    let push = |out: &mut Vec<String>, t: String| {
+        if !out.contains(&t) {
+            out.push(t);
+        }
+    };
+    if let Some(stripped) = strip_suffix(text) {
+        push(&mut out, stripped.to_owned());
+    }
+    for i in 0..out.len() {
+        let maps = in_your_maps(&out[i]);
+        if let Some(maps) = maps {
+            push(&mut out, maps);
         }
     }
-    let real: BTreeSet<(String, String)> = by_id.values().map(|s| (s.kind.clone(), s.text.clone())).collect();
-    let mut out: Vec<StatDef> = by_id.into_values().collect();
-    for stat in &mut out {
-        let kind = stat.kind.clone();
-        stat.aliases.retain(|a| !real.contains(&(kind.clone(), a.text.clone())));
+    for i in 0..out.len() {
+        let skill = out[i].strip_prefix("Grants Skill: Level # ").map(|s| format!("Grants Skill: {s}"));
+        let templated = kalandra_core::matcher::templatize(&out[i]);
+        push(&mut out, templated);
+        if let Some(skill) = skill {
+            push(&mut out, skill);
+        }
+    }
+    out.remove(0);
+    out
+}
+
+/// `X (Local)` -> `X`, for a trailing parenthesised capitalised label.
+fn strip_suffix(text: &str) -> Option<&str> {
+    let body = text.strip_suffix(')')?;
+    let open = body.rfind(" (")?;
+    let label = &body[open + 2..];
+    let is_label = label.starts_with(|c: char| c.is_ascii_uppercase())
+        && label.chars().all(|c| c.is_ascii_alphabetic() || c == ' ');
+    is_label.then(|| &text[..open])
+}
+
+/// Replace the whole word `in Map` with `in your Maps`.
+fn in_your_maps(text: &str) -> Option<String> {
+    let at = text.match_indices(" in Map").find(|(i, m)| {
+        let after = &text[i + m.len()..];
+        after.is_empty() || after.starts_with(' ')
+    })?;
+    Some(format!("{} in your Maps{}", &text[..at.0], &text[at.0 + at.1.len()..]))
+}
+
+/// `/api/trade2/data/stats` -> stats sorted by `(kind, id)`, with aliases.
+///
+/// `kind` is the trade2 group id (`explicit`, `implicit`, `rune`, ...). trade2 lists some
+/// ids several times with different wordings (`#% increased Experience gain` and
+/// `#% increased Experience gain in Map`); the first is `text`, the others become
+/// non-negated aliases, as do [`wording_variants`]. Generated [`stat_aliases`] that collide
+/// with a real template of the same kind are dropped so they cannot create false
+/// ambiguities; real wordings and wording variants are always kept.
+pub fn stats(json: &str) -> anyhow::Result<Vec<StatDef>> {
+    let env: Envelope<StatGroup> = serde_json::from_str(json).context("parsing trade2 stats")?;
+    let mut texts: BTreeMap<(String, String), Vec<String>> = BTreeMap::new();
+    for group in env.result {
+        for e in group.entries {
+            let t = texts.entry((group.id.clone(), e.id)).or_default();
+            if !t.contains(&e.text) {
+                t.push(e.text);
+            }
+        }
+    }
+    let real: BTreeSet<(&str, &str)> =
+        texts.iter().flat_map(|((kind, _), ts)| ts.iter().map(move |t| (kind.as_str(), t.as_str()))).collect();
+    let mut out = Vec::with_capacity(texts.len());
+    for ((kind, id), ts) in &texts {
+        let primary = &ts[0];
+        let mut wordings: Vec<String> = Vec::new();
+        for t in ts {
+            if t != primary {
+                wordings.push(t.clone());
+            }
+            wordings.extend(wording_variants(t));
+        }
+        let mut aliases: Vec<StatAlias> = Vec::new();
+        let mut push = |alias: StatAlias| {
+            if alias.text != *primary && !aliases.iter().any(|a| a.text == alias.text) {
+                aliases.push(alias);
+            }
+        };
+        for w in &wordings {
+            push(StatAlias { text: w.clone(), negate: false });
+        }
+        for w in std::iter::once(primary).chain(&wordings) {
+            for a in stat_aliases(w) {
+                if !real.contains(&(kind.as_str(), a.text.as_str())) {
+                    push(a);
+                }
+            }
+        }
+        out.push(StatDef { id: id.clone(), text: primary.clone(), kind: kind.clone(), aliases });
     }
     Ok(out)
 }
@@ -338,6 +419,56 @@ mod tests {
         // `#% reduced Mana Cost of Skills` is a real stat, so not an alias of stat_1.
         assert!(s[0].aliases.iter().all(|a| a.text != "#% reduced Mana Cost of Skills"));
         assert_eq!(s[2].aliases.len(), 2);
+    }
+
+    #[test]
+    fn wording_variants_strip_suffix_and_map_wording() {
+        assert_eq!(wording_variants("#% increased Armour (Local)"), ["#% increased Armour"]);
+        assert_eq!(wording_variants("#% increased Duration (Charm)"), ["#% increased Duration"]);
+        assert_eq!(
+            wording_variants("#% increased Gold found in Map (Gold Piles)"),
+            [
+                "#% increased Gold found in Map",
+                "#% increased Gold found in your Maps (Gold Piles)",
+                "#% increased Gold found in your Maps",
+            ]
+        );
+        assert_eq!(
+            wording_variants("#% increased Quantity of Items found in Map"),
+            ["#% increased Quantity of Items found in your Maps"]
+        );
+        assert_eq!(wording_variants("Breaches in Map have # Monsters"), ["Breaches in your Maps have # Monsters"]);
+        // Not a whole word / not a label suffix.
+        assert!(wording_variants("Delirium in Maps").is_empty());
+        assert!(wording_variants("# to Spirit (per socket)").is_empty());
+        assert!(wording_variants("Has ()").is_empty());
+        assert!(wording_variants("Dazes on Hit").is_empty());
+        assert_eq!(
+            wording_variants("#% increased Attack Speed per 10 Dexterity"),
+            ["#% increased Attack Speed per # Dexterity"]
+        );
+        assert_eq!(wording_variants("Grants Skill: Level # Parry"), ["Grants Skill: Parry"]);
+    }
+
+    #[test]
+    fn stats_keep_same_id_wordings_and_local_variants() {
+        let json = r##"{"result":[{"id":"explicit","entries":[
+            {"id":"explicit.xp","text":"#% increased Experience gain"},
+            {"id":"explicit.xp","text":"#% increased Experience gain in Map"},
+            {"id":"explicit.armour_local","text":"#% increased Armour (Local)"},
+            {"id":"explicit.armour","text":"#% increased Armour"}
+        ]}]}"##;
+        let s = stats(json).unwrap();
+        let by_id = |id: &str| s.iter().find(|s| s.id == id).unwrap();
+        let has =
+            |id: &str, text: &str, negate: bool| by_id(id).aliases.iter().any(|a| a.text == text && a.negate == negate);
+        assert_eq!(by_id("explicit.xp").text, "#% increased Experience gain");
+        assert!(has("explicit.xp", "#% increased Experience gain in Map", false));
+        assert!(has("explicit.xp", "#% increased Experience gain in your Maps", false));
+        assert!(has("explicit.xp", "#% reduced Experience gain in your Maps", true));
+        // Local variant keeps the unsuffixed wording even though a global stat has it.
+        assert!(has("explicit.armour_local", "#% increased Armour", false));
+        assert!(has("explicit.armour_local", "#% reduced Armour", true));
     }
 
     #[test]

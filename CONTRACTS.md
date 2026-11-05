@@ -184,6 +184,11 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   generated, plus `#% increased`<->`#% reduced` / `#% more`<->`#% less` (negate=true). The
   matcher should therefore extract unsigned numbers and apply `negate`.
   `base_in_magic_name` matches whole-word runs only, longest wins.
+- **kalandra-data (C, semantics):** `stats_by_template` returns real-template hits before
+  alias hits, and for `Explicit|Implicit|Sanctified` falls back to the trade2 `sanctum`
+  group (relic mods) when the primary kind has no hit. Aliases now also cover other trade
+  wordings of the same id, unsuffixed `(Local)`/`(Charm)`/`(Flask)`/... templates, tablet
+  `in your Maps`, templatized literal numbers and level-less `Grants Skill:` lines.
 - **A (core)**, additive only:
   - New helpers: `item::WEAPON_CLASSES`, `ItemClass::{trade_category, is_weapon}`, `Rarity::{from_header, trade_option}`,
     `matcher::extract_values`, `query::{widen_min, DEFAULT_ENABLED_STATS}`, `ExchangeRates::{rate, convert}`,

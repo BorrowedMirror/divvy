@@ -23,6 +23,15 @@ pub(crate) fn stat_kinds(kind: ModKind) -> &'static [&'static str] {
     }
 }
 
+/// Kinds searched only when [`stat_kinds`] finds nothing: relic (and sanctum) modifiers
+/// print as plain explicits/implicits but trade2 files them under `sanctum`.
+pub(crate) fn fallback_stat_kinds(kind: ModKind) -> &'static [&'static str] {
+    match kind {
+        ModKind::Implicit | ModKind::Explicit | ModKind::Sanctified => &["sanctum"],
+        _ => &[],
+    }
+}
+
 /// kind -> template -> [(stat index, negate)]
 type StatIndex = HashMap<String, HashMap<String, Vec<(usize, bool)>>>;
 
@@ -38,17 +47,19 @@ struct Indexed {
 impl Indexed {
     fn new(bundle: Bundle) -> Self {
         let mut stats: StatIndex = HashMap::new();
+        let mut add = |kind: &str, template: &str, i: usize, negate: bool| {
+            let hits = stats.entry(kind.to_owned()).or_default().entry(template.to_owned()).or_default();
+            if !hits.iter().any(|(j, _)| *j == i) {
+                hits.push((i, negate));
+            }
+        };
+        // Real templates first, then aliases, so direct hits always come first.
         for (i, stat) in bundle.stats.iter().enumerate() {
-            let by_template = stats.entry(stat.kind.clone()).or_default();
-            let mut add = |template: &str, negate: bool| {
-                let hits = by_template.entry(template.to_owned()).or_default();
-                if !hits.iter().any(|(j, _)| *j == i) {
-                    hits.push((i, negate));
-                }
-            };
-            add(&stat.text, false);
+            add(&stat.kind, &stat.text, i, false);
+        }
+        for (i, stat) in bundle.stats.iter().enumerate() {
             for alias in &stat.aliases {
-                add(&alias.text, alias.negate);
+                add(&stat.kind, &alias.text, i, alias.negate);
             }
         }
         Self {
@@ -95,12 +106,16 @@ impl GameData {
 
 impl Catalog for GameData {
     fn stats_by_template(&self, template: &str, kind: ModKind) -> Vec<(&StatDef, bool)> {
-        stat_kinds(kind)
-            .iter()
-            .filter_map(|k| self.inner.stats.get(*k)?.get(template))
-            .flatten()
-            .map(|&(i, negate)| (&self.inner.bundle.stats[i], negate))
-            .collect()
+        let lookup = |kinds: &[&str]| -> Vec<(&StatDef, bool)> {
+            kinds
+                .iter()
+                .filter_map(|k| self.inner.stats.get(*k)?.get(template))
+                .flatten()
+                .map(|&(i, negate)| (&self.inner.bundle.stats[i], negate))
+                .collect()
+        };
+        let hits = lookup(stat_kinds(kind));
+        if hits.is_empty() { lookup(fallback_stat_kinds(kind)) } else { hits }
     }
 
     fn base(&self, name: &str) -> Option<&BaseDef> {
