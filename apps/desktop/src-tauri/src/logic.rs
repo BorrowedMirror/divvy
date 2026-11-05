@@ -203,9 +203,11 @@ impl Default for FlowGate {
     }
 }
 
-/// Show settings at startup when the user would otherwise have no way in (no tray or no hotkey).
+/// Show settings at startup only when the user would otherwise have no way in: neither a tray
+/// icon nor a registered hotkey. With either one the app is reachable (missing hotkeys are
+/// explained by first-run onboarding and the diagnostics page, and `kalandra --trigger` works).
 pub fn must_show_settings(tray_ok: bool, hotkeys_ok: bool) -> bool {
-    !tray_ok || !hotkeys_ok
+    !tray_ok && !hotkeys_ok
 }
 
 #[cfg(test)]
@@ -215,8 +217,8 @@ mod tests {
     #[test]
     fn settings_shown_when_unreachable() {
         assert!(!must_show_settings(true, true));
-        assert!(must_show_settings(false, true));
-        assert!(must_show_settings(true, false));
+        assert!(!must_show_settings(false, true));
+        assert!(!must_show_settings(true, false));
         assert!(must_show_settings(false, false));
     }
 
