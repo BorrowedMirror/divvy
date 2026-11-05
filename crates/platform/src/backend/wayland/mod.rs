@@ -2,7 +2,7 @@
 //!
 //! What Wayland allows a regular client:
 //! - window tracking: impossible (no global window list) -> overlay anchored to the output;
-//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 / `kalandra --trigger`;
+//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 (price check) / SIGUSR1 (pinned) / `kalandra --trigger`;
 //! - passive hook: impossible;
 //! - keystrokes: zwp_virtual_keyboard_v1 (wlroots: sway, Hyprland, river...) via enigo, else
 //!   the `ydotool` CLI, else unsupported;
@@ -30,7 +30,7 @@ use crate::{
 use portal::PortalHotkeys;
 use ydotool::YdotoolSimulator;
 
-/// Hotkeys: the portal when available; SIGUSR2 always (fallback trigger).
+/// Hotkeys: the portal when available; SIGUSR2/SIGUSR1 always (fallback trigger).
 #[derive(Debug)]
 pub(crate) struct WaylandHotkeys {
     portal: Option<PortalHotkeys>,
@@ -44,7 +44,7 @@ impl WaylandHotkeys {
         signal::spawn_sigusr2(tx.clone())?;
         let portal = if use_portal {
             PortalHotkeys::connect(tx, portal::CONNECT_TIMEOUT)
-                .inspect_err(|e| tracing::info!(error = %e, "GlobalShortcuts portal unavailable; SIGUSR2 fallback"))
+                .inspect_err(|e| tracing::info!(error = %e, "GlobalShortcuts portal unavailable; signal fallback"))
                 .ok()
         } else {
             None
@@ -105,7 +105,8 @@ pub(crate) fn create_with(probe: &EnvProbe, use_portal: bool) -> Result<Platform
     caps.global_hotkeys = hotkeys.has_portal();
     if !caps.global_hotkeys {
         caps.notes.push(
-            "No GlobalShortcuts portal: bind `kalandra --trigger` (or `pkill -USR2 kalandra`) in your compositor"
+            "No GlobalShortcuts portal: bind `kalandra --trigger` (or `pkill -USR2 kalandra`; `-USR1` to pin) in \
+             your compositor"
                 .into(),
         );
     }
