@@ -1,1 +1,221 @@
-{}
+{
+  "common": {
+    "loading": "불러오는 중…",
+    "dismiss": "닫기"
+  },
+  "overlay": {
+    "title": "시세 확인",
+    "empty": "게임에서 아이템에 마우스를 올리고 {{hotkey}} 키를 누르면 시세를 확인합니다.",
+    "openSettings": "설정 열기",
+    "pin": "오버레이 고정",
+    "unpin": "고정 해제",
+    "close": "오버레이 닫기",
+    "league": "리그",
+    "widen": "범위 ±%",
+    "widenAria": "능력치 범위를 퍼센트만큼 넓히기",
+    "status": "판매자",
+    "stats": "능력치",
+    "misc": "아이템 속성",
+    "itemValue": "아이템 값: {{value}}",
+    "min": "최소",
+    "max": "최대",
+    "statMin": "{{stat}} 최솟값",
+    "statMax": "{{stat}} 최댓값",
+    "search": "검색",
+    "loading": "검색 중…"
+  },
+  "item": {
+    "rarityLabel": "희귀도:",
+    "ilvl": "템렙 {{value}}",
+    "quality": "퀄리티 {{value}}%",
+    "gemLevel": "레벨 {{value}}",
+    "waystoneTier": "등급 {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "타락",
+    "unidentified": "미확인"
+  },
+  "rarity": {
+    "normal": "일반",
+    "magic": "마법",
+    "rare": "희귀",
+    "unique": "고유",
+    "currency": "화폐",
+    "gem": "젬",
+    "other": "기타"
+  },
+  "misc": {
+    "item_level": "아이템 레벨",
+    "quality": "퀄리티",
+    "gem_level": "젬 레벨",
+    "waystone_tier": "경로석 등급",
+    "sockets": "홈",
+    "corrupted": "타락",
+    "any": "전체",
+    "yes": "예",
+    "no": "아니요"
+  },
+  "status": {
+    "securable": "즉시 구매",
+    "online": "온라인",
+    "any": "전체"
+  },
+  "source": {
+    "trade": "거래소",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "시세 · {{source}}",
+    "total_other": "매물 {{count}}개",
+    "empty": "조건에 맞는 매물이 없습니다. 일부 능력치를 끄거나 범위를 넓혀 보세요.",
+    "min": "최저",
+    "median": "중간값",
+    "max": "최고",
+    "listings": "매물",
+    "price": "가격",
+    "seller": "판매자",
+    "age": "등록",
+    "unknownSeller": "알 수 없음",
+    "openTrade": "거래소 열기"
+  },
+  "age": {
+    "now": "방금",
+    "minutes": "{{count}}분 전",
+    "hours": "{{count}}시간 전",
+    "days": "{{count}}일 전"
+  },
+  "currency": {
+    "divine": "신성",
+    "exalted": "엑잘",
+    "chaos": "카오스",
+    "gold": "골드"
+  },
+  "errors": {
+    "parse": "아이템을 읽을 수 없습니다",
+    "trade": "거래소에서 오류가 발생했습니다",
+    "rate_limited": "거래소 요청 한도를 초과했습니다",
+    "config": "설정 문제",
+    "platform": "플랫폼 오류",
+    "no_item": "클립보드에 아이템이 없습니다",
+    "internal": "문제가 발생했습니다",
+    "commandFailed": "작업에 실패했습니다",
+    "retryIn_other": "{{count}}초 후 다시 시도"
+  },
+  "settings": {
+    "title": "설정",
+    "tabs": {
+      "general": "일반",
+      "hotkeys": "단축키",
+      "trade": "거래",
+      "overlay": "오버레이",
+      "platform": "플랫폼"
+    },
+    "language": "언어",
+    "theme": "테마",
+    "startMinimised": "트레이로 최소화하여 시작",
+    "source": "시세 출처",
+    "leagueAuto": "리그 자동 감지",
+    "league": "리그",
+    "leaguesFailed": "리그를 불러올 수 없습니다: {{message}}",
+    "onlineOnly": "온라인 판매자만",
+    "widenPct": "능력치 범위 확장 (%)",
+    "enableAllStats": "기본적으로 모든 능력치 사용",
+    "contact": "연락처 이메일",
+    "contactHelp": "선택 사항입니다. User-Agent에 추가되어 문제가 생기면 GGG가 연락할 수 있습니다.",
+    "autoHide": "자동 숨김 지연 (ms)",
+    "opacity": "불투명도 (0.1–1)",
+    "side": "위치",
+    "backend": "플랫폼 백엔드",
+    "backendHelp": "진단에서 다른 설정을 권장하지 않는 한 자동으로 두세요. 재시작 후 적용됩니다.",
+    "save": "저장",
+    "saving": "저장 중…",
+    "saved": "설정을 저장했습니다",
+    "discard": "변경 사항 취소",
+    "saveFailed": "저장할 수 없습니다: {{message}}",
+    "loadFailed": "설정을 불러올 수 없습니다.",
+    "fixErrors": "저장하기 전에 표시된 항목을 수정하세요.",
+    "externalChange": "설정이 다른 곳에서 변경되었습니다.",
+    "reload": "최신 설정 불러오기"
+  },
+  "theme": {
+    "system": "시스템",
+    "dark": "어둡게",
+    "light": "밝게"
+  },
+  "side": {
+    "cursor": "커서 옆",
+    "left": "왼쪽 가장자리",
+    "right": "오른쪽 가장자리"
+  },
+  "backend": {
+    "auto": "자동",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (네이티브)",
+    "fake": "가상 (테스트용)"
+  },
+  "hotkeys": {
+    "help": "단축키를 클릭한 다음 새 키 조합을 누르세요. Esc를 누르면 취소됩니다.",
+    "price_check": "시세 확인",
+    "price_check_pinned": "시세 확인 (고정)",
+    "open_settings": "설정 열기",
+    "pressKeys": "키를 누르세요…",
+    "needsModifier": "Ctrl, Alt, Shift 또는 Meta를 함께 누르세요 (F 키만 단독 사용 가능).",
+    "rebindFailed": "단축키를 지정할 수 없습니다: {{message}}",
+    "advancedCopy": "고급 아이템 복사",
+    "advancedCopyHelp": "Ctrl+Alt+C를 사용해 옵션 등급과 범위를 가져옵니다."
+  },
+  "validation": {
+    "widen": "0에서 100 사이의 값을 입력하세요.",
+    "email": "올바른 이메일 주소를 입력하거나 비워 두세요.",
+    "league": "리그를 선택하거나 자동 감지를 켜세요.",
+    "autoHide": "0에서 10000 사이의 정수를 입력하세요 (0이면 자동 숨김 해제).",
+    "opacity": "0.1에서 1 사이의 값을 입력하세요.",
+    "hotkeyClash": "이 단축키는 이미 다른 작업에 사용 중입니다.",
+    "poesessid": "영문자와 숫자만 사용하세요."
+  },
+  "diagnostics": {
+    "title": "진단",
+    "version": "버전",
+    "os": "OS",
+    "backend": "백엔드",
+    "dataVersion": "게임 데이터",
+    "league": "리그",
+    "settingsPath": "설정 파일",
+    "logPath": "로그 파일",
+    "capabilities": "기능",
+    "supported": "지원됨",
+    "unsupported": "지원 안 됨",
+    "missingPermissions": "누락된 권한",
+    "recentErrors": "최근 오류",
+    "noErrors": "기록된 오류가 없습니다.",
+    "copyReport": "보고서 복사",
+    "copied": "보고서를 클립보드에 복사했습니다",
+    "copyFailed": "클립보드에 접근할 수 없습니다",
+    "loadFailed": "진단 정보를 불러올 수 없습니다."
+  },
+  "capability": {
+    "window_tracking": "게임 창 추적",
+    "overlay_always_on_top": "오버레이 항상 위",
+    "overlay_click_through": "클릭 통과 오버레이",
+    "global_hotkeys": "전역 단축키",
+    "passive_hook": "수동 입력 후킹",
+    "keystroke_injection": "키 입력 전송 (아이템 복사)",
+    "clipboard": "클립보드 접근"
+  },
+  "guidance": {
+    "accessibility": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용에서 kalandra를 허용하세요. 단축키와 아이템 복사에 필요합니다.",
+    "screenRecording": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 화면 기록에서 kalandra를 허용해야 게임 창을 찾을 수 있습니다. 그런 다음 kalandra를 재시작하세요.",
+    "wayland": "Wayland 네이티브 모드: 전역 단축키는 데스크톱 포털을 거치고, 오버레이는 게임 창이 아닌 화면 기준으로 배치되며, 키 입력 전송을 사용하지 못할 수 있습니다. 컴포지터가 지원하면 X11/XWayland를 사용하세요.",
+    "gnome": "GNOME은 kalandra에 필요한 Wayland 기능을 지원하지 않으므로 XWayland(X11)로 실행됩니다. 게임도 XWayland에서 실행하세요.",
+    "generic": "누락된 권한: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "시세 확인 (고정)",
+    "settings": "설정…",
+    "diagnostics": "진단",
+    "quit": "kalandra 종료",
+    "tooltip": "kalandra"
+  }
+}

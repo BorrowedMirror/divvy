@@ -1,1 +1,221 @@
-{}
+{
+  "common": {
+    "loading": "読み込み中…",
+    "dismiss": "閉じる"
+  },
+  "overlay": {
+    "title": "価格チェック",
+    "empty": "ゲーム内でアイテムにカーソルを合わせ、{{hotkey}} を押すと価格をチェックします。",
+    "openSettings": "設定を開く",
+    "pin": "オーバーレイを固定",
+    "unpin": "固定を解除",
+    "close": "オーバーレイを閉じる",
+    "league": "リーグ",
+    "widen": "範囲 ±%",
+    "widenAria": "ステータスの範囲をパーセントで広げる",
+    "status": "出品者",
+    "stats": "ステータス",
+    "misc": "アイテムの特性",
+    "itemValue": "アイテムの値: {{value}}",
+    "min": "最小",
+    "max": "最大",
+    "statMin": "{{stat}} の最小値",
+    "statMax": "{{stat}} の最大値",
+    "search": "検索",
+    "loading": "検索中…"
+  },
+  "item": {
+    "rarityLabel": "レアリティ:",
+    "ilvl": "iLv {{value}}",
+    "quality": "品質 {{value}}%",
+    "gemLevel": "レベル {{value}}",
+    "waystoneTier": "ティア {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "コラプト",
+    "unidentified": "未鑑定"
+  },
+  "rarity": {
+    "normal": "ノーマル",
+    "magic": "マジック",
+    "rare": "レア",
+    "unique": "ユニーク",
+    "currency": "カレンシー",
+    "gem": "ジェム",
+    "other": "その他"
+  },
+  "misc": {
+    "item_level": "アイテムレベル",
+    "quality": "品質",
+    "gem_level": "ジェムレベル",
+    "waystone_tier": "ウェイストーンのティア",
+    "sockets": "ソケット",
+    "corrupted": "コラプト",
+    "any": "指定なし",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "status": {
+    "securable": "即時購入",
+    "online": "オンライン",
+    "any": "指定なし"
+  },
+  "source": {
+    "trade": "トレードサイト",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "価格 · {{source}}",
+    "total_other": "{{count}} 件の出品",
+    "empty": "条件に一致する出品はありません。一部のステータスを無効にするか、範囲を広げてください。",
+    "min": "最安",
+    "median": "中央値",
+    "max": "最高",
+    "listings": "出品",
+    "price": "価格",
+    "seller": "出品者",
+    "age": "出品日時",
+    "unknownSeller": "不明",
+    "openTrade": "トレードを開く"
+  },
+  "age": {
+    "now": "たった今",
+    "minutes": "{{count}}分前",
+    "hours": "{{count}}時間前",
+    "days": "{{count}}日前"
+  },
+  "currency": {
+    "divine": "ディヴァイン",
+    "exalted": "エクザ",
+    "chaos": "カオス",
+    "gold": "ゴールド"
+  },
+  "errors": {
+    "parse": "アイテムを読み取れませんでした",
+    "trade": "トレードサイトがエラーを返しました",
+    "rate_limited": "トレードサイトのレート制限中です",
+    "config": "設定に問題があります",
+    "platform": "プラットフォームエラー",
+    "no_item": "クリップボードにアイテムがありません",
+    "internal": "問題が発生しました",
+    "commandFailed": "操作に失敗しました",
+    "retryIn_other": "{{count}} 秒後に再試行"
+  },
+  "settings": {
+    "title": "設定",
+    "tabs": {
+      "general": "一般",
+      "hotkeys": "ホットキー",
+      "trade": "トレード",
+      "overlay": "オーバーレイ",
+      "platform": "プラットフォーム"
+    },
+    "language": "言語",
+    "theme": "テーマ",
+    "startMinimised": "トレイに最小化して起動",
+    "source": "価格ソース",
+    "leagueAuto": "リーグを自動検出",
+    "league": "リーグ",
+    "leaguesFailed": "リーグを読み込めませんでした: {{message}}",
+    "onlineOnly": "オンラインの出品者のみ",
+    "widenPct": "ステータス範囲の拡大 (%)",
+    "enableAllStats": "すべてのステータスを既定で有効にする",
+    "contact": "連絡先メールアドレス",
+    "contactHelp": "任意です。User-Agent に追加され、問題が起きた際に GGG が連絡できるようになります。",
+    "autoHide": "自動非表示までの時間 (ms)",
+    "opacity": "不透明度 (0.1–1)",
+    "side": "表示位置",
+    "backend": "プラットフォームのバックエンド",
+    "backendHelp": "診断で別の設定を勧められない限り、自動のままにしてください。再起動後に反映されます。",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "設定を保存しました",
+    "discard": "変更を破棄",
+    "saveFailed": "保存できませんでした: {{message}}",
+    "loadFailed": "設定を読み込めませんでした。",
+    "fixErrors": "保存する前に、強調表示された項目を修正してください。",
+    "externalChange": "設定が別の場所で変更されました。",
+    "reload": "最新を読み込む"
+  },
+  "theme": {
+    "system": "システム",
+    "dark": "ダーク",
+    "light": "ライト"
+  },
+  "side": {
+    "cursor": "カーソルの横",
+    "left": "左端",
+    "right": "右端"
+  },
+  "backend": {
+    "auto": "自動",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (ネイティブ)",
+    "fake": "ダミー (テスト用)"
+  },
+  "hotkeys": {
+    "help": "ショートカットをクリックし、新しいキーの組み合わせを押してください。Esc でキャンセルします。",
+    "price_check": "価格チェック",
+    "price_check_pinned": "価格チェック (固定)",
+    "open_settings": "設定を開く",
+    "pressKeys": "キーを押してください…",
+    "needsModifier": "Ctrl、Alt、Shift、Meta のいずれかを追加してください (単独で使えるのは F キーのみです)。",
+    "rebindFailed": "ショートカットを割り当てられませんでした: {{message}}",
+    "advancedCopy": "詳細アイテムコピー",
+    "advancedCopyHelp": "Ctrl+Alt+C を使い、Mod のティアと範囲を取得します。"
+  },
+  "validation": {
+    "widen": "0〜100 の値を入力してください。",
+    "email": "有効なメールアドレスを入力するか、空欄にしてください。",
+    "league": "リーグを選択するか、自動検出を有効にしてください。",
+    "autoHide": "0〜10000 の整数を入力してください (0 で自動非表示を無効にします)。",
+    "opacity": "0.1〜1 の値を入力してください。",
+    "hotkeyClash": "このショートカットは別の操作で使用されています。",
+    "poesessid": "英字と数字のみ使用できます。"
+  },
+  "diagnostics": {
+    "title": "診断",
+    "version": "バージョン",
+    "os": "OS",
+    "backend": "バックエンド",
+    "dataVersion": "ゲームデータ",
+    "league": "リーグ",
+    "settingsPath": "設定ファイル",
+    "logPath": "ログファイル",
+    "capabilities": "機能",
+    "supported": "対応",
+    "unsupported": "非対応",
+    "missingPermissions": "不足している権限",
+    "recentErrors": "最近のエラー",
+    "noErrors": "エラーは記録されていません。",
+    "copyReport": "レポートをコピー",
+    "copied": "レポートをクリップボードにコピーしました",
+    "copyFailed": "クリップボードにアクセスできませんでした",
+    "loadFailed": "診断情報を読み込めませんでした。"
+  },
+  "capability": {
+    "window_tracking": "ゲームウィンドウの追跡",
+    "overlay_always_on_top": "オーバーレイを最前面に表示",
+    "overlay_click_through": "クリック透過オーバーレイ",
+    "global_hotkeys": "グローバルホットキー",
+    "passive_hook": "パッシブ入力フック",
+    "keystroke_injection": "キー入力の送信 (アイテムのコピー)",
+    "clipboard": "クリップボードへのアクセス"
+  },
+  "guidance": {
+    "accessibility": "macOS: システム設定 → プライバシーとセキュリティ → アクセシビリティを開き、kalandra を有効にしてください。ホットキーとアイテムのコピーに必要です。",
+    "screenRecording": "macOS: システム設定 → プライバシーとセキュリティ → 画面収録を開き、kalandra を有効にしてください。ゲームウィンドウの検出に必要です。その後 kalandra を再起動してください。",
+    "wayland": "Wayland ネイティブモード: グローバルホットキーはデスクトップポータル経由になり、オーバーレイはゲームウィンドウではなく画面に固定され、キー入力の送信は使えない場合があります。コンポジターが対応していれば X11/XWayland を使用してください。",
+    "gnome": "GNOME は kalandra に必要な Wayland 機能に対応していないため、GNOME では XWayland (X11) 経由で動作します。ゲームも XWayland で実行してください。",
+    "generic": "不足している権限: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "価格チェック (固定)",
+    "settings": "設定…",
+    "diagnostics": "診断",
+    "quit": "kalandra を終了",
+    "tooltip": "kalandra"
+  }
+}
