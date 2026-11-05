@@ -167,3 +167,4 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
 
 ## Contract changes
 (append here)
+- (D windows) Additive: `kalandra_platform::backend::windows` re-exports `raw_window_handle` (`pub use raw_window_handle;`) so `apps/desktop` can call `HasWindowHandle`/`HasDisplayHandle` on its Tauri window and pass the raw handles to `backend::windows::overlay` without a direct dependency or unsafe code. `backend::windows::overlay(RawWindowHandle, RawDisplayHandle)` follows the table above (the doc comment in `backend/mod.rs` still shows the older one-argument form).
