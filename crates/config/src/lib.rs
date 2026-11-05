@@ -175,10 +175,28 @@ pub struct Paths {
     pub settings_file: PathBuf,
 }
 
+/// Environment variable that relocates every path under one root (portable mode, tests).
+pub const CONFIG_DIR_ENV: &str = "KALANDRA_CONFIG_DIR";
+
 impl Paths {
     /// From `directories::ProjectDirs` (`au.nerv.kalandra`), or `KALANDRA_CONFIG_DIR` override.
     pub fn resolve() -> Result<Self, ConfigError> {
-        todo!("workstream J (config)")
+        Self::resolve_with(|key| std::env::var(key).ok())
+    }
+
+    /// Like [`Paths::resolve`], with an injectable environment lookup.
+    pub fn resolve_with(env: impl Fn(&str) -> Option<String>) -> Result<Self, ConfigError> {
+        if let Some(root) = env(CONFIG_DIR_ENV).filter(|v| !v.trim().is_empty()) {
+            return Ok(Self::under(Path::new(&root)));
+        }
+        let dirs = directories::ProjectDirs::from("au", "nerv", "kalandra").ok_or(ConfigError::NoConfigDir)?;
+        let config_dir = dirs.config_dir().to_path_buf();
+        Ok(Self {
+            settings_file: config_dir.join("settings.toml"),
+            config_dir,
+            cache_dir: dirs.cache_dir().to_path_buf(),
+            log_dir: dirs.state_dir().unwrap_or_else(|| dirs.data_local_dir()).join("logs"),
+        })
     }
 
     /// All paths rooted under `root` (tests, portable mode).
@@ -192,22 +210,227 @@ impl Paths {
     }
 }
 
+fn invalid(field: impl Into<String>, reason: impl Into<String>) -> ConfigError {
+    ConfigError::Invalid { field: field.into(), reason: reason.into() }
+}
+
+/// One migration step: upgrades a document from version `i` to `i + 1`, where `i` is the step's
+/// index in [`MIGRATIONS`].
+type MigrationStep = fn(toml::Table) -> Result<toml::Table, ConfigError>;
+
+/// Ordered migration steps; `MIGRATIONS[i]` upgrades `vi -> v(i+1)`. To add v2, append a step
+/// and bump [`SETTINGS_VERSION`].
+const MIGRATIONS: &[MigrationStep] = &[migrate_v0_to_v1];
+
+const _: () = assert!(MIGRATIONS.len() == SETTINGS_VERSION as usize, "one migration step per version");
+
+fn document_version(doc: &toml::Table) -> Result<u32, ConfigError> {
+    match doc.get("version") {
+        None => Ok(0),
+        Some(toml::Value::Integer(v)) => {
+            u32::try_from(*v).map_err(|_| invalid("version", format!("{v} is not a valid version")))
+        }
+        Some(other) => Err(invalid("version", format!("expected an integer, found {}", other.type_str()))),
+    }
+}
+
+/// Fetch (or create) the sub-table `name` of `doc`.
+fn section<'a>(doc: &'a mut toml::Table, name: &str) -> Result<&'a mut toml::Table, ConfigError> {
+    doc.entry(name)
+        .or_insert_with(|| toml::Value::Table(toml::Table::new()))
+        .as_table_mut()
+        .ok_or_else(|| invalid(name, "expected a table"))
+}
+
+/// v0 (unversioned, pre-sections) stored `league`, `hotkey` and `online_only` at the top level:
+///
+/// ```toml
+/// league = "Standard"
+/// hotkey = "Ctrl+D"
+/// online_only = false
+/// ```
+///
+/// v1 moves them into `[league]`, `[hotkeys]` and `[trade]`. An explicit v0 league meant
+/// "always use this league", i.e. auto-detect off; an empty one meant auto-detect.
+fn migrate_v0_to_v1(mut doc: toml::Table) -> Result<toml::Table, ConfigError> {
+    if let Some(value) = doc.remove("league") {
+        match value {
+            toml::Value::String(league) => {
+                let sec = section(&mut doc, "league")?;
+                if league.trim().is_empty() {
+                    sec.insert("auto_detect".into(), true.into());
+                } else {
+                    sec.insert("auto_detect".into(), false.into());
+                    sec.insert("league".into(), league.into());
+                }
+            }
+            // Already sectioned, merely missing a version number.
+            toml::Value::Table(t) => {
+                doc.insert("league".into(), t.into());
+            }
+            other => return Err(invalid("league", format!("expected a string, found {}", other.type_str()))),
+        }
+    }
+    if let Some(value) = doc.remove("hotkey") {
+        let raw = value.as_str().ok_or_else(|| invalid("hotkey", "expected a string"))?;
+        let chord = Chord::parse(raw).map_err(|e| invalid("hotkey", e.to_string()))?;
+        let chord = toml::Table::try_from(chord)?;
+        section(&mut doc, "hotkeys")?.insert("price_check".into(), chord.into());
+    }
+    if let Some(value) = doc.remove("online_only") {
+        let online = value.as_bool().ok_or_else(|| invalid("online_only", "expected a boolean"))?;
+        section(&mut doc, "trade")?.insert("online_only".into(), online.into());
+    }
+    doc.insert("version".into(), 1.into());
+    Ok(doc)
+}
+
 /// Upgrade a raw TOML document from any older version to [`SETTINGS_VERSION`].
-pub fn migrate(_doc: toml::Table) -> Result<toml::Table, ConfigError> {
-    todo!("workstream J (config)")
+pub fn migrate(mut doc: toml::Table) -> Result<toml::Table, ConfigError> {
+    let found = document_version(&doc)?;
+    if found > SETTINGS_VERSION {
+        return Err(ConfigError::TooNew { found });
+    }
+    for step in &MIGRATIONS[found as usize..] {
+        doc = step(doc)?;
+    }
+    Ok(doc)
+}
+
+/// `KeyboardEvent.code` names (and common aliases) that are modifiers, not chord keys.
+const MODIFIER_KEY_CODES: &[&str] = &[
+    "Control",
+    "ControlLeft",
+    "ControlRight",
+    "Ctrl",
+    "Alt",
+    "AltLeft",
+    "AltRight",
+    "AltGraph",
+    "Option",
+    "Shift",
+    "ShiftLeft",
+    "ShiftRight",
+    "Meta",
+    "MetaLeft",
+    "MetaRight",
+    "OSLeft",
+    "OSRight",
+    "Cmd",
+    "Super",
+    "Win",
+];
+
+fn validate_chord(field: &str, chord: &Chord) -> Result<(), ConfigError> {
+    let key = chord.key.trim();
+    if key.is_empty() {
+        return Err(invalid(field, "chord has no key"));
+    }
+    if MODIFIER_KEY_CODES.iter().any(|m| m.eq_ignore_ascii_case(key)) {
+        return Err(invalid(field, format!("`{key}` is a modifier; a chord needs a non-modifier key")));
+    }
+    Ok(())
+}
+
+/// Canonical form for comparing chords: modifier order and duplicates don't matter.
+fn chord_key(chord: &Chord) -> (Vec<kalandra_platform::KeyModifier>, String) {
+    let mut mods = chord.modifiers.clone();
+    mods.sort_by_key(|m| *m as u8);
+    mods.dedup();
+    (mods, chord.key.trim().to_owned())
+}
+
+fn looks_like_email(s: &str) -> bool {
+    let Some((local, domain)) = s.split_once('@') else { return false };
+    !local.is_empty()
+        && !domain.contains('@')
+        && !s.chars().any(char::is_whitespace)
+        && domain.split('.').count() >= 2
+        && domain.split('.').all(|label| !label.is_empty())
 }
 
 /// Validate semantic constraints (ranges, chords distinct, ...).
-pub fn validate(_s: &Settings) -> Result<(), ConfigError> {
-    todo!("workstream J (config)")
+pub fn validate(s: &Settings) -> Result<(), ConfigError> {
+    if s.version > SETTINGS_VERSION {
+        return Err(ConfigError::TooNew { found: s.version });
+    }
+
+    if !s.league.auto_detect && s.league.league.as_deref().is_none_or(|l| l.trim().is_empty()) {
+        return Err(invalid("league.league", "must be set when league.auto_detect is false"));
+    }
+
+    let hotkeys = [
+        ("hotkeys.price_check", &s.hotkeys.price_check),
+        ("hotkeys.price_check_pinned", &s.hotkeys.price_check_pinned),
+        ("hotkeys.open_settings", &s.hotkeys.open_settings),
+    ];
+    for (i, (field, chord)) in hotkeys.iter().enumerate() {
+        validate_chord(field, chord)?;
+        if let Some((other, _)) = hotkeys[..i].iter().find(|(_, c)| chord_key(c) == chord_key(chord)) {
+            return Err(invalid(*field, format!("`{chord}` is already bound to {other}")));
+        }
+    }
+
+    if !(0.0..=100.0).contains(&s.trade.widen_pct) {
+        return Err(invalid("trade.widen_pct", format!("{} is not within 0..=100", s.trade.widen_pct)));
+    }
+    if let Some(contact) = s.trade.contact.as_deref().filter(|c| !looks_like_email(c)) {
+        return Err(invalid("trade.contact", format!("`{contact}` does not look like an e-mail address")));
+    }
+
+    if !(0.1..=1.0).contains(&s.overlay.opacity) {
+        return Err(invalid("overlay.opacity", format!("{} is not within 0.1..=1.0", s.overlay.opacity)));
+    }
+    if s.overlay.auto_hide_ms > 10_000 {
+        return Err(invalid("overlay.auto_hide_ms", format!("{} exceeds 10000", s.overlay.auto_hide_ms)));
+    }
+    Ok(())
+}
+
+fn io_err(path: &Path) -> impl FnOnce(std::io::Error) -> ConfigError + '_ {
+    move |source| ConfigError::Io { path: path.to_path_buf(), source }
 }
 
 /// Load settings; missing file -> defaults. Runs [`migrate`] then [`validate`].
-pub fn load(_paths: &Paths) -> Result<Settings, ConfigError> {
-    todo!("workstream J (config)")
+pub fn load(paths: &Paths) -> Result<Settings, ConfigError> {
+    let path = &paths.settings_file;
+    let text = match std::fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Settings::default()),
+        Err(e) => return Err(io_err(path)(e)),
+    };
+    let doc: toml::Table = toml::from_str(&text)?;
+    let settings: Settings = migrate(doc)?.try_into()?;
+    validate(&settings)?;
+    Ok(settings)
 }
 
-/// Atomically write settings (temp file + rename).
-pub fn save(_paths: &Paths, _settings: &Settings) -> Result<(), ConfigError> {
-    todo!("workstream J (config)")
+/// Atomically write settings (temp file in the same directory, fsync, rename).
+pub fn save(paths: &Paths, settings: &Settings) -> Result<(), ConfigError> {
+    use std::io::Write as _;
+
+    validate(settings)?;
+    let text = toml::to_string_pretty(settings)?;
+    let target = &paths.settings_file;
+    let dir = target.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
+    std::fs::create_dir_all(dir).map_err(io_err(dir))?;
+
+    let file_name = target.file_name().map_or_else(|| "settings.toml".into(), |n| n.to_string_lossy().into_owned());
+    let tmp = dir.join(format!(".{file_name}.{}.tmp", std::process::id()));
+    let write = || -> std::io::Result<()> {
+        let mut f = std::fs::File::create(&tmp)?;
+        f.write_all(text.as_bytes())?;
+        f.sync_all()?;
+        std::fs::rename(&tmp, target)
+    };
+    if let Err(e) = write() {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(io_err(target)(e));
+    }
+    // Persist the rename itself; best effort, not every platform/filesystem supports it.
+    #[cfg(unix)]
+    if let Ok(d) = std::fs::File::open(dir) {
+        let _ = d.sync_all();
+    }
+    Ok(())
 }

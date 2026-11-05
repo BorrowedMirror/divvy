@@ -1,0 +1,47 @@
+---
+source: crates/config/tests/settings.rs
+expression: "toml::to_string_pretty(&Settings::default()).unwrap()"
+---
+version = 1
+
+[league]
+auto_detect = true
+
+[hotkeys]
+advanced_copy = true
+
+[hotkeys.price_check]
+modifiers = ["ctrl"]
+key = "KeyD"
+
+[hotkeys.price_check_pinned]
+modifiers = [
+    "ctrl",
+    "alt",
+]
+key = "KeyD"
+
+[hotkeys.open_settings]
+modifiers = [
+    "ctrl",
+    "alt",
+]
+key = "KeyS"
+
+[trade]
+source = "trade"
+online_only = true
+widen_pct = 10.0
+enable_all_stats = false
+
+[overlay]
+auto_hide_ms = 400
+opacity = 0.95
+side = "cursor"
+
+[ui]
+language = "en"
+theme = "system"
+start_minimised = true
+
+[platform]
