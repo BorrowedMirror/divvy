@@ -1,0 +1,101 @@
+[
+  {
+    "ItemId": 14035,
+    "CategoryApiId": "accessory",
+    "Text": "Mageblood Utility Belt",
+    "Name": "Mageblood",
+    "Type": "Utility Belt",
+    "ApiId": null,
+    "BaseItemTypeId": null,
+    "CurrentPrice": 70000,
+    "IconUrl": "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQmVsdHMvVW5pcXVlcy9NYWdlYmxvb2QiLCJ3IjoyLCJoIjoxLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/79ac3ce7d3/Mageblood.png"
+  },
+  {
+    "ItemId": 22,
+    "CategoryApiId": "accessory",
+    "Text": "Headhunter Heavy Belt",
+    "Name": "Headhunter",
+    "Type": "Heavy Belt",
+    "ApiId": null,
+    "BaseItemTypeId": null,
+    "CurrentPrice": 3934.031284916201,
+    "IconUrl": "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQmVsdHMvVW5pcXVlcy9IZWFkaHVudGVyIiwidyI6MiwiaCI6MSwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/24accb4eec/Headhunter.png"
+  },
+  {
+    "ItemId": 1,
+    "CategoryApiId": "accessory",
+    "Text": "Andvarius Gold Ring",
+    "Name": "Andvarius",
+    "Type": "Gold Ring",
+    "ApiId": null,
+    "BaseItemTypeId": null,
+    "CurrentPrice": 15,
+    "IconUrl": "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvUmluZ3MvVW5pcXVlcy9BbmR2YXJpdXMiLCJ3IjoxLCJoIjoxLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/62ed73e3a0/Andvarius.png"
+  },
+  {
+    "ItemId": 286,
+    "CategoryApiId": "currency",
+    "Text": "Orb of Alchemy",
+    "Name": null,
+    "Type": null,
+    "ApiId": "alch",
+    "BaseItemTypeId": "Metadata/Items/Currency/CurrencyUpgradeToRare",
+    "CurrentPrice": 3.921722497541591,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lVcGdyYWRlVG9SYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/9b80b44821/CurrencyUpgradeToRare.png"
+  },
+  {
+    "ItemId": 287,
+    "CategoryApiId": "currency",
+    "Text": "Chaos Orb",
+    "Name": null,
+    "Type": null,
+    "ApiId": "chaos",
+    "BaseItemTypeId": "Metadata/Items/Currency/CurrencyRerollRare",
+    "CurrentPrice": 104.21937842778793,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/c0ca392a78/CurrencyRerollRare.png"
+  },
+  {
+    "ItemId": 290,
+    "CategoryApiId": "currency",
+    "Text": "Exalted Orb",
+    "Name": null,
+    "Type": null,
+    "ApiId": "exalted",
+    "BaseItemTypeId": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "CurrentPrice": 1,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png"
+  },
+  {
+    "ItemId": 291,
+    "CategoryApiId": "currency",
+    "Text": "Divine Orb",
+    "Name": null,
+    "Type": null,
+    "ApiId": "divine",
+    "BaseItemTypeId": "Metadata/Items/Currency/CurrencyModValues",
+    "CurrentPrice": 966.5638733842405,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png"
+  },
+  {
+    "ItemId": 4513,
+    "CategoryApiId": "uncutgems",
+    "Text": "Uncut Support Gem (Level 2)",
+    "Name": null,
+    "Type": null,
+    "ApiId": "uncut-support-gem-2",
+    "BaseItemTypeId": "Metadata/Items/Gems/SupportGemUncut2",
+    "CurrentPrice": 20,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvR2Vtcy9VbmN1dFN1cHBvcnRHZW0iLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/d1ffe1c951/UncutSupportGem.png"
+  },
+  {
+    "ItemId": 4557,
+    "CategoryApiId": "uncutgems",
+    "Text": "Uncut Skill Gem (Level 2)",
+    "Name": null,
+    "Type": null,
+    "ApiId": "uncut-skill-gem-2",
+    "BaseItemTypeId": "Metadata/Items/Gems/SkillGemUncut2",
+    "CurrentPrice": 0.2,
+    "IconUrl": "https://web.poecdn.com//gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvR2Vtcy9VbmN1dFNraWxsR2VtIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/97f0ceba15/UncutSkillGem.png"
+  }
+]

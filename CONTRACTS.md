@@ -196,3 +196,20 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   - Magic items keep the full name line in `base_type`; `StatMatcher::match_item` moves it to `name` and sets
     `base_type` to the base found by `Catalog::base_in_magic_name`. Negated matches flip the sign of `Modifier::values`.
   - `FilterSet::to_trade_query` always returns the search body; the `Exchange` route body is built by `kalandra-trade`.
+
+### Workstream B (trade), all additive
+- Paths verified live 2026-11-05: search `/api/trade2/search/poe2/{league}`, fetch
+  `/api/trade2/fetch/{ids}?query={id}&realm=poe2`, exchange `/api/trade2/exchange/poe2/{league}`;
+  site links `/trade2/search/poe2/{league}/{id}` and `/trade2/exchange/poe2/{league}/{id}`.
+- `ratelimit`: `format_rules`, `format_states`, `Display` for `Rule`/`RuleState`;
+  `RateLimiter::{seed, blocked_for, policy_name}`.
+- `client`: `TradeClient::{exchange, exchange_url, search_listings, exchange_listings, listings_for, static_id, limiter}`,
+  `ListingPage`, `exchange_body`, `fetch_listing`, `exchange_listing`, consts `FETCH_CHUNK`, `MAX_QUEUE_WAIT`,
+  module `client::policy`. Requests that would queue longer than `MAX_QUEUE_WAIT` (10s) or hit an active
+  restriction return `TradeError::RateLimited` without sending.
+- `types`: `ExchangeResponse`, `ExchangeEntry`, `ExchangeListing`, `ExchangeOffer`, `ExchangeSide`.
+- New module `rates`: `value_in_base`, `display_price`, `aggregated_summary`, `exchange_name`.
+- `PoeNinjaSource`: private `http`/`cache` fields, `with_cache_ttl(self, Duration)`, `rates(league)`.
+- `Poe2ScoutSource`: private `http`/cache fields, `with_cache_ttl(base_url, user_agent, ttl)`, `rates(league)`.
+- Exchange-route (`QueryRoute::Exchange`) bodies are built in trade (`exchange_body`), not by
+  `FilterSet::to_trade_query`; the want id is resolved from `data/static` by `base_type` (or `name`).

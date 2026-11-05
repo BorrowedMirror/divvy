@@ -4,6 +4,7 @@ pub mod client;
 pub mod error;
 pub mod ninja;
 pub mod ratelimit;
+pub mod rates;
 pub mod scout;
 pub mod source;
 pub mod types;

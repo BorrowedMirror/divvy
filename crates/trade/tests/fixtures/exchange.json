@@ -1,0 +1,93 @@
+{
+  "id": "H4sIAAAAAAAAAxXIwQmAMAxA0V3-uRN0Fekh0IABSYXGqpTuLr7jm_SQuDp50s6w5mTEX1Zil6HkDX3kCK2UxC0ef1Ub5kpZH37Mg11AAAAA",
+  "complexity": null,
+  "result": {
+    "083698c07f70e49c4b0833133bf2e6656dd90ed1dca75860a9dbb8": {
+      "id": "8116da1eb3083698c07f70e49c4b0833133bf2e6656dd90ed1dca75860a9dbb8",
+      "item": null,
+      "listing": {
+        "indexed": "2026-05-29T12:02:47+00:00",
+        "account": {
+          "name": "Seller1#0001",
+          "online": null,
+          "lastCharacterName": "Char1"
+        },
+        "offers": [
+          {
+            "exchange": {
+              "currency": "exalted",
+              "amount": 1,
+              "whisper": "{0} Exalted Orb"
+            },
+            "item": {
+              "currency": "divine",
+              "amount": 1,
+              "stock": 2,
+              "id": "8116da1eb3083698c07f70e49c4b0833133bf2e6656dd90ed1dca75860a9dbb8",
+              "whisper": "{0} Divine Orb"
+            }
+          }
+        ]
+      }
+    },
+    "0b43487ed454e3d9a6a7f88ab4fa2f37ef362e8334ef23ab2807a1": {
+      "id": "6e1a522f630b43487ed454e3d9a6a7f88ab4fa2f37ef362e8334ef23ab2807a1",
+      "item": null,
+      "listing": {
+        "indexed": "2026-06-06T20:05:23+00:00",
+        "account": {
+          "name": "Seller2#0002",
+          "online": {
+            "league": "Standard"
+          },
+          "lastCharacterName": "Char2"
+        },
+        "offers": [
+          {
+            "exchange": {
+              "currency": "exalted",
+              "amount": 1,
+              "whisper": "{0} Exalted Orb"
+            },
+            "item": {
+              "currency": "divine",
+              "amount": 1,
+              "stock": 30,
+              "id": "6e1a522f630b43487ed454e3d9a6a7f88ab4fa2f37ef362e8334ef23ab2807a1",
+              "whisper": "{0} Divine Orb"
+            }
+          }
+        ]
+      }
+    },
+    "4170a6b6a7cb56f2dc7997e471dd3b259b4e2d1698d953dd425ad1": {
+      "id": "16a7c3e8f04170a6b6a7cb56f2dc7997e471dd3b259b4e2d1698d953dd425ad1",
+      "item": null,
+      "listing": {
+        "indexed": "2026-09-13T22:28:19+00:00",
+        "account": {
+          "name": "Seller3#0003",
+          "online": null,
+          "lastCharacterName": "Char3"
+        },
+        "offers": [
+          {
+            "exchange": {
+              "currency": "exalted",
+              "amount": 1,
+              "whisper": "{0} Exalted Orb"
+            },
+            "item": {
+              "currency": "divine",
+              "amount": 1,
+              "stock": 314,
+              "id": "16a7c3e8f04170a6b6a7cb56f2dc7997e471dd3b259b4e2d1698d953dd425ad1",
+              "whisper": "{0} Divine Orb"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "total": 3
+}

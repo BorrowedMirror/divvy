@@ -1,0 +1,4 @@
+x-rate-limit-policy: trade-fetch-request-limit
+x-rate-limit-rules: Ip
+x-rate-limit-ip: 12:4:10,16:12:300,50:300:300,1000:21600:1800
+x-rate-limit-ip-state: 1:4:0,1:12:0,1:300:0,1:21600:0
