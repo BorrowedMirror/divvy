@@ -272,3 +272,9 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   also exposes `plugin()` (tauri-nspanel, which must be registered) and
   `set_click_through(&WebviewWindow, bool)`. On macOS, `Rect` is in points (logical pixels) with
   a top-left origin.
+- **kalandra-platform (review fixes, additive):** `Clipboard::has_non_text(&self) -> bool`
+  (default `false`; arboard backends report whether an image is on the clipboard).
+  `copy_item_text` semantics: a clipboard holding non-text content is neither cleared nor
+  restored, and the prior text is restored only while the clipboard still holds the item we
+  read (or nothing after our clear); a copy the user made meanwhile is kept. An item that
+  arrives after the timeout is not restored.

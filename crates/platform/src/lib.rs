@@ -56,6 +56,12 @@ pub trait Clipboard: Send + Sync {
     fn get_text(&self) -> Result<Option<String>, PlatformError>;
     fn set_text(&self, text: &str) -> Result<(), PlatformError>;
     fn clear(&self) -> Result<(), PlatformError>;
+    /// Whether the clipboard holds something that is not text (e.g. an image), which
+    /// `get_text` reports as `None` and which `set_text`/`clear` would destroy. Backends that
+    /// cannot tell cheaply return `false`.
+    fn has_non_text(&self) -> bool {
+        false
+    }
 }
 
 /// Native styling for the overlay window. Implemented over a raw window handle by each backend;

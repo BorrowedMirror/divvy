@@ -229,6 +229,9 @@ impl Clipboard for ArboardClipboard {
     fn clear(&self) -> Result<(), PlatformError> {
         lock(&self.inner).clear().map_err(clip_err)
     }
+    fn has_non_text(&self) -> bool {
+        lock(&self.inner).get_image().is_ok()
+    }
 }
 
 /// Global hotkeys via `global-hotkey` (XGrabKey on `$DISPLAY`).
