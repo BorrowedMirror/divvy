@@ -14,7 +14,12 @@ runs:
         EXTRA: ${{ inputs.extra }}
       run: |
         sudo apt-get update -q
+        # Tauri/WebKitGTK + tray; gtk-layer-shell (Wayland overlay, kalandra-desktop);
+        # libX11/libXtst (rdev XRecord hook), libxkbcommon (enigo wayland), libdbus (tray).
+        # libei is not linked: kalandra-platform keeps enigo's libei feature off.
+        # Xvfb + openbox give the display-server tests and e2e an X11 session.
         # shellcheck disable=SC2086 # EXTRA is a word list by design.
         sudo apt-get install -y --no-install-recommends \
           libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
-          libxdo-dev libgtk-layer-shell-dev libei-dev xvfb openbox $EXTRA
+          libgtk-layer-shell-dev libx11-dev libxtst-dev libxkbcommon-dev libdbus-1-dev \
+          pkg-config xvfb openbox dbus $EXTRA
