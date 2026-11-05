@@ -137,11 +137,15 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr webkit2gtk-driver
+          # libxkbcommon-tools: xkbcli compiles the keymap for the wl-keyboard helper.
+          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr webkit2gtk-driver libxkbcommon-tools
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
+          workspaces: |
+            .
+            e2e/macos-harness
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -154,7 +158,7 @@ jobs:
           pnpm --dir web build
           cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
           cargo build --locked -p fake-game
-      - name: Run e2e (script starts headless sway + portal in a private D-Bus session)
+      - name: Run e2e (script starts headless sway + portal + virtual keyboard in a D-Bus session)
         env:
           SKIP_BUILD: "1"
           # Debian/Ubuntu install the portal daemons under /usr/libexec.
