@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "앱 업데이트",
+    "available": "kalandra {{version}} 버전을 사용할 수 있습니다.",
+    "notes": "새로운 기능",
+    "later": "나중에",
+    "install": "설치 후 다시 시작",
+    "installing": "설치 중…"
+  },
   "common": {
     "loading": "불러오는 중…",
     "dismiss": "닫기"
@@ -132,7 +140,9 @@
     "loadFailed": "설정을 불러올 수 없습니다.",
     "fixErrors": "저장하기 전에 표시된 항목을 수정하세요.",
     "externalChange": "설정이 다른 곳에서 변경되었습니다.",
-    "reload": "최신 설정 불러오기"
+    "reload": "최신 설정 불러오기",
+    "checkUpdates": "업데이트 자동 확인",
+    "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다."
   },
   "theme": {
     "system": "시스템",

@@ -1,26 +1,38 @@
 //! Game window tracking on X11: `_NET_ACTIVE_WINDOW`/`_NET_CLIENT_LIST` PropertyNotify on the
 //! root, ConfigureNotify (SubstructureNotify on root catches WM frames moving; StructureNotify
 //! on the client catches synthetic ICCCM configures) and title changes on the game window.
+//!
+//! The event thread blocks in poll(2) on the X socket (no busy polling). It wakes for relevant
+//! events, or every [`RESCAN`] for a full rescan (titles set after mapping, odd WMs), and exits
+//! once the receiver is dropped (next send fails) or the tracker is dropped (next wake-up).
+use std::os::fd::AsRawFd as _;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, Sender, channel};
 use std::time::{Duration, Instant};
 
 use x11rb::connection::Connection;
 use x11rb::protocol::Event;
-use x11rb::protocol::xproto::{ChangeWindowAttributesAux, ConnectionExt as _, EventMask, Window};
+use x11rb::protocol::xproto::{Atom, AtomEnum, ChangeWindowAttributesAux, ConnectionExt as _, EventMask, Window};
 
 use super::conn::{XConn, x_err};
 use crate::{PlatformError, Rect, WindowEvent, WindowInfo, WindowTracker};
 
-/// Rescan interval when no relevant event arrived (titles set after mapping, odd WMs).
-const RESCAN: Duration = Duration::from_millis(500);
-const IDLE_SLEEP: Duration = Duration::from_millis(10);
+/// Rescan interval when no relevant event arrived; also the poll(2) timeout.
+const RESCAN: Duration = Duration::from_secs(1);
 
 #[derive(Debug)]
 pub(crate) struct X11WindowTracker {
     conn: XConn,
     display: Option<String>,
     subscribed: AtomicBool,
+    stop: Arc<AtomicBool>,
+}
+
+impl Drop for X11WindowTracker {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::SeqCst);
+    }
 }
 
 impl X11WindowTracker {
@@ -29,6 +41,7 @@ impl X11WindowTracker {
             conn: XConn::connect(display)?,
             display: display.map(str::to_owned),
             subscribed: AtomicBool::new(false),
+            stop: Arc::default(),
         })
     }
 }
@@ -61,9 +74,10 @@ impl WindowTracker for X11WindowTracker {
             .check()
             .map_err(x_err)?;
         let (tx, rx) = channel();
+        let stop = Arc::clone(&self.stop);
         std::thread::Builder::new()
             .name("kalandra-x11-tracker".into())
-            .spawn(move || run(&conn, &tx))
+            .spawn(move || run(&conn, &tx, &stop))
             .map_err(|e| PlatformError::Backend(format!("spawn tracker thread: {e}")))?;
         Ok(rx)
     }
@@ -102,14 +116,31 @@ fn snapshot(conn: &XConn) -> Option<(Tracked, WindowInfo)> {
     Some((Tracked { window: w, rect: info.rect, focused: info.focused }, info))
 }
 
-fn run(conn: &XConn, tx: &Sender<WindowEvent>) {
+/// Block until the X socket is readable or `timeout` passes. `false` on timeout.
+fn wait_readable(fd: std::os::fd::RawFd, timeout: Duration) -> bool {
+    let mut pfd = libc::pollfd { fd, events: libc::POLLIN, revents: 0 };
+    let ms = libc::c_int::try_from(timeout.as_millis()).unwrap_or(libc::c_int::MAX);
+    // SAFETY: `pfd` is a valid, exclusively borrowed pollfd array of length 1 for the call.
+    let n = unsafe { libc::poll(&raw mut pfd, 1, ms) };
+    n > 0
+}
+
+fn run(conn: &XConn, tx: &Sender<WindowEvent>, stop: &AtomicBool) {
+    let fd = conn.conn.stream().as_raw_fd();
     let mut state: Option<Tracked> = None;
     let mut dirty = true;
     let mut last_scan = Instant::now();
+    let watched = |game: Option<Window>| Watched {
+        root: conn.root,
+        root_atoms: [conn.atoms._NET_ACTIVE_WINDOW, conn.atoms._NET_CLIENT_LIST],
+        game,
+        title_atoms: [conn.atoms._NET_WM_NAME, AtomEnum::WM_NAME.into()],
+    };
     loop {
+        let w = watched(state.map(|s| s.window));
         loop {
             match conn.conn.poll_for_event() {
-                Ok(Some(ev)) => dirty |= relevant(&ev),
+                Ok(Some(ev)) => dirty |= w.relevant(&ev),
                 Ok(None) => break,
                 Err(e) => {
                     tracing::warn!(error = %e, "x11 tracker connection lost");
@@ -117,6 +148,9 @@ fn run(conn: &XConn, tx: &Sender<WindowEvent>) {
                     return;
                 }
             }
+        }
+        if stop.load(Ordering::SeqCst) {
+            return;
         }
         if dirty || last_scan.elapsed() >= RESCAN {
             dirty = false;
@@ -129,7 +163,6 @@ fn run(conn: &XConn, tx: &Sender<WindowEvent>) {
                 let mask = EventMask::STRUCTURE_NOTIFY | EventMask::PROPERTY_CHANGE;
                 let _ =
                     conn.conn.change_window_attributes(c.window, &ChangeWindowAttributesAux::new().event_mask(mask));
-                let _ = conn.conn.flush();
             }
             for ev in diff(state, cur.clone()) {
                 if tx.send(ev).is_err() {
@@ -138,20 +171,41 @@ fn run(conn: &XConn, tx: &Sender<WindowEvent>) {
             }
             state = cur.map(|(c, _)| c);
         }
-        std::thread::sleep(IDLE_SLEEP);
+        if conn.conn.flush().is_err() {
+            let _ = tx.send(WindowEvent::Lost);
+            return;
+        }
+        let left = RESCAN.saturating_sub(last_scan.elapsed());
+        wait_readable(fd, left.max(Duration::from_millis(1)));
     }
 }
 
-fn relevant(ev: &Event) -> bool {
-    matches!(
-        ev,
-        Event::PropertyNotify(_)
-            | Event::ConfigureNotify(_)
+/// Which events should trigger a rescan.
+#[derive(Debug, Clone, Copy)]
+struct Watched {
+    root: Window,
+    /// `_NET_ACTIVE_WINDOW`, `_NET_CLIENT_LIST` on the root.
+    root_atoms: [Atom; 2],
+    game: Option<Window>,
+    /// `_NET_WM_NAME`, `WM_NAME` on the game window.
+    title_atoms: [Atom; 2],
+}
+
+impl Watched {
+    /// PropertyNotify only for the atoms we read (not e.g. `_NET_WM_USER_TIME`, which changes on
+    /// every keypress in the game); structure changes always.
+    fn relevant(&self, ev: &Event) -> bool {
+        match ev {
+            Event::PropertyNotify(p) if p.window == self.root => self.root_atoms.contains(&p.atom),
+            Event::PropertyNotify(p) => Some(p.window) == self.game && self.title_atoms.contains(&p.atom),
+            Event::ConfigureNotify(_)
             | Event::MapNotify(_)
             | Event::UnmapNotify(_)
             | Event::DestroyNotify(_)
-            | Event::ReparentNotify(_)
-    )
+            | Event::ReparentNotify(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -172,6 +226,38 @@ mod tests {
                 native_id: tr.window.into(),
             },
         )
+    }
+
+    #[test]
+    fn only_watched_properties_trigger_rescans() {
+        use x11rb::protocol::xproto::{MapNotifyEvent, PropertyNotifyEvent};
+        const ROOT: Window = 1;
+        const GAME: Window = 7;
+        let (active, clients, net_name, wm_name, user_time) = (10, 11, 12, 39, 99);
+        let w =
+            Watched { root: ROOT, root_atoms: [active, clients], game: Some(GAME), title_atoms: [net_name, wm_name] };
+        let prop = |window, atom| Event::PropertyNotify(PropertyNotifyEvent { window, atom, ..Default::default() });
+        assert!(w.relevant(&prop(ROOT, active)));
+        assert!(w.relevant(&prop(ROOT, clients)));
+        assert!(!w.relevant(&prop(ROOT, user_time)));
+        assert!(w.relevant(&prop(GAME, net_name)));
+        assert!(w.relevant(&prop(GAME, wm_name)));
+        assert!(!w.relevant(&prop(GAME, user_time)), "_NET_WM_USER_TIME is ignored");
+        assert!(!w.relevant(&prop(3, net_name)), "other windows' titles are ignored");
+        assert!(!Watched { game: None, ..w }.relevant(&prop(GAME, net_name)));
+        assert!(w.relevant(&Event::MapNotify(MapNotifyEvent::default())));
+        assert!(!w.relevant(&Event::KeymapNotify(x11rb::protocol::xproto::KeymapNotifyEvent::default())));
+    }
+
+    #[test]
+    fn wait_readable_times_out_and_wakes() {
+        use std::io::Write as _;
+        let (mut a, b) = std::os::unix::net::UnixStream::pair().unwrap();
+        let start = Instant::now();
+        assert!(!wait_readable(b.as_raw_fd(), Duration::from_millis(30)));
+        assert!(start.elapsed() >= Duration::from_millis(25));
+        a.write_all(b"x").unwrap();
+        assert!(wait_readable(b.as_raw_fd(), Duration::from_secs(5)));
     }
 
     #[test]

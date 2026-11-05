@@ -90,14 +90,15 @@ pub fn looks_like_item(text: &str) -> bool {
     t.starts_with("Item Class:") || t.starts_with("Rarity: Gem")
 }
 
-fn split_sections(text: &str) -> Vec<Vec<String>> {
-    let mut out: Vec<Vec<String>> = vec![Vec::new()];
+/// Sections as borrowed, trimmed, non-empty lines (no per-line allocation).
+fn split_sections(text: &str) -> Vec<Vec<&str>> {
+    let mut out: Vec<Vec<&str>> = vec![Vec::new()];
     for line in text.lines() {
         let line = line.trim();
         if line.len() >= SEPARATOR.len() && line.bytes().all(|b| b == b'-') {
             out.push(Vec::new());
         } else if !line.is_empty() {
-            out.last_mut().expect("non-empty").push(line.to_owned());
+            out.last_mut().expect("non-empty").push(line);
         }
     }
     out.retain(|s| !s.is_empty());
@@ -108,8 +109,8 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
     line.strip_prefix(key).and_then(|r| r.strip_prefix(':')).map(str::trim)
 }
 
-fn parse_header(lines: &[String], raw: &str) -> Result<ParsedItem, ParseError> {
-    let mut it = lines.iter().map(String::as_str).peekable();
+fn parse_header(lines: &[&str], raw: &str) -> Result<ParsedItem, ParseError> {
+    let mut it = lines.iter().copied().peekable();
     let class = match it.peek().and_then(|l| strip_key(l, "Item Class")) {
         Some(v) => {
             it.next();
@@ -223,11 +224,11 @@ fn is_flag(line: &str) -> bool {
     FLAGS.contains(&line) || line.starts_with("Unidentified (")
 }
 
-fn parse_section(item: &mut ParsedItem, state: &mut State, lines: &[String]) {
-    let first = lines[0].as_str();
+fn parse_section(item: &mut ParsedItem, state: &mut State, lines: &[&str]) {
+    let first = lines[0];
     if lines.iter().all(|l| is_flag(l)) {
         for l in lines {
-            match l.as_str() {
+            match *l {
                 "Corrupted" | "Twice Corrupted" => item.corrupted = true,
                 "Mirrored" => item.mirrored = true,
                 "Sanctified" => item.sanctified = true,
@@ -268,7 +269,7 @@ fn parse_section(item: &mut ParsedItem, state: &mut State, lines: &[String]) {
 }
 
 fn parse_requirement_line(req: &mut Requirements, line: &str) {
-    let clean = PAREN_SUFFIX.replace_all(line, "");
+    let clean = strip_paren_suffixes(line);
     let body = clean.strip_prefix("Requires:").or_else(|| clean.strip_prefix("Requires"));
     let set = |req: &mut Requirements, key: &str, n: u32| match key.to_ascii_lowercase().as_str() {
         "level" => req.level = Some(n),
@@ -303,6 +304,11 @@ fn parse_requirement_line(req: &mut Requirements, line: &str) {
     }
 }
 
+/// Remove `(augmented)`-style suffixes; lines without `(` skip the regex entirely.
+fn strip_paren_suffixes(s: &str) -> std::borrow::Cow<'_, str> {
+    if s.contains('(') { PAREN_SUFFIX.replace_all(s, "") } else { std::borrow::Cow::Borrowed(s) }
+}
+
 fn first_number<T: std::str::FromStr>(s: &str) -> Option<T> {
     crate::matcher::NUMBER.find(s).and_then(|m| m.as_str().replace(',', "").parse().ok())
 }
@@ -319,7 +325,7 @@ fn parse_property_line(item: &mut ParsedItem, line: &str) {
         return;
     };
     let augmented = value.contains("(augmented)");
-    let clean = PAREN_SUFFIX.replace_all(value, "").trim().to_owned();
+    let clean = strip_paren_suffixes(value).trim().to_owned();
     match key {
         "Item Level" => {
             item.item_level = first_number(&clean);
@@ -415,8 +421,8 @@ fn parse_advanced_header(line: &str) -> Option<(AdvancedModInfo, ModKind)> {
     Some((info, kind))
 }
 
-fn parse_mod_section(item: &mut ParsedItem, state: &mut State, lines: &[String]) {
-    let first = lines[0].as_str();
+fn parse_mod_section(item: &mut ParsedItem, state: &mut State, lines: &[&str]) {
+    let first = lines[0];
     if HINT_PREFIXES.iter().any(|p| first.starts_with(p)) || matches!(item.rarity, Rarity::Currency | Rarity::Gem) {
         return;
     }
@@ -433,7 +439,7 @@ fn parse_mod_section(item: &mut ParsedItem, state: &mut State, lines: &[String])
         state.explicits_done = true;
     }
     state.advanced = None;
-    for line in lines {
+    for &line in lines {
         if line.starts_with('{') {
             state.advanced = parse_advanced_header(line);
             continue;
@@ -453,14 +459,19 @@ fn parse_mod_line(line: &str, advanced: Option<&(AdvancedModInfo, ModKind)>) -> 
     let line = line.strip_suffix("— Unscalable Value").map_or(line, str::trim_end);
     let (body, marker) = split_marker(line);
     let mut ranges = Vec::new();
-    let text = ROLL_RANGE
-        .replace_all(body, |c: &regex::Captures<'_>| {
-            let a: f64 = c[2].parse().unwrap_or_default();
-            let b: f64 = c[3].parse().unwrap_or_default();
-            ranges.push(ValueRange { min: a.min(b), max: a.max(b) });
-            c[1].to_owned()
-        })
-        .into_owned();
+    // Rolls (`+42(40-49)`) only appear in advanced copies; skip the regex pass otherwise.
+    let text = if body.contains('(') {
+        ROLL_RANGE
+            .replace_all(body, |c: &regex::Captures<'_>| {
+                let a: f64 = c[2].parse().unwrap_or_default();
+                let b: f64 = c[3].parse().unwrap_or_default();
+                ranges.push(ValueRange { min: a.min(b), max: a.max(b) });
+                c[1].to_owned()
+            })
+            .into_owned()
+    } else {
+        body.to_owned()
+    };
     let kind = if body.starts_with("Grants Skill:") {
         ModKind::Skill
     } else {

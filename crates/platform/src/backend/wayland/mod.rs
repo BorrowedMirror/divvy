@@ -2,7 +2,7 @@
 //!
 //! What Wayland allows a regular client:
 //! - window tracking: impossible (no global window list) -> overlay anchored to the output;
-//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 / `kalandra --trigger`;
+//! - global hotkeys: XDG GlobalShortcuts portal when present, else SIGUSR2 (price check) / SIGUSR1 (pinned) / `kalandra --trigger`;
 //! - passive hook: impossible;
 //! - keystrokes: zwp_virtual_keyboard_v1 (wlroots: sway, Hyprland, river...) via enigo, else
 //!   the `ydotool` CLI, else unsupported;
@@ -30,7 +30,7 @@ use crate::{
 use portal::PortalHotkeys;
 use ydotool::YdotoolSimulator;
 
-/// Hotkeys: the portal when available; SIGUSR2 always (fallback trigger).
+/// Hotkeys: the portal when available; SIGUSR2/SIGUSR1 always (fallback trigger).
 #[derive(Debug)]
 pub(crate) struct WaylandHotkeys {
     portal: Option<PortalHotkeys>,
@@ -44,7 +44,7 @@ impl WaylandHotkeys {
         signal::spawn_sigusr2(tx.clone())?;
         let portal = if use_portal {
             PortalHotkeys::connect(tx, portal::CONNECT_TIMEOUT)
-                .inspect_err(|e| tracing::info!(error = %e, "GlobalShortcuts portal unavailable; SIGUSR2 fallback"))
+                .inspect_err(|e| tracing::info!(error = %e, "GlobalShortcuts portal unavailable; signal fallback"))
                 .ok()
         } else {
             None
@@ -61,6 +61,18 @@ impl HotkeyHost for WaylandHotkeys {
     fn register(&self, id: HotkeyAction, chord: &Chord) -> Result<(), PlatformError> {
         self.registered.lock().unwrap_or_else(PoisonError::into_inner).insert(id, chord.clone());
         self.portal.as_ref().map_or(Ok(()), |p| p.register(id, chord))
+    }
+
+    /// One portal bind for all bindings (one confirmation dialog instead of one per hotkey).
+    fn register_all(&self, bindings: &[(HotkeyAction, Chord)]) -> Result<(), PlatformError> {
+        let mut registered = self.registered.lock().unwrap_or_else(PoisonError::into_inner);
+        registered.extend(bindings.iter().cloned());
+        drop(registered);
+        self.portal.as_ref().map_or(Ok(()), |p| p.register_all(bindings))
+    }
+
+    fn notes(&self) -> Vec<String> {
+        self.portal.as_ref().map_or_else(Vec::new, PortalHotkeys::notes)
     }
 
     fn unregister(&self, id: HotkeyAction) -> Result<(), PlatformError> {
@@ -105,26 +117,22 @@ pub(crate) fn create_with(probe: &EnvProbe, use_portal: bool) -> Result<Platform
     caps.global_hotkeys = hotkeys.has_portal();
     if !caps.global_hotkeys {
         caps.notes.push(
-            "No GlobalShortcuts portal: bind `kalandra --trigger` (or `pkill -USR2 kalandra`) in your compositor"
+            "No GlobalShortcuts portal: bind `kalandra --trigger` (or `pkill -USR2 kalandra`; `-USR1` to pin) in \
+             your compositor"
                 .into(),
         );
     }
 
-    let input_simulator: Box<dyn InputSimulator> = match EnigoSimulator::new(EnigoTarget::Wayland) {
-        Ok(sim) => {
-            caps.keystroke_injection = true;
-            Box::new(sim)
-        }
-        Err(e) => {
-            if let Some(y) = YdotoolSimulator::detect() {
-                caps.keystroke_injection = true;
-                caps.notes.push("Keystrokes via ydotool (needs ydotoold running)".into());
-                Box::new(y)
-            } else {
-                caps.notes.push(format!("No virtual-keyboard protocol and no ydotool: {e}"));
-                Box::new(Unsupported("keystroke_injection"))
-            }
-        }
+    let enigo = EnigoSimulator::new(EnigoTarget::Wayland);
+    let eager = enigo.ensure_ready();
+    let ydotool = YdotoolSimulator::detect();
+    let plan = injection_plan(eager.as_ref().err(), ydotool.is_some(), virtual_keyboard_plausible(probe));
+    caps.keystroke_injection = plan.available;
+    caps.notes.extend(plan.note);
+    let input_simulator: Box<dyn InputSimulator> = match (plan.available, ydotool) {
+        (false, _) => Box::new(Unsupported("keystroke_injection")),
+        (true, Some(y)) => Box::new(enigo.with_fallback(Box::new(y))),
+        (true, None) => Box::new(enigo),
     };
 
     let clipboard: Box<dyn Clipboard> = match ArboardClipboard::new() {
@@ -149,6 +157,43 @@ pub(crate) fn create_with(probe: &EnvProbe, use_portal: bool) -> Result<Platform
     })
 }
 
+/// Whether the compositor may implement `zwp_virtual_keyboard_v1` (wlroots-based ones do;
+/// mutter and KWin do not).
+pub(crate) fn virtual_keyboard_plausible(probe: &EnvProbe) -> bool {
+    let kde = probe.desktop.as_deref().is_some_and(|d| d.split(':').any(|p| p.eq_ignore_ascii_case("kde")));
+    !probe.is_gnome() && !kde
+}
+
+/// Keystroke-injection capability and its diagnostics note.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct InjectionPlan {
+    /// "Available on demand": enigo is created lazily on each send until it works.
+    pub(crate) available: bool,
+    pub(crate) note: Option<String>,
+}
+
+/// `eager_error`: why enigo failed at startup (`None` = it works now).
+pub(crate) fn injection_plan(eager_error: Option<&PlatformError>, ydotool: bool, plausible: bool) -> InjectionPlan {
+    let (available, note) = match (eager_error, ydotool, plausible) {
+        (None, _, _) => (true, None),
+        (Some(e), true, _) => (
+            true,
+            Some(format!(
+                "Virtual keyboard unavailable at startup ({e}); retried on each copy, ydotool (needs ydotoold) \
+                 used meanwhile"
+            )),
+        ),
+        (Some(e), false, true) => (
+            true,
+            Some(format!(
+                "Virtual keyboard (virtual-keyboard protocol) not ready at startup ({e}); retried on each copy"
+            )),
+        ),
+        (Some(e), false, false) => (false, Some(format!("No virtual-keyboard protocol and no ydotool: {e}"))),
+    };
+    InjectionPlan { available, note }
+}
+
 /// Wayland overlays are layer-shell surfaces configured on the GTK window by the desktop app
 /// (`apps/desktop/src-tauri/src/overlay/linux.rs`); there is nothing to do over a raw handle.
 pub fn overlay(window: RawWindowHandle, display: RawDisplayHandle) -> Result<Box<dyn OverlayWindow>, PlatformError> {
@@ -159,6 +204,27 @@ pub fn overlay(window: RawWindowHandle, display: RawDisplayHandle) -> Result<Box
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn injection_is_available_on_demand() {
+        let e = PlatformError::Backend("enigo: no keymap".into());
+        assert_eq!(injection_plan(None, false, false), InjectionPlan { available: true, note: None });
+        let p = injection_plan(Some(&e), true, false);
+        assert!(p.available && p.note.as_deref().is_some_and(|n| n.contains("ydotool")));
+        let p = injection_plan(Some(&e), false, true);
+        assert!(p.available && p.note.as_deref().is_some_and(|n| n.contains("retried")));
+        let p = injection_plan(Some(&e), false, false);
+        assert!(!p.available && p.note.as_deref().is_some_and(|n| n.contains("no ydotool")));
+    }
+
+    #[test]
+    fn virtual_keyboard_plausibility_by_desktop() {
+        let probe = |d: &str| EnvProbe { desktop: Some(d.into()), ..EnvProbe::default() };
+        assert!(virtual_keyboard_plausible(&probe("sway")));
+        assert!(virtual_keyboard_plausible(&EnvProbe::default()));
+        assert!(!virtual_keyboard_plausible(&probe("ubuntu:GNOME")));
+        assert!(!virtual_keyboard_plausible(&probe("KDE")));
+    }
 
     #[test]
     fn requires_wayland_display() {
@@ -179,6 +245,10 @@ mod tests {
         assert!(!h.has_portal());
         let chord = Chord::parse("ctrl+d").unwrap();
         h.register(HotkeyAction::PriceCheck, &chord).unwrap();
+        h.register_all(&[(HotkeyAction::OpenSettings, chord.clone()), (HotkeyAction::PriceCheckPinned, chord.clone())])
+            .unwrap();
+        assert_eq!(h.registered.lock().unwrap().len(), 3);
+        assert!(h.notes().is_empty());
         h.unregister(HotkeyAction::PriceCheck).unwrap();
         h.unregister_all().unwrap();
         assert!(h.events().is_ok());

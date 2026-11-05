@@ -19,8 +19,13 @@ specta.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
 insta.workspace = true
 pretty_assertions.workspace = true
 proptest.workspace = true
 toml.workspace = true
 kalandra-data.workspace = true
+
+[[bench]]
+name = "pipeline"
+harness = false

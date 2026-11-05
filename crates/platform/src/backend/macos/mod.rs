@@ -100,7 +100,14 @@ pub fn open_permission_settings(kind: &str) {
     permissions::request(kind);
     match std::process::Command::new("/usr/bin/open").arg(url).spawn() {
         // Reap the child off-thread so callers (UI) never block and no zombie is left.
-        Ok(mut child) => drop(std::thread::spawn(move || child.wait())),
+        // `std::thread::spawn` would panic if the thread cannot be created; log instead.
+        Ok(mut child) => {
+            if let Err(e) =
+                std::thread::Builder::new().name("kalandra-open-settings".into()).spawn(move || child.wait())
+            {
+                tracing::warn!(error = %e, "failed to spawn reaper thread for System Settings");
+            }
+        }
         Err(e) => tracing::warn!(error = %e, url, "failed to open System Settings"),
     }
 }

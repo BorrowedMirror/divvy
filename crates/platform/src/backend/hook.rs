@@ -2,23 +2,41 @@
 //! backends. The rdev callback only does a non-blocking `try_send` into a bounded channel:
 //! hook callbacks run on OS input paths (low-level hooks on Windows, event taps on macOS)
 //! and must never block or allocate unboundedly.
+//!
+//! Only keyboard events are hooked: rdev's `KEYBOARD_ONLY` switch keeps it from installing a
+//! low-level mouse hook (`WH_MOUSE_LL` on Windows, mouse event-tap masks on macOS, pointer
+//! events in the XRecord range), which would add latency to every mouse move in the game.
 use std::sync::Mutex;
-use std::sync::mpsc::{Receiver, SyncSender, TryRecvError, TrySendError, sync_channel};
-use std::time::Duration;
+use std::sync::mpsc::{Receiver, SyncSender, TrySendError, sync_channel};
 
 use crate::{InputEvent, PlatformError};
 
 /// Events buffered before new ones are dropped (consumer stalled).
 pub(crate) const HOOK_CHANNEL_CAPACITY: usize = 1024;
 
-/// How long `start_global_hook` waits for rdev to report an early start failure.
-const START_GRACE: Duration = Duration::from_millis(250);
+/// The environment variable the rustdesk-org rdev fork reads to hook the keyboard only.
+pub const KEYBOARD_ONLY_ENV: &str = "KEYBOARD_ONLY";
+
+/// Set `KEYBOARD_ONLY` for rdev. Call it from `main` before any other thread exists; the
+/// hook calls it again (a no-op once set) as a fallback.
+pub fn init_process_env() {
+    if std::env::var_os(KEYBOARD_ONLY_ENV).is_none() {
+        // SAFETY: rdev exposes this switch only as an environment variable. Writing the
+        // environment races with concurrent `getenv` in other threads; callers are told to run
+        // this from `main` before spawning threads, and it writes at most once per process.
+        unsafe { std::env::set_var(KEYBOARD_ONLY_ENV, "1") };
+    }
+}
 
 /// `true` while a hook thread is running (or starting). A `Mutex<bool>` rather than a
 /// `OnceLock` so a hook that failed to start (no X server, missing permission) can be retried.
 static STARTED: Mutex<bool> = Mutex::new(false);
 
 /// Start the global hook. Returns `AlreadyStarted` on a second call while the first hook lives.
+///
+/// Never blocks: the hook starts on its own thread. A late start failure (no RECORD extension,
+/// missing permission) is logged and reported by the returned receiver disconnecting; the hook
+/// can then be started again.
 pub(crate) fn start_global_hook() -> Result<Receiver<InputEvent>, PlatformError> {
     {
         let mut started = STARTED.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
@@ -27,30 +45,25 @@ pub(crate) fn start_global_hook() -> Result<Receiver<InputEvent>, PlatformError>
         }
         *started = true;
     }
+    init_process_env();
     let (tx, rx) = sync_channel(HOOK_CHANNEL_CAPACITY);
-    let (err_tx, err_rx) = sync_channel::<String>(1);
     let spawned = std::thread::Builder::new().name("kalandra-input-hook".into()).spawn(move || {
+        // rdev::listen blocks for the life of the hook; it only returns on failure.
         let result = rdev::listen(move |event| {
             if let Some(ev) = map_event(&event.event_type) {
                 forward(&tx, ev);
             }
         });
+        mark_stopped();
         if let Err(e) = result {
-            mark_stopped();
-            let _ = err_tx.try_send(format!("{e:?}"));
+            tracing::warn!(error = ?e, "input hook failed to start");
         }
     });
     if let Err(e) = spawned {
         mark_stopped();
         return Err(PlatformError::Backend(format!("spawn input hook thread: {e}")));
     }
-    // rdev::listen blocks forever on success; failures (no display, no RECORD extension,
-    // missing accessibility permission) are reported immediately.
-    std::thread::sleep(START_GRACE);
-    match err_rx.try_recv() {
-        Ok(msg) => Err(PlatformError::Backend(format!("input hook: {msg}"))),
-        Err(TryRecvError::Empty | TryRecvError::Disconnected) => Ok(rx),
-    }
+    Ok(rx)
 }
 
 fn mark_stopped() {

@@ -24,4 +24,8 @@ impl Clipboard for MacClipboard {
     fn clear(&self) -> Result<(), PlatformError> {
         open()?.clear().map_err(|e| PlatformError::Backend(format!("clipboard: {e}")))
     }
+
+    fn has_non_text(&self) -> bool {
+        open().is_ok_and(|mut c| c.get_image().is_ok())
+    }
 }

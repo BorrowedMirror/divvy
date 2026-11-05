@@ -205,8 +205,36 @@ pub fn remap_chord(chord: &Chord, modifier: CopyModifier) -> Chord {
     Chord { modifiers, key: chord.key.clone() }
 }
 
+/// `kCGEventFlagMask*` bits (CGEventTypes.h) for the modifiers we model.
+pub const FLAG_SHIFT: u64 = 0x0002_0000;
+pub const FLAG_CONTROL: u64 = 0x0004_0000;
+pub const FLAG_ALTERNATE: u64 = 0x0008_0000;
+pub const FLAG_COMMAND: u64 = 0x0010_0000;
+
+/// Modifiers held according to `CGEventSourceFlagsState` bits (Option = Alt, Command = Meta).
+pub fn held_from_flags(flags: u64) -> Vec<KeyModifier> {
+    [
+        (FLAG_CONTROL, KeyModifier::Ctrl),
+        (FLAG_ALTERNATE, KeyModifier::Alt),
+        (FLAG_SHIFT, KeyModifier::Shift),
+        (FLAG_COMMAND, KeyModifier::Meta),
+    ]
+    .into_iter()
+    .filter(|(bit, _)| flags & bit != 0)
+    .map(|(_, m)| m)
+    .collect()
+}
+
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn held_modifiers_from_cg_flags() {
+        use KeyModifier::{Alt, Ctrl, Meta, Shift};
+        assert!(held_from_flags(0).is_empty());
+        assert_eq!(held_from_flags(FLAG_CONTROL | FLAG_SHIFT | 0x100), vec![Ctrl, Shift]);
+        assert_eq!(held_from_flags(FLAG_ALTERNATE | FLAG_COMMAND), vec![Alt, Meta]);
+    }
+
     use super::*;
 
     fn win(number: u32, pid: i32, title: Option<&str>, owner: Option<&str>) -> RawWindow {

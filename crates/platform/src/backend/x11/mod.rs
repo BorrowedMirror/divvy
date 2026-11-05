@@ -1,6 +1,7 @@
 //! X11 / XWayland backend (default on Linux whenever `DISPLAY` is set).
 mod conn;
 pub(crate) mod input;
+mod keystate;
 mod overlay;
 mod tracker;
 
@@ -37,19 +38,16 @@ pub fn create() -> Result<Platform, PlatformError> {
         Box::new(Unsupported("passive_hook"))
     };
 
-    let input_simulator: Box<dyn InputSimulator> = match EnigoSimulator::new(EnigoTarget::X11) {
-        Ok(sim) if x.has_extension("XTEST") => {
-            caps.keystroke_injection = true;
-            Box::new(sim)
+    let input_simulator: Box<dyn InputSimulator> = if x.has_extension("XTEST") {
+        caps.keystroke_injection = true;
+        let sim = EnigoSimulator::new(EnigoTarget::X11);
+        if let Err(e) = sim.ensure_ready() {
+            caps.notes.push(format!("keystroke injection not ready at startup ({e}); retried on each copy"));
         }
-        Ok(_) => {
-            caps.notes.push("X server lacks XTEST: cannot send Ctrl+C to the game".into());
-            Box::new(Unsupported("keystroke_injection"))
-        }
-        Err(e) => {
-            caps.notes.push(format!("keystroke injection unavailable: {e}"));
-            Box::new(Unsupported("keystroke_injection"))
-        }
+        Box::new(sim)
+    } else {
+        caps.notes.push("X server lacks XTEST: cannot send Ctrl+C to the game".into());
+        Box::new(Unsupported("keystroke_injection"))
     };
 
     let clipboard: Box<dyn Clipboard> = match ArboardClipboard::new() {

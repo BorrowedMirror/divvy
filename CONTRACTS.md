@@ -287,3 +287,74 @@ All additive; the tables above already include them.
 - **xtask (I):** `gen --no-bindings`, `coverage --no-run/--profile`, `lint --no-web/--no-tools`,
   `release --dry-run/--allow-dirty`, `fixtures record`; root tool configs renamed to dotfiles
   (`.commit-config.toml`, `.cliff.toml`, `.deny.toml`, ...).
+### Workstream H (testkit / fake-game / e2e) — all additive
+- `kalandra-testkit::fakes`: besides the listed fakes and `fake_platform() -> Platform`, adds
+  `FakePlatformBuilder::{new, item_text, advanced_text, copy_delay, window, clipboard, capabilities, build -> (Platform, FakeHandles)}`,
+  `FakeHandles { clipboard, input_simulator, window_tracker, hotkeys, input_listener }`, `ClipboardOp`, `OverlayCall`,
+  `game_window(Rect)`, `copy_chord()`, `advanced_copy_chord()`, `fake_capabilities()`. Every fake is a cloneable handle
+  over shared state. Streams (`subscribe`/`events`/`start`) may be taken once; later calls return `AlreadyStarted`.
+- `kalandra-testkit::fixtures`: `mount_trade_fixtures` is `async fn(&MockServer)`. `fixture(name)` reads
+  `crates/trade/tests/fixtures/<name>.json`, falling back to testkit's own samples in `crates/testkit/fixtures/`.
+  Adds `try_fixture`, `testkit_fixture`, `FixtureError`, `TradeMock` (prices, leagues, total, 429 injection per
+  `Endpoint`, `mount`, `serve(addr)`), `MockListing`, `LEAGUES_PATH`/`SEARCH_PREFIX`/`FETCH_PREFIX`.
+- `tools/fake-game` CLI adds `--corpus-id <id>`, `--advanced-corpus-id <id>`, `--corpus-dir` (env
+  `KALANDRA_CORPUS_DIR`), `--exit-after <secs>`, `--size WxH`; prints `EXIT` on shutdown; `FAKE_GAME_DEBUG=1` logs
+  window events to stderr; Cmd+C counts as Ctrl+C (macOS).
+- Desktop env vars the e2e suite relies on: `KALANDRA_TRADE_BASE_URL` (overrides `TradeConfig::base_url`, no trailing
+  slash, e.g. `http://127.0.0.1:18080`), `KALANDRA_CONFIG_DIR` (already listed), `KALANDRA_TEST_HOOK=<port>`.
+- Test hook: every command answers with exactly one line (`ok`, `err <message>`, or JSON for `state`). New command
+  `tray <menu-id>` runs the tray menu handler for `open_settings` / `quit` (unknown id -> `err ...`). `state` gains
+  optional fields `overlay_pinned: bool`, `settings_visible: bool`, `tray_present: bool`; `last_price` is the
+  `PriceSummary` JSON (serde field names) or `null`.
+- Web `data-testid`s used by e2e: `price-summary` on the overlay's price block (its text includes the median
+  amount), `settings-root` on the settings page root.
+
+### F (linux + platform common) — additive only
+- `BackendKind::parse(&str) -> Option<BackendKind>` (the `KALANDRA_BACKEND` grammar) and
+  `EnvProbe::is_gnome(&self) -> bool`.
+- `copy::looks_like_item(&str) -> bool` (local `Item Class:` check, no core dependency) and
+  `copy::copy_chord(advanced: bool) -> Chord`. `copy_item_text` returns `NoItemText` when the
+  clipboard changed to non-item text, `Timeout` when nothing arrived.
+- `backend::Unsupported(&'static str)`: stand-in implementing every trait (all calls ->
+  `PlatformError::Unsupported`, `is_game_focused` -> `true`); backends use it for capabilities
+  that are `false`.
+- `backend::hook::start_global_hook()` is `pub(crate)` (shared by x11/windows/macos).
+- `backend::x11::{overlay, X11Overlay}`; `backend::wayland::{overlay, sigusr2_trigger}`.
+  `wayland::overlay` always returns `Unsupported` (layer-shell is applied on the GTK window).
+- Wayland `WindowTracker::subscribe` and `InputListener::start` return `Unsupported`; the
+  Wayland `HotkeyHost::events()` also yields SIGUSR2 as `PriceCheck`.
+- `apps/desktop/src-tauri/src/overlay/linux.rs`: `pre_init() -> BackendKind`,
+  `pre_init_with(Option<BackendKind>) -> BackendKind`, `gdk_backend_for(BackendKind)`,
+  `set_click_through(&WebviewWindow, bool)`, `anchor_layer(&WebviewWindow, right, top, side)`
+  in addition to `prepare`.
+- (D windows) Additive: `kalandra_platform::backend::windows` re-exports `raw_window_handle` (`pub use raw_window_handle;`) so `apps/desktop` can call `HasWindowHandle`/`HasDisplayHandle` on its Tauri window and pass the raw handles to `backend::windows::overlay` without a direct dependency or unsafe code. `backend::windows::overlay(RawWindowHandle, RawDisplayHandle)` follows the table above (the doc comment in `backend/mod.rs` still shows the older one-argument form).
+
+- **E macos (additive).** `kalandra_platform::backend::macos` (macOS + `native`) also exposes
+  `recheck_permissions() -> Vec<String>`, `open_permission_settings(kind: &str)`,
+  `create_with(MacosOptions) -> Result<Platform, PlatformError>`,
+  `MacosOptions { copy_modifier, prompt_for_accessibility }` (+ `from_env()`), `CopyModifier
+  { Command (default), Control }`, and `COPY_MODIFIER_ENV` (`KALANDRA_MACOS_COPY_MODIFIER`).
+  `macos::overlay(...)` is not provided: overlay styling lives in `overlay/macos.rs`. That file
+  also exposes `plugin()` (tauri-nspanel, which must be registered) and
+  `set_click_through(&WebviewWindow, bool)`. On macOS, `Rect` is in points (logical pixels) with
+  a top-left origin.
+- **kalandra-platform (review fixes, additive):** `Clipboard::has_non_text(&self) -> bool`
+  (default `false`; arboard backends report whether an image is on the clipboard).
+  `copy_item_text` semantics: a clipboard holding non-text content is neither cleared nor
+  restored, and the prior text is restored only while the clipboard still holds the item we
+  read (or nothing after our clear); a copy the user made meanwhile is kept. An item that
+  arrives after the timeout is not restored.
+- **kalandra-platform (review fixes, additive):** `backend::init_process_env()` and
+  `backend::KEYBOARD_ONLY_ENV` (feature `native`): sets rdev's `KEYBOARD_ONLY` so the passive
+  hook never installs a mouse hook. The desktop app should call it first thing in `main`
+  (before threads); `InputListener::start` calls it as a fallback. `start` no longer blocks
+  250ms: a late hook failure is logged and shows up as the receiver disconnecting. The hook
+  delivers keyboard events only (`InputEvent::MouseMove`/`Wheel` are no longer produced).
+- **kalandra-platform (review fixes, semantics):** `detect` on GNOME picks X11 only when
+  `DISPLAY` is set; GNOME without `DISPLAY` is Wayland-native (supersedes "GNOME => X11").
+- **kalandra-platform (review fixes, additive):** `HotkeyHost::register_all(&self, &[(HotkeyAction,
+  Chord)]) -> Result<(), PlatformError>` (default: `register` each, stop at the first error;
+  Wayland binds them in ONE portal `BindShortcuts` call, so one confirmation dialog) and
+  `HotkeyHost::notes(&self) -> Vec<String>` (default empty; late problems such as a portal
+  bind that failed after `register` returned, to show next to `Capabilities::notes`). The
+  portal bind no longer blocks hotkey activations while it waits for the user.

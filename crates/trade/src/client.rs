@@ -211,25 +211,33 @@ impl TradeClient {
 
     /// `GET /api/trade2/fetch/{id,id,...}?query={search_id}`, in chunks of [`FETCH_CHUNK`].
     /// Listings that vanished between search and fetch (`null`) are skipped.
+    ///
+    /// Chunks are requested concurrently (each still takes its own rate-limiter slot), so
+    /// the default 20 listings cost one round trip instead of two; results keep id order.
     pub async fn fetch(&self, ids: &[String], search_id: &str) -> Result<Vec<FetchEntry>, TradeError> {
+        let chunks =
+            futures::future::try_join_all(ids.chunks(FETCH_CHUNK).map(|c| self.fetch_chunk(c, search_id))).await?;
         let mut out = Vec::with_capacity(ids.len());
-        for chunk in ids.chunks(FETCH_CHUNK) {
-            let joined = chunk.join(",");
-            let key = format!("{search_id}\n{joined}");
-            if let Some(hit) = cached(self.fetches.as_ref(), &key).await {
-                out.extend(hit.iter().cloned());
-                continue;
-            }
-            let mut url = self.url(&["api", "trade2", "fetch", &joined]);
-            url.query_pairs_mut().append_pair("query", search_id).append_pair("realm", "poe2");
-            let list: ResultList<Option<FetchEntry>> = self.send(policy::FETCH, self.http.get(url)).await?;
-            let entries: Vec<FetchEntry> = list.result.into_iter().flatten().collect();
-            out.extend(entries.iter().cloned());
-            if let Some(c) = &self.fetches {
-                c.insert(key, Arc::new(entries)).await;
-            }
+        for chunk in chunks {
+            out.extend(chunk.iter().cloned());
         }
         Ok(out)
+    }
+
+    async fn fetch_chunk(&self, chunk: &[String], search_id: &str) -> Result<Arc<Vec<FetchEntry>>, TradeError> {
+        let joined = chunk.join(",");
+        let key = format!("{search_id}\n{joined}");
+        if let Some(hit) = cached(self.fetches.as_ref(), &key).await {
+            return Ok(hit);
+        }
+        let mut url = self.url(&["api", "trade2", "fetch", &joined]);
+        url.query_pairs_mut().append_pair("query", search_id).append_pair("realm", "poe2");
+        let list: ResultList<Option<FetchEntry>> = self.send(policy::FETCH, self.http.get(url)).await?;
+        let entries = Arc::new(list.result.into_iter().flatten().collect::<Vec<_>>());
+        if let Some(c) = &self.fetches {
+            c.insert(key, entries.clone()).await;
+        }
+        Ok(entries)
     }
 
     /// `POST /api/trade2/exchange/poe2/{league}` with a raw bulk-exchange body.
