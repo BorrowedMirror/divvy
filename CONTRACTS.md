@@ -202,7 +202,9 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   `/api/trade2/fetch/{ids}?query={id}&realm=poe2`, exchange `/api/trade2/exchange/poe2/{league}`;
   site links `/trade2/search/poe2/{league}/{id}` and `/trade2/exchange/poe2/{league}/{id}`.
 - `ratelimit`: `format_rules`, `format_states`, `Display` for `Rule`/`RuleState`;
-  `RateLimiter::{seed, blocked_for, policy_name}`.
+  `RateLimiter::{seed, blocked_for, policy_name, try_reserve, reserve_guarded}`, `Reservation`
+  (drop guard; releases the slot unless `commit()`ed), `edge_margin` (windows padded by
+  `max(period/20, 250ms)`). `policy::DATA` is seeded with `5:10:60`.
 - `client`: `TradeClient::{exchange, exchange_url, search_listings, exchange_listings, listings_for, static_id, limiter}`,
   `ListingPage`, `exchange_body`, `fetch_listing`, `exchange_listing`, consts `FETCH_CHUNK`, `MAX_QUEUE_WAIT`,
   module `client::policy`. Requests that would queue longer than `MAX_QUEUE_WAIT` (10s) or hit an active

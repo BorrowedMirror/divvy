@@ -108,6 +108,8 @@ impl TradeClient {
         limiter.seed(policy::SEARCH, &rules("5:10:60,15:60:300,30:300:1800"));
         limiter.seed(policy::FETCH, &rules("12:4:10,16:12:300,50:300:300"));
         limiter.seed(policy::EXCHANGE, &rules("5:15:60,10:90:300,30:300:1800"));
+        // Data endpoints are CDN-cached and send no headers; stay conservative anyway.
+        limiter.seed(policy::DATA, &rules("5:10:60"));
         let ttl = config.cache_ttl;
         Ok(Self {
             config,
@@ -140,14 +142,18 @@ impl TradeClient {
         if !blocked.is_zero() {
             return Err(TradeError::RateLimited { retry_after: blocked });
         }
-        let wait = self.limiter.reserve(policy);
-        if wait > MAX_QUEUE_WAIT {
-            return Err(TradeError::RateLimited { retry_after: wait });
-        }
+        // Refusals record nothing; if this future is dropped while sleeping, the
+        // guard releases the slot so cancelled requests do not throttle later ones.
+        let slot = self
+            .limiter
+            .reserve_guarded(policy, MAX_QUEUE_WAIT)
+            .map_err(|retry_after| TradeError::RateLimited { retry_after })?;
+        let wait = slot.wait();
         if !wait.is_zero() {
             tracing::debug!(policy, ?wait, "rate limiter delaying request");
             tokio::time::sleep(wait).await;
         }
+        slot.commit();
         let resp = req.send().await?;
         let status = resp.status();
         self.limiter.observe(policy, status.as_u16(), resp.headers());

@@ -121,16 +121,20 @@ struct Tracked {
     /// Rule-set name (`ip`, `account`, ...), lower-case.
     scope: String,
     rule: Rule,
-    /// Sorted start times of recent hits; at most `max_hits` retained.
+    /// Sorted start times of hits still inside the (padded) window. Not truncated by
+    /// count, so releasing a cancelled reservation never forgets an older real hit.
     hits: VecDeque<Duration>,
 }
 
 impl Tracked {
+    /// Effective window: the rule's period plus [`edge_margin`].
+    fn window(&self) -> Duration {
+        self.rule.period + edge_margin(self.rule.period)
+    }
+
     fn prune(&mut self, now: Duration) {
-        while self.hits.front().is_some_and(|h| *h + self.rule.period <= now) {
-            self.hits.pop_front();
-        }
-        while self.hits.len() > self.rule.max_hits as usize {
+        let window = self.window();
+        while self.hits.front().is_some_and(|h| *h + window <= now) {
             self.hits.pop_front();
         }
     }
@@ -141,13 +145,27 @@ impl Tracked {
         if max == 0 || self.hits.len() < max {
             return t;
         }
-        t.max(self.hits[self.hits.len() - max] + self.rule.period)
+        t.max(self.hits[self.hits.len() - max] + self.window())
     }
 
     fn insert(&mut self, at: Duration) {
         let pos = self.hits.partition_point(|h| *h <= at);
         self.hits.insert(pos, at);
     }
+
+    /// Remove one hit recorded at exactly `at`, if still present.
+    fn remove(&mut self, at: Duration) {
+        if let Some(pos) = self.hits.iter().rposition(|h| *h == at) {
+            self.hits.remove(pos);
+        }
+    }
+}
+
+/// Safety margin added to every window. GGG counts hits on arrival, so latency
+/// jitter can squeeze `max_hits + 1` requests into a server-side window if we
+/// schedule exactly at the edge; the margin is `max(period / 20, 250ms)`.
+pub fn edge_margin(period: Duration) -> Duration {
+    (period / 20).max(Duration::from_millis(250))
 }
 
 #[derive(Debug, Default)]
@@ -176,10 +194,7 @@ impl Policy {
                 .find(|o| o.rule.period == rule.period)
                 .map(|o| std::mem::take(&mut o.hits))
                 .unwrap_or_default();
-            let mut t = Tracked { scope: scope.to_owned(), rule: *rule, hits };
-            while t.hits.len() > rule.max_hits as usize {
-                t.hits.pop_front();
-            }
+            let t = Tracked { scope: scope.to_owned(), rule: *rule, hits };
             self.rules.push(t);
         }
     }
@@ -220,6 +235,27 @@ impl RateLimiter {
     /// How long the caller must wait before issuing a request under `policy`
     /// (`Duration::ZERO` = go now). Records the hit optimistically.
     pub fn reserve(&self, policy: &str) -> Duration {
+        match self.reserve_inner(policy, None) {
+            Ok((wait, _)) | Err(wait) => wait,
+        }
+    }
+
+    /// Like [`Self::reserve`], but refuses (recording nothing) when the wait would
+    /// exceed `max_wait`. `Err` carries the wait that was refused.
+    pub fn try_reserve(&self, policy: &str, max_wait: Duration) -> Result<Duration, Duration> {
+        self.reserve_inner(policy, Some(max_wait)).map(|(wait, _)| wait)
+    }
+
+    /// Like [`Self::try_reserve`], returning a guard that un-records the hit when
+    /// dropped without [`Reservation::commit`] (e.g. the caller was cancelled while
+    /// waiting), so abandoned requests do not consume future slots.
+    pub fn reserve_guarded(&self, policy: &str, max_wait: Duration) -> Result<Reservation<'_>, Duration> {
+        let (wait, start) = self.reserve_inner(policy, Some(max_wait))?;
+        Ok(Reservation { limiter: self, policy: policy.to_owned(), start, wait, committed: false })
+    }
+
+    /// Returns `(wait, start)`; `Err(wait)` when refused under `max_wait`.
+    fn reserve_inner(&self, policy: &str, max_wait: Option<Duration>) -> Result<(Duration, Duration), Duration> {
         let now = self.clock.now();
         let mut map = self.lock();
         let p = map.entry(policy.to_owned()).or_default();
@@ -230,13 +266,29 @@ impl RateLimiter {
         for t in &p.rules {
             start = t.earliest(start);
         }
+        let wait = start.saturating_sub(now);
+        if max_wait.is_some_and(|m| wait > m) {
+            return Err(wait);
+        }
         for t in &mut p.rules {
             if t.rule.max_hits > 0 {
                 t.insert(start);
             }
         }
         p.last_start = start;
-        start.saturating_sub(now)
+        Ok((wait, start))
+    }
+
+    /// Un-record a hit previously reserved at `start` under `policy`.
+    fn release(&self, policy: &str, start: Duration) {
+        let mut map = self.lock();
+        let Some(p) = map.get_mut(policy) else { return };
+        for t in &mut p.rules {
+            t.remove(start);
+        }
+        if p.last_start == start {
+            p.last_start = p.rules.iter().filter_map(|t| t.hits.back().copied()).max().unwrap_or_default();
+        }
     }
 
     /// Remaining hard restriction (from a 429 or an active penalty) for `policy`.
@@ -303,6 +355,37 @@ impl RateLimiter {
         }
         if !restricted.is_zero() {
             p.blocked_until = p.blocked_until.max(now + restricted);
+        }
+    }
+}
+
+/// A recorded hit that is released on drop unless [`Self::commit`]ted.
+#[derive(Debug)]
+#[must_use = "dropping a reservation releases its slot"]
+pub struct Reservation<'a> {
+    limiter: &'a RateLimiter,
+    policy: String,
+    start: Duration,
+    wait: Duration,
+    committed: bool,
+}
+
+impl Reservation<'_> {
+    /// How long to wait before sending.
+    pub fn wait(&self) -> Duration {
+        self.wait
+    }
+
+    /// The request is being sent: keep the hit recorded.
+    pub fn commit(mut self) {
+        self.committed = true;
+    }
+}
+
+impl Drop for Reservation<'_> {
+    fn drop(&mut self) {
+        if !self.committed {
+            self.limiter.release(&self.policy, self.start);
         }
     }
 }
@@ -395,13 +478,14 @@ mod tests {
         );
         assert_eq!(rl.policy_name("search").as_deref(), Some("trade-search-request-limit"));
         assert_eq!(rl.reserve("search"), Duration::ZERO);
-        // Third request inside 10s must wait for the first hit to leave the window.
-        assert_eq!(rl.reserve("search"), Duration::from_secs(10));
-        clock.advance(Duration::from_secs(10));
-        // Window [10, 20) holds the reservation made for t=10 plus this one...
+        // Third request inside 10s must wait for the first hit to leave the window
+        // (plus the 500ms edge margin for a 10s period).
+        assert_eq!(rl.reserve("search"), Duration::from_millis(10_500));
+        clock.advance(Duration::from_millis(10_500));
+        // Window from 10.5s holds the reservation made for t=10.5 plus this one...
         assert_eq!(rl.reserve("search"), Duration::ZERO);
-        // ...so a third one has to wait until t=20.
-        assert_eq!(rl.reserve("search"), Duration::from_secs(10));
+        // ...so a third one has to wait until t=21.
+        assert_eq!(rl.reserve("search"), Duration::from_millis(10_500));
     }
 
     #[test]
@@ -420,7 +504,7 @@ mod tests {
             ]),
         );
         // Account window is already full according to the server.
-        assert_eq!(rl.reserve("fetch"), Duration::from_secs(5));
+        assert_eq!(rl.reserve("fetch"), Duration::from_millis(5_250));
     }
 
     #[test]
@@ -475,10 +559,10 @@ mod tests {
         let rl = RateLimiter::new(Box::new(clock));
         rl.seed("s", &[rule(1, 4, 0)]);
         assert_eq!(rl.reserve("s"), Duration::ZERO);
-        assert_eq!(rl.reserve("s"), Duration::from_secs(4));
+        assert_eq!(rl.reserve("s"), Duration::from_millis(4_250));
         rl.observe("s", 200, &headers(&[("x-rate-limit-rules", "Ip"), ("x-rate-limit-ip", "100:4:0")]));
         // seed rule gone; real rule is generous but monotonic ordering is preserved.
-        assert_eq!(rl.reserve("s"), Duration::from_secs(4));
+        assert_eq!(rl.reserve("s"), Duration::from_millis(4_250));
     }
 
     #[test]
@@ -505,7 +589,7 @@ mod tests {
         rl.reserve("p");
         rl.reserve("p");
         rl.observe("p", 200, &h("2:10:0,50:60:0"));
-        assert_eq!(rl.reserve("p"), Duration::from_secs(10));
+        assert_eq!(rl.reserve("p"), Duration::from_millis(10_500));
     }
 
     #[test]
@@ -553,12 +637,123 @@ mod tests {
             let mut sorted = starts.clone();
             sorted.sort();
             prop_assert_eq!(&sorted, &starts, "start times must be monotonic");
-            for r in &rules {
-                for (i, s) in sorted.iter().enumerate() {
-                    let in_window = sorted[i..].iter().take_while(|t| **t < *s + r.period).count();
-                    prop_assert!(in_window <= r.max_hits as usize, "rule {} saw {} hits from {:?}", r, in_window, s);
+            check_windows(&rules, &sorted)?;
+        }
+
+        /// Mixed reserve / try_reserve / guarded-and-cancelled sequences: the hits that
+        /// were actually sent (committed or plain reserved) still respect every window,
+        /// and refusals or cancellations never push later requests further out.
+        #[test]
+        fn cancellations_and_refusals_never_exceed_max_hits(
+            rules in arb_rules(),
+            ops in prop::collection::vec((0u64..5_000, 0u8..4, 0u64..20_000), 1..60),
+        ) {
+            let clock = FakeClock::default();
+            let rl = RateLimiter::new(Box::new(clock.clone()));
+            rl.seed("p", &rules);
+            let mut sent = Vec::new();
+            for (gap, op, max_ms) in ops {
+                clock.advance(Duration::from_millis(gap));
+                let max_wait = Duration::from_millis(max_ms);
+                match op {
+                    0 => sent.push(clock.now() + rl.reserve("p")),
+                    1 => {
+                        if let Ok(wait) = rl.try_reserve("p", max_wait) {
+                            sent.push(clock.now() + wait);
+                        }
+                    }
+                    2 => {
+                        if let Ok(slot) = rl.reserve_guarded("p", max_wait) {
+                            sent.push(clock.now() + slot.wait());
+                            slot.commit();
+                        }
+                    }
+                    _ => {
+                        // Cancelled before sending: the slot must be handed back.
+                        let before = rl.try_reserve("p", Duration::MAX);
+                        if let Ok(wait) = before {
+                            sent.push(clock.now() + wait);
+                        }
+                        let probe = rl.reserve_guarded("p", Duration::MAX).map(|s| s.wait());
+                        let again = rl.reserve_guarded("p", Duration::MAX).map(|s| s.wait());
+                        prop_assert_eq!(probe, again, "dropped guard must release its slot");
+                    }
                 }
             }
+            let mut sorted = sent.clone();
+            sorted.sort();
+            check_windows(&rules, &sorted)?;
         }
+    }
+
+    /// Every window of `period + edge_margin` holds at most `max_hits` starts.
+    fn check_windows(rules: &[Rule], sorted: &[Duration]) -> Result<(), TestCaseError> {
+        for r in rules {
+            let window = r.period + edge_margin(r.period);
+            for (i, s) in sorted.iter().enumerate() {
+                let in_window = sorted[i..].iter().take_while(|t| **t < *s + window).count();
+                prop_assert!(in_window <= r.max_hits as usize, "rule {} saw {} hits from {:?}", r, in_window, s);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn edge_margin_is_five_percent_with_floor() {
+        assert_eq!(edge_margin(Duration::from_secs(1)), Duration::from_millis(250));
+        assert_eq!(edge_margin(Duration::from_secs(10)), Duration::from_millis(500));
+        assert_eq!(edge_margin(Duration::from_secs(60)), Duration::from_secs(3));
+    }
+
+    #[test]
+    fn hits_stay_in_window_until_margin_passes() {
+        let clock = FakeClock::default();
+        let rl = RateLimiter::new(Box::new(clock.clone()));
+        rl.seed("e", &[rule(1, 10, 0)]);
+        assert_eq!(rl.reserve("e"), Duration::ZERO);
+        // Exactly at the server window edge we still hold back for the margin.
+        clock.advance(Duration::from_secs(10));
+        assert_eq!(rl.try_reserve("e", Duration::ZERO), Err(Duration::from_millis(500)));
+        clock.advance(Duration::from_millis(500));
+        assert_eq!(rl.try_reserve("e", Duration::ZERO), Ok(Duration::ZERO));
+    }
+
+    #[test]
+    fn refused_try_reserve_records_nothing() {
+        let rl = RateLimiter::new(Box::new(FakeClock::default()));
+        rl.seed("r", &[rule(1, 10, 0)]);
+        assert_eq!(rl.try_reserve("r", Duration::ZERO), Ok(Duration::ZERO));
+        let refused = rl.try_reserve("r", Duration::from_secs(1)).unwrap_err();
+        assert_eq!(refused, Duration::from_millis(10_500));
+        // Repeated refusals do not push the next slot further out.
+        for _ in 0..5 {
+            assert_eq!(rl.try_reserve("r", Duration::from_secs(1)), Err(refused));
+        }
+        assert_eq!(rl.try_reserve("r", Duration::MAX), Ok(refused));
+    }
+
+    #[test]
+    fn dropped_reservation_releases_slot() {
+        let rl = RateLimiter::new(Box::new(FakeClock::default()));
+        rl.seed("g", &[rule(1, 10, 0)]);
+        let slot = rl.reserve_guarded("g", Duration::MAX).unwrap();
+        assert_eq!(slot.wait(), Duration::ZERO);
+        drop(slot);
+        // Cancelled: the slot is free again.
+        let slot = rl.reserve_guarded("g", Duration::MAX).unwrap();
+        assert_eq!(slot.wait(), Duration::ZERO);
+        slot.commit();
+        // Committed: the next one has to wait, and cancelling a later one keeps order.
+        let later = rl.reserve_guarded("g", Duration::MAX).unwrap();
+        assert_eq!(later.wait(), Duration::from_millis(10_500));
+        let latest = rl.reserve_guarded("g", Duration::MAX).unwrap();
+        assert_eq!(latest.wait(), Duration::from_secs(21));
+        drop(later);
+        drop(latest);
+        assert_eq!(rl.reserve("g"), Duration::from_millis(10_500));
+        // Refusal through the guarded API also records nothing.
+        assert_eq!(rl.reserve_guarded("g", Duration::ZERO).unwrap_err(), Duration::from_secs(21));
+        // Releasing for an unknown policy is a no-op.
+        rl.release("unknown", Duration::ZERO);
     }
 }

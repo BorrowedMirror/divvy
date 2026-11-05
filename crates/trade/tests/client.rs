@@ -327,6 +327,52 @@ async fn rate_limit_headers_throttle_subsequent_calls() {
     let err = c.search("Standard", &other).await.unwrap_err();
     let TradeError::RateLimited { retry_after } = err else { panic!("{err:?}") };
     assert!(retry_after > Duration::from_secs(50));
+    // Refusals record nothing: retrying does not push the next free slot further out.
+    for _ in 0..3 {
+        let TradeError::RateLimited { retry_after: again } = c.search("Standard", &other).await.unwrap_err() else {
+            panic!("expected rate limit")
+        };
+        assert!(again <= retry_after, "{again:?} > {retry_after:?}");
+    }
+}
+
+#[tokio::test]
+async fn cancelled_waits_release_their_slot() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(
+            search_ok().insert_header("x-rate-limit-ip", "1:2:0").insert_header("x-rate-limit-ip-state", "1:2:0"),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+    let c = client(&server);
+    c.search("Standard", &query()).await.unwrap();
+    let other = TradeQuery { sort: json!({"price":"desc"}), ..query() };
+    // The caller gives up while the request is queued behind the limiter.
+    let abandoned = tokio::time::timeout(Duration::from_millis(50), c.search("Standard", &other)).await;
+    assert!(abandoned.is_err(), "request should still have been waiting");
+    // Its slot was handed back: the next request waits for one padded window (2.25s),
+    // not two (~4.5s).
+    let next = c.limiter().try_reserve("search", Duration::ZERO).unwrap_err();
+    assert!(next <= Duration::from_millis(2_250), "{next:?}");
+}
+
+#[tokio::test]
+async fn data_endpoints_are_throttled_before_any_headers() {
+    let server = MockServer::start().await;
+    Mock::given(path("/api/trade2/data/stats"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(fixture("stats.sample.json")))
+        .mount(&server)
+        .await;
+    let c =
+        TradeClient::new(TradeConfig { cache_ttl: Duration::ZERO, ..config(&server) }, Box::new(SystemClock)).unwrap();
+    for _ in 0..5 {
+        c.data("stats").await.unwrap();
+    }
+    // Seeded 5:10 rule: the sixth call inside 10s would queue ~10.5s > MAX_QUEUE_WAIT.
+    let err = c.data("stats").await.unwrap_err();
+    assert!(matches!(err, TradeError::RateLimited { .. }), "{err:?}");
 }
 
 #[tokio::test]
@@ -383,9 +429,15 @@ async fn invalid_json_maps_to_decode() {
 
 #[tokio::test]
 async fn transport_errors_are_reported() {
-    // wiremock pools servers (a dropped one keeps listening), so bind and release a
-    // port ourselves to get a guaranteed connection refusal.
-    let port = std::net::TcpListener::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port();
+    // A server that hangs up on every connection. (Binding then releasing a port is
+    // racy: a concurrently started wiremock server can grab it.)
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    tokio::spawn(async move {
+        while let Ok((sock, _)) = listener.accept().await {
+            drop(sock);
+        }
+    });
     let cfg =
         TradeConfig { base_url: Url::parse(&format!("http://127.0.0.1:{port}")).unwrap(), ..TradeConfig::default() };
     let c = TradeClient::new(cfg, Box::new(SystemClock)).unwrap();
