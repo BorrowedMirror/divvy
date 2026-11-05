@@ -2,6 +2,7 @@
 use clap::{Parser, Subcommand};
 
 mod commit_config;
+mod data;
 
 #[derive(Debug, Parser)]
 #[command(name = "xtask")]
@@ -40,7 +41,7 @@ enum DataCmd {
 fn main() -> anyhow::Result<()> {
     match Cli::parse().cmd {
         Cmd::Gen => commit_config::generate(),
-        Cmd::Data { .. } => anyhow::bail!("not implemented yet: workstream C"),
+        Cmd::Data { cmd: DataCmd::Refresh { offline } } => data::refresh(offline),
         Cmd::Coverage | Cmd::Release | Cmd::Lint => anyhow::bail!("not implemented yet: workstream I"),
     }
 }
