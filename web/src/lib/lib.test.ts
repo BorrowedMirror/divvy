@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { filterSet, settings } from "../test/fixtures";
 import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from "./chord";
-import { ageOf, formatAmount, formatPrice } from "./format";
+import i18n from "../i18n";
+import { activeLocale, ageOf, formatAge, formatAmount, formatDateTime, formatPrice } from "./format";
 import { IpcFailure, toIpcError, unwrap } from "./ipc";
 import { rewiden, rewidenStat, widenValue } from "./rewiden";
 import { looksLikeEmail, validateSettings } from "./validate";
@@ -126,6 +127,30 @@ describe("format", () => {
     expect(ageOf("2026-11-05T11:15:00Z", now)).toEqual({ unit: "minutes", count: 45 });
     expect(ageOf("2026-11-05T07:00:00Z", now)).toEqual({ unit: "hours", count: 5 });
     expect(ageOf("2026-11-02T12:00:00Z", now)).toEqual({ unit: "days", count: 3 });
+  });
+
+  test("localised ages and dates", () => {
+    expect(formatAge({ unit: "now", count: 0 }, "en")).toBeNull();
+    expect(formatAge({ unit: "minutes", count: 10 }, "en")).toBe("10m ago");
+    expect(formatAge({ unit: "days", count: 1 }, "en")).toBe("1d ago");
+    expect(formatAge({ unit: "hours", count: 3 }, "ja")).toBe("3時間前");
+    expect(formatDateTime(null, "en")).toBeNull();
+    expect(formatDateTime("garbage", "en")).toBeNull();
+    expect(formatDateTime("2026-11-05T12:00:00Z", "en")).toMatch(/Nov 5, 2026/);
+  });
+
+  test("defaults follow the active i18n language", async () => {
+    await i18n.changeLanguage("de");
+    try {
+      expect(activeLocale()).toBe("de");
+      expect(formatAmount(1234.56)).toBe("1.234,6");
+      expect(formatPrice({ amount: 2.5, currency: "divine" })).toBe("2,5 divine");
+      expect(formatAge({ unit: "minutes", count: 10 })).toBe(new Intl.RelativeTimeFormat("de", { style: "narrow" }).format(-10, "minute"));
+      expect(formatDateTime("2026-11-05T12:00:00Z")).toMatch(/2026/);
+    } finally {
+      await i18n.changeLanguage("en");
+    }
+    expect(formatAmount(1234.56)).toBe("1,234.6");
   });
 });
 
