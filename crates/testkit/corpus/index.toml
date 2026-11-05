@@ -1,0 +1,6 @@
+[[item]]
+id = "currency/divine-orb"
+class = "StackableCurrency"
+rarity = "currency"
+advanced = false
+source = "phase-1 seed"
