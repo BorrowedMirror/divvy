@@ -208,6 +208,7 @@ pub const WEAPON_CLASSES: &[&str] = &[
     "Staves",
     "Warstaves",
     "Quarterstaves",
+    "Talismans",
     "One Hand Maces",
     "Two Hand Maces",
     "One Hand Swords",
@@ -238,12 +239,12 @@ impl ItemClass {
             "essence" | "essences" => Self::Essence,
             "soul core" | "soul cores" => Self::SoulCore,
             "rune" | "runes" | "augment" | "augments" | "socketable" | "socketables" => Self::Rune,
-            "talisman" | "talismans" => Self::Talisman,
+            "talisman socketable" | "talisman socketables" => Self::Talisman,
             "distilled emotion" | "distilled emotions" => Self::DistilledEmotion,
             "splinter" | "splinters" | "breach splinter" | "breach splinters" => Self::Splinter,
             "catalyst" | "catalysts" | "breach catalyst" | "breach catalysts" => Self::Catalyst,
             "skill gem" | "skill gems" | "active skill gems" => Self::SkillGem,
-            "support gem" | "support gems" | "meta gem" | "meta gems" => Self::SupportGem,
+            "support gem" | "support gems" => Self::SupportGem,
             "uncut skill gem" | "uncut skill gems" | "uncut support gem" | "uncut support gems"
             | "uncut spirit gem" | "uncut spirit gems" | "uncut gems" => Self::UncutGem,
             "waystone" | "waystones" | "map" | "maps" => Self::Waystone,
@@ -319,14 +320,13 @@ impl ItemClass {
     /// Ids follow `/api/trade2/data/filters` (`weapon.bow`, `armour.helmet`, ...).
     pub fn trade_category(&self) -> Option<&'static str> {
         Some(match self {
-            Self::StackableCurrency | Self::Catalyst => "currency",
+            Self::StackableCurrency | Self::Catalyst | Self::Essence | Self::DistilledEmotion | Self::Splinter => {
+                "currency"
+            }
             Self::Omen => "currency.omen",
-            Self::Essence => "currency.essence",
             Self::SoulCore => "currency.soulcore",
             Self::Rune => "currency.rune",
-            Self::Talisman => "currency.talisman",
-            Self::DistilledEmotion => "currency.distilledemotion",
-            Self::Splinter => "currency.splinter",
+            Self::Talisman => "currency.socketable",
             Self::SkillGem => "gem.activegem",
             Self::SupportGem => "gem.supportgem",
             Self::UncutGem => "gem",
@@ -335,7 +335,7 @@ impl ItemClass {
             Self::Jewel => "jewel",
             Self::LifeFlask => "flask.life",
             Self::ManaFlask => "flask.mana",
-            Self::Charm => "azmeri.charm",
+            Self::Charm => "flask.charm",
             Self::Relic => "sanctum.relic",
             Self::Amulet => "accessory.amulet",
             Self::Ring => "accessory.ring",
@@ -349,6 +349,7 @@ impl ItemClass {
             Self::Focus => "armour.focus",
             Self::Quiver => "armour.quiver",
             Self::Weapon(raw) => return weapon_trade_category(raw),
+            Self::Other(raw) if raw.eq_ignore_ascii_case("Meta Gems") => "gem.metagem",
             Self::Other(_) => return None,
         })
     }
@@ -380,6 +381,7 @@ fn weapon_trade_category(raw: &str) -> Option<&'static str> {
         "dagger" => "weapon.dagger",
         "claw" => "weapon.claw",
         "trap" => "weapon.trap",
+        "talisman" => "weapon.talisman",
         "fishing rod" => "weapon.rod",
         _ => return None,
     })
@@ -438,7 +440,7 @@ mod tests {
             ("Soul Cores", ItemClass::SoulCore),
             ("Runes", ItemClass::Rune),
             ("Socketable", ItemClass::Rune),
-            ("Talismans", ItemClass::Talisman),
+            ("Augment", ItemClass::Rune),
             ("Distilled Emotions", ItemClass::DistilledEmotion),
             ("Splinter", ItemClass::Splinter),
             ("Catalysts", ItemClass::Catalyst),
@@ -497,6 +499,8 @@ mod tests {
         }
         assert_eq!(ItemClass::Weapon("Lances".into()).trade_category(), None);
         assert_eq!(ItemClass::Other("x".into()).trade_category(), None);
+        assert_eq!(ItemClass::Other("Meta Gems".into()).trade_category(), Some("gem.metagem"));
+        assert_eq!(ItemClass::from_header("Talismans").trade_category(), Some("weapon.talisman"));
         assert_eq!(ItemClass::Helmet.trade_category(), Some("armour.helmet"));
     }
 
