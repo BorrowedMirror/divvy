@@ -2,7 +2,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
 import { useOverlayStore } from "../../stores/overlay";
-import { filterSet, ipcError, itemCopied, parsedItem, priceSummary } from "../../test/fixtures";
+import { filterSet, ipcError, itemCopied, parsedItem, priceSummary, settings } from "../../test/fixtures";
 import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
 import { OverlayView } from "./OverlayView";
 import { Results } from "./Results";
@@ -219,6 +219,120 @@ describe("OverlayView", () => {
     expect(within(header).getByText("Unidentified")).toBeInTheDocument();
     expect(screen.queryByText("Stats")).toBeNull();
     expect(screen.getByRole("checkbox", { name: "Gem level" })).toBeInTheDocument();
+  });
+});
+
+describe("overlay extras", () => {
+  test("price summary block exposes the median for e2e", async () => {
+    await mountWithItem();
+    expect(await screen.findByTestId("price-summary")).toHaveTextContent("2.75");
+  });
+
+  test("price-failed without an item renders in the empty state", async () => {
+    setupIpc();
+    renderWithProviders(<OverlayView />);
+    await flush();
+    await emitEvent("price-failed", { error: ipcError("no_item", "clipboard empty") });
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("No item on the clipboard");
+    expect(alert).toHaveTextContent("clipboard empty");
+    expect(screen.getByText(/press Ctrl\+D/)).toBeInTheDocument();
+  });
+
+  test("price-failed supersedes an in-flight query result", async () => {
+    let resolve: (v: unknown) => void = () => {};
+    await mountWithItem({ query_price: () => new Promise((r) => (resolve = r)) });
+    await emitEvent("price-failed", { error: ipcError("trade", "upstream down") });
+    await act(async () => resolve(priceSummary()));
+    expect(screen.getByRole("alert")).toHaveTextContent("upstream down");
+    expect(screen.queryByTestId("price-summary")).toBeNull();
+  });
+
+  test("failing window commands show a toast", async () => {
+    const user = userEvent.setup();
+    await mountWithItem({
+      hide_overlay: () => fail(ipcError("platform", "cannot hide")),
+      open_settings: () => fail(ipcError("platform", "no settings window")),
+      open_trade: () => fail(ipcError("platform", "no browser")),
+    });
+    await user.click(screen.getByRole("button", { name: "Close overlay" }));
+    expect(await screen.findByText("cannot hide")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Open settings" }));
+    expect(await screen.findByText("no settings window")).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: /Open trade/ }));
+    expect(await screen.findByText("no browser")).toBeInTheDocument();
+    expect(screen.getAllByText("That action failed").length).toBeGreaterThan(0);
+    // Base UI aria-hides the close button until the toast stack is focused/expanded.
+    expect(document.querySelectorAll('button[aria-label="Dismiss"]').length).toBeGreaterThan(0);
+  });
+
+  describe("auto-hide", () => {
+    async function mountAutoHide(ms: number) {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const calls = setupIpc({
+        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor" } }),
+        query_price: () => priceSummary(),
+      });
+      renderWithProviders(<OverlayView />);
+      await flush();
+      await emitEvent("item-copied", itemCopied());
+      await waitFor(() => expect(useOverlayStore.getState().phase).toBe("ready"));
+      // Settings query must have resolved so the delay is known.
+      await flush();
+      return { calls, panel: screen.getByRole("article") };
+    }
+    const advance = (ms: number) => act(async () => void vi.advanceTimersByTime(ms));
+
+    test("hides after the delay once the pointer leaves", async () => {
+      try {
+        const { calls, panel } = await mountAutoHide(1000);
+        fireEvent.mouseLeave(panel);
+        await advance(900);
+        expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+        await advance(200);
+        expect(callsOf(calls, "hide_overlay")).toHaveLength(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    test("re-entering cancels the timer", async () => {
+      try {
+        const { calls, panel } = await mountAutoHide(1000);
+        fireEvent.mouseLeave(panel);
+        await advance(500);
+        fireEvent.mouseEnter(panel);
+        await advance(2000);
+        expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    test("skipped while pinned", async () => {
+      try {
+        const { calls, panel } = await mountAutoHide(1000);
+        fireEvent.mouseLeave(panel);
+        await emitEvent("overlay-state", { visible: true, pinned: true });
+        await advance(1500);
+        fireEvent.mouseLeave(panel);
+        await advance(1500);
+        expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    test("disabled when the delay is 0", async () => {
+      try {
+        const { calls, panel } = await mountAutoHide(0);
+        fireEvent.mouseLeave(panel);
+        await advance(5000);
+        expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });
 

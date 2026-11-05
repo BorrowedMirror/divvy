@@ -5,7 +5,7 @@ import type { PartialMessages } from "./en";
  * platform guidance texts are intentionally left for a native speaker.
  */
 export const de: PartialMessages = {
-  common: { loading: "Lädt…" },
+  common: { loading: "Lädt…", dismiss: "Schließen" },
   overlay: {
     title: "Preisprüfung",
     empty: "Fahre im Spiel über einen Gegenstand und drücke {{hotkey}}.",

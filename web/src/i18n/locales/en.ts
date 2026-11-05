@@ -1,5 +1,5 @@
 export const en = {
-  common: { loading: "Loading…" },
+  common: { loading: "Loading…", dismiss: "Dismiss" },
   overlay: {
     title: "Price check",
     empty: "Hover an item in game and press {{hotkey}} to price check it.",
@@ -83,6 +83,7 @@ export const en = {
     platform: "Platform error",
     no_item: "No item on the clipboard",
     internal: "Something went wrong",
+    commandFailed: "That action failed",
     retryIn_one: "Retry in {{count}} second",
     retryIn_other: "Retry in {{count}} seconds",
   },
