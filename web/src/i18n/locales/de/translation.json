@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "App-Update",
+    "available": "kalandra {{version}} ist verfügbar.",
+    "notes": "Neuerungen",
+    "later": "Später",
+    "install": "Installieren und neu starten",
+    "installing": "Wird installiert…"
+  },
   "common": {
     "loading": "Wird geladen…",
     "dismiss": "Schließen"
@@ -112,6 +120,8 @@
     "language": "Sprache",
     "theme": "Design",
     "startMinimised": "Minimiert im Infobereich starten",
+    "checkUpdates": "Automatisch nach Updates suchen",
+    "checkUpdatesHelp": "Sucht kurz nach dem Start und einmal täglich nach einer neuen Version. Heruntergeladen wird erst, wenn die Installation bestätigt wird.",
     "source": "Preisquelle",
     "leagueAuto": "Liga automatisch erkennen",
     "league": "Liga",
@@ -192,7 +202,8 @@
     "copyReport": "Bericht kopieren",
     "copied": "Bericht in die Zwischenablage kopiert",
     "copyFailed": "Kein Zugriff auf die Zwischenablage",
-    "loadFailed": "Diagnose konnte nicht geladen werden."
+    "loadFailed": "Diagnose konnte nicht geladen werden.",
+    "onboardingLink": "Einrichtungsassistent öffnen"
   },
   "capability": {
     "window_tracking": "Spielfenster-Verfolgung",
@@ -216,5 +227,68 @@
     "diagnostics": "Diagnose",
     "quit": "kalandra beenden",
     "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "kalandra einrichten",
+    "intro": "Ein paar plattformspezifische Schritte, damit Preisprüfungen reibungslos funktionieren. Diese Seite ist jederzeit über die Diagnose wieder erreichbar.",
+    "stepsHeading": "Einrichtung für {{platform}}",
+    "loadFailed": "Berechtigungen konnten nicht geprüft werden.",
+    "required": "erforderlich",
+    "optional": "optional",
+    "granted": "Erteilt",
+    "notGranted": "Nicht erteilt",
+    "openSettings": "Systemeinstellungen öffnen",
+    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von kalandra. Nach dem Aktivieren kalandra beenden und erneut öffnen.",
+    "requestFailed": "Systemeinstellungen konnten nicht geöffnet werden: {{message}}",
+    "details": "Technische Details",
+    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. kalandra funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
+    "continueWithout": "Ohne fortfahren",
+    "done": "Fertig",
+    "saveFailed": "Speichern fehlgeschlagen: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Bedienungshilfen",
+        "body": "Beim Tastenkürzel für die Preisprüfung drückt kalandra die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
+      },
+      "screen_recording": {
+        "name": "Bildschirmaufnahme",
+        "body": "Ermöglicht kalandra, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. kalandra nimmt den Bildschirm niemals auf."
+      },
+      "input_monitoring": {
+        "name": "Eingabeüberwachung",
+        "body": "Ermöglicht kalandra, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
+      },
+      "unknown": "Berechtigung: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Fenstermodus oder randloses Vollbild verwenden",
+      "windowedBody": "Über exklusivem Vollbild kann das Overlay nicht erscheinen. In den Grafikoptionen des Spiels Fenster oder Fenster-Vollbild (randlos) wählen.",
+      "elevatedTitle": "Läuft das Spiel als Administrator?",
+      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, kalandra ebenfalls als Administrator starten."
+    },
+    "x11": {
+      "title": "Keine weitere Einrichtung nötig",
+      "body": "X11 unterstützt alles, was kalandra braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
+    },
+    "gnome": {
+      "title": "GNOME: nur X11/XWayland",
+      "x11Body": "GNOME fehlen die von kalandra benötigten Wayland-Funktionen, daher läuft kalandra hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
+      "waylandBody": "GNOME bietet kein layer-shell, daher kann das Overlay im nativen Wayland-Modus nicht über dem Spiel bleiben. In den Einstellungen das Backend auf X11 / XWayland umstellen."
+    },
+    "wayland": {
+      "degradedTitle": "Der native Wayland-Modus hat Einschränkungen",
+      "degradedBody": "Wayland isoliert Apps voneinander, daher funktionieren einige Funktionen anders:",
+      "portal": "Globale Tastenkürzel laufen über das GlobalShortcuts-Portal des Desktops, das um Bestätigung bittet. Nicht jeder Compositor bietet es an.",
+      "layerShell": "Das Overlay wird per layer-shell am Bildschirmrand verankert, statt dem Spielfenster zu folgen.",
+      "noTracking": "kalandra kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
+      "triggerTitle": "Preisprüfung im Compositor belegen",
+      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das kalandra --trigger ausführt. Damit prüft das laufende kalandra den Preis des Gegenstands unter dem Mauszeiger.",
+      "pinnedHint": "Mit --pinned öffnet sich das Overlay angeheftet.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (Befehl für eigenes Tastenkürzel)"
+      }
+    }
   }
 }

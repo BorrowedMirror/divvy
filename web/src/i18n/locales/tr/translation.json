@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "Uygulama güncellemesi",
+    "available": "kalandra {{version}} kullanıma sunuldu.",
+    "notes": "Yenilikler",
+    "later": "Daha sonra",
+    "install": "Yükle ve yeniden başlat",
+    "installing": "Yükleniyor…"
+  },
   "common": {
     "loading": "Yükleniyor…",
     "dismiss": "Kapat"
@@ -112,6 +120,8 @@
     "language": "Dil",
     "theme": "Tema",
     "startMinimised": "Sistem tepsisinde küçültülmüş başlat",
+    "checkUpdates": "Güncellemeleri otomatik denetle",
+    "checkUpdatesHelp": "Başlatmadan kısa süre sonra ve günde bir kez yeni sürüm arar. Siz yüklemeyi seçene kadar hiçbir şey indirilmez.",
     "source": "Fiyat kaynağı",
     "leagueAuto": "Ligi otomatik algıla",
     "league": "Lig",
@@ -192,7 +202,8 @@
     "copyReport": "Raporu kopyala",
     "copied": "Rapor panoya kopyalandı",
     "copyFailed": "Panoya erişilemedi",
-    "loadFailed": "Tanılama yüklenemedi."
+    "loadFailed": "Tanılama yüklenemedi.",
+    "onboardingLink": "Kurulum rehberini aç"
   },
   "capability": {
     "window_tracking": "Oyun penceresi takibi",
@@ -216,5 +227,68 @@
     "diagnostics": "Tanılama",
     "quit": "kalandra'dan çık",
     "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "kalandra'yı kur",
+    "intro": "Fiyat kontrollerinin sorunsuz çalışması için platformunuza özel birkaç adım. Buraya istediğiniz zaman Tanılama'dan geri dönebilirsiniz.",
+    "stepsHeading": "{{platform}} için kurulum",
+    "loadFailed": "İzinler kontrol edilemedi.",
+    "required": "gerekli",
+    "optional": "isteğe bağlı",
+    "granted": "Verildi",
+    "notGranted": "Verilmedi",
+    "openSettings": "Sistem Ayarları'nı aç",
+    "relaunch": "macOS bu izni kalandra yeniden başlatıldıktan sonra uygular. İzni etkinleştirdikten sonra kalandra'dan çıkıp yeniden açın.",
+    "requestFailed": "Sistem Ayarları açılamadı: {{message}}",
+    "details": "Teknik ayrıntılar",
+    "blockedHint": "Bazı gerekli izinler hâlâ eksik. kalandra kısıtlı özelliklerle çalışmaya devam edecek.",
+    "continueWithout": "İzin vermeden devam et",
+    "done": "Bitti",
+    "saveFailed": "Kaydedilemedi: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Erişilebilirlik",
+        "body": "Fiyat kontrolü kısayoluna bastığınızda kalandra oyunun kopyalama kısayoluna sizin yerinize basar. macOS bunun için Erişilebilirlik erişimi gerektirir."
+      },
+      "screen_recording": {
+        "name": "Ekran Kaydı",
+        "body": "kalandra'nın Path of Exile 2 penceresini güvenilir şekilde bulabilmesi için pencere başlıklarını okumasına izin verir. kalandra ekranınızı asla kaydetmez."
+      },
+      "input_monitoring": {
+        "name": "Girdi İzleme",
+        "body": "Oyun odaktayken kalandra'nın arayüzü Esc ile kapatmasına ve Ctrl+kaydırmaya tepki vermesine izin verir."
+      },
+      "unknown": "İzin: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Pencereli veya kenarlıksız tam ekran kullanın",
+      "windowedBody": "Arayüz, özel tam ekran modunun üzerinde görünemez. Oyunun grafik seçeneklerinde Pencereli veya Pencereli Tam Ekran'ı (kenarlıksız) seçin.",
+      "elevatedTitle": "Oyunu yönetici olarak mı çalıştırıyorsunuz?",
+      "elevatedBody": "Windows, normal bir uygulamadan yükseltilmiş bir uygulamaya giden kısayolları ve benzetilmiş tuş vuruşlarını engeller (UIPI). Oyun yönetici olarak çalışıyorsa kalandra'yı da yönetici olarak çalıştırın."
+    },
+    "x11": {
+      "title": "Ek kurulum gerekmez",
+      "body": "X11, kalandra'nın ihtiyaç duyduğu her şeyi destekler: genel kısayollar, pencere takibi ve oyunun üzerinde bir arayüz."
+    },
+    "gnome": {
+      "title": "GNOME: yalnızca X11/XWayland",
+      "x11Body": "GNOME'da kalandra'nın ihtiyaç duyduğu Wayland özellikleri yok; bu yüzden kalandra burada XWayland üzerinden çalışır. Oyunu da XWayland altında çalıştırın (Proton ve Wine'da varsayılan).",
+      "waylandBody": "GNOME'da layer-shell yok; bu yüzden yerel Wayland modunda arayüz oyunun üzerinde kalamaz. Ayarlar'dan altyapıyı X11 / XWayland olarak değiştirin."
+    },
+    "wayland": {
+      "degradedTitle": "Yerel Wayland modunun sınırları var",
+      "degradedBody": "Wayland uygulamaları birbirinden yalıtır, bu yüzden bazı özellikler farklı çalışır:",
+      "portal": "Genel kısayollar masaüstünün GlobalShortcuts portalı üzerinden çalışır ve portal bunları onaylamanızı ister. Her compositor bu portalı sunmaz.",
+      "layerShell": "Arayüz, oyun penceresini takip etmek yerine layer-shell ile ekran kenarına sabitlenir.",
+      "noTracking": "kalandra oyun penceresini göremez ve Esc tuşunu dinleyemez; bu yüzden arayüzü kendi düğmesiyle kapatın.",
+      "triggerTitle": "Fiyat kontrolünü compositor'ünüzde atayın",
+      "triggerBody": "Kısayollar çalışmıyorsa compositor'ünüzde kalandra --trigger komutunu çalıştıran bir klavye kısayolu ekleyin. Bu komut, çalışan kalandra'da imlecin altındaki eşyanın fiyatını kontrol eder.",
+      "pinnedHint": "Arayüzü sabitlenmiş olarak açmak için --pinned ekleyin.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (özel kısayol komutu)"
+      }
+    }
   }
 }

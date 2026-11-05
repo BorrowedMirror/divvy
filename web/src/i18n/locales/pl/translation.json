@@ -1,4 +1,12 @@
 {
+  "update": {
+    "title": "Aktualizacja aplikacji",
+    "available": "Dostępna jest wersja kalandra {{version}}.",
+    "notes": "Co nowego",
+    "later": "Później",
+    "install": "Zainstaluj i uruchom ponownie",
+    "installing": "Instalowanie…"
+  },
   "common": {
     "loading": "Ładowanie…",
     "dismiss": "Zamknij"
@@ -116,6 +124,8 @@
     "language": "Język",
     "theme": "Motyw",
     "startMinimised": "Uruchamiaj zminimalizowany do zasobnika",
+    "checkUpdates": "Automatycznie sprawdzaj aktualizacje",
+    "checkUpdatesHelp": "Szuka nowej wersji krótko po uruchomieniu i raz dziennie. Nic nie jest pobierane, dopóki nie zdecydujesz się zainstalować.",
     "source": "Źródło cen",
     "leagueAuto": "Wykrywaj ligę automatycznie",
     "league": "Liga",
@@ -196,7 +206,8 @@
     "copyReport": "Kopiuj raport",
     "copied": "Skopiowano raport do schowka",
     "copyFailed": "Brak dostępu do schowka",
-    "loadFailed": "Nie udało się wczytać diagnostyki."
+    "loadFailed": "Nie udało się wczytać diagnostyki.",
+    "onboardingLink": "Otwórz przewodnik konfiguracji"
   },
   "capability": {
     "window_tracking": "Śledzenie okna gry",
@@ -220,5 +231,68 @@
     "diagnostics": "Diagnostyka",
     "quit": "Zamknij aplikację kalandra",
     "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "Konfiguracja aplikacji kalandra",
+    "intro": "Kilka kroków zależnych od platformy, aby sprawdzanie cen działało bez problemów. Możesz tu wrócić w dowolnym momencie z poziomu Diagnostyki.",
+    "stepsHeading": "Konfiguracja dla: {{platform}}",
+    "loadFailed": "Nie udało się sprawdzić uprawnień.",
+    "required": "wymagane",
+    "optional": "opcjonalne",
+    "granted": "Przyznano",
+    "notGranted": "Nie przyznano",
+    "openSettings": "Otwórz Ustawienia systemowe",
+    "relaunch": "macOS zastosuje to uprawnienie po ponownym uruchomieniu aplikacji kalandra. Po jego włączeniu zamknij i ponownie otwórz aplikację kalandra.",
+    "requestFailed": "Nie udało się otworzyć Ustawień systemowych: {{message}}",
+    "details": "Szczegóły techniczne",
+    "blockedHint": "Nadal brakuje niektórych wymaganych uprawnień. kalandra będzie działać z ograniczonymi funkcjami.",
+    "continueWithout": "Kontynuuj bez nich",
+    "done": "Gotowe",
+    "saveFailed": "Nie udało się zapisać: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "Dostępność",
+        "body": "Po naciśnięciu skrótu sprawdzania ceny kalandra naciska za ciebie skrót kopiowania w grze. macOS wymaga do tego dostępu w sekcji Dostępność."
+      },
+      "screen_recording": {
+        "name": "Nagrywanie ekranu",
+        "body": "Pozwala aplikacji kalandra odczytywać tytuły okien, aby niezawodnie znajdować okno Path of Exile 2. kalandra nigdy nie nagrywa twojego ekranu."
+      },
+      "input_monitoring": {
+        "name": "Monitorowanie wprowadzania",
+        "body": "Pozwala aplikacji kalandra zamykać nakładkę klawiszem Esc i reagować na Ctrl+kółko myszy, gdy gra jest aktywna."
+      },
+      "unknown": "Uprawnienie: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "Użyj trybu okna lub pełnego ekranu bez ramek",
+      "windowedBody": "Nakładka nie może pojawić się nad wyłącznym trybem pełnoekranowym. W opcjach grafiki gry wybierz tryb okna lub pełny ekran w oknie (bez ramek).",
+      "elevatedTitle": "Gra działa jako administrator?",
+      "elevatedBody": "Windows blokuje skróty i symulowane naciśnięcia klawiszy wysyłane ze zwykłej aplikacji do aplikacji z podwyższonymi uprawnieniami (UIPI). Jeśli gra działa jako administrator, uruchom aplikację kalandra również jako administrator."
+    },
+    "x11": {
+      "title": "Nie trzeba nic więcej konfigurować",
+      "body": "X11 obsługuje wszystko, czego potrzebuje kalandra: globalne skróty, śledzenie okna i nakładkę nad grą."
+    },
+    "gnome": {
+      "title": "GNOME: tylko X11/XWayland",
+      "x11Body": "GNOME nie ma funkcji Waylanda, których potrzebuje kalandra, więc tutaj kalandra działa przez XWayland. Uruchom grę również przez XWayland (domyślnie w Proton i Wine).",
+      "waylandBody": "GNOME nie obsługuje layer-shell, więc w trybie natywnym Wayland nakładka nie może pozostać nad grą. Zmień backend na X11 / XWayland w Ustawieniach."
+    },
+    "wayland": {
+      "degradedTitle": "Tryb natywny Wayland ma ograniczenia",
+      "degradedBody": "Wayland izoluje aplikacje od siebie, więc niektóre funkcje działają inaczej:",
+      "portal": "Globalne skróty działają przez portal GlobalShortcuts pulpitu, który prosi o ich potwierdzenie. Nie każdy kompozytor go udostępnia.",
+      "layerShell": "Nakładka jest zakotwiczona do krawędzi ekranu przez layer-shell zamiast podążać za oknem gry.",
+      "noTracking": "kalandra nie widzi okna gry ani nie wykrywa klawisza Esc, więc zamykaj nakładkę jej własnym przyciskiem.",
+      "triggerTitle": "Przypisz sprawdzanie ceny w kompozytorze",
+      "triggerBody": "Jeśli skróty nie działają, dodaj w kompozytorze skrót klawiszowy uruchamiający kalandra --trigger. Sprawdza on cenę przedmiotu pod kursorem w działającej aplikacji kalandra.",
+      "pinnedHint": "Dodaj --pinned, aby otworzyć przypiętą nakładkę.",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (polecenie własnego skrótu)"
+      }
+    }
   }
 }
