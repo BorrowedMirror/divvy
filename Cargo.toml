@@ -106,6 +106,8 @@ wiremock = "0.6"
 pretty_assertions = "1"
 tempfile = "3"
 signal-hook = "0.3"
+gtk = "0.18"
+gtk-layer-shell = { version = "0.8", features = ["v0_6"] }
 
 [profile.release]
 lto = true

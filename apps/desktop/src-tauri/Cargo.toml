@@ -55,3 +55,8 @@ tracing-subscriber.workspace = true
 [dev-dependencies]
 kalandra-testkit.workspace = true
 tauri = { workspace = true, features = ["test"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Linux overlay (owned by workstream F, src/overlay/linux.rs): layer-shell on Wayland-native.
+gtk.workspace = true
+gtk-layer-shell.workspace = true
