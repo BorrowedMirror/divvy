@@ -5,6 +5,7 @@ pub mod flow;
 pub mod ipc;
 pub mod logic;
 pub mod overlay;
+pub mod permissions;
 pub mod state;
 #[cfg(any(debug_assertions, feature = "test-hook"))]
 pub mod testhook;
@@ -35,6 +36,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::set_overlay_pinned,
             ipc::open_settings,
             ipc::rebind_hotkey,
+            permissions::get_permissions,
+            permissions::request_permission,
+            permissions::recheck_permissions,
             updater::install_update,
         ])
         .events(collect_events![
@@ -43,6 +47,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             events::PriceFailed,
             events::SettingsChanged,
             events::OverlayState,
+            permissions::PermissionsChanged,
             updater::UpdateAvailable,
         ])
         .dangerously_cast_bigints_to_number()
@@ -206,6 +211,8 @@ pub fn run() {
             if !state.settings().ui.start_minimised {
                 let _ = flow::show_settings(&handle, "settings");
             }
+            // First run or required OS permissions missing: open `#/onboarding` instead.
+            permissions::init(&handle, &state);
             let st = Arc::clone(&state);
             tauri::async_runtime::spawn(async move {
                 match st.sources().trade.leagues().await {

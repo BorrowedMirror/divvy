@@ -1,7 +1,8 @@
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { commands } from "../bindings";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { commands, events } from "../bindings";
 import type { FilterSet_Serialize, PriceSummary_Serialize, Settings_Serialize } from "../bindings";
 import { unwrap } from "../lib/ipc";
+import { useTauriEvent } from "./useTauriEvent";
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -16,6 +17,7 @@ export const keys = {
   settings: ["settings"] as const,
   leagues: ["leagues"] as const,
   diagnostics: ["diagnostics"] as const,
+  permissions: ["permissions"] as const,
 };
 
 export function useSettingsQuery() {
@@ -43,5 +45,37 @@ export function useQueryPrice() {
 export function useSaveSettings() {
   return useMutation<Settings_Serialize, Error, Settings_Serialize>({
     mutationFn: async (settings) => unwrap(await commands.saveSettings(settings)),
+  });
+}
+
+/** How often the onboarding view re-checks OS permissions while it is visible. */
+export const PERMISSION_POLL_MS = 2000;
+
+/** Poll only while the document is visible; a hidden settings window does no work. */
+export function permissionPollInterval(): number | false {
+  return document.visibilityState === "visible" ? PERMISSION_POLL_MS : false;
+}
+
+/**
+ * Live permission report. While mounted it re-checks every 2 s (paused when the window is
+ * hidden) and also applies `permissions-changed` pushes from the backend.
+ */
+export function usePermissions() {
+  const queryClient = useQueryClient();
+  useTauriEvent(events.permissionsChanged, (p) => {
+    queryClient.setQueryData(keys.permissions, p.report);
+  });
+  return useQuery({
+    queryKey: keys.permissions,
+    queryFn: () => commands.recheckPermissions(),
+    refetchInterval: permissionPollInterval,
+    refetchIntervalInBackground: false,
+    staleTime: 0,
+  });
+}
+
+export function useRequestPermission() {
+  return useMutation<null, Error, string>({
+    mutationFn: async (kind) => unwrap(await commands.requestPermission(kind)),
   });
 }

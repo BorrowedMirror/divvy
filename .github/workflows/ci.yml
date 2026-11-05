@@ -23,20 +23,26 @@ jobs:
     name: rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: rustup toolchain install
       - run: cargo fmt --all -- --check
+      # e2e/macos-harness is a standalone workspace (own Cargo.lock), so --all skips it.
+      - run: cargo fmt --manifest-path e2e/macos-harness/Cargo.toml -- --check
 
   generated:
     name: generated files + xtask
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: xtask
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: cargo-nextest
       - name: xtask unit tests
@@ -54,14 +60,18 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - if: runner.os == 'Linux'
         uses: ./.github/actions/linux-deps
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: clippy
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: clippy (e2e/macos-harness, standalone workspace)
+        run: cargo clippy --manifest-path e2e/macos-harness/Cargo.toml --all-targets --locked -- -D warnings
 
   deny:
     name: cargo deny
@@ -73,8 +83,10 @@ jobs:
     # New advisories must not block unrelated PRs; they still fail on master and nightly.
     continue-on-error: ${{ matrix.checks == 'advisories' && github.event_name == 'pull_request' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: EmbarkStudios/cargo-deny-action@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
         with:
           command: check ${{ matrix.checks }}
 
@@ -82,8 +94,10 @@ jobs:
     name: cargo machete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: taiki-e/install-action@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: cargo-machete
       - run: cargo machete --skip-target-dir
@@ -96,7 +110,9 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - if: runner.os == 'Linux'
         uses: ./.github/actions/linux-deps
       - name: Start Xvfb + openbox
@@ -107,24 +123,24 @@ jobs:
           sleep 1
           DISPLAY=:99 openbox &
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: test
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: cargo-nextest,cargo-llvm-cov
       - name: nextest + llvm-cov with per-crate gates
         run: cargo xtask coverage --check --profile ci
       - name: Upload junit
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: junit-${{ matrix.os }}
           path: target/nextest/ci/junit.xml
           if-no-files-found: ignore
       - name: Upload coverage (core)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/coverage/core.lcov
@@ -134,7 +150,7 @@ jobs:
           fail_ci_if_error: false
       - name: Upload coverage (data)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/coverage/data.lcov
@@ -144,7 +160,7 @@ jobs:
           fail_ci_if_error: false
       - name: Upload coverage (trade)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/coverage/trade.lcov
@@ -154,7 +170,7 @@ jobs:
           fail_ci_if_error: false
       - name: Upload coverage (platform)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/coverage/platform.lcov
@@ -164,7 +180,7 @@ jobs:
           fail_ci_if_error: false
       - name: Upload coverage (config)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/coverage/config.lcov
@@ -177,32 +193,37 @@ jobs:
     name: bindings are fresh
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/linux-deps
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: bindings
       - name: web/src/bindings.ts matches the Rust IPC types
         run: cargo test --locked -p kalandra-desktop --test bindings
 
   web:
-    name: web lint + typecheck + coverage
+    name: web lint + typecheck + coverage (+ e2e typecheck)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web lint
       - run: pnpm --dir web typecheck
+      - run: pnpm --dir e2e typecheck
       - run: pnpm --dir web coverage
       - name: Upload coverage (web)
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: web/coverage/lcov.info

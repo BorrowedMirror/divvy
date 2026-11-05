@@ -4,7 +4,7 @@ import type { IpcError_Serialize, PriceSummary_Serialize } from "../../bindings"
 import { commands } from "../../bindings";
 import { ExternalIcon } from "../../components/icons";
 import { useCommand } from "../../hooks/useCommand";
-import { ageOf, formatPrice } from "../../lib/format";
+import { ageOf, formatAge, formatDateTime, formatPrice } from "../../lib/format";
 
 function useCurrencyLabel() {
   const { t } = useTranslation();
@@ -91,8 +91,8 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
                         )}
                         {l.seller ?? t("results.unknownSeller")}
                       </td>
-                      <td className="px-2 py-1 text-right text-muted">
-                        {age ? t(`age.${age.unit}`, { count: age.count }) : "—"}
+                      <td className="px-2 py-1 text-right text-muted" title={formatDateTime(l.indexed, i18n.language) ?? undefined}>
+                        {age ? (formatAge(age, i18n.language) ?? t("age.now")) : "—"}
                       </td>
                     </tr>
                   );

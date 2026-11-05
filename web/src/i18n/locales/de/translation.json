@@ -29,7 +29,7 @@
     "ilvl": "GS {{value}}",
     "quality": "{{value}} % Qualität",
     "gemLevel": "Stufe {{value}}",
-    "waystoneTier": "Stufe {{value}}",
+    "waystoneTier": "Level {{value}}",
     "stack": "{{current}}/{{max}}",
     "corrupted": "Verderbt",
     "unidentified": "Nicht identifiziert"
@@ -47,7 +47,7 @@
     "item_level": "Gegenstandsstufe",
     "quality": "Qualität",
     "gem_level": "Gemmenstufe",
-    "waystone_tier": "Wegsteinstufe",
+    "waystone_tier": "Wegstein-Level",
     "sockets": "Fassungen",
     "corrupted": "Verderbt",
     "any": "Beliebig",
@@ -77,7 +77,7 @@
     "seller": "Verkäufer",
     "age": "Eingestellt",
     "unknownSeller": "unbekannt",
-    "openTrade": "Auf Handelsseite öffnen"
+    "openTrade": "Handel öffnen"
   },
   "age": {
     "now": "gerade eben",

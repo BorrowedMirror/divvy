@@ -11,6 +11,7 @@ import { useTauriEvent } from "./hooks/useTauriEvent";
 import i18n, { supportedLanguage } from "./i18n";
 import { type Route, routeFromHash } from "./route";
 import { DiagnosticsView } from "./views/diagnostics/DiagnosticsView";
+import { OnboardingView } from "./views/onboarding/OnboardingView";
 import { OverlayView } from "./views/overlay/OverlayView";
 import { SettingsView } from "./views/settings/SettingsView";
 
@@ -100,6 +101,7 @@ export function Routes() {
     <main data-route={route} className="min-h-screen">
       {route === "overlay" && <OverlayView />}
       {route === "settings" && <SettingsView onOpenDiagnostics={() => navigate("diagnostics")} />}
+      {route === "onboarding" && <OnboardingView onDone={() => navigate("settings")} />}
       {route === "diagnostics" && (
         <>
           <nav className="mx-auto max-w-2xl px-6 pt-4">
@@ -114,7 +116,7 @@ export function Routes() {
   );
 }
 
-/** Root component: providers + hash route (`overlay | settings | diagnostics`). */
+/** Root component: providers + hash route (`overlay | settings | diagnostics | onboarding`). */
 export function App({ client }: { client?: QueryClient }) {
   return (
     <AppProviders client={client}>

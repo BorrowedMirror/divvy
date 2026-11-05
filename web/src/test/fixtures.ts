@@ -156,7 +156,7 @@ export function settings(overrides: Partial<Settings_Serialize> = {}): Settings_
       poesessid: null,
     },
     overlay: { auto_hide_ms: 1500, opacity: 1, side: "cursor" },
-    ui: { language: "en", theme: "dark", start_minimised: false },
+    ui: { language: "en", theme: "dark", start_minimised: false, onboarding_done: false },
     platform: { backend_override: null },
     ...overrides,
   };

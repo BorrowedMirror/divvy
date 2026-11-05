@@ -39,14 +39,14 @@
     "magic": "Magique",
     "rare": "Rare",
     "unique": "Unique",
-    "currency": "Monnaie",
+    "currency": "Objet monétaire",
     "gem": "Gemme",
     "other": "Autre"
   },
   "misc": {
     "item_level": "Niveau de l'objet",
     "quality": "Qualité",
-    "gem_level": "Niveau de gemme",
+    "gem_level": "Niveau de la gemme",
     "waystone_tier": "Palier de la pierre",
     "sockets": "Châsses",
     "corrupted": "Corrompu",
@@ -78,7 +78,7 @@
     "seller": "Vendeur",
     "age": "Publiée",
     "unknownSeller": "inconnu",
-    "openTrade": "Ouvrir sur le site d'échange"
+    "openTrade": "Ouvrir l'échange"
   },
   "age": {
     "now": "à l'instant",

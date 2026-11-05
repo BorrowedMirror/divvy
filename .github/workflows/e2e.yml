@@ -1,7 +1,10 @@
 name: e2e
 
 # End-to-end runs of the real app against tools/fake-game and recorded trade fixtures.
-# Scripts live in e2e/ (workstream H); this file only provisions each environment.
+# Scripts live in e2e/scripts (workstream H); this file only provisions each environment and
+# builds the binaries once, then runs the scripts with SKIP_BUILD (-SkipBuild on Windows).
+# The app is a debug build with the test hook and `tauri/custom-protocol`, so it serves
+# web/dist itself instead of waiting for the Vite dev server.
 on:
   push:
     branches: [master]
@@ -18,6 +21,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
+  TAURI_DRIVER_VERSION: 2.1.0
 
 jobs:
   windows:
@@ -25,18 +29,20 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked
+      - run: cargo install tauri-driver --locked --version "$env:TAURI_DRIVER_VERSION"
       - name: msedgedriver matching the installed WebView2
         shell: pwsh
         run: |
@@ -46,124 +52,141 @@ jobs:
           Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile $zip
           Expand-Archive $zip -DestinationPath "$env:RUNNER_TEMP\edgedriver" -Force
           "$env:RUNNER_TEMP\edgedriver" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-      - name: Build app (debug, test hook) and fake game
+      - name: Build web, app (debug, test hook) and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
           cargo build --locked -p fake-game
       - name: Run e2e
         shell: pwsh
-        run: ./e2e/scripts/run-windows.ps1
-      - name: Upload artifacts
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-windows
-          path: e2e/artifacts/
-          if-no-files-found: ignore
+        run: ./e2e/scripts/run-windows.ps1 -SkipBuild
 
   linux-x11:
-    name: linux x11 (Xvfb + openbox)
+    name: linux x11 (Xvfb + openbox, webdriver)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          extra: webkit2gtk-driver xdotool xclip
+          extra: webkit2gtk-driver xdotool
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked
-      - name: Build app (debug, test hook) and fake game
+      - run: cargo install tauri-driver --locked --version "$TAURI_DRIVER_VERSION"
+      - name: Build web, app (debug, test hook) and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
           cargo build --locked -p fake-game
-      - name: Run e2e (script starts Xvfb + openbox itself)
+      - name: Run e2e (script starts Xvfb + openbox in a private D-Bus session)
+        env:
+          SKIP_BUILD: "1"
         run: bash e2e/scripts/run-x11.sh
-      - name: Upload artifacts
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+
+  linux-x11-hook:
+    name: linux x11 (Xvfb + openbox, hook harness + real hotkey)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          name: e2e-linux-x11
-          path: e2e/artifacts/
-          if-no-files-found: ignore
+          persist-credentials: false
+      - uses: ./.github/actions/linux-deps
+        with:
+          extra: xdotool
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: e2e
+          workspaces: |
+            .
+            e2e/macos-harness
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build web, app (debug, test hook) and fake game
+        run: |
+          pnpm --dir web build
+          cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
+          cargo build --locked -p fake-game
+      - name: Run hook harness (script builds it, starts Xvfb + openbox, presses the hotkey)
+        env:
+          SKIP_BUILD: "1"
+        run: bash e2e/scripts/run-hook-x11.sh
 
   linux-wayland:
     name: linux wayland (sway headless)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr wl-clipboard wtype dbus-x11 webkit2gtk-driver
+          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr webkit2gtk-driver
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked
-      - name: Build app (debug, test hook) and fake game
+      - run: cargo install tauri-driver --locked --version "$TAURI_DRIVER_VERSION"
+      - name: Build web, app (debug, test hook) and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
           cargo build --locked -p fake-game
-      - name: Run e2e (script starts headless sway + portal itself)
+      - name: Run e2e (script starts headless sway + portal in a private D-Bus session)
         env:
-          WLR_BACKENDS: headless
-          WLR_LIBINPUT_NO_DEVICES: "1"
-          WLR_RENDERER: pixman
+          SKIP_BUILD: "1"
+          # Debian/Ubuntu install the portal daemons under /usr/libexec.
+          PORTAL_LIBEXEC: /usr/libexec
         run: bash e2e/scripts/run-wayland.sh
-      - name: Upload artifacts
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-linux-wayland
-          path: e2e/artifacts/
-          if-no-files-found: ignore
 
   macos:
     name: macos (rust harness)
     runs-on: macos-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+          workspaces: |
+            .
+            e2e/macos-harness
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build app (debug, test hook) and fake game
+      - name: Build web, app (debug, test hook) and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p kalandra-desktop --features test-hook
+          cargo build --locked -p kalandra-desktop --features test-hook,tauri/custom-protocol
           cargo build --locked -p fake-game
       # WKWebView has no WebDriver; the harness drives the app over the KALANDRA_TEST_HOOK socket.
       - name: Run macOS harness
         run: cargo run --locked --manifest-path e2e/macos-harness/Cargo.toml
-      - name: Upload artifacts
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-macos
-          path: e2e/artifacts/
-          if-no-files-found: ignore

@@ -19,6 +19,9 @@ export const commands = {
 	setOverlayPinned: (pinned: boolean) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("set_overlay_pinned", { pinned })),
 	openSettings: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings")),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
+	getPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("get_permissions"),
+	requestPermission: (kind: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("request_permission", { kind })),
+	recheckPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("recheck_permissions"),
 	/**
 	 *  Download, verify and install the announced update, then restart into it.
 	 *  On Windows the installer exits the app itself.
@@ -30,6 +33,7 @@ export const commands = {
 export const events = {
 	itemCopied: makeEvent<ItemCopied_Serialize, ItemCopied_Deserialize>("item-copied"),
 	overlayState: makeEvent<OverlayState, OverlayState>("overlay-state"),
+	permissionsChanged: makeEvent<PermissionsChanged_Serialize, PermissionsChanged_Deserialize>("permissions-changed"),
 	priceFailed: makeEvent<PriceFailed_Serialize, PriceFailed_Deserialize>("price-failed"),
 	priceReady: makeEvent<PriceReady_Serialize, PriceReady_Deserialize>("price-ready"),
 	settingsChanged: makeEvent<SettingsChanged_Serialize, SettingsChanged_Deserialize>("settings-changed"),
@@ -463,6 +467,72 @@ export type ParsedItem_Serialize = {
 	raw: string,
 };
 
+/**  One OS permission and whether it is currently granted. */
+export type PermissionInfo = PermissionInfo_Serialize | PermissionInfo_Deserialize;
+
+/**  One OS permission and whether it is currently granted. */
+export type PermissionInfo_Deserialize = {
+	/**  `accessibility`, `screen_recording`, `input_monitoring`. */
+	kind: string,
+	granted: boolean,
+	/**  Without it the core price-check flow does not work. */
+	required: boolean,
+	/**  System Settings deep link, if the OS has one. */
+	settings_url?: string | null,
+};
+
+/**  One OS permission and whether it is currently granted. */
+export type PermissionInfo_Serialize = {
+	/**  `accessibility`, `screen_recording`, `input_monitoring`. */
+	kind: string,
+	granted: boolean,
+	/**  Without it the core price-check flow does not work. */
+	required: boolean,
+	/**  System Settings deep link, if the OS has one. */
+	settings_url: string | null,
+};
+
+export type PermissionReport = PermissionReport_Serialize | PermissionReport_Deserialize;
+
+export type PermissionReport_Deserialize = {
+	platform: BackendKind,
+	/**
+	 *  Every permission relevant on this platform (granted ones included, so the UI can tick
+	 *  them off live). Empty where the OS has no permission model (Windows, Linux).
+	 */
+	missing: PermissionInfo_Deserialize[],
+	/**  Degradation notes (English, for the details list / bug reports). */
+	notes: string[],
+	/**  Running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports X11/XWayland. */
+	gnome: boolean,
+};
+
+export type PermissionReport_Serialize = {
+	platform: BackendKind,
+	/**
+	 *  Every permission relevant on this platform (granted ones included, so the UI can tick
+	 *  them off live). Empty where the OS has no permission model (Windows, Linux).
+	 */
+	missing: PermissionInfo_Serialize[],
+	/**  Degradation notes (English, for the details list / bug reports). */
+	notes: string[],
+	/**  Running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports X11/XWayland. */
+	gnome: boolean,
+};
+
+/**  Pushed when a recheck finds the permission state changed. */
+export type PermissionsChanged = PermissionsChanged_Serialize | PermissionsChanged_Deserialize;
+
+/**  Pushed when a recheck finds the permission state changed. */
+export type PermissionsChanged_Deserialize = {
+	report: PermissionReport_Deserialize,
+};
+
+/**  Pushed when a recheck finds the permission state changed. */
+export type PermissionsChanged_Serialize = {
+	report: PermissionReport_Serialize,
+};
+
 export type PlatformSettings = PlatformSettings_Serialize | PlatformSettings_Deserialize;
 
 export type PlatformSettings_Deserialize = {
@@ -710,6 +780,8 @@ export type UiSettings_Deserialize = {
 	start_minimised?: boolean,
 	/**  Check for and offer app updates in the background (release builds with an updater key only). */
 	check_updates?: boolean,
+	/**  First-run onboarding (permissions / platform notes) was completed or dismissed. */
+	onboarding_done?: boolean,
 };
 
 export type UiSettings_Serialize = {
@@ -719,6 +791,8 @@ export type UiSettings_Serialize = {
 	start_minimised: boolean,
 	/**  Check for and offer app updates in the background (release builds with an updater key only). */
 	check_updates: boolean,
+	/**  First-run onboarding (permissions / platform notes) was completed or dismissed. */
+	onboarding_done: boolean,
 };
 
 /**  A newer, signed release is available. `install_update` applies it. */

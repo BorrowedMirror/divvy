@@ -10,7 +10,8 @@
    It never pushes.
 3. Review the commit, then `git push origin master v0.2.0`.
 4. `.github/workflows/release.yml` creates a **draft** release, builds and signs the bundles
-   (Windows MSI + NSIS, macOS universal notarised DMG, Linux AppImage/deb/rpm), uploads
+   (Windows MSI + NSIS, macOS universal notarised DMG, Linux AppImage/deb/rpm; no rpm for
+   pre-releases, since RPM versions cannot contain `-`), uploads
    `latest.json` for the updater, `SHA256SUMS.txt`, a CycloneDX SBOM and
    `THIRD-PARTY-NOTICES.html`.
 5. Check the draft (install one bundle per OS if possible) and publish it. Publishing makes
@@ -27,7 +28,15 @@ Signing secrets exist only in the protected `release` environment (deployment br
 | Secret | Purpose |
 | --- | --- |
 | `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | updater signatures |
+| `TAURI_UPDATER_PUBKEY` | matching public key; merged into `plugins.updater.pubkey` at build time |
 | `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` | macOS code signing |
 | `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | macOS notarisation |
+
+Generate the updater key pair once with `cargo tauri signer generate -w kalandra.key` and store
+the private key, its password and the public key (the `.pub` file contents) as the secrets above.
+The public key is not checked in: `release.yml` writes it into a copy of
+`.github/tauri-release.conf.json`, and the build fails early when it is missing, because
+`bundle.createUpdaterArtifacts` cannot sign without it. The secret overrides any
+`plugins.updater.pubkey` in `tauri.conf.json`, so both must be the same key.
 
 `CODECOV_TOKEN` is a repository secret used by `ci.yml`.

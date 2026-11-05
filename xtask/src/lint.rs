@@ -21,6 +21,8 @@ pub struct Step {
     pub argv: &'static [&'static str],
 }
 
+const HARNESS: &str = "e2e/macos-harness/Cargo.toml";
+
 pub fn steps(args: &LintArgs) -> Vec<Step> {
     let mut steps = vec![
         Step { name: "rustfmt", dir: ".", argv: &["cargo", "fmt", "--all", "--", "--check"] },
@@ -28,6 +30,17 @@ pub fn steps(args: &LintArgs) -> Vec<Step> {
             name: "clippy",
             dir: ".",
             argv: &["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
+        },
+        // e2e/macos-harness is a standalone workspace with its own lockfile.
+        Step {
+            name: "rustfmt (harness)",
+            dir: ".",
+            argv: &["cargo", "fmt", "--manifest-path", HARNESS, "--", "--check"],
+        },
+        Step {
+            name: "clippy (harness)",
+            dir: ".",
+            argv: &["cargo", "clippy", "--manifest-path", HARNESS, "--all-targets", "--locked", "--", "-D", "warnings"],
         },
     ];
     if !args.no_tools {
@@ -41,6 +54,7 @@ pub fn steps(args: &LintArgs) -> Vec<Step> {
     if !args.no_web {
         steps.push(Step { name: "eslint", dir: "web", argv: &["pnpm", "lint"] });
         steps.push(Step { name: "tsc", dir: "web", argv: &["pnpm", "typecheck"] });
+        steps.push(Step { name: "tsc (e2e)", dir: "e2e", argv: &["pnpm", "typecheck"] });
     }
     steps
 }
@@ -77,13 +91,26 @@ mod tests {
     fn full_lint_runs_everything() {
         assert_eq!(
             names(&LintArgs { no_web: false, no_tools: false }),
-            ["rustfmt", "clippy", "cargo-deny", "cargo-machete", "eslint", "tsc"]
+            [
+                "rustfmt",
+                "clippy",
+                "rustfmt (harness)",
+                "clippy (harness)",
+                "cargo-deny",
+                "cargo-machete",
+                "eslint",
+                "tsc",
+                "tsc (e2e)"
+            ]
         );
     }
 
     #[test]
     fn flags_skip_groups() {
-        assert_eq!(names(&LintArgs { no_web: true, no_tools: true }), ["rustfmt", "clippy"]);
+        assert_eq!(
+            names(&LintArgs { no_web: true, no_tools: true }),
+            ["rustfmt", "clippy", "rustfmt (harness)", "clippy (harness)"]
+        );
         let clippy = &steps(&LintArgs { no_web: true, no_tools: true })[1];
         assert!(clippy.argv.ends_with(&["-D", "warnings"]));
     }

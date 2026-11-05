@@ -29,7 +29,7 @@
     "ilvl": "物等 {{value}}",
     "quality": "品質 {{value}}%",
     "gemLevel": "等級 {{value}}",
-    "waystoneTier": "{{value}} 階",
+    "waystoneTier": "階級 {{value}}",
     "stack": "{{current}}/{{max}}",
     "corrupted": "已汙染",
     "unidentified": "未鑑定"

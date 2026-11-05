@@ -55,7 +55,7 @@
     "no": "No"
   },
   "status": {
-    "securable": "Acquisto immediato",
+    "securable": "Immediato",
     "online": "Online",
     "any": "Tutti"
   },
@@ -78,7 +78,7 @@
     "seller": "Venditore",
     "age": "Pubblicata",
     "unknownSeller": "sconosciuto",
-    "openTrade": "Apri sul sito di scambio"
+    "openTrade": "Apri scambio"
   },
   "age": {
     "now": "proprio ora",
