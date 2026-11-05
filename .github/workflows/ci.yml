@@ -86,7 +86,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-      - run: cargo machete
+      - run: cargo machete --skip-target-dir
 
   test:
     name: test + coverage (${{ matrix.os }})

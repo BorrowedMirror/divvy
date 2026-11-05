@@ -31,8 +31,12 @@ pub fn steps(args: &LintArgs) -> Vec<Step> {
         },
     ];
     if !args.no_tools {
-        steps.push(Step { name: "cargo-deny", dir: ".", argv: &["cargo", "deny", "--locked", "check"] });
-        steps.push(Step { name: "cargo-machete", dir: ".", argv: &["cargo", "machete"] });
+        steps.push(Step {
+            name: "cargo-deny",
+            dir: ".",
+            argv: &["cargo", "deny", "--log-level", "error", "--locked", "check"],
+        });
+        steps.push(Step { name: "cargo-machete", dir: ".", argv: &["cargo-machete", "--skip-target-dir"] });
     }
     if !args.no_web {
         steps.push(Step { name: "eslint", dir: "web", argv: &["pnpm", "lint"] });
