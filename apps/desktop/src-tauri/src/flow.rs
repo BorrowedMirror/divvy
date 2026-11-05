@@ -33,7 +33,7 @@ pub fn handle_item_text(
     let catalog = data.as_deref().map(|d| d as &dyn Catalog);
     let (item, filters) = logic::process_item_text(text, catalog, &opts).inspect_err(|e| state.record_error(e))?;
     *state.last_item.lock().expect("last item lock") = Some((item.clone(), filters.clone()));
-    state.set_pinned(pinned);
+    set_pinned(app, state, pinned);
     show_overlay(app, state);
     if let Err(e) = (ItemCopied { item: item.clone(), filters: filters.clone(), pinned }).emit(app) {
         state.record_error(format!("emit item-copied: {e}"));
@@ -91,11 +91,25 @@ pub fn trigger(app: &AppHandle, pinned: bool) {
                 return;
             }
             // Surface copy/parse failures in the overlay instead of failing silently.
-            state.set_pinned(pinned);
+            set_pinned(&app, &state, pinned);
             show_overlay(&app, &state);
             let _ = (crate::events::PriceFailed { error: e }).emit(&app);
         }
     });
+}
+
+/// Record the pinned flag. On Windows the overlay is non-focusable (tao rewrites the ex-style on
+/// `show()`, wiping `WS_EX_NOACTIVATE`) except while pinned, so the filters can be typed into.
+pub fn set_pinned(app: &AppHandle, state: &AppState, pinned: bool) {
+    state.set_pinned(pinned);
+    #[cfg(target_os = "windows")]
+    if let Some(win) = app.get_webview_window(OVERLAY)
+        && let Err(e) = win.set_focusable(pinned)
+    {
+        state.record_error(format!("overlay focusable: {e}"));
+    }
+    #[cfg(not(target_os = "windows"))]
+    let _ = app;
 }
 
 pub fn emit_overlay_state(app: &AppHandle, state: &AppState) {
@@ -151,7 +165,7 @@ pub fn hide_overlay(app: &AppHandle, state: &AppState) -> Result<(), IpcError> {
         win.hide().map_err(|e| IpcError::new("internal", e.to_string()))?;
     }
     state.overlay_visible.store(false, Ordering::SeqCst);
-    state.set_pinned(false);
+    set_pinned(app, state, false);
     emit_overlay_state(app, state);
     Ok(())
 }

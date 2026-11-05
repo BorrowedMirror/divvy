@@ -278,6 +278,8 @@ pub fn run() {
             {
                 state.record_error(format!("overlay styling failed: {e}"));
             }
+            // Windows: start non-focusable; `flow::set_pinned` toggles it.
+            flow::set_pinned(&handle, &state, false);
             // Portal registration can block for seconds; keep the main thread free.
             let (st, h) = (Arc::clone(&state), handle.clone());
             tauri::async_runtime::spawn_blocking(move || {

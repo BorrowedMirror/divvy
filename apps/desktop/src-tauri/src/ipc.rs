@@ -176,7 +176,7 @@ pub fn hide_overlay(app: AppHandle, state: State<'_, Arc<AppState>>) -> Result<(
 #[tauri::command]
 #[specta::specta]
 pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinned: bool) -> Result<(), IpcError> {
-    state.set_pinned(pinned);
+    flow::set_pinned(&app, &state, pinned);
     flow::emit_overlay_state(&app, &state);
     Ok(())
 }
