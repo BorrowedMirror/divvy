@@ -41,7 +41,8 @@ impl EnvProbe {
 
 /// Pick a backend. Order: explicit override (settings) > `KALANDRA_BACKEND` > OS defaults.
 /// On Linux, X11/XWayland is preferred whenever `DISPLAY` is set; Wayland-native only when
-/// there is no X server, or when explicitly requested. GNOME is always X11.
+/// there is no X server, or when explicitly requested. GNOME with `DISPLAY` is X11 (XWayland);
+/// GNOME without `DISPLAY` is Wayland-native, since there is no X server for GTK to open.
 pub fn detect(probe: &EnvProbe, settings_override: Option<BackendKind>) -> BackendKind {
     if let Some(kind) = settings_override {
         return kind;
@@ -58,9 +59,9 @@ pub fn detect(probe: &EnvProbe, settings_override: Option<BackendKind>) -> Backe
 
 fn linux_default(probe: &EnvProbe) -> BackendKind {
     // GNOME (mutter) implements neither layer-shell nor wlr virtual-keyboard, so the
-    // Wayland-native backend would be crippled there; XWayland is always available
-    // (mutter starts it on demand).
-    if probe.is_gnome() || probe.display.is_some() {
+    // Wayland-native backend is crippled there: prefer XWayland whenever `DISPLAY` is set.
+    // Without `DISPLAY` (XWayland disabled) the X11 backend, and GTK's X11 init, would fail.
+    if probe.display.is_some() {
         return BackendKind::X11;
     }
     if probe.wayland_display.is_some() || probe.xdg_session_type.as_deref() == Some("wayland") {
@@ -152,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn gnome_is_always_x11_by_default() {
+    fn gnome_is_x11_when_xwayland_is_available() {
         let probe = EnvProbe {
             display: Some(":0".into()),
             wayland_display: Some("wayland-0".into()),
@@ -161,9 +162,11 @@ mod tests {
         };
         assert!(probe.is_gnome());
         assert_eq!(detect(&probe, None), BackendKind::X11);
-        // Without DISPLAY we still answer X11 on GNOME (mutter starts XWayland on demand).
+        // Without DISPLAY there is no X server: Wayland-native (X11 would fail GTK init).
         let probe = EnvProbe { wayland_display: Some("wayland-0".into()), desktop: Some("GNOME".into()), ..linux() };
-        assert_eq!(detect(&probe, None), BackendKind::X11);
+        assert_eq!(detect(&probe, None), BackendKind::Wayland);
+        let probe = EnvProbe { xdg_session_type: Some("wayland".into()), desktop: Some("GNOME".into()), ..linux() };
+        assert_eq!(detect(&probe, None), BackendKind::Wayland);
     }
 
     #[test]

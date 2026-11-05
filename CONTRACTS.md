@@ -284,3 +284,5 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   (before threads); `InputListener::start` calls it as a fallback. `start` no longer blocks
   250ms: a late hook failure is logged and shows up as the receiver disconnecting. The hook
   delivers keyboard events only (`InputEvent::MouseMove`/`Wheel` are no longer produced).
+- **kalandra-platform (review fixes, semantics):** `detect` on GNOME picks X11 only when
+  `DISPLAY` is set; GNOME without `DISPLAY` is Wayland-native (supersedes "GNOME => X11").
