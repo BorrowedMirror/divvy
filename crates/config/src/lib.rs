@@ -344,7 +344,7 @@ fn looks_like_email(s: &str) -> bool {
     let Some((local, domain)) = s.split_once('@') else { return false };
     !local.is_empty()
         && !domain.contains('@')
-        && !s.chars().any(char::is_whitespace)
+        && s.chars().all(|c| c.is_ascii_graphic() && !matches!(c, ';' | '(' | ')' | ',' | '<' | '>'))
         && domain.split('.').count() >= 2
         && domain.split('.').all(|label| !label.is_empty())
 }
@@ -378,6 +378,12 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         return Err(invalid("trade.contact", format!("`{contact}` does not look like an e-mail address")));
     }
 
+    if let Some(sid) = s.trade.poesessid.as_deref().filter(|v| !v.is_empty())
+        && !sid.chars().all(|c| c.is_ascii_alphanumeric())
+    {
+        return Err(invalid("trade.poesessid", "must contain only ASCII letters and digits"));
+    }
+
     if !(0.1..=1.0).contains(&s.overlay.opacity) {
         return Err(invalid("overlay.opacity", format!("{} is not within 0.1..=1.0", s.overlay.opacity)));
     }
@@ -405,20 +411,34 @@ pub fn load(paths: &Paths) -> Result<Settings, ConfigError> {
     Ok(settings)
 }
 
+/// Per-process counter making each save's temp file name unique.
+static SAVE_SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 /// Atomically write settings (temp file in the same directory, fsync, rename).
 pub fn save(paths: &Paths, settings: &Settings) -> Result<(), ConfigError> {
     use std::io::Write as _;
 
     validate(settings)?;
-    let text = toml::to_string_pretty(settings)?;
+    // Always persist the current schema version so a stale `version` sent over IPC does not
+    // make every later `load` re-run old migrations.
+    let mut current = settings.clone();
+    current.version = SETTINGS_VERSION;
+    let text = toml::to_string_pretty(&current)?;
     let target = &paths.settings_file;
     let dir = target.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
     std::fs::create_dir_all(dir).map_err(io_err(dir))?;
 
     let file_name = target.file_name().map_or_else(|| "settings.toml".into(), |n| n.to_string_lossy().into_owned());
-    let tmp = dir.join(format!(".{file_name}.{}.tmp", std::process::id()));
+    // Unique per call so concurrent saves in one process never share a temp file.
+    let seq = SAVE_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let tmp = dir.join(format!(".{file_name}.{}.{seq}.tmp", std::process::id()));
     let write = || -> std::io::Result<()> {
-        let mut f = std::fs::File::create(&tmp)?;
+        let mut opts = std::fs::OpenOptions::new();
+        opts.write(true).create_new(true);
+        // The file may hold a POESESSID: keep it private to the user.
+        #[cfg(unix)]
+        std::os::unix::fs::OpenOptionsExt::mode(&mut opts, 0o600);
+        let mut f = opts.open(&tmp)?;
         f.write_all(text.as_bytes())?;
         f.sync_all()?;
         std::fs::rename(&tmp, target)

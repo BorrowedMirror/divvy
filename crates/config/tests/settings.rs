@@ -441,3 +441,55 @@ proptest! {
         prop_assert_eq!(load(&paths).unwrap(), s);
     }
 }
+
+#[test]
+fn rejects_header_unsafe_secrets_and_contacts() {
+    let mut s = Settings::default();
+    s.trade.poesessid = Some("abc;def".into());
+    assert!(matches!(validate(&s), Err(ConfigError::Invalid { field, .. }) if field == "trade.poesessid"));
+    s.trade.poesessid = Some("0123abcdef".into());
+    assert!(validate(&s).is_ok());
+    s.trade.contact = Some("me@example.com;x".into());
+    assert!(matches!(validate(&s), Err(ConfigError::Invalid { field, .. }) if field == "trade.contact"));
+    s.trade.contact = Some("me@exa\u{7}mple.com".into());
+    assert!(validate(&s).is_err());
+}
+
+#[test]
+fn save_normalises_version_and_restricts_permissions() {
+    let dir = tempfile::tempdir().unwrap();
+    let paths = Paths::under(dir.path());
+    let s = Settings { version: 0, ..Settings::default() };
+    save(&paths, &s).unwrap();
+    assert_eq!(load(&paths).unwrap().version, kalandra_config::SETTINGS_VERSION);
+    let text = std::fs::read_to_string(&paths.settings_file).unwrap();
+    assert!(text.contains(&format!("version = {}", kalandra_config::SETTINGS_VERSION)));
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = std::fs::metadata(&paths.settings_file).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o600);
+    }
+}
+
+#[test]
+fn concurrent_saves_never_corrupt() {
+    let dir = tempfile::tempdir().unwrap();
+    let paths = std::sync::Arc::new(Paths::under(dir.path()));
+    let handles: Vec<_> = (0..8)
+        .map(|i| {
+            let paths = paths.clone();
+            std::thread::spawn(move || {
+                let mut s = Settings::default();
+                s.trade.widen_pct = f64::from(i);
+                for _ in 0..20 {
+                    save(&paths, &s).unwrap();
+                }
+            })
+        })
+        .collect();
+    for h in handles {
+        h.join().unwrap();
+    }
+    assert!(load(&paths).is_ok());
+}
