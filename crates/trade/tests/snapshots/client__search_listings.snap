@@ -1,0 +1,78 @@
+---
+source: crates/trade/tests/client.rs
+expression: page.listings
+---
+[
+  {
+    "id": "0033ca90abddfb1584ae7ce42cbe97e7e5115c625013142cb20b1e20e51b3070",
+    "price": {
+      "amount": 1.0,
+      "currency": "divine"
+    },
+    "seller": "Seller1#0001",
+    "online": true,
+    "indexed": "2025-01-13T21:21:29Z",
+    "item_level": 40,
+    "stack_size": null
+  },
+  {
+    "id": "7de4152805fb954495a45b2f92bef3d8dd052d8c333b128748ae7b661430eac4",
+    "price": {
+      "amount": 1.0,
+      "currency": "divine"
+    },
+    "seller": "Seller2#0002",
+    "online": true,
+    "indexed": "2025-01-12T23:42:54Z",
+    "item_level": 73,
+    "stack_size": null
+  },
+  {
+    "id": "46ef1c2f63ce1c11c4c4a73daa149041a0050dd22b4d76370ce4e512bf3e16c0",
+    "price": {
+      "amount": 1.0,
+      "currency": "divine"
+    },
+    "seller": "Seller3#0003",
+    "online": true,
+    "indexed": "2025-01-17T21:08:09Z",
+    "item_level": 79,
+    "stack_size": null
+  },
+  {
+    "id": "2d21fd92b9b59184dd4c6d67d0b80237c6dd2ed67871345b0c13c67cccd08a10",
+    "price": {
+      "amount": 1.0,
+      "currency": "divine"
+    },
+    "seller": "Seller4#0004",
+    "online": true,
+    "indexed": "2026-02-04T12:46:41Z",
+    "item_level": 80,
+    "stack_size": null
+  },
+  {
+    "id": "e643dd4bd5154c655a7b8b1c5056c7ffa9ae24df55408f5e2c87e08a41f3a68d",
+    "price": {
+      "amount": 1.0,
+      "currency": "divine"
+    },
+    "seller": "Seller5#0005",
+    "online": true,
+    "indexed": "2025-01-13T21:21:29Z",
+    "item_level": 82,
+    "stack_size": null
+  },
+  {
+    "id": "aeb5a12c54d9fb6d691fe8fadc7a71c2872b62a56778fec8b39356b6b15f631f",
+    "price": {
+      "amount": 2.0,
+      "currency": "divine"
+    },
+    "seller": "Seller6#0006",
+    "online": true,
+    "indexed": "2026-10-29T14:33:40Z",
+    "item_level": 79,
+    "stack_size": null
+  }
+]
