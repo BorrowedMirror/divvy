@@ -63,3 +63,7 @@ tauri = { workspace = true, features = ["test"] }
 # Linux overlay (owned by workstream F, src/overlay/linux.rs): layer-shell on Wayland-native.
 gtk.workspace = true
 gtk-layer-shell.workspace = true
+
+# macOS overlay: convert the overlay window into a non-activating NSPanel (workstream E).
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri-nspanel.workspace = true

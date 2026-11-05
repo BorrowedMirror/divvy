@@ -67,3 +67,10 @@ arboard.workspace = true
 # Windows backend (workstream D): raw Win32 calls for window tracking and overlay styling.
 [target.'cfg(windows)'.dependencies]
 windows.workspace = true
+
+# macOS backend (workstream E). Not optional: target-gated, so other OSes never build them, and
+# this keeps the shared `native` feature list untouched.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-core-foundation = { workspace = true, features = ["std", "CFBase", "CFString", "CFDictionary", "CFNumber", "CFArray", "CFRunLoop", "CFDate", "CFCGTypes"] }
+objc2-core-graphics = { workspace = true, features = ["std", "CGWindow", "CGEvent"] }
+objc2-application-services = { workspace = true, features = ["std", "libc", "HIServices", "AXUIElement", "AXError", "AXValue"] }

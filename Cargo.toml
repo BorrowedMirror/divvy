@@ -110,6 +110,10 @@ tempfile = "3"
 gtk = "0.18"
 gtk-layer-shell = { version = "0.8", features = ["v0_6"] }
 windows = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Dwm", "Win32_System_Threading", "Win32_UI_Accessibility", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
+objc2-core-foundation = { version = "0.3", default-features = false }
+objc2-core-graphics = { version = "0.3", default-features = false }
+objc2-application-services = { version = "0.3", default-features = false }
+tauri-nspanel = "2.1"
 
 [profile.release]
 lto = true

@@ -159,8 +159,11 @@ pub fn run() {
     }
 
     let builder = specta_builder();
-    let app = tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
+    let app = tauri::Builder::default().plugin(tauri_plugin_opener::init());
+    // The NSPanel plugin must be registered before `setup` so `overlay::prepare` can convert the window.
+    #[cfg(target_os = "macos")]
+    let app = app.plugin(overlay::macos::plugin());
+    let app = app
         .manage(Arc::clone(&state))
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
