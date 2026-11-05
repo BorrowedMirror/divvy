@@ -1,1 +1,225 @@
-{}
+{
+  "common": {
+    "loading": "Carregando…",
+    "dismiss": "Dispensar"
+  },
+  "overlay": {
+    "title": "Consulta de preço",
+    "empty": "Passe o mouse sobre um item no jogo e pressione {{hotkey}} para consultar o preço.",
+    "openSettings": "Abrir configurações",
+    "pin": "Fixar overlay",
+    "unpin": "Desafixar overlay",
+    "close": "Fechar overlay",
+    "league": "Liga",
+    "widen": "Ampliar ±%",
+    "widenAria": "Ampliar os intervalos dos atributos em porcentagem",
+    "status": "Vendedores",
+    "stats": "Atributos",
+    "misc": "Propriedades do item",
+    "itemValue": "no item: {{value}}",
+    "min": "mín.",
+    "max": "máx.",
+    "statMin": "Mínimo de {{stat}}",
+    "statMax": "Máximo de {{stat}}",
+    "search": "Buscar",
+    "loading": "Buscando…"
+  },
+  "item": {
+    "rarityLabel": "Raridade:",
+    "ilvl": "nv. item {{value}}",
+    "quality": "{{value}}% de qualidade",
+    "gemLevel": "nível {{value}}",
+    "waystoneTier": "nível {{value}}",
+    "stack": "{{current}}/{{max}}",
+    "corrupted": "Corrompido",
+    "unidentified": "Não identificado"
+  },
+  "rarity": {
+    "normal": "Normal",
+    "magic": "Mágico",
+    "rare": "Raro",
+    "unique": "Único",
+    "currency": "Moeda",
+    "gem": "Gema",
+    "other": "Outro"
+  },
+  "misc": {
+    "item_level": "Nível do item",
+    "quality": "Qualidade",
+    "gem_level": "Nível da gema",
+    "waystone_tier": "Nível da pedra-guia",
+    "sockets": "Encaixes",
+    "corrupted": "Corrompido",
+    "any": "Qualquer",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "status": {
+    "securable": "Instantâneo",
+    "online": "Online",
+    "any": "Qualquer"
+  },
+  "source": {
+    "trade": "Site de trocas",
+    "poe_ninja": "poe.ninja",
+    "poe2_scout": "poe2scout"
+  },
+  "results": {
+    "heading": "Preços · {{source}}",
+    "total_one": "{{count}} anúncio",
+    "total_many": "{{count}} anúncios",
+    "total_other": "{{count}} anúncios",
+    "empty": "Nenhum anúncio corresponde a esses filtros. Desative alguns atributos ou amplie os intervalos.",
+    "min": "Mín.",
+    "median": "Mediana",
+    "max": "Máx.",
+    "listings": "Anúncios",
+    "price": "Preço",
+    "seller": "Vendedor",
+    "age": "Anunciado",
+    "unknownSeller": "desconhecido",
+    "openTrade": "Abrir trocas"
+  },
+  "age": {
+    "now": "agora mesmo",
+    "minutes": "há {{count}} min",
+    "hours": "há {{count}} h",
+    "days": "há {{count}} d"
+  },
+  "currency": {
+    "divine": "div",
+    "exalted": "ex",
+    "chaos": "caos",
+    "gold": "ouro"
+  },
+  "errors": {
+    "parse": "Não foi possível ler o item",
+    "trade": "O site de trocas retornou um erro",
+    "rate_limited": "Limite de requisições do site de trocas",
+    "config": "Problema nas configurações",
+    "platform": "Erro de plataforma",
+    "no_item": "Nenhum item na área de transferência",
+    "internal": "Algo deu errado",
+    "commandFailed": "A ação falhou",
+    "retryIn_one": "Tentar de novo em {{count}} segundo",
+    "retryIn_many": "Tentar de novo em {{count}} segundos",
+    "retryIn_other": "Tentar de novo em {{count}} segundos"
+  },
+  "settings": {
+    "title": "Configurações",
+    "tabs": {
+      "general": "Geral",
+      "hotkeys": "Atalhos",
+      "trade": "Trocas",
+      "overlay": "Overlay",
+      "platform": "Plataforma"
+    },
+    "language": "Idioma",
+    "theme": "Tema",
+    "startMinimised": "Iniciar minimizado na bandeja",
+    "source": "Fonte de preços",
+    "leagueAuto": "Detectar a liga automaticamente",
+    "league": "Liga",
+    "leaguesFailed": "Não foi possível carregar as ligas: {{message}}",
+    "onlineOnly": "Apenas vendedores online",
+    "widenPct": "Ampliar intervalos dos atributos (%)",
+    "enableAllStats": "Ativar todos os atributos por padrão",
+    "contact": "E-mail de contato",
+    "contactHelp": "Opcional. Adicionado ao User-Agent para que a GGG possa contatar você se algo der errado.",
+    "autoHide": "Atraso para ocultar (ms)",
+    "opacity": "Opacidade (0,1–1)",
+    "side": "Posição",
+    "backend": "Backend da plataforma",
+    "backendHelp": "Deixe no automático, a menos que o diagnóstico recomende outra opção. Vale após reiniciar.",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "saved": "Configurações salvas",
+    "discard": "Descartar alterações",
+    "saveFailed": "Não foi possível salvar: {{message}}",
+    "loadFailed": "Não foi possível carregar as configurações.",
+    "fixErrors": "Corrija os campos destacados antes de salvar.",
+    "externalChange": "As configurações foram alteradas em outro lugar.",
+    "reload": "Carregar a mais recente"
+  },
+  "theme": {
+    "system": "Sistema",
+    "dark": "Escuro",
+    "light": "Claro"
+  },
+  "side": {
+    "cursor": "Ao lado do cursor",
+    "left": "Borda esquerda",
+    "right": "Borda direita"
+  },
+  "backend": {
+    "auto": "Automático",
+    "windows": "Windows",
+    "macos": "macOS",
+    "x11": "X11 / XWayland",
+    "wayland": "Wayland (nativo)",
+    "fake": "Simulado (testes)"
+  },
+  "hotkeys": {
+    "help": "Clique em um atalho e pressione a nova combinação de teclas. Esc cancela.",
+    "price_check": "Consulta de preço",
+    "price_check_pinned": "Consulta de preço (fixada)",
+    "open_settings": "Abrir configurações",
+    "pressKeys": "Pressione as teclas…",
+    "needsModifier": "Adicione Ctrl, Alt, Shift ou Meta (só as teclas F funcionam sozinhas).",
+    "rebindFailed": "Não foi possível definir o atalho: {{message}}",
+    "advancedCopy": "Cópia avançada de itens",
+    "advancedCopyHelp": "Usa Ctrl+Alt+C para incluir os níveis e intervalos dos modificadores."
+  },
+  "validation": {
+    "widen": "Insira um valor entre 0 e 100.",
+    "email": "Insira um e-mail válido ou deixe em branco.",
+    "league": "Escolha uma liga ou ative a detecção automática.",
+    "autoHide": "Insira um número inteiro entre 0 e 10000 (0 desativa a ocultação).",
+    "opacity": "Insira um valor entre 0,1 e 1.",
+    "hotkeyClash": "Este atalho já é usado por outra ação.",
+    "poesessid": "Use apenas letras e dígitos."
+  },
+  "diagnostics": {
+    "title": "Diagnóstico",
+    "version": "Versão",
+    "os": "SO",
+    "backend": "Backend",
+    "dataVersion": "Dados do jogo",
+    "league": "Liga",
+    "settingsPath": "Arquivo de configurações",
+    "logPath": "Arquivo de log",
+    "capabilities": "Recursos",
+    "supported": "compatível",
+    "unsupported": "incompatível",
+    "missingPermissions": "Permissões ausentes",
+    "recentErrors": "Erros recentes",
+    "noErrors": "Nenhum erro registrado.",
+    "copyReport": "Copiar relatório",
+    "copied": "Relatório copiado para a área de transferência",
+    "copyFailed": "Não foi possível acessar a área de transferência",
+    "loadFailed": "Não foi possível carregar o diagnóstico."
+  },
+  "capability": {
+    "window_tracking": "Rastreamento da janela do jogo",
+    "overlay_always_on_top": "Overlay sempre visível",
+    "overlay_click_through": "Overlay transparente a cliques",
+    "global_hotkeys": "Atalhos globais",
+    "passive_hook": "Captura passiva de entrada",
+    "keystroke_injection": "Injeção de teclas (copiar item)",
+    "clipboard": "Acesso à área de transferência"
+  },
+  "guidance": {
+    "accessibility": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Acessibilidade e ative o kalandra. Isso é necessário para os atalhos e para copiar itens.",
+    "screenRecording": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e ative o kalandra para que ele encontre a janela do jogo. Depois, reinicie o kalandra.",
+    "wayland": "Modo Wayland nativo: os atalhos globais passam pelo portal da área de trabalho, o overlay é ancorado à tela e não à janela do jogo, e a injeção de teclas pode não estar disponível. Use X11/XWayland se o seu compositor permitir.",
+    "gnome": "O GNOME não oferece os recursos do Wayland de que o kalandra precisa, então ele roda via XWayland (X11) nesse caso. Rode o jogo no XWayland também.",
+    "generic": "Permissão ausente: {{permission}}"
+  },
+  "tray": {
+    "priceCheck": "Consulta de preço (fixada)",
+    "settings": "Configurações…",
+    "diagnostics": "Diagnóstico",
+    "quit": "Sair do kalandra",
+    "tooltip": "kalandra"
+  }
+}
