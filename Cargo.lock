@@ -2909,6 +2909,7 @@ name = "kalandra-core"
 version = "0.1.0-rc.1"
 dependencies = [
  "insta",
+ "kalandra-data",
  "pretty_assertions",
  "proptest",
  "regex",
