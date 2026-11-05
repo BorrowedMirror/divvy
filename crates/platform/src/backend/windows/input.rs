@@ -1,9 +1,5 @@
-//! Passive input hook (`rdev`) and copy-chord injection (`enigo`).
-//!
-//! The listener is a private copy of what the shared `backend/hook.rs` (workstream F) is meant to
-//! provide; once that lands, `RdevInputListener` should delegate to it.
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver};
+//! Passive input hook (the shared `backend::hook`) and copy-chord injection (`enigo`).
+use std::sync::mpsc::Receiver;
 
 use enigo::{Direction, Enigo, Key, Keyboard, Settings};
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_LWIN, VK_MENU, VK_SHIFT};
@@ -31,57 +27,14 @@ fn vk_mapping_matches_windows_crate() {
     assert_eq!(vk_for_code("Quote"), Some(VK_OEM_7.0));
 }
 
-/// rdev installs process-global low-level hooks with a single global callback, so "started" is
-/// process-wide too, not per listener instance.
-static HOOK_STARTED: AtomicBool = AtomicBool::new(false);
-
-const HOOK_CHANNEL_CAPACITY: usize = 1024;
-
+/// Passive hook through the process-wide `backend::hook` (rdev low-level hooks).
 #[derive(Debug)]
 pub(super) struct RdevInputListener;
 
 impl InputListener for RdevInputListener {
     fn start(&self) -> Result<Receiver<InputEvent>, PlatformError> {
-        if HOOK_STARTED.swap(true, Ordering::SeqCst) {
-            return Err(PlatformError::AlreadyStarted);
-        }
-        let (tx, rx) = mpsc::sync_channel(HOOK_CHANNEL_CAPACITY);
-        std::thread::Builder::new()
-            .name("kalandra-input-hook".into())
-            .spawn(move || {
-                // The callback runs inside the low-level hook; it must return fast, so it only
-                // try_sends (dropping events when the consumer lags).
-                let result = rdev::listen(move |event| {
-                    if let Some(ev) = map_event(&event.event_type) {
-                        let _ = tx.try_send(ev);
-                    }
-                });
-                if let Err(err) = result {
-                    tracing::error!(?err, "rdev hook failed");
-                }
-            })
-            .map_err(|e| {
-                HOOK_STARTED.store(false, Ordering::SeqCst);
-                PlatformError::Backend(format!("spawn input hook thread: {e}"))
-            })?;
-        Ok(rx)
+        crate::backend::hook::start_global_hook()
     }
-}
-
-fn key_name(key: rdev::Key) -> String {
-    rdev::chrome_keycode_from_key(key).map_or_else(|| format!("{key:?}"), str::to_owned)
-}
-
-fn map_event(event: &rdev::EventType) -> Option<InputEvent> {
-    Some(match *event {
-        rdev::EventType::KeyPress(key) => InputEvent::KeyDown { key: key_name(key) },
-        rdev::EventType::KeyRelease(key) => InputEvent::KeyUp { key: key_name(key) },
-        rdev::EventType::MouseMove { x, y } => InputEvent::MouseMove { x: x as i32, y: y as i32 },
-        rdev::EventType::Wheel { delta_y, .. } if delta_y != 0 => {
-            InputEvent::Wheel { delta: i32::try_from(delta_y).unwrap_or(if delta_y > 0 { i32::MAX } else { i32::MIN }) }
-        }
-        _ => return None,
-    })
 }
 
 /// Sends chords with `enigo` (SendInput).
@@ -142,37 +95,5 @@ impl InputSimulator for EnigoSimulator {
             result = result.and(released);
         }
         result
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn maps_rdev_events() {
-        assert_eq!(
-            map_event(&rdev::EventType::KeyPress(rdev::Key::Escape)),
-            Some(InputEvent::KeyDown { key: "Escape".into() })
-        );
-        assert_eq!(
-            map_event(&rdev::EventType::KeyRelease(rdev::Key::KeyC)),
-            Some(InputEvent::KeyUp { key: "KeyC".into() })
-        );
-        assert_eq!(
-            map_event(&rdev::EventType::MouseMove { x: 10.6, y: -3.0 }),
-            Some(InputEvent::MouseMove { x: 10, y: -3 })
-        );
-        assert_eq!(
-            map_event(&rdev::EventType::Wheel { delta_x: 0, delta_y: -1 }),
-            Some(InputEvent::Wheel { delta: -1 })
-        );
-        assert_eq!(map_event(&rdev::EventType::Wheel { delta_x: 3, delta_y: 0 }), None);
-        assert_eq!(map_event(&rdev::EventType::ButtonPress(rdev::Button::Left)), None);
-    }
-
-    #[test]
-    fn unknown_keys_fall_back_to_debug_name() {
-        assert_eq!(key_name(rdev::Key::Unknown(999)), "Unknown(999)");
     }
 }

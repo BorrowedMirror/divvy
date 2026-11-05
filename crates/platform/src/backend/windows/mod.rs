@@ -4,13 +4,12 @@
 //!   thread, plus a 1 s rescan timer for the game window appearing/disappearing.
 //! - `hotkeys`: `global-hotkey` manager owned by its own message-loop thread (its hidden
 //!   `WM_HOTKEY` window must be pumped by the thread that created it).
-//! - `input`: `rdev` passive hook (callback only `try_send`s) and `enigo` chord injection.
+//! - `input`: the shared `backend::hook` passive hook and `enigo` chord injection.
 //! - `clipboard`: `arboard`.
 //! - `overlay`: ex-style based no-activate / topmost / click-through styling of an HWND.
 //!
 //! Every `unsafe` block carries a `// SAFETY:` comment.
 mod clipboard;
-mod ghk_map;
 mod hotkeys;
 mod input;
 mod logic;

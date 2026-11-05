@@ -1,7 +1,6 @@
 //! Input pieces shared by the Linux backends: enigo keystrokes, arboard clipboard,
 //! `global-hotkey` (X11 grabs) and the rdev passive hook.
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, sync_channel};
 use std::sync::{Arc, Mutex, PoisonError};
@@ -10,6 +9,7 @@ use enigo::{Direction, Enigo, Keyboard, Settings};
 use global_hotkey::hotkey::HotKey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, HotKeyState};
 
+use crate::backend::ghk::to_hotkey;
 use crate::{
     Chord, Clipboard, HotkeyAction, HotkeyEvent, HotkeyHost, InputEvent, InputListener, InputSimulator, KeyModifier,
     PlatformError,
@@ -166,21 +166,6 @@ impl Clipboard for ArboardClipboard {
     }
 }
 
-/// `Chord` -> `global-hotkey` string (`ctrl+alt+KeyD`).
-pub(crate) fn hotkey_string(chord: &Chord) -> String {
-    let mut s = String::new();
-    for m in &chord.modifiers {
-        s.push_str(match m {
-            KeyModifier::Ctrl => "ctrl+",
-            KeyModifier::Alt => "alt+",
-            KeyModifier::Shift => "shift+",
-            KeyModifier::Meta => "super+",
-        });
-    }
-    s.push_str(&chord.key);
-    s
-}
-
 /// Global hotkeys via `global-hotkey` (XGrabKey on `$DISPLAY`).
 pub(crate) struct GlobalHotkeys {
     manager: GlobalHotKeyManager,
@@ -209,8 +194,7 @@ impl GlobalHotkeys {
 
 impl HotkeyHost for GlobalHotkeys {
     fn register(&self, id: HotkeyAction, chord: &Chord) -> Result<(), PlatformError> {
-        let hotkey =
-            HotKey::from_str(&hotkey_string(chord)).map_err(|_| PlatformError::InvalidChord(chord.to_string()))?;
+        let hotkey = to_hotkey(chord)?;
         self.unregister(id)?;
         self.manager.register(hotkey).map_err(|e| match e {
             global_hotkey::Error::AlreadyRegistered(_) | global_hotkey::Error::FailedToRegister(_) => {
@@ -283,15 +267,5 @@ mod tests {
         assert_eq!(enigo_key("DigitX"), None);
         assert_eq!(enigo_key("Pause"), None);
         assert_eq!(enigo_modifier(KeyModifier::Meta), enigo::Key::Meta);
-    }
-
-    #[test]
-    fn hotkey_strings_parse_in_global_hotkey() {
-        for s in ["Ctrl+Alt+D", "Shift+F5", "Meta+1", "Ctrl+Space"] {
-            let chord = Chord::parse(s).unwrap();
-            let hs = hotkey_string(&chord);
-            assert!(HotKey::from_str(&hs).is_ok(), "{hs}");
-        }
-        assert_eq!(hotkey_string(&Chord::parse("ctrl+alt+shift+meta+d").unwrap()), "ctrl+alt+shift+super+KeyD");
     }
 }

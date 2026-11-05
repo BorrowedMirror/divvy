@@ -8,9 +8,3 @@ pub use kalandra_platform::{
 #[allow(dead_code)]
 #[path = "../src/backend/windows/logic.rs"]
 mod logic;
-
-// Needs `global-hotkey`, which is only a dependency with the `native` feature.
-#[cfg(feature = "native")]
-#[allow(dead_code)]
-#[path = "../src/backend/windows/ghk_map.rs"]
-mod ghk_map;

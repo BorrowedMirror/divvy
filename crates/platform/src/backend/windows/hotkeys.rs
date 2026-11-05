@@ -16,7 +16,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     DispatchMessageW, GetMessageW, MSG, PostThreadMessageW, TranslateMessage, WM_APP, WM_QUIT,
 };
 
-use super::ghk_map::to_hotkey;
+use crate::backend::ghk::to_hotkey;
 use crate::{Chord, HotkeyAction, HotkeyEvent, HotkeyHost, PlatformError};
 
 const WM_KALANDRA_CMD: u32 = WM_APP + 0x4B;

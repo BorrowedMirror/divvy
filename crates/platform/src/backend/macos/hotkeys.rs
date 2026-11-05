@@ -1,30 +1,16 @@
 //! Global hotkeys via `global-hotkey` (Carbon `RegisterEventHotKey`; no TCC permission).
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, sync_channel};
 use std::sync::{Arc, Mutex, PoisonError};
 
-use global_hotkey::hotkey::{Code, HotKey, Modifiers};
+use global_hotkey::hotkey::HotKey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager, HotKeyState};
 
-use crate::{Chord, HotkeyAction, HotkeyEvent, HotkeyHost, KeyModifier, PlatformError};
+use crate::backend::ghk::to_hotkey;
+use crate::{Chord, HotkeyAction, HotkeyEvent, HotkeyHost, PlatformError};
 
 const CHANNEL_CAPACITY: usize = 32;
-
-/// Translate a [`Chord`] into a `global-hotkey` [`HotKey`].
-fn to_hotkey(chord: &Chord) -> Result<HotKey, PlatformError> {
-    let code = Code::from_str(&chord.key).map_err(|_| PlatformError::InvalidChord(chord.to_string()))?;
-    let mods = chord.modifiers.iter().fold(Modifiers::empty(), |acc, m| {
-        acc | match m {
-            KeyModifier::Ctrl => Modifiers::CONTROL,
-            KeyModifier::Alt => Modifiers::ALT,
-            KeyModifier::Shift => Modifiers::SHIFT,
-            KeyModifier::Meta => Modifiers::META,
-        }
-    });
-    Ok(HotKey::new(Some(mods), code))
-}
 
 fn map_error(chord: &Chord, e: global_hotkey::Error) -> PlatformError {
     match e {

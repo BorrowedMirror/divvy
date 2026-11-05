@@ -1,6 +1,5 @@
-//! Passive hook (rdev) and keystroke injection (enigo).
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{Receiver, sync_channel};
+//! Passive hook (the shared `backend::hook`) and keystroke injection (enigo).
+use std::sync::mpsc::Receiver;
 use std::time::Duration;
 
 use enigo::{Direction, Enigo, Key, Keyboard, Settings};
@@ -10,57 +9,22 @@ use super::model::{self, CopyModifier, PERM_ACCESSIBILITY, PERM_INPUT_MONITORING
 use super::permissions;
 use crate::{Chord, InputEvent, InputListener, InputSimulator, KeyModifier, PlatformError};
 
-const CHANNEL_CAPACITY: usize = 1024;
 /// Gap between synthetic key events so the game samples modifier state reliably.
 const KEY_GAP: Duration = Duration::from_millis(8);
 
-/// rdev can install its tap once per process.
-static HOOK_STARTED: AtomicBool = AtomicBool::new(false);
-
-/// rdev listen-only event tap. Until F's shared `backend/hook.rs` lands this is the single hook
-/// for the macOS process; swap `start` to delegate to it once available.
+/// Listen-only event tap through the process-wide `backend::hook`. rdev schedules the tap on
+/// the *main* run loop (driven by Tauri/AppKit), so its callback runs on the main thread.
 #[derive(Debug)]
 pub(super) struct MacInputListener;
 
-fn map_event(event: &rdev::Event) -> Option<InputEvent> {
-    // On macOS rdev's `platform_code` is the virtual keycode (kVK_*).
-    let key = || keymap::code_name(event.platform_code as u16).to_owned();
-    match event.event_type {
-        rdev::EventType::KeyPress(_) => Some(InputEvent::KeyDown { key: key() }),
-        rdev::EventType::KeyRelease(_) => Some(InputEvent::KeyUp { key: key() }),
-        rdev::EventType::MouseMove { x, y } => Some(InputEvent::MouseMove { x: x as i32, y: y as i32 }),
-        rdev::EventType::Wheel { delta_y, .. } => Some(InputEvent::Wheel { delta: delta_y as i32 }),
-        _ => None,
-    }
-}
-
 impl InputListener for MacInputListener {
     fn start(&self) -> Result<Receiver<InputEvent>, PlatformError> {
+        // Without Input Monitoring (or Accessibility) the tap would be created but stay silent,
+        // so refuse up front and let the caller surface the missing permission.
         if !permissions::current().can_listen() {
             return Err(PlatformError::PermissionDenied(PERM_INPUT_MONITORING));
         }
-        if HOOK_STARTED.swap(true, Ordering::SeqCst) {
-            return Err(PlatformError::AlreadyStarted);
-        }
-        let (tx, rx) = sync_channel(CHANNEL_CAPACITY);
-        // rdev schedules its tap on the *main* run loop (driven by Tauri/AppKit), so the
-        // callback runs on the main thread and `listen` returns once its own (empty) run loop
-        // finishes. The thread only performs that setup.
-        std::thread::Builder::new()
-            .name("kalandra-macos-hook".into())
-            .spawn(move || {
-                let result = rdev::listen(move |event| {
-                    if let Some(e) = map_event(&event) {
-                        let _ = tx.try_send(e);
-                    }
-                });
-                if let Err(e) = result {
-                    tracing::warn!(error = ?e, "rdev listen failed");
-                    HOOK_STARTED.store(false, Ordering::SeqCst);
-                }
-            })
-            .map_err(|e| PlatformError::Backend(format!("spawn hook thread: {e}")))?;
-        Ok(rx)
+        crate::backend::hook::start_global_hook()
     }
 }
 

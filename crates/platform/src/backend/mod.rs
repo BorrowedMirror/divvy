@@ -7,10 +7,11 @@ use crate::{
     Platform, PlatformError, WindowEvent, WindowInfo, WindowTracker,
 };
 
-// The shared rdev hook is used by x11 today and by the windows/macos backends once they
-// are wired (workstreams D/E); until then it is dead code on those OSes.
+// Shared by the x11, windows and macos backends: the single process-wide rdev hook and the
+// Chord -> global-hotkey mapping.
 #[cfg(feature = "native")]
-#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+pub(crate) mod ghk;
+#[cfg(feature = "native")]
 pub(crate) mod hook;
 #[cfg(all(target_os = "macos", feature = "native"))]
 pub mod macos;

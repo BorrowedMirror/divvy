@@ -1,7 +1,8 @@
-//! W3C `KeyboardEvent.code` <-> macOS virtual keycode (`kVK_*`, Carbon `Events.h`).
+//! W3C `KeyboardEvent.code` -> macOS virtual keycode (`kVK_*`, Carbon `Events.h`), for injection.
 //!
 //! Pure; included by `crates/platform/tests/macos_model.rs` so it is tested on every OS.
 //! Virtual keycodes are layout-independent (they name physical positions), exactly like W3C codes.
+//! The reverse direction (hook events -> W3C names) is done by the shared `backend::hook`.
 
 /// `(W3C code, kVK_* value)`.
 const TABLE: &[(&str, u16)] = &[
@@ -124,14 +125,10 @@ pub fn mac_keycode(code: &str) -> Option<u16> {
     TABLE.iter().find(|(c, _)| *c == code).map(|&(_, k)| k)
 }
 
-/// W3C code for a virtual keycode; `None` for unmapped codes.
-pub fn code_for_keycode(keycode: u16) -> Option<&'static str> {
+/// W3C code for a virtual keycode; `None` for unmapped codes. Test-only: checks the table.
+#[cfg(test)]
+fn code_for_keycode(keycode: u16) -> Option<&'static str> {
     TABLE.iter().find(|&&(_, k)| k == keycode).map(|&(c, _)| c)
-}
-
-/// W3C code for a keycode, or `Unidentified` (the W3C name for unknown keys).
-pub fn code_name(keycode: u16) -> &'static str {
-    code_for_keycode(keycode).unwrap_or("Unidentified")
 }
 
 #[cfg(test)]
@@ -147,8 +144,7 @@ mod tests {
         assert_eq!(mac_keycode("Nope"), None);
         assert_eq!(code_for_keycode(0x08), Some("KeyC"));
         assert_eq!(code_for_keycode(0x42), None);
-        assert_eq!(code_name(0x35), "Escape");
-        assert_eq!(code_name(0xFFFF), "Unidentified");
+        assert_eq!(code_for_keycode(0x35), Some("Escape"));
     }
 
     #[test]

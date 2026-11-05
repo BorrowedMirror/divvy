@@ -1,8 +1,7 @@
-//! [`Chord`] -> `global_hotkey` mapping.
+//! [`Chord`] -> `global_hotkey` mapping shared by the X11, Windows and macOS backends.
 //!
-//! Pure and OS-independent; the macOS backend needs the same mapping, so this would ideally live in
-//! a shared `backend/ghk.rs` (owned by the platform-common workstream). It is private to the
-//! Windows backend for now and also compiled by `tests/windows_logic.rs` via `#[path]`.
+//! Pure and OS-independent, so its unit tests run on every host. Chord keys are W3C
+//! `KeyboardEvent.code` names, the same names [`super::hook`] reports for key events.
 use std::str::FromStr;
 
 use global_hotkey::hotkey::{Code, HotKey, Modifiers};
@@ -10,7 +9,7 @@ use global_hotkey::hotkey::{Code, HotKey, Modifiers};
 use crate::{Chord, KeyModifier, PlatformError};
 
 /// Convert a chord whose key is a W3C `KeyboardEvent.code` name (`KeyD`, `F5`) into a hotkey.
-pub fn to_hotkey(chord: &Chord) -> Result<HotKey, PlatformError> {
+pub(crate) fn to_hotkey(chord: &Chord) -> Result<HotKey, PlatformError> {
     let invalid = || PlatformError::InvalidChord(chord.to_string());
     let code = Code::from_str(&chord.key).map_err(|_| invalid())?;
     if is_modifier_or_unidentified(code) {
@@ -62,6 +61,22 @@ mod tests {
         assert_eq!(hk.key, Code::Digit1);
 
         assert_eq!(to_hotkey(&Chord::new(&[], "Space")).unwrap().key, Code::Space);
+    }
+
+    #[test]
+    fn meta_and_super_are_the_same_hotkey() {
+        // `HotKey::new` folds META into SUPER; X11 used to build hotkeys from "super+..." strings.
+        let hk = to_hotkey(&Chord::parse("Meta+D").unwrap()).unwrap();
+        assert_eq!(hk, "super+KeyD".parse::<HotKey>().unwrap());
+    }
+
+    #[test]
+    fn matches_global_hotkey_string_parser() {
+        for (chord, s) in [("Ctrl+Alt+D", "ctrl+alt+KeyD"), ("Shift+F5", "shift+F5"), ("Ctrl+Space", "ctrl+Space")] {
+            let ours = to_hotkey(&Chord::parse(chord).unwrap()).unwrap();
+            let theirs: HotKey = s.parse().unwrap();
+            assert_eq!(ours.id(), theirs.id(), "{chord}");
+        }
     }
 
     #[test]

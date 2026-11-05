@@ -78,52 +78,21 @@ pub(crate) fn map_event(ev: &rdev::EventType) -> Option<InputEvent> {
 }
 
 /// rdev key -> W3C `KeyboardEvent.code` name (the format [`crate::Chord`] uses).
+///
+/// rdev derives its `Key` from the platform's physical key code on every OS (X11 keycode,
+/// Windows scan/virtual key, macOS `kVK_*`), so these names are layout independent. Keys W3C
+/// has no name for in rdev's table fall back to their rdev `Debug` name.
 pub(crate) fn key_code(key: rdev::Key) -> String {
     use rdev::Key as K;
+    if let Some(code) = rdev::chrome_keycode_from_key(key).filter(|c| !c.is_empty()) {
+        return code.to_owned();
+    }
     let named = match key {
-        K::Alt => "AltLeft",
-        K::AltGr => "AltRight",
-        K::Backspace => "Backspace",
-        K::CapsLock => "CapsLock",
-        K::ControlLeft => "ControlLeft",
-        K::ControlRight => "ControlRight",
-        K::Delete => "Delete",
-        K::DownArrow => "ArrowDown",
-        K::UpArrow => "ArrowUp",
-        K::LeftArrow => "ArrowLeft",
-        K::RightArrow => "ArrowRight",
-        K::End => "End",
-        K::Escape => "Escape",
-        K::Home => "Home",
-        K::PageDown => "PageDown",
-        K::PageUp => "PageUp",
-        K::Return => "Enter",
-        K::ShiftLeft => "ShiftLeft",
-        K::ShiftRight => "ShiftRight",
-        K::Space => "Space",
-        K::Tab => "Tab",
-        K::MetaLeft => "MetaLeft",
-        K::MetaRight => "MetaRight",
-        K::Insert => "Insert",
-        K::Minus => "Minus",
-        K::Equal => "Equal",
-        K::LeftBracket => "BracketLeft",
-        K::RightBracket => "BracketRight",
-        K::SemiColon => "Semicolon",
-        K::Quote => "Quote",
-        K::BackQuote => "Backquote",
-        K::BackSlash => "Backslash",
-        K::Comma => "Comma",
-        K::Dot => "Period",
-        K::Slash => "Slash",
-        other => {
-            let dbg = format!("{other:?}");
-            // KeyA..KeyZ and F1..F24 already match W3C names; Num0..Num9 -> Digit0..Digit9.
-            return match dbg.strip_prefix("Num") {
-                Some(d) if d.len() == 1 && d.chars().all(|c| c.is_ascii_digit()) => format!("Digit{d}"),
-                _ => dbg,
-            };
-        }
+        K::Function => "Fn",
+        K::Pause => "Pause",
+        K::Help => "Help",
+        K::Unknown(_) => "Unidentified",
+        other => return format!("{other:?}"),
     };
     named.to_owned()
 }
@@ -140,6 +109,23 @@ mod tests {
         assert_eq!(key_code(rdev::Key::Escape), "Escape");
         assert_eq!(key_code(rdev::Key::ControlLeft), "ControlLeft");
         assert_eq!(key_code(rdev::Key::Return), "Enter");
+        assert_eq!(key_code(rdev::Key::Kp0), "Numpad0");
+        assert_eq!(key_code(rdev::Key::KpReturn), "NumpadEnter");
+        assert_eq!(key_code(rdev::Key::F20), "F20");
+        assert_eq!(key_code(rdev::Key::Function), "Fn");
+        assert_eq!(key_code(rdev::Key::Pause), "Pause");
+        assert_eq!(key_code(rdev::Key::Unknown(999)), "Unidentified");
+        assert_eq!(key_code(rdev::Key::Kana), "Kana");
+    }
+
+    /// Named keys come straight from rdev's W3C table and map back to the same key.
+    #[test]
+    fn named_keys_round_trip_through_rdev_table() {
+        use rdev::Key as K;
+        for key in [K::Escape, K::KeyA, K::Num0, K::F1, K::Dot, K::BackQuote, K::Insert, K::Kp9, K::IntlBackslash] {
+            let code = key_code(key);
+            assert_eq!(rdev::chrome_key_from_code(&code), key, "{code}");
+        }
     }
 
     #[test]
