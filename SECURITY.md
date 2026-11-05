@@ -26,7 +26,7 @@ In scope: the kalandra desktop app, its release artefacts (including the updater
 - the IPC surface between the web UI and the Rust core, including `open_trade`, which only
   opens pathofexile.com URLs;
 - the global input hook and clipboard handling;
-- the `kalandra --trigger` signal fallback and its pid file (Unix);
+- `kalandra --trigger` forwarding through the single-instance plugin and the SIGUSR1/SIGUSR2 handlers (Unix);
 - the test hook (a localhost TCP socket enabled by `KALANDRA_TEST_HOOK`), which is compiled
   only into debug builds and builds with the `test-hook` feature, and must never be part of a
   release build.

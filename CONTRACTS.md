@@ -285,7 +285,7 @@ All additive; the tables above already include them.
 - **testkit / fake-game / e2e (H):** `FakePlatformBuilder` and handles, fixture helpers and
   `TradeMock`; fake-game corpus flags, `--exit-after`, `--size`, `EXIT`; web `data-testid`s.
 - **desktop (lead):** `Diagnostics` fields; overlay `linux.rs`/`macos.rs` extras; tray menu;
-  `kalandra --trigger [--pinned]` via pid file + SIGUSR2/SIGUSR1 (Phase 1 described it as going
+  `kalandra --trigger [--pinned]` forwarded via single-instance (pid file removed; Phase 1 described it as going
   over the test-hook socket); test hook gained `text`, `settings`, `save_settings`, `tray` and
   extra `state` fields, and is compiled into every debug build; env vars
   `KALANDRA_TRADE_BASE_URL`, `KALANDRA_NINJA_BASE_URL`, `KALANDRA_SCOUT_BASE_URL`,
