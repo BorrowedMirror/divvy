@@ -12,6 +12,7 @@ yanked = "deny"
 unmaintained = "workspace"
 ignore = [
   # Add `{ id = "RUSTSEC-YYYY-NNNN", reason = "..." }` with a justification and a tracking issue.
+  { id = "RUSTSEC-2024-0422", reason = "gtk-layer-shell (GTK3) is unmaintained, but Tauri 2 / WebKitGTK are GTK3-only, so gtk4-layer-shell is not an option; revisit when Tauri moves to GTK4" },
 ]
 
 [licenses]

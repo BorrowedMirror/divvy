@@ -5,7 +5,13 @@ name: release
 # third-party notices. A maintainer reviews and publishes the draft by hand.
 #
 # Signing secrets live ONLY in the `release` environment (protected: tags `v*`, required
-# reviewers), and only the `build` job enters that environment.
+# reviewers), and only the `build` job enters that environment. The updater public key
+# (`TAURI_UPDATER_PUBKEY`, minisign, from `cargo tauri signer generate`) lives there too and is
+# merged into the bundle config at build time; see docs/contributing/releasing.md.
+#
+# Bundles are built by `cargo tauri build`: release profile, default features (`native`) plus
+# `tauri/custom-protocol`, which the CLI adds itself. The `test-hook` feature is never enabled
+# here and the hook is compiled only with it or with debug assertions.
 on:
   push:
     tags: ["v*"]
@@ -30,11 +36,12 @@ jobs:
     outputs:
       release_id: ${{ steps.create.outputs.release_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Release notes (git-cliff)
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
         with:
           config: .cliff.toml
           args: --latest --strip header
@@ -75,25 +82,48 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - if: runner.os == 'Linux'
         uses: ./.github/actions/linux-deps
+        with:
+          # AppImage bundling (linuxdeploy) shells out to `file`.
+          extra: file
       - run: rustup toolchain install
       - if: runner.os == 'macOS'
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: release-${{ matrix.name }}
           save-if: false
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
-      - run: cargo install tauri-cli --version "^2" --locked
-      - uses: tauri-apps/tauri-action@v0
+      - run: cargo install tauri-cli --version 2.12.4 --locked
+      - name: Release bundle config (updater public key) and bundle args
+        id: bundle
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+          OUT: ${{ runner.temp }}/tauri-release.conf.json
+          ARGS: ${{ matrix.args }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # RPM versions cannot contain `-`, so SemVer pre-releases (v0.2.0-rc.1) ship no rpm.
+          case "$TAG" in *-*) ARGS=${ARGS/,rpm/} ;; esac
+          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
+          if [ -z "$TAURI_UPDATER_PUBKEY" ]; then
+            echo "::error::TAURI_UPDATER_PUBKEY is not set in the release environment" >&2
+            exit 1
+          fi
+          jq --arg key "$TAURI_UPDATER_PUBKEY" '.plugins.updater.pubkey = $key' \
+            .github/tauri-release.conf.json > "$OUT"
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # action-v0.6.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
           # Updater signatures (latest.json).
@@ -113,8 +143,9 @@ jobs:
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
           # web/dist is built above; .github/tauri-release.conf.json (merged over tauri.conf.json)
-          # skips beforeBuildCommand and enables updater artifacts.
-          args: ${{ matrix.args }} --config ${{ github.workspace }}/.github/tauri-release.conf.json
+          # skips beforeBuildCommand and enables updater artifacts; the step above adds the
+          # updater pubkey, which `createUpdaterArtifacts` requires.
+          args: ${{ steps.bundle.outputs.args }} --config ${{ runner.temp }}/tauri-release.conf.json
 
   attest:
     name: checksums + sbom + notices
@@ -123,9 +154,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: rustup toolchain install
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: cargo-about
       - name: Download release assets
@@ -136,7 +169,7 @@ jobs:
           mkdir -p dist
           gh release download "$TAG" --dir dist --pattern '*'
       - name: SBOM (CycloneDX, Cargo.lock + pnpm-lock.yaml)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: .
           format: cyclonedx-json
