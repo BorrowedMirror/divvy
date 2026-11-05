@@ -68,7 +68,16 @@ impl<'c> StatMatcher<'c> {
         item.modifiers
             .iter_mut()
             .map(|m| {
-                let outcome = self.match_one(&m.template, m.kind, local);
+                let mut outcome = self.match_one(&m.template, m.kind, local);
+                if outcome == MatchOutcome::Unmatched
+                    && let Some((plural, index)) = pluralise_additional(&m.template)
+                {
+                    outcome = self.match_one(&plural, m.kind, local);
+                    if outcome != MatchOutcome::Unmatched {
+                        // "an additional Arrow" carries an implicit value of 1.
+                        m.values.insert(index.min(m.values.len()), 1.0);
+                    }
+                }
                 match &outcome {
                     MatchOutcome::Matched { stat_id, negated } => {
                         m.stat_id = Some(stat_id.clone());
@@ -84,12 +93,12 @@ impl<'c> StatMatcher<'c> {
     }
 
     fn match_one(&self, template: &str, kind: ModKind, local: bool) -> MatchOutcome {
-        let mut candidates = self.lookup(template, kind);
+        let mut candidates = self.candidates(template, kind, local);
         if candidates.is_empty()
             && let Some(rest) = template.strip_prefix('-')
         {
             // `-#% to Fire Resistance` is listed as `+#% to Fire Resistance` with negative values.
-            candidates = self.lookup(&format!("+{rest}"), kind).into_iter().map(|(s, n)| (s, !n)).collect();
+            candidates = self.candidates(&format!("+{rest}"), kind, local).into_iter().map(|(s, n)| (s, !n)).collect();
         }
         match candidates.len() {
             0 => MatchOutcome::Unmatched,
@@ -98,14 +107,21 @@ impl<'c> StatMatcher<'c> {
                 MatchOutcome::Matched { stat_id: stat.id.clone(), negated }
             }
             _ => {
-                let preferred: Vec<_> = candidates.iter().filter(|(s, _)| is_local(s) == local).collect();
-                if let [(stat, negated)] = preferred.as_slice() {
-                    MatchOutcome::Matched { stat_id: stat.id.clone(), negated: *negated }
-                } else {
-                    MatchOutcome::Ambiguous(candidates.iter().map(|(s, _)| s.id.clone()).collect())
-                }
+                let (stat, negated) = break_tie(candidates, template, local);
+                MatchOutcome::Matched { stat_id: stat.id.clone(), negated }
             }
         }
+    }
+
+    /// Candidates for `template`; on weapons/armour the `(Local)` variants win when present.
+    fn candidates(&self, template: &str, kind: ModKind, local: bool) -> Vec<(&'c StatDef, bool)> {
+        if local {
+            let locals = self.lookup(&format!("{template} (Local)"), kind);
+            if !locals.is_empty() {
+                return locals;
+            }
+        }
+        self.lookup(template, kind)
     }
 
     fn lookup(&self, template: &str, kind: ModKind) -> Vec<(&'c StatDef, bool)> {
@@ -119,8 +135,36 @@ impl<'c> StatMatcher<'c> {
     }
 }
 
+/// Deterministic choice among several stats sharing a template: exact text first, then
+/// the local/global variant fitting the item, then the lowest id.
+fn break_tie<'c>(mut candidates: Vec<(&'c StatDef, bool)>, template: &str, local: bool) -> (&'c StatDef, bool) {
+    let local_text = format!("{template} (Local)");
+    let narrow = |c: &mut Vec<(&'c StatDef, bool)>, keep: &dyn Fn(&StatDef) -> bool| {
+        if c.iter().any(|(s, _)| keep(s)) {
+            c.retain(|(s, _)| keep(s));
+        }
+    };
+    narrow(&mut candidates, &|s| s.text == template || s.text == local_text);
+    narrow(&mut candidates, &|s| is_local(s) == local);
+    candidates.sort_by(|a, b| a.0.id.cmp(&b.0.id));
+    candidates[0]
+}
+
+/// `an additional Arrow` / `a Projectile` -> `# additional Arrows`; returns the new template
+/// and the index of the inserted `#` among the template's placeholders.
+fn pluralise_additional(template: &str) -> Option<(String, usize)> {
+    static SINGULAR: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"\b(?:an|a) (?:additional )?([A-Z][A-Za-z]*)\b").expect("singular regex"));
+    let caps = SINGULAR.captures(template)?;
+    let whole = caps.get(0)?;
+    let noun = &caps[1];
+    let index = template[..whole.start()].matches('#').count();
+    let plural = format!("{}# additional {noun}s{}", &template[..whole.start()], &template[whole.end()..]);
+    Some((plural, index))
+}
+
 fn is_local(stat: &StatDef) -> bool {
-    stat.text.contains("(Local)")
+    stat.text.ends_with("(Local)")
 }
 
 /// Weapons and armour pieces use local variants of damage / defence stats.
@@ -176,12 +220,11 @@ pub(crate) mod tests {
 
     impl Catalog for FakeCatalog {
         fn stats_by_template(&self, template: &str, kind: ModKind) -> Vec<(&StatDef, bool)> {
-            let strip = |t: &str| t.replace(" (Local)", "");
             self.stats
                 .iter()
                 .filter(|s| s.kind == kind_prefix(kind))
                 .filter_map(|s| {
-                    if strip(&s.text) == template {
+                    if s.text == template {
                         Some((s, false))
                     } else {
                         s.aliases.iter().find(|a| a.text == template).map(|a| (s, a.negate))
@@ -207,6 +250,12 @@ pub(crate) mod tests {
         StatDef { id: id.into(), text: text.into(), kind: kind.into(), aliases: vec![] }
     }
 
+    fn aliased(id: &str, text: &str, alias: &str) -> StatDef {
+        let mut s = stat(id, text, "explicit");
+        s.aliases.push(StatAlias { text: alias.into(), negate: false });
+        s
+    }
+
     pub(crate) fn fake_catalog() -> FakeCatalog {
         let mut increased_ms = stat("explicit.stat_2250533757", "#% increased Movement Speed", "explicit");
         increased_ms.aliases.push(StatAlias { text: "#% reduced Movement Speed".into(), negate: true });
@@ -223,6 +272,11 @@ pub(crate) mod tests {
                 stat("explicit.stat_dup_a", "#% increased Rarity of Items found", "explicit"),
                 stat("explicit.stat_dup_b", "#% increased Rarity of Items found", "explicit"),
                 increased_ms,
+                stat("explicit.stat_arrows", "Bow Attacks fire # additional Arrows", "explicit"),
+                aliased("explicit.stat_attr_a", "# to all Attributes", "+# to all Attributes"),
+                stat("explicit.stat_attr_b", "+# to all Attributes", "explicit"),
+                aliased("explicit.stat_spirit_a", "#% increased Spirit (Local)", "#% increased Spirit"),
+                aliased("explicit.stat_spirit_b", "#% increased Spirit", "#% increased Spirit"),
             ],
             bases: vec![
                 BaseDef { name: "Hunter Hood".into(), category: "armour.helmet".into(), item_class: "Helmets".into() },
@@ -298,6 +352,9 @@ pub(crate) mod tests {
                 ("Adds 3 to 7 Physical Damage", ModKind::Explicit),
                 ("20% increased Rarity of Items found", ModKind::Explicit),
                 ("Totally unknown", ModKind::Explicit),
+                ("Bow Attacks fire an additional Arrow", ModKind::Explicit),
+                ("+10 to all Attributes", ModKind::Explicit),
+                ("Has a Strange thing", ModKind::Explicit),
             ],
         );
         let out = m.match_item(&mut item);
@@ -312,25 +369,30 @@ pub(crate) mod tests {
                 Some("explicit.stat_4220027924"),
                 Some("explicit.stat_2250533757"),
                 Some("explicit.stat_1940865751"),
+                Some("explicit.stat_dup_a"),
                 None,
+                Some("explicit.stat_arrows"),
+                Some("explicit.stat_attr_b"),
                 None,
             ]
         );
         assert_eq!(out[4], MatchOutcome::Matched { stat_id: "explicit.stat_4220027924".into(), negated: true });
         assert_eq!(item.modifiers[4].values, vec![-10.0]);
         assert_eq!(item.modifiers[5].values, vec![-10.0]);
-        assert!(matches!(&out[7], MatchOutcome::Ambiguous(v) if v.len() == 2));
         assert_eq!(out[8], MatchOutcome::Unmatched);
+        assert_eq!(item.modifiers[9].values, vec![1.0]);
+        assert_eq!(out[11], MatchOutcome::Unmatched);
 
         // On jewellery the global variant wins.
         let mut ring = item_with(
             ItemClass::Ring,
             Rarity::Rare,
             "Ruby Ring",
-            &[("Adds 3 to 7 Physical Damage", ModKind::Explicit)],
+            &[("Adds 3 to 7 Physical Damage", ModKind::Explicit), ("30% increased Spirit", ModKind::Explicit)],
         );
         m.match_item(&mut ring);
         assert_eq!(ring.modifiers[0].stat_id.as_deref(), Some("explicit.stat_2223678961"));
+        assert_eq!(ring.modifiers[1].stat_id.as_deref(), Some("explicit.stat_spirit_b"));
     }
 
     #[test]
@@ -349,6 +411,19 @@ pub(crate) mod tests {
         assert!(cat.base("Hunter Hood").is_some());
         assert!(cat.unique("Goldrim").is_some());
         assert!(cat.static_item("Divine Orb").is_some());
+    }
+
+    #[test]
+    fn pluralise_examples() {
+        assert_eq!(
+            pluralise_additional("Bow Attacks fire an additional Arrow"),
+            Some(("Bow Attacks fire # additional Arrows".into(), 0))
+        );
+        assert_eq!(
+            pluralise_additional("#% chance to fire a Projectile"),
+            Some(("#% chance to fire # additional Projectiles".into(), 1))
+        );
+        assert_eq!(pluralise_additional("+# to maximum Life"), None);
     }
 
     proptest! {
