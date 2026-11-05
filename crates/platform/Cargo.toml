@@ -1,0 +1,43 @@
+[package]
+name = "kalandra-platform"
+description = "OS integration traits and backends (window tracking, hotkeys, input, clipboard, overlay)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# unsafe is required for FFI in backends; each unsafe block carries a SAFETY comment.
+[lints.rust]
+unsafe_code = "allow"
+missing_debug_implementations = "warn"
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(coverage_nightly)"] }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+undocumented_unsafe_blocks = "warn"
+
+[features]
+default = []
+# Enables real OS backends; off in pure-logic unit tests.
+native = ["dep:arboard", "dep:enigo", "dep:global-hotkey", "dep:rdev"]
+
+[dependencies]
+raw-window-handle.workspace = true
+serde.workspace = true
+specta.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+arboard = { workspace = true, optional = true }
+enigo = { workspace = true, optional = true }
+global-hotkey = { workspace = true, optional = true }
+rdev = { workspace = true, optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+x11rb = { workspace = true, optional = true, features = ["allow-unsafe-code"] }
+ashpd = { workspace = true, optional = true }
+
+[dev-dependencies]
+mockall.workspace = true
+pretty_assertions.workspace = true
