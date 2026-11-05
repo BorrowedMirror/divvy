@@ -35,6 +35,10 @@ fn sample() -> Bundle {
             stat("desecrated.life", "desecrated", "# to maximum Life", &[]),
             stat("skill.raise", "skill", "Grants Skill: Level # Raise Shield", &[]),
             stat("rune.life", "rune", "Bonded: # to maximum Life", &[]),
+            stat("sanctum.honour", "sanctum", "#% increased Honour restored", &[]),
+            stat("sanctum.life", "sanctum", "# to maximum Life", &[]),
+            stat("explicit.armour_local", "explicit", "#% increased Armour (Local)", &[("#% increased Armour", false)]),
+            stat("explicit.armour", "explicit", "#% increased Armour", &[]),
         ],
         bases: vec![
             base("Hood", "armour.helmet"),
@@ -239,6 +243,27 @@ fn stats_by_template_direct_alias_and_kind() {
 }
 
 #[test]
+fn stats_by_template_sanctum_fallback_and_direct_first() {
+    let d = data();
+    assert_eq!(
+        ids(&d.stats_by_template("#% increased Honour restored", ModKind::Explicit)),
+        [("sanctum.honour".into(), false)]
+    );
+    assert_eq!(
+        ids(&d.stats_by_template("#% increased Honour restored", ModKind::Implicit)),
+        [("sanctum.honour".into(), false)]
+    );
+    assert!(d.stats_by_template("#% increased Honour restored", ModKind::Rune).is_empty());
+    // Fallback only when the primary kind has no hit.
+    assert_eq!(ids(&d.stats_by_template("# to maximum Life", ModKind::Explicit)), [("explicit.life".into(), false)]);
+    // The real template is listed before stats that reach it via an alias.
+    assert_eq!(
+        ids(&d.stats_by_template("#% increased Armour", ModKind::Explicit)),
+        [("explicit.armour".into(), false), ("explicit.armour_local".into(), false)]
+    );
+}
+
+#[test]
 fn stats_by_template_ambiguous_and_deduped() {
     let d = data();
     // Two stats share a template; a self-alias must not duplicate the hit.
@@ -296,6 +321,13 @@ fn bundled_assets_load() {
     assert!(d.unique("Astramentis").is_some());
     let life = d.stats_by_template("+# to maximum Life", ModKind::Explicit);
     assert!(life.iter().any(|(s, negate)| s.id == "explicit.stat_3299347043" && !negate), "{life:?}");
+    let has =
+        |template: &str, kind: ModKind, id: &str| d.stats_by_template(template, kind).iter().any(|(s, _)| s.id == id);
+    assert!(has("#% increased Armour", ModKind::Explicit, "explicit.stat_1062208444"));
+    assert!(has("#% increased Duration", ModKind::Explicit, "explicit.stat_2541588185"));
+    assert!(has("#% increased Honour restored", ModKind::Explicit, "sanctum.stat_1583320325"));
+    assert!(has("#% increased Quantity of Items found in your Maps", ModKind::Explicit, "explicit.stat_2390685262"));
+    assert!(has("#% increased Experience gain in your Maps", ModKind::Explicit, "explicit.stat_57434274"));
     // Records are sorted deterministically.
     assert!(d.bundle().bases.windows(2).all(|w| w[0].name < w[1].name));
 }
