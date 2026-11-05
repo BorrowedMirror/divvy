@@ -41,3 +41,7 @@ ashpd = { workspace = true, optional = true }
 [dev-dependencies]
 mockall.workspace = true
 pretty_assertions.workspace = true
+
+# Windows backend (workstream D): raw Win32 calls for window tracking and overlay styling.
+[target.'cfg(windows)'.dependencies]
+windows.workspace = true
