@@ -167,3 +167,13 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
 
 ## Contract changes
 (append here)
+
+- **E macos (additive).** `kalandra_platform::backend::macos` (macOS + `native`) also exposes
+  `recheck_permissions() -> Vec<String>`, `open_permission_settings(kind: &str)`,
+  `create_with(MacosOptions) -> Result<Platform, PlatformError>`,
+  `MacosOptions { copy_modifier, prompt_for_accessibility }` (+ `from_env()`), `CopyModifier
+  { Command (default), Control }`, and `COPY_MODIFIER_ENV` (`KALANDRA_MACOS_COPY_MODIFIER`).
+  `macos::overlay(...)` is not provided: overlay styling lives in `overlay/macos.rs`. That file
+  also exposes `plugin()` (tauri-nspanel, which must be registered) and
+  `set_click_through(&WebviewWindow, bool)`. On macOS, `Rect` is in points (logical pixels) with
+  a top-left origin.
