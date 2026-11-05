@@ -129,7 +129,8 @@ pub struct AppState {
     pub flow_gate: Arc<logic::FlowGate>,
     /// Held for a whole settings apply (register hotkeys, persist, swap state).
     pub apply_lock: Mutex<()>,
-    pub log_path: Option<std::path::PathBuf>,
+    /// Set once the primary instance has opened its log file.
+    pub log_path: OnceLock<std::path::PathBuf>,
 }
 
 impl AppState {
@@ -138,7 +139,6 @@ impl AppState {
         settings: Settings,
         platform: Option<Arc<Platform>>,
         backend: BackendKind,
-        log_path: Option<std::path::PathBuf>,
     ) -> Result<Self, String> {
         let sources = Sources::from_settings(&settings)?;
         Ok(Self {
@@ -158,7 +158,7 @@ impl AppState {
             close_quits: AtomicBool::new(false),
             flow_gate: Arc::default(),
             apply_lock: Mutex::new(()),
-            log_path,
+            log_path: OnceLock::new(),
         })
     }
 
@@ -218,7 +218,7 @@ mod tests {
     use super::*;
 
     fn state() -> AppState {
-        AppState::new(None, Settings::default(), None, BackendKind::X11, None).unwrap()
+        AppState::new(None, Settings::default(), None, BackendKind::X11).unwrap()
     }
 
     fn league(id: &str) -> League {

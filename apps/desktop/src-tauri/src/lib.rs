@@ -175,26 +175,40 @@ fn spawn_signal_triggers(app: &tauri::AppHandle, state: &AppState, mut signals: 
     }
 }
 
+/// Embedded config + assets, expanded once so both startup paths share it.
+fn context() -> tauri::Context<tauri::Wry> {
+    tauri::generate_context!()
+}
+
+/// Isolated e2e instances (test hook set) may run beside a user's instance.
+fn single_instance_enabled() -> bool {
+    #[cfg(any(debug_assertions, feature = "test-hook"))]
+    if testhook::port_from_env().is_some() {
+        return false;
+    }
+    true
+}
+
+/// `kalandra --trigger [--pinned]`: hand our argv to the running instance through the
+/// single-instance plugin (which exits this process during init). Reaching the end of `build`
+/// means no instance was running. Works on every OS, so Wayland compositor bindings can use it;
+/// `kill -USR2|-USR1 $(pidof kalandra)` remains a signal-based alternative on unix.
+fn forward_trigger() -> ! {
+    let built = tauri::Builder::default().plugin(tauri_plugin_single_instance::init(|_, _, _| {})).build(context());
+    match built {
+        Ok(_) => eprintln!("kalandra: no running instance to trigger"),
+        Err(e) => eprintln!("kalandra: cannot reach the running instance: {e}"),
+    }
+    std::process::exit(1);
+}
+
 pub fn run() {
     let cli = cli::parse(std::env::args().skip(1));
-    let paths = Paths::resolve().ok();
     if cli.trigger {
-        let code = match paths.as_ref().map(|p| cli::send_trigger(&p.cache_dir, cli.pinned)) {
-            Some(Ok(())) => 0,
-            Some(Err(e)) => {
-                eprintln!("kalandra: {e}");
-                1
-            }
-            None => {
-                eprintln!("kalandra: cannot resolve cache directory");
-                1
-            }
-        };
-        std::process::exit(code);
+        forward_trigger();
     }
-
+    let paths = Paths::resolve().ok();
     let log_slot = init_logging();
-    let log_path = attach_log_file(&log_slot, paths.as_ref());
     let mut errors = Vec::new();
     let settings = load_settings(paths.as_ref(), &mut errors);
     let backend = overlay::pre_init(settings.platform.backend_override);
@@ -208,7 +222,7 @@ pub fn run() {
             None
         }
     };
-    let state = match AppState::new(paths, settings, platform, backend, log_path) {
+    let state = match AppState::new(paths, settings, platform, backend) {
         Ok(s) => Arc::new(s),
         Err(e) => {
             eprintln!("kalandra: failed to initialise: {e}");
@@ -218,10 +232,23 @@ pub fn run() {
     for e in errors {
         state.record_error(e);
     }
-    spawn_data_decode(&state);
 
     let builder = specta_builder();
-    let app = tauri::Builder::default().plugin(tauri_plugin_opener::init());
+    // Single instance first: a second launch exits during plugin init, before any setup below
+    // (and before it could truncate the running instance's log). It focuses settings, or with
+    // `--trigger [--pinned]` runs a price check in the running instance.
+    let mut app = tauri::Builder::default();
+    if single_instance_enabled() {
+        app = app.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            let cli = cli::parse(argv.into_iter().skip(1));
+            if cli.trigger {
+                flow::trigger(app, cli.pinned);
+            } else {
+                let _ = flow::show_settings(app, "settings");
+            }
+        }));
+    }
+    let app = app.plugin(tauri_plugin_opener::init());
     // The NSPanel plugin must be registered before `setup` so `overlay::prepare` can convert the window.
     #[cfg(target_os = "macos")]
     let app = app.plugin(overlay::macos::plugin());
@@ -232,6 +259,11 @@ pub fn run() {
             builder.mount_events(app);
             let handle = app.handle().clone();
             let state = Arc::clone(&app.state::<Arc<AppState>>());
+            // Past single-instance init: this is the primary instance.
+            if let Some(path) = attach_log_file(&log_slot, state.paths.as_ref()) {
+                let _ = state.log_path.set(path);
+            }
+            spawn_data_decode(&state);
             let tray_ok = match tray::build(&handle, &state.settings().ui.language) {
                 Ok(()) => true,
                 Err(e) => {
@@ -268,11 +300,6 @@ pub fn run() {
             if let Some(signals) = signals {
                 spawn_signal_triggers(&handle, &state, signals);
             }
-            if let Some(p) = state.paths.as_ref()
-                && let Err(e) = cli::write_pid(&p.cache_dir)
-            {
-                state.record_error(format!("pid file: {e}"));
-            }
             #[cfg(any(debug_assertions, feature = "test-hook"))]
             if let Some(port) = testhook::port_from_env()
                 && let Err(e) = testhook::spawn(&handle, port)
@@ -306,7 +333,7 @@ pub fn run() {
                 }
             }
         })
-        .build(tauri::generate_context!())
+        .build(context())
         .expect("error while building kalandra");
 
     app.run(|handle, event| {

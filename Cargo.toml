@@ -99,6 +99,7 @@ softbuffer = "0.4"
 tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
 tauri-build = { version = "2", features = [] }
 tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
 
 # test
 insta = { version = "1", features = ["json", "yaml", "redactions"] }

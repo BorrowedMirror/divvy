@@ -109,7 +109,7 @@ pub fn get_diagnostics(state: State<'_, Arc<AppState>>) -> Diagnostics {
             .map(|d| d.manifest.game_version.clone().unwrap_or_else(|| d.manifest.generated_at.clone())),
         league: Some(state.league()),
         settings_path: state.paths.as_ref().map(|p| p.settings_file.display().to_string()),
-        log_path: state.log_path.as_ref().map(|p| p.display().to_string()),
+        log_path: state.log_path.get().map(|p| p.display().to_string()),
         recent_errors: state.errors.lock().expect("errors lock").iter().cloned().collect(),
     }
 }
