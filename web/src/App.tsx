@@ -5,7 +5,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type { Settings_Serialize } from "./bindings";
 import { events } from "./bindings";
 import { createQueryClient, keys, useSettingsQuery } from "./hooks/queries";
 import { useTauriEvent } from "./hooks/useTauriEvent";
@@ -20,7 +19,7 @@ function SettingsSync() {
   const queryClient = useQueryClient();
   const settings = useSettingsQuery().data;
   useTauriEvent(events.settingsChanged, (p) => {
-    queryClient.setQueryData(keys.settings, p.settings as Settings_Serialize);
+    queryClient.setQueryData(keys.settings, p.settings);
   });
   const language = supportedLanguage(settings?.ui.language);
   const theme = settings?.ui.theme ?? "system";
@@ -36,6 +35,7 @@ function SettingsSync() {
 
 function Toasts() {
   const { toasts } = Toast.useToastManager();
+  const { t } = useTranslation();
   return (
     <Toast.Portal>
       <Toast.Viewport className="fixed right-4 bottom-4 z-50 flex w-72 flex-col gap-2">
@@ -46,8 +46,11 @@ function Toasts() {
             className="rounded-md border border-gold/40 bg-surface-2 px-3 py-2 text-sm text-fg shadow-lg"
           >
             <Toast.Content className="flex items-center justify-between gap-2">
-              <Toast.Title />
-              <Toast.Close aria-label="Dismiss" className="text-muted hover:text-fg">
+              <div className="flex min-w-0 flex-col">
+                <Toast.Title />
+                <Toast.Description className="text-xs text-muted" />
+              </div>
+              <Toast.Close aria-label={t("common.dismiss")} className="text-muted hover:text-fg">
                 ×
               </Toast.Close>
             </Toast.Content>

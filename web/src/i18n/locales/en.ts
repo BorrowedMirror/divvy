@@ -1,5 +1,5 @@
 export const en = {
-  common: { loading: "Loading…" },
+  common: { loading: "Loading…", dismiss: "Dismiss" },
   overlay: {
     title: "Price check",
     empty: "Hover an item in game and press {{hotkey}} to price check it.",
@@ -83,6 +83,7 @@ export const en = {
     platform: "Platform error",
     no_item: "No item on the clipboard",
     internal: "Something went wrong",
+    commandFailed: "That action failed",
     retryIn_one: "Retry in {{count}} second",
     retryIn_other: "Retry in {{count}} seconds",
   },
@@ -102,7 +103,7 @@ export const en = {
     contact: "Contact e-mail",
     contactHelp: "Optional. Added to the User-Agent so GGG can reach you if something misbehaves.",
     autoHide: "Auto-hide delay (ms)",
-    opacity: "Opacity (0.2–1)",
+    opacity: "Opacity (0.1–1)",
     side: "Position",
     backend: "Platform backend",
     backendHelp: "Leave on automatic unless diagnostics recommends otherwise. Takes effect after a restart.",
@@ -141,9 +142,10 @@ export const en = {
     widen: "Enter a value between 0 and 100.",
     email: "Enter a valid e-mail address or leave it empty.",
     league: "Choose a league or turn on automatic detection.",
-    autoHide: "Enter a whole number between 0 and 600000.",
-    opacity: "Enter a value between 0.2 and 1.",
+    autoHide: "Enter a whole number between 0 and 10000 (0 disables auto-hide).",
+    opacity: "Enter a value between 0.1 and 1.",
     hotkeyClash: "This shortcut is already used by another action.",
+    poesessid: "Use only letters and digits.",
   },
   diagnostics: {
     title: "Diagnostics",

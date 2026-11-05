@@ -110,13 +110,39 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    const opacity = screen.getByRole("textbox", { name: "Opacity (0.2–1)" });
-    fireEvent.change(opacity, { target: { value: "0.1" } });
+    const opacity = screen.getByRole("textbox", { name: "Opacity (0.1–1)" });
+    fireEvent.change(opacity, { target: { value: "0.05" } });
     fireEvent.blur(opacity);
-    expect(await screen.findByText("Enter a value between 0.2 and 1.")).toBeInTheDocument();
+    expect(await screen.findByText("Enter a value between 0.1 and 1.")).toBeInTheDocument();
+    fireEvent.change(autoHide, { target: { value: "10001" } });
+    fireEvent.blur(autoHide);
+    expect(await screen.findByText(/between 0 and 10000/)).toBeInTheDocument();
     await user.click(screen.getByRole("combobox", { name: "Position" }));
     await user.click(await screen.findByRole("option", { name: "Right edge" }));
-    expect(draft().overlay).toEqual({ auto_hide_ms: 3000, opacity: 0.1, side: "right" });
+    expect(draft().overlay).toEqual({ auto_hide_ms: 10001, opacity: 0.05, side: "right" });
+  });
+
+  test("clearing a numeric field keeps the last valid value instead of null", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    for (const name of ["Auto-hide delay (ms)", "Opacity (0.1–1)"]) {
+      const input = screen.getByRole("textbox", { name });
+      fireEvent.change(input, { target: { value: "" } });
+      fireEvent.blur(input);
+    }
+    await user.click(screen.getByRole("tab", { name: "Trade" }));
+    const widen = screen.getByRole("textbox", { name: "Widen stat ranges (%)" });
+    fireEvent.change(widen, { target: { value: "" } });
+    fireEvent.blur(widen);
+    expect(draft().overlay).toMatchObject({ auto_hide_ms: 1500, opacity: 1 });
+    expect(draft().trade.widen_pct).toBe(10);
+  });
+
+  test("labels point at their controls", async () => {
+    await mount();
+    expect(screen.getByText("Language", { selector: "label" })).toHaveAttribute("for", "set-language");
+    expect(document.getElementById("set-language")).not.toBeNull();
   });
 
   test("platform tab sets and clears the backend override", async () => {
@@ -142,11 +168,24 @@ describe("SettingsView", () => {
     const user = userEvent.setup();
     await mount();
     await flush();
-    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false } }) });
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
+    fireEvent.change(autoHide, { target: { value: "3000" } });
+    fireEvent.blur(autoHide);
+    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor" } }) });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
-    expect(draft().ui.theme).toBe("light");
+    expect(draft().overlay.auto_hide_ms).toBe(2000);
+  });
+
+  test("non-conflicting external changes merge into unsaved edits", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await flush();
+    await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false } }) });
+    expect(screen.queryByText("Settings were changed elsewhere.")).toBeNull();
+    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true });
   });
 });
 
@@ -173,6 +212,21 @@ describe("hotkeys tab", () => {
     });
     expect(await screen.findByRole("button", { name: /^Price check Ctrl\+Shift\+E$/ })).toBeInTheDocument();
     expect(draft().hotkeys.price_check).toEqual({ modifiers: ["ctrl", "shift"], key: "KeyE" });
+  });
+
+  test("rebind persists without a false external-change banner, even with unsaved edits", async () => {
+    const { user } = await openHotkeys();
+    await flush();
+    await user.click(screen.getByRole("switch", { name: /Advanced item copy/ }));
+    const btn = screen.getByRole("button", { name: /^Open settings F10$/ });
+    await user.click(btn);
+    fireEvent.keyDown(btn, { code: "F9" });
+    expect(await screen.findByRole("button", { name: /^Open settings F9$/ })).toBeInTheDocument();
+    const st = useSettingsStore.getState();
+    expect(st.base?.hotkeys.open_settings).toEqual({ modifiers: [], key: "F9" });
+    expect(st.draft?.hotkeys.advanced_copy).toBe(true);
+    expect(st.externalChange).toBe(false);
+    expect(screen.queryByText("Settings were changed elsewhere.")).toBeNull();
   });
 
   test("needs a modifier for plain keys; Esc cancels", async () => {

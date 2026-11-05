@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { IpcError_Serialize, PriceSummary_Serialize } from "../../bindings";
 import { commands } from "../../bindings";
 import { ExternalIcon } from "../../components/icons";
+import { useCommand } from "../../hooks/useCommand";
 import { ageOf, formatPrice } from "../../lib/format";
 
 function useCurrencyLabel() {
@@ -17,6 +18,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
   const currency = useCurrencyLabel();
   const fmt = (p: PriceSummary_Serialize["min"]) => formatPrice(p, i18n.language, currency);
   const tradeUrl = summary.trade_url;
+  const command = useCommand();
 
   return (
     <section aria-labelledby="results-heading" className="flex min-h-0 flex-1 flex-col gap-2">
@@ -31,7 +33,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
           {tradeUrl && (
             <button
               type="button"
-              onClick={() => void commands.openTrade(tradeUrl)}
+              onClick={() => void command(commands.openTrade(tradeUrl))}
               className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-gold hover:bg-gold/10 outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               {t("results.openTrade")} <ExternalIcon />
@@ -45,7 +47,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
         </p>
       ) : (
         <>
-          <dl className="grid grid-cols-3 gap-1.5 text-center">
+          <dl className="grid grid-cols-3 gap-1.5 text-center" data-testid="price-summary">
             {(
               [
                 ["min", summary.min],

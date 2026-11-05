@@ -4,7 +4,7 @@ import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from ".
 import { ageOf, formatAmount, formatPrice } from "./format";
 import { IpcFailure, toIpcError, unwrap } from "./ipc";
 import { rewiden, rewidenStat, widenValue } from "./rewiden";
-import { validateSettings } from "./validate";
+import { looksLikeEmail, validateSettings } from "./validate";
 
 const key = (code: string, mods: Partial<Record<"ctrlKey" | "altKey" | "shiftKey" | "metaKey", boolean>> = {}) => ({
   code,
@@ -158,13 +158,14 @@ describe("validateSettings", () => {
     const bad = {
       ...s,
       league: { auto_detect: false, league: null },
-      trade: { ...s.trade, widen_pct: 150, contact: "not-an-email" },
-      overlay: { ...s.overlay, auto_hide_ms: -1, opacity: 0.1 },
+      trade: { ...s.trade, widen_pct: 150, contact: "not-an-email", poesessid: "abc-123" },
+      overlay: { ...s.overlay, auto_hide_ms: 10_001, opacity: 0.05 },
       hotkeys: { ...s.hotkeys, open_settings: { modifiers: ["ctrl" as const], key: "KeyD" } },
     };
     expect(validateSettings(bad)).toEqual({
       "trade.widen_pct": "validation.widen",
       "trade.contact": "validation.email",
+      "trade.poesessid": "validation.poesessid",
       "league.league": "validation.league",
       "overlay.auto_hide_ms": "validation.autoHide",
       "overlay.opacity": "validation.opacity",
@@ -172,10 +173,30 @@ describe("validateSettings", () => {
     });
   });
 
-  test("null widen / opacity and valid email are accepted", () => {
+  test("null numeric fields are rejected (Rust f64/u64 cannot be null)", () => {
     const s = settings();
     expect(
-      validateSettings({ ...s, trade: { ...s.trade, widen_pct: null, contact: "a@b.co" }, overlay: { ...s.overlay, opacity: 0.8 } }),
+      validateSettings({ ...s, trade: { ...s.trade, widen_pct: null }, overlay: { ...s.overlay, opacity: null } }),
+    ).toEqual({ "trade.widen_pct": "validation.widen", "overlay.opacity": "validation.opacity" });
+  });
+
+  test("range bounds are inclusive like Rust", () => {
+    const s = settings();
+    expect(
+      validateSettings({
+        ...s,
+        trade: { ...s.trade, widen_pct: 100, contact: "a@b.co", poesessid: "Abc123" },
+        overlay: { ...s.overlay, opacity: 0.1, auto_hide_ms: 10_000 },
+      }),
     ).toEqual({});
+    expect(validateSettings({ ...s, overlay: { ...s.overlay, auto_hide_ms: 1.5 } })).toHaveProperty(["overlay.auto_hide_ms"]);
+  });
+
+  test("e-mail check mirrors looks_like_email", () => {
+    expect(looksLikeEmail("me@example.com")).toBe(true);
+    expect(looksLikeEmail("a+b@x.y.z")).toBe(true);
+    for (const bad of ["", "@x.y", "a@b", "a@b.", "a@.b", "a@b@c.d", "a b@c.d", "a;b@c.d", "a@(b).c", "ü@b.c", "<a>@b.c"]) {
+      expect(looksLikeEmail(bad)).toBe(false);
+    }
   });
 });

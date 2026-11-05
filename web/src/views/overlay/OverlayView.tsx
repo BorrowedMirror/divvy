@@ -5,6 +5,8 @@ import { commands, events } from "../../bindings";
 import { CloseIcon, GearIcon, PinIcon } from "../../components/icons";
 import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "../../components/ui";
 import { useLeagues, useQueryPrice, useSettingsQuery } from "../../hooks/queries";
+import { useAutoHide } from "../../hooks/useAutoHide";
+import { useCommand } from "../../hooks/useCommand";
 import { useCountdown } from "../../hooks/useCountdown";
 import { useTauriEvent } from "../../hooks/useTauriEvent";
 import { formatChord } from "../../lib/chord";
@@ -14,12 +16,18 @@ import { MiscFilters, StatFilters } from "./Filters";
 import { ItemHeader } from "./ItemHeader";
 import { ErrorNotice, Results } from "./Results";
 
-/** Runs `query_price`, discarding responses that a newer query has superseded. */
+/**
+ * Runs `query_price`, discarding responses that a newer query (or a `price-failed` event, via
+ * `invalidate`) has superseded.
+ */
 function usePriceRunner() {
   const mutation = useQueryPrice();
   const seq = useRef(0);
   const { mutateAsync } = mutation;
-  return useCallback(
+  const invalidate = useCallback(() => {
+    seq.current += 1;
+  }, []);
+  const run = useCallback(
     (filters: FilterSet_Serialize) => {
       const id = ++seq.current;
       const store = useOverlayStore.getState();
@@ -35,7 +43,10 @@ function usePriceRunner() {
     },
     [mutateAsync],
   );
+  return { run, invalidate };
 }
+
+const isPinned = () => useOverlayStore.getState().pinned;
 
 export function OverlayView() {
   const { t } = useTranslation();
@@ -47,32 +58,37 @@ export function OverlayView() {
   const pinned = useOverlayStore((s) => s.pinned);
   const retryAt = useOverlayStore((s) => s.retryAt);
   const secondsLeft = useCountdown(retryAt);
-  const run = usePriceRunner();
+  const { run, invalidate } = usePriceRunner();
   const settings = useSettingsQuery().data;
+  const command = useCommand();
+  const hide = useCallback(() => void command(commands.hideOverlay()), [command]);
+  const autoHide = useAutoHide(settings?.overlay.auto_hide_ms ?? 0, isPinned, hide);
 
   useTauriEvent(events.itemCopied, (p) => {
     useOverlayStore.getState().itemCopied(p);
     run(p.filters);
   });
   useTauriEvent(events.priceReady, (p) => useOverlayStore.getState().priceReady(p.summary));
-  useTauriEvent(events.priceFailed, (p) =>
-    useOverlayStore.getState().priceFailed({ ...p.error, retry_after_ms: p.error.retry_after_ms ?? null }),
-  );
+  useTauriEvent(events.priceFailed, (p) => {
+    // Rust shows the overlay on copy/query failure; an in-flight result must not overwrite it.
+    invalidate();
+    useOverlayStore.getState().priceFailed(p.error);
+  });
   useTauriEvent(events.overlayState, (p) => useOverlayStore.getState().setOverlayState(p));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (useOverlayStore.getState().pinned) return;
-      void commands.hideOverlay();
+      if (isPinned()) return;
+      hide();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [hide]);
 
   const togglePin = async () => {
     const next = !pinned;
-    const res = await commands.setOverlayPinned(next);
+    const res = await command(commands.setOverlayPinned(next));
     if (res.status === "ok") useOverlayStore.getState().setPinned(next);
   };
 
@@ -84,29 +100,34 @@ export function OverlayView() {
       <article
         aria-label={t("overlay.title")}
         style={{ opacity }}
+        onMouseEnter={autoHide.onMouseEnter}
+        onMouseLeave={autoHide.onMouseLeave}
         className="flex max-h-full w-full max-w-[420px] flex-col gap-3 overflow-hidden rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
       >
         <header className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">kalandra</h1>}
           </div>
-          <IconButton label={t("overlay.openSettings")} onClick={() => void commands.openSettings()}>
+          <IconButton label={t("overlay.openSettings")} onClick={() => void command(commands.openSettings())}>
             <GearIcon />
           </IconButton>
           <IconButton label={pinned ? t("overlay.unpin") : t("overlay.pin")} pressed={pinned} onClick={() => void togglePin()}>
             <PinIcon filled={pinned} />
           </IconButton>
-          <IconButton label={t("overlay.close")} onClick={() => void commands.hideOverlay()}>
+          <IconButton label={t("overlay.close")} onClick={hide}>
             <CloseIcon />
           </IconButton>
         </header>
 
         {!item || !filters ? (
-          <p className="py-8 text-center text-sm text-muted">
-            {t("overlay.empty", {
-              hotkey: settings ? formatChord(settings.hotkeys.price_check) : "Ctrl+D",
-            })}
-          </p>
+          <div className="flex flex-col gap-3 py-4" aria-live="polite">
+            {error && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
+            <p className="py-4 text-center text-sm text-muted">
+              {t("overlay.empty", {
+                hotkey: settings ? formatChord(settings.hotkeys.price_check) : "Ctrl+D",
+              })}
+            </p>
+          </div>
         ) : (
           <>
             <div className="flex max-h-[38vh] min-h-24 shrink-0 flex-col gap-3 overflow-y-auto pr-1">
@@ -159,7 +180,7 @@ function Toolbar({ filters }: { filters: FilterSet_Serialize }) {
           options={leagueOptions}
         />
         <div className="flex w-20 flex-col gap-1">
-          <span className="text-xs text-muted" id="widen-label">
+          <span className="text-xs text-muted" aria-hidden="true">
             {t("overlay.widen")}
           </span>
           <NumberInput
