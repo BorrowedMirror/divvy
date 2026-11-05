@@ -190,7 +190,8 @@
     "copyReport": "レポートをコピー",
     "copied": "レポートをクリップボードにコピーしました",
     "copyFailed": "クリップボードにアクセスできませんでした",
-    "loadFailed": "診断情報を読み込めませんでした。"
+    "loadFailed": "診断情報を読み込めませんでした。",
+    "onboardingLink": "セットアップガイドを開く"
   },
   "capability": {
     "window_tracking": "ゲームウィンドウの追跡",
@@ -214,5 +215,68 @@
     "diagnostics": "診断",
     "quit": "kalandra を終了",
     "tooltip": "kalandra"
+  },
+  "onboarding": {
+    "title": "kalandra のセットアップ",
+    "intro": "価格チェックをスムーズに使うための、プラットフォームごとの手順です。この画面には診断からいつでも戻れます。",
+    "stepsHeading": "{{platform}} のセットアップ",
+    "loadFailed": "権限を確認できませんでした。",
+    "required": "必須",
+    "optional": "任意",
+    "granted": "許可済み",
+    "notGranted": "未許可",
+    "openSettings": "システム設定を開く",
+    "relaunch": "この権限は kalandra の再起動後に macOS で反映されます。有効にしたら kalandra を終了して再度開いてください。",
+    "requestFailed": "システム設定を開けませんでした: {{message}}",
+    "details": "技術的な詳細",
+    "blockedHint": "必須の権限がまだ不足しています。kalandra は一部の機能を制限した状態で動作を続けます。",
+    "continueWithout": "許可せずに続ける",
+    "done": "完了",
+    "saveFailed": "保存できませんでした: {{message}}",
+    "permission": {
+      "accessibility": {
+        "name": "アクセシビリティ",
+        "body": "価格チェックのホットキーを押すと、kalandra がゲームのコピーショートカットを代わりに押します。そのために macOS ではアクセシビリティへのアクセスが必要です。"
+      },
+      "screen_recording": {
+        "name": "画面収録",
+        "body": "kalandra がウィンドウタイトルを読み取り、Path of Exile 2 のウィンドウを確実に見つけられるようにします。kalandra が画面をキャプチャすることはありません。"
+      },
+      "input_monitoring": {
+        "name": "入力監視",
+        "body": "ゲームにフォーカスがある間も、Esc でオーバーレイを閉じたり Ctrl+スクロールに反応したりできるようにします。"
+      },
+      "unknown": "権限: {{kind}}"
+    },
+    "windows": {
+      "windowedTitle": "ウィンドウモードまたはボーダーレスフルスクリーンを使用",
+      "windowedBody": "オーバーレイは排他的フルスクリーンの上には表示できません。ゲームのグラフィック設定で「ウィンドウ」または「ウィンドウフルスクリーン」(ボーダーレス) を選んでください。",
+      "elevatedTitle": "ゲームを管理者として実行していますか?",
+      "elevatedBody": "Windows は通常のアプリから管理者権限のアプリへのホットキーやキー入力の送信をブロックします (UIPI)。ゲームを管理者として実行している場合は、kalandra も管理者として実行してください。"
+    },
+    "x11": {
+      "title": "追加の設定は不要です",
+      "body": "X11 は kalandra に必要な機能 (グローバルホットキー、ウィンドウの追跡、ゲーム上へのオーバーレイ表示) にすべて対応しています。"
+    },
+    "gnome": {
+      "title": "GNOME: X11/XWayland のみ",
+      "x11Body": "GNOME には kalandra に必要な Wayland 機能がないため、ここでは XWayland 経由で動作します。ゲームも XWayland で実行してください (Proton と Wine では既定)。",
+      "waylandBody": "GNOME には layer-shell がないため、Wayland ネイティブモードではオーバーレイをゲームの上に表示し続けられません。設定でバックエンドを X11 / XWayland に切り替えてください。"
+    },
+    "wayland": {
+      "degradedTitle": "Wayland ネイティブモードには制限があります",
+      "degradedBody": "Wayland はアプリ同士を分離するため、一部の機能の動作が異なります:",
+      "portal": "グローバルホットキーはデスクトップの GlobalShortcuts ポータルを経由し、確認を求められます。すべてのコンポジターが対応しているわけではありません。",
+      "layerShell": "オーバーレイはゲームウィンドウに追従せず、layer-shell で画面の端に固定されます。",
+      "noTracking": "kalandra はゲームウィンドウを認識できず Esc も検知できないため、オーバーレイは専用のボタンで閉じてください。",
+      "triggerTitle": "コンポジターで価格チェックを割り当てる",
+      "triggerBody": "ホットキーが動作しない場合は、コンポジターに kalandra --trigger を実行するキーボードショートカットを追加してください。実行中の kalandra でカーソル下のアイテムの価格をチェックします。",
+      "pinnedHint": "--pinned を付けると、オーバーレイを固定した状態で開きます。",
+      "example": {
+        "sway": "sway",
+        "hyprland": "Hyprland",
+        "kde": "KDE (カスタムショートカットのコマンド)"
+      }
+    }
   }
 }
