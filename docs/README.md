@@ -12,8 +12,17 @@
 
 ## Research
 
-Notes on external systems kalandra depends on live in [research/](research/) (trade2 API,
-poe.ninja / poe2scout, data sources, macOS specifics).
+Notes on external systems kalandra depends on (captured live; background, not a spec):
+
+- [trade2 API](research/trade2.md): endpoints, payloads, rate-limit headers.
+- [poe.ninja and poe2scout](research/ninja-scout.md): aggregated price APIs.
+- [Game data sources](research/data-sources.md): inputs to `cargo xtask data refresh`.
+- [macOS](research/macos.md): permissions, window tracking, overlay panel.
+
+## Using kalandra
+
+Install requirements, the Linux session matrix, settings paths and every `KALANDRA_*`
+environment variable are in the [README](../README.md).
 
 ## Policies
 
