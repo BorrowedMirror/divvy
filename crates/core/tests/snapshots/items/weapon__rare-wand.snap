@@ -1,0 +1,85 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Wands
+category: equipment
+rarity: rare
+name: Spirit Song
+base_type: Attuned Wand
+item_level: 81
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 65
+  str: ~
+  dex: ~
+  int: 139
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: "Grants Skill: Level 19 Mana Drain"
+    template: "Grants Skill: Level # Mana Drain"
+    kind: skill
+    values:
+      - 19
+    stat_id: ~
+    advanced: ~
+  - text: +3 to Level of all Lightning Spell Skills
+    template: "+# to Level of all Lightning Spell Skills"
+    kind: explicit
+    values:
+      - 3
+    stat_id: ~
+    advanced: ~
+  - text: 98% increased Spell Damage
+    template: "#% increased Spell Damage"
+    kind: explicit
+    values:
+      - 98
+    stat_id: ~
+    advanced: ~
+  - text: 24% increased Cast Speed
+    template: "#% increased Cast Speed"
+    kind: explicit
+    values:
+      - 24
+    stat_id: ~
+    advanced: ~
+  - text: Gain 12% of Damage as Extra Lightning Damage
+    template: "Gain #% of Damage as Extra Lightning Damage"
+    kind: explicit
+    values:
+      - 12
+    stat_id: ~
+    advanced: ~
+  - text: +90 to maximum Mana
+    template: "+# to maximum Mana"
+    kind: explicit
+    values:
+      - 90
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

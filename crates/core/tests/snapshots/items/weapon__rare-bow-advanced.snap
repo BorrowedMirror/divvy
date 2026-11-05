@@ -1,0 +1,115 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Bows
+category: equipment
+rarity: rare
+name: Doom Song
+base_type: Gemini Bow
+item_level: 82
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 70
+  str: ~
+  dex: 138
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 161.15
+  elemental_dps: ~
+  total_dps: 161.15
+  attacks_per_second: 1.1
+  critical_hit_chance: 5
+properties:
+  - name: Physical Damage
+    value: 102-191
+    augmented: true
+  - name: Critical Hit Chance
+    value: 5.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.10"
+    augmented: false
+modifiers:
+  - text: Bow Attacks fire an additional Arrow
+    template: Bow Attacks fire an additional Arrow
+    kind: implicit
+    values: []
+    stat_id: ~
+    advanced:
+      affix: implicit
+      name: ~
+      tier: ~
+      ranges: []
+  - text: 151% increased Physical Damage
+    template: "#% increased Physical Damage"
+    kind: explicit
+    values:
+      - 151
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Tyrannical
+      tier: 2
+      ranges:
+        - min: 135
+          max: 154
+  - text: Adds 16 to 28 Physical Damage
+    template: "Adds # to # Physical Damage"
+    kind: explicit
+    values:
+      - 16
+      - 28
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Gleaming
+      tier: 4
+      ranges:
+        - min: 14
+          max: 19
+        - min: 26
+          max: 33
+  - text: 17% increased Attack Speed
+    template: "#% increased Attack Speed"
+    kind: explicit
+    values:
+      - 17
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Celebration
+      tier: 2
+      ranges:
+        - min: 15
+          max: 17
+  - text: +3 to Level of all Projectile Skills
+    template: "+# to Level of all Projectile Skills"
+    kind: explicit
+    values:
+      - 3
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Hunt
+      tier: ~
+      ranges: []
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

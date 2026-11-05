@@ -1,0 +1,66 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Flails
+category: equipment
+rarity: rare
+name: Doom Lash
+base_type: Iron Flail
+item_level: 50
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 35
+  str: 45
+  dex: ~
+  int: 45
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 66.5
+  elemental_dps: ~
+  total_dps: 66.5
+  attacks_per_second: 1.4
+  critical_hit_chance: 7
+properties:
+  - name: Physical Damage
+    value: 33-62
+    augmented: true
+  - name: Critical Hit Chance
+    value: 7.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.40"
+    augmented: false
+modifiers:
+  - text: 84% increased Physical Damage
+    template: "#% increased Physical Damage"
+    kind: explicit
+    values:
+      - 84
+    stat_id: ~
+    advanced: ~
+  - text: +26 to Intelligence
+    template: "+# to Intelligence"
+    kind: explicit
+    values:
+      - 26
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

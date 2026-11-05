@@ -1,0 +1,87 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: boots
+category: equipment
+rarity: rare
+name: Havoc Stride
+base_type: Dragonscale Boots
+item_level: 82
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 70
+  str: 62
+  dex: 62
+  int: ~
+stats:
+  armour: 112
+  evasion: 98
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Armour
+    value: "112"
+    augmented: true
+  - name: Evasion Rating
+    value: "98"
+    augmented: true
+modifiers:
+  - text: 30% increased Movement Speed
+    template: "#% increased Movement Speed"
+    kind: explicit
+    values:
+      - 30
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: "Cheetah's"
+      tier: 2
+      ranges:
+        - min: 30
+          max: 34
+  - text: +76 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 76
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Vigorous
+      tier: 5
+      ranges:
+        - min: 70
+          max: 84
+  - text: +12% to all Elemental Resistances
+    template: "+#% to all Elemental Resistances"
+    kind: explicit
+    values:
+      - 12
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Rainbow
+      tier: 4
+      ranges:
+        - min: 10
+          max: 12
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

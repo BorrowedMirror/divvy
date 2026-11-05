@@ -1,0 +1,62 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: ring
+category: unique
+rarity: unique
+name: Blackflame
+base_type: Amethyst Ring
+item_level: 74
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 40
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: +11% to Chaos Resistance
+    template: "+#% to Chaos Resistance"
+    kind: implicit
+    values:
+      - 11
+    stat_id: ~
+    advanced: ~
+  - text: Ignites you inflict deal Chaos Damage instead of Fire Damage
+    template: Ignites you inflict deal Chaos Damage instead of Fire Damage
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced: ~
+  - text: +19% to Fire Resistance
+    template: "+#% to Fire Resistance"
+    kind: explicit
+    values:
+      - 19
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

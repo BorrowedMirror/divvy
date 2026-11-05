@@ -1,0 +1,55 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Two Hand Axes
+category: equipment
+rarity: normal
+name: ~
+base_type: Splitting Greataxe
+item_level: 10
+quality: 10
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 6
+  str: 15
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 33.55
+  elemental_dps: ~
+  total_dps: 33.55
+  attacks_per_second: 1.1
+  critical_hit_chance: 5
+properties:
+  - name: Quality
+    value: +10%
+    augmented: true
+  - name: Physical Damage
+    value: 22-39
+    augmented: true
+  - name: Critical Hit Chance
+    value: 5.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.10"
+    augmented: false
+modifiers: []
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

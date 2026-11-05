@@ -1,0 +1,104 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: waystone
+category: waystone
+rarity: rare
+name: Shrouded Halls
+base_type: Waystone (Tier 15)
+item_level: 81
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: 15
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Waystone Tier
+    value: "15"
+    augmented: false
+  - name: Revives Available
+    value: "0"
+    augmented: true
+  - name: Pack Size
+    value: +18%
+    augmented: true
+  - name: Magic Monsters
+    value: +35%
+    augmented: true
+  - name: Rare Monsters
+    value: +28%
+    augmented: true
+  - name: Item Rarity
+    value: +46%
+    augmented: true
+  - name: Waystone Drop Chance
+    value: +210%
+    augmented: true
+modifiers:
+  - text: Monsters deal 26% of Damage as Extra Lightning
+    template: "Monsters deal #% of Damage as Extra Lightning"
+    kind: explicit
+    values:
+      - 26
+    stat_id: ~
+    advanced: ~
+  - text: Monsters have 20% increased Area of Effect
+    template: "Monsters have #% increased Area of Effect"
+    kind: explicit
+    values:
+      - 20
+    stat_id: ~
+    advanced: ~
+  - text: Area has patches of Shocked Ground
+    template: Area has patches of Shocked Ground
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced: ~
+  - text: Players have 40% less Recovery Rate of Life and Energy Shield
+    template: "Players have #% less Recovery Rate of Life and Energy Shield"
+    kind: explicit
+    values:
+      - 40
+    stat_id: ~
+    advanced: ~
+  - text: Monsters fire 2 additional Projectiles
+    template: "Monsters fire # additional Projectiles"
+    kind: explicit
+    values:
+      - 2
+    stat_id: ~
+    advanced: ~
+  - text: Monsters have 70% increased Freeze Buildup
+    template: "Monsters have #% increased Freeze Buildup"
+    kind: explicit
+    values:
+      - 70
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

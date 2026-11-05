@@ -1,0 +1,84 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: amulet
+category: equipment
+rarity: rare
+name: Dusk Locket
+base_type: Stellar Amulet
+item_level: 80
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 55
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: +11 to all Attributes
+    template: "+# to all Attributes"
+    kind: implicit
+    values:
+      - 11
+    stat_id: ~
+    advanced: ~
+  - text: +1 to Level of all Spell Skills
+    template: "+# to Level of all Spell Skills"
+    kind: explicit
+    values:
+      - 1
+    stat_id: ~
+    advanced: ~
+  - text: +87 to maximum Energy Shield
+    template: "+# to maximum Energy Shield"
+    kind: explicit
+    values:
+      - 87
+    stat_id: ~
+    advanced: ~
+  - text: 21% increased Mana Regeneration Rate
+    template: "#% increased Mana Regeneration Rate"
+    kind: explicit
+    values:
+      - 21
+    stat_id: ~
+    advanced: ~
+  - text: +33% to Lightning Resistance
+    template: "+#% to Lightning Resistance"
+    kind: explicit
+    values:
+      - 33
+    stat_id: ~
+    advanced: ~
+  - text: +24 to Intelligence
+    template: "+# to Intelligence"
+    kind: explicit
+    values:
+      - 24
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~price 4 divine
+advanced: false
+raw: "[raw]"

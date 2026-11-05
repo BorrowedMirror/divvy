@@ -1,0 +1,76 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "armour.chest"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": true,
+            "id": "rune.stat_2650726450",
+            "value": {
+              "min": 12.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_658054952",
+            "value": {
+              "min": 82.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_3723911275",
+            "value": {
+              "min": 63.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_3744174416",
+            "value": {
+              "min": 80.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_4235394652",
+            "value": {
+              "min": 33.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_2436331999",
+            "value": {
+              "min": 16.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Vile Robe"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

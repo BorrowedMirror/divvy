@@ -1,0 +1,60 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: skill_gem
+category: gem
+rarity: gem
+name: ~
+base_type: Lightning Arrow
+item_level: ~
+quality: 23
+stack_size: ~
+gem_level: 21
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 90
+  str: ~
+  dex: 129
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: "Attack, AoE, Projectile, Lightning, Chaining, Bow"
+    value: ""
+    augmented: false
+  - name: Level
+    value: 21 (Max)
+    augmented: false
+  - name: Quality
+    value: +23%
+    augmented: true
+  - name: Cost
+    value: 18 Mana
+    augmented: false
+  - name: Attack Speed
+    value: 100% of base
+    augmented: false
+  - name: Attack Damage
+    value: 141% of base
+    augmented: false
+modifiers: []
+corrupted: true
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

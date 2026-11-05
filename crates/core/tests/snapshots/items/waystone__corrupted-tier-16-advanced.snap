@@ -1,0 +1,110 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: waystone
+category: waystone
+rarity: rare
+name: Twisted Barrens
+base_type: Waystone (Tier 16)
+item_level: 82
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: 16
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Waystone Tier
+    value: "16"
+    augmented: false
+  - name: Revives Available
+    value: "0"
+    augmented: true
+  - name: Pack Size
+    value: +12%
+    augmented: true
+  - name: Rare Monsters
+    value: +41%
+    augmented: true
+  - name: Item Rarity
+    value: +62%
+    augmented: true
+  - name: Waystone Drop Chance
+    value: +255%
+    augmented: true
+modifiers:
+  - text: Monsters deal 32% of Damage as Extra Fire
+    template: "Monsters deal #% of Damage as Extra Fire"
+    kind: explicit
+    values:
+      - 32
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Searing
+      tier: 1
+      ranges:
+        - min: 25
+          max: 35
+  - text: Monsters have 41% increased Life
+    template: "Monsters have #% increased Life"
+    kind: explicit
+    values:
+      - 41
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Hulking
+      tier: 1
+      ranges:
+        - min: 40
+          max: 49
+  - text: Players have -20% to all maximum Resistances
+    template: "Players have -#% to all maximum Resistances"
+    kind: explicit
+    values:
+      - 20
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Exposure
+      tier: 1
+      ranges: []
+  - text: "Monsters have 18% increased Attack, Cast and Movement Speed"
+    template: "Monsters have #% increased Attack, Cast and Movement Speed"
+    kind: explicit
+    values:
+      - 18
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Frenzy
+      tier: 1
+      ranges:
+        - min: 15
+          max: 20
+corrupted: true
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

@@ -1,0 +1,78 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: quiver
+category: equipment
+rarity: rare
+name: Kraken Fletch
+base_type: Primed Quiver
+item_level: 79
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 55
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: Adds 6 to 11 Physical Damage to Attacks
+    template: "Adds # to # Physical Damage to Attacks"
+    kind: implicit
+    values:
+      - 6
+      - 11
+    stat_id: ~
+    advanced: ~
+  - text: +2 to Level of all Projectile Skills
+    template: "+# to Level of all Projectile Skills"
+    kind: explicit
+    values:
+      - 2
+    stat_id: ~
+    advanced: ~
+  - text: 38% increased Projectile Damage
+    template: "#% increased Projectile Damage"
+    kind: explicit
+    values:
+      - 38
+    stat_id: ~
+    advanced: ~
+  - text: +74 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 74
+    stat_id: ~
+    advanced: ~
+  - text: 18% increased Attack Speed
+    template: "#% increased Attack Speed"
+    kind: explicit
+    values:
+      - 18
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

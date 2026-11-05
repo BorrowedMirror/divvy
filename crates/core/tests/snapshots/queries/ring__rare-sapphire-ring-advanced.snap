@@ -1,0 +1,69 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "accessory.ring"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": true,
+            "id": "implicit.stat_4235394652",
+            "value": {
+              "min": 21.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_3744174416",
+            "value": {
+              "min": 83.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_223661585",
+            "value": {
+              "min": 9.45
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_2650726450",
+            "value": {
+              "min": 34.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "fractured.stat_2073410902",
+            "value": {
+              "min": 39.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Sapphire Ring"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

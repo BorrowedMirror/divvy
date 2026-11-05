@@ -1,0 +1,97 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: helmet
+category: equipment
+rarity: rare
+name: Gale Cowl
+base_type: Expert Hunter Hood
+item_level: 80
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 65
+  str: ~
+  dex: 87
+  int: ~
+stats:
+  armour: ~
+  evasion: 402
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Evasion Rating
+    value: "402"
+    augmented: true
+modifiers:
+  - text: +42 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 42
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Hale
+      tier: 7
+      ranges:
+        - min: 40
+          max: 49
+  - text: +109 to Evasion Rating
+    template: "+# to Evasion Rating"
+    kind: explicit
+    values:
+      - 109
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Agile
+      tier: 3
+      ranges:
+        - min: 98
+          max: 119
+  - text: +31% to Fire Resistance
+    template: "+#% to Fire Resistance"
+    kind: explicit
+    values:
+      - 31
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Kiln
+      tier: 4
+      ranges:
+        - min: 26
+          max: 30
+  - text: +16% to Chaos Resistance
+    template: "+#% to Chaos Resistance"
+    kind: explicit
+    values:
+      - 16
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Calamity
+      tier: 3
+      ranges:
+        - min: 14
+          max: 17
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"
