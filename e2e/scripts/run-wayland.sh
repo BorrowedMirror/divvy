@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# e2e on native Wayland: headless sway + xdg-desktop-portal(-wlr) inside a private D-Bus
+# session. Global hotkeys cannot be injected reliably here, so the price check is
+# triggered over the test hook (`trigger 0`); the app's own copy chord still has to reach
+# the fake game, which runs as a native Wayland client.
+#   e2e/scripts/run-wayland.sh [wdio args...]
+# Env: SKIP_BUILD=1; see e2e/lib/env.ts.
+# Needs: sway xdg-desktop-portal xdg-desktop-portal-wlr dbus-run-session tauri-driver
+#        WebKitWebDriver pnpm cargo.
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+repo=$(cd "$here/../.." && pwd)
+
+if [ -z "${KALANDRA_E2E_IN_SESSION:-}" ]; then
+  for tool in sway dbus-run-session; do
+    command -v "$tool" >/dev/null || { echo "run-wayland: missing $tool" >&2; exit 2; }
+  done
+  if [ -z "${SKIP_BUILD:-}" ]; then
+    (cd "$repo" && pnpm install --frozen-lockfile && pnpm --dir web build)
+    (cd "$repo" && cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game)
+  fi
+  export KALANDRA_E2E_IN_SESSION=1
+  exec dbus-run-session -- "$0" "$@"
+fi
+
+work=$(mktemp -d)
+pids=()
+cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null || true; done; rm -rf "$work"; }
+trap cleanup EXIT
+
+export XDG_RUNTIME_DIR=$work/run
+mkdir -m 700 "$XDG_RUNTIME_DIR"
+unset DISPLAY WAYLAND_DISPLAY
+cat >"$work/sway.conf" <<'EOF'
+output HEADLESS-1 resolution 1920x1080
+exec dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+EOF
+export XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland
+WLR_BACKENDS=headless WLR_RENDERER=pixman WLR_LIBINPUT_NO_DEVICES=1 \
+  sway --unsupported-gpu -c "$work/sway.conf" >"$work/sway.log" 2>&1 & pids+=($!)
+sock=
+for _ in $(seq 100); do
+  sock=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'wayland-*' ! -name '*.lock' | head -1)
+  [ -n "$sock" ] && break
+  sleep 0.1
+done
+[ -n "$sock" ] || { echo "run-wayland: sway did not start" >&2; cat "$work/sway.log" >&2; exit 1; }
+export WAYLAND_DISPLAY=$(basename "$sock")
+
+portal_dir=${PORTAL_LIBEXEC:-/usr/lib}
+if [ -x "$portal_dir/xdg-desktop-portal-wlr" ]; then
+  "$portal_dir/xdg-desktop-portal-wlr" >"$work/portal-wlr.log" 2>&1 & pids+=($!)
+  "$portal_dir/xdg-desktop-portal" -r >"$work/portal.log" 2>&1 & pids+=($!)
+else
+  echo "run-wayland: xdg-desktop-portal-wlr not found in $portal_dir (set PORTAL_LIBEXEC); continuing" >&2
+fi
+
+export GDK_BACKEND=wayland KALANDRA_BACKEND=wayland KALANDRA_E2E_TRIGGER=${KALANDRA_E2E_TRIGGER:-hook}
+cd "$repo/e2e"
+pnpm exec wdio run ./wdio.conf.ts "$@"
