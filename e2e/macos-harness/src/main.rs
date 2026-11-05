@@ -5,10 +5,18 @@
 //! 2. start `fake-game` with an item and wait for `READY`,
 //! 3. start kalandra with `KALANDRA_TEST_HOOK`, `KALANDRA_TRADE_BASE_URL`, `KALANDRA_CONFIG_DIR`,
 //! 4. `trigger 0`, wait for the game's `COPIED 1`, poll `state` until the overlay shows a price,
-//! 5. assert the median, that search + fetch hit the mock, then `quit`.
+//! 5. assert the median, that search + fetch hit the mock,
+//! 6. the tray exists and `tray open_settings` shows the settings window,
+//! 7. `save_settings` persists to `KALANDRA_CONFIG_DIR`, `quit` exits, and a restarted app
+//!    reads the saved settings back, then `quit` again.
 //!
 //! Env: `KALANDRA_APP_BIN`, `KALANDRA_FAKE_GAME_BIN`, `KALANDRA_TEST_HOOK` (port, default 47123),
-//! `KALANDRA_E2E_ITEM`, `KALANDRA_E2E_TIMEOUT_SECS` (default 30).
+//! `KALANDRA_E2E_ITEM`, `KALANDRA_E2E_TIMEOUT_SECS` (default 30),
+//! `KALANDRA_E2E_TRIGGER` (`hook` (default): test-hook `trigger 0`; `xdotool`: a real XTest
+//! `ctrl+d` press caught by the app's global hotkey; `signal`: SIGUSR2 to the app),
+//! `KALANDRA_E2E_FOCUS_CMD` (optional `sh -c` command run before triggering to focus the game
+//! window, e.g. `swaymsg '[title="Path of Exile 2"] focus'`).
+//! The Linux wrappers are `e2e/scripts/run-hook-{x11,wayland}.sh`.
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
@@ -129,7 +137,7 @@ fn median(state: &Value) -> Option<(f64, String)> {
 async fn main() -> anyhow::Result<()> {
     match run().await {
         Ok(()) => {
-            println!("PASS: price check end-to-end over the test hook");
+            println!("PASS: price check, tray, settings persistence and quit over the test hook");
             Ok(())
         }
         Err(e) => {
@@ -148,6 +156,8 @@ async fn run() -> anyhow::Result<()> {
         std::env::var("KALANDRA_TEST_HOOK").ok().map_or(Ok(47123), |p| p.parse()).context("KALANDRA_TEST_HOOK")?;
     let timeout =
         Duration::from_secs(std::env::var("KALANDRA_E2E_TIMEOUT_SECS").ok().and_then(|s| s.parse().ok()).unwrap_or(30));
+    let trigger = std::env::var("KALANDRA_E2E_TRIGGER").unwrap_or_else(|_| "hook".into());
+    ensure!(matches!(trigger.as_str(), "hook" | "xdotool" | "signal"), "unknown KALANDRA_E2E_TRIGGER `{trigger}`");
     for (bin, hint) in [
         (&app_bin, "cargo build -p kalandra-desktop --features test-hook,tauri/custom-protocol"),
         (&game_bin, "cargo build -p fake-game"),
@@ -157,7 +167,7 @@ async fn run() -> anyhow::Result<()> {
     ensure!(item.is_file(), "item file {} not found", item.display());
 
     let server = TradeMock::new()
-        .leagues(&["Standard"])
+        .leagues(&["Standard", "Hardcore"])
         .prices(&[(1.0, "divine"), (2.0, "divine"), (3.0, "divine")])
         .serve("127.0.0.1:0")
         .await?;
@@ -169,25 +179,50 @@ async fn run() -> anyhow::Result<()> {
 
     let config_dir = std::env::temp_dir().join(format!("kalandra-harness-{}", std::process::id()));
     std::fs::create_dir_all(&config_dir)?;
-    let mut app = Guard(
-        Command::new(&app_bin)
-            .env("KALANDRA_TEST_HOOK", port.to_string())
-            .env("KALANDRA_TRADE_BASE_URL", server.uri())
-            .env("KALANDRA_CONFIG_DIR", &config_dir)
-            .env("RUST_LOG", std::env::var("RUST_LOG").unwrap_or_else(|_| "kalandra=debug,info".into()))
-            .spawn()
-            .with_context(|| format!("spawning {}", app_bin.display()))?,
-    );
+    let launch = || -> anyhow::Result<Guard> {
+        let log = std::env::var("KALANDRA_LOG")
+            .or_else(|_| std::env::var("RUST_LOG"))
+            .unwrap_or_else(|_| "kalandra=debug,kalandra_platform=debug,info".into());
+        Ok(Guard(
+            Command::new(&app_bin)
+                .env("KALANDRA_TEST_HOOK", port.to_string())
+                .env("KALANDRA_TRADE_BASE_URL", server.uri())
+                .env("KALANDRA_CONFIG_DIR", &config_dir)
+                .env("KALANDRA_LOG", log)
+                .spawn()
+                .with_context(|| format!("spawning {}", app_bin.display()))?,
+        ))
+    };
     let hook = Hook { port };
+    let mut app = launch()?;
     hook.wait_up(&mut app.0, timeout)?;
     println!("test hook up on {port}");
 
     let initial = hook.state()?;
     ensure!(initial["overlay_visible"] == Value::Bool(false), "overlay visible before any hotkey: {initial}");
+    ensure!(initial["settings_visible"] == Value::Bool(false), "settings visible at a minimised start: {initial}");
 
-    hook.ok("trigger 0")?;
-    wait_line(&game_out, "COPIED 1", Duration::from_secs(10))
-        .context("the app never sent the copy chord to the game window (focus? accessibility permission?)")?;
+    // Price check: hotkey -> Ctrl+Alt+C into the game -> clipboard -> overlay -> query_price.
+    if let Ok(cmd) = std::env::var("KALANDRA_E2E_FOCUS_CMD") {
+        run_sh(&cmd).context("KALANDRA_E2E_FOCUS_CMD")?;
+    }
+    match trigger.as_str() {
+        "hook" => hook.ok("trigger 0")?,
+        "xdotool" => {
+            // Give the app a moment to grab the hotkey after its hook came up.
+            std::thread::sleep(Duration::from_millis(500));
+            run_sh("xdotool key --clearmodifiers ctrl+d")?;
+        }
+        _ => run_sh(&format!("kill -USR2 {}", app.0.id()))?,
+    }
+    wait_line(&game_out, "COPIED 1", Duration::from_secs(10)).with_context(|| {
+        format!(
+            "the app never sent the copy chord to the game window (trigger `{trigger}`; focus? \
+             accessibility permission?); state: {}",
+            hook.state().map(|s| s.to_string()).unwrap_or_default()
+        )
+    })?;
+    println!("game saw the copy chord");
 
     let deadline = Instant::now() + timeout;
     let state = loop {
@@ -205,13 +240,87 @@ async fn run() -> anyhow::Result<()> {
     let hit = |p: &str| reqs.iter().any(|r| r.url.path().starts_with(p));
     ensure!(hit("/api/trade2/search/poe2/"), "app never called trade2 search");
     ensure!(hit("/api/trade2/fetch/"), "app never called trade2 fetch");
+    println!("price check ok: median 2 divine from the mock");
 
+    // Tray.
+    ensure!(state["tray_present"] == Value::Bool(true), "tray icon missing; state: {state}");
+    hook.ok("tray open_settings")?;
+    wait_state(&hook, timeout, "settings window visible after `tray open_settings`", |s| {
+        s["settings_visible"] == Value::Bool(true)
+    })?;
+    println!("tray ok: open_settings shows the settings window");
+
+    // Settings persistence across a restart.
+    let mut settings = get_settings(&hook)?;
+    settings["league"]["auto_detect"] = Value::Bool(false);
+    settings["league"]["league"] = Value::String("Hardcore".into());
+    settings["trade"]["widen_pct"] = Value::from(17);
+    hook.ok(&format!("save_settings {settings}"))?;
+    let toml = find_file(&config_dir, "settings.toml")
+        .and_then(|p| std::fs::read_to_string(p).ok())
+        .with_context(|| format!("no settings.toml under {}", config_dir.display()))?;
+    ensure!(toml.contains("Hardcore") && toml.contains("widen_pct = 17"), "settings.toml lacks the change:\n{toml}");
+
+    quit(&hook, &mut app)?;
+    println!("quit ok");
+    let mut app = launch()?;
+    hook.wait_up(&mut app.0, timeout)?;
+    let restored = get_settings(&hook)?;
+    ensure!(
+        restored["league"]["league"] == "Hardcore"
+            && restored["league"]["auto_detect"] == false
+            && restored["trade"]["widen_pct"].as_f64() == Some(17.0),
+        "settings not restored after restart: {restored}"
+    );
+    println!("settings persisted across restart");
+    quit(&hook, &mut app)?;
+    let _ = std::fs::remove_dir_all(&config_dir);
+    Ok(())
+}
+
+fn run_sh(cmd: &str) -> anyhow::Result<()> {
+    let status = Command::new("sh").args(["-c", cmd]).status().with_context(|| format!("running `{cmd}`"))?;
+    ensure!(status.success(), "`{cmd}` failed: {status}");
+    Ok(())
+}
+
+fn get_settings(hook: &Hook) -> anyhow::Result<Value> {
+    let r = hook.command("settings")?;
+    serde_json::from_str(&r).with_context(|| format!("`settings` reply is not JSON: {r}"))
+}
+
+fn wait_state(hook: &Hook, timeout: Duration, what: &str, ok: impl Fn(&Value) -> bool) -> anyhow::Result<()> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        let s = hook.state()?;
+        if ok(&s) {
+            return Ok(());
+        }
+        ensure!(Instant::now() < deadline, "expected {what} within {timeout:?}; last state: {s}");
+        std::thread::sleep(Duration::from_millis(200));
+    }
+}
+
+fn find_file(dir: &Path, name: &str) -> Option<PathBuf> {
+    for entry in std::fs::read_dir(dir).ok()?.flatten() {
+        let p = entry.path();
+        if p.is_dir() {
+            if let Some(f) = find_file(&p, name) {
+                return Some(f);
+            }
+        } else if p.file_name().is_some_and(|n| n == name) {
+            return Some(p);
+        }
+    }
+    None
+}
+
+fn quit(hook: &Hook, app: &mut Guard) -> anyhow::Result<()> {
     hook.ok("quit")?;
     let deadline = Instant::now() + Duration::from_secs(10);
     while app.0.try_wait()?.is_none() {
         ensure!(Instant::now() < deadline, "app still running 10s after `quit`");
         std::thread::sleep(Duration::from_millis(100));
     }
-    let _ = std::fs::remove_dir_all(&config_dir);
     Ok(())
 }
