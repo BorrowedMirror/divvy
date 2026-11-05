@@ -77,6 +77,8 @@ pub struct UiSettings {
     pub language: String,
     pub theme: Theme,
     pub start_minimised: bool,
+    /// Check for and offer app updates in the background (release builds with an updater key only).
+    pub check_updates: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -146,7 +148,7 @@ impl Default for OverlaySettings {
 
 impl Default for UiSettings {
     fn default() -> Self {
-        Self { language: "en".into(), theme: Theme::System, start_minimised: true }
+        Self { language: "en".into(), theme: Theme::System, start_minimised: true, check_updates: true }
     }
 }
 
