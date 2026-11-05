@@ -105,6 +105,9 @@ proptest = "1"
 wiremock = "0.6"
 pretty_assertions = "1"
 tempfile = "3"
+objc2-core-foundation = { version = "0.3", default-features = false }
+objc2-core-graphics = { version = "0.3", default-features = false }
+objc2-application-services = { version = "0.3", default-features = false }
 
 [profile.release]
 lto = true
