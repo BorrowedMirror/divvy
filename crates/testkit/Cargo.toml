@@ -21,4 +21,5 @@ wiremock.workspace = true
 insta.workspace = true
 
 [dev-dependencies]
+reqwest.workspace = true
 tokio = { workspace = true }

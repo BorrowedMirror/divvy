@@ -2890,6 +2890,7 @@ dependencies = [
  "insta",
  "kalandra-core",
  "kalandra-platform",
+ "reqwest",
  "serde",
  "serde_json",
  "tokio",
