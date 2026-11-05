@@ -47,7 +47,7 @@
     "item_level": "アイテムレベル",
     "quality": "品質",
     "gem_level": "ジェムレベル",
-    "waystone_tier": "ウェイストーンのティア",
+    "waystone_tier": "ウェイストーンティア",
     "sockets": "ソケット",
     "corrupted": "コラプト",
     "any": "指定なし",
@@ -85,8 +85,8 @@
     "days": "{{count}}日前"
   },
   "currency": {
-    "divine": "ディヴァイン",
-    "exalted": "エクザ",
+    "divine": "div",
+    "exalted": "ex",
     "chaos": "カオス",
     "gold": "ゴールド"
   },

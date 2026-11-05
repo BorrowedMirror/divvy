@@ -29,27 +29,27 @@
     "ilvl": "ilvl {{value}}",
     "quality": "คุณภาพ {{value}}%",
     "gemLevel": "เลเวล {{value}}",
-    "waystoneTier": "เทียร์ {{value}}",
+    "waystoneTier": "ระดับ {{value}}",
     "stack": "{{current}}/{{max}}",
-    "corrupted": "คอร์รัปต์",
-    "unidentified": "ยังไม่ระบุ"
+    "corrupted": "มีมลทิน",
+    "unidentified": "ยังไม่ได้ตรวจสอบ"
   },
   "rarity": {
-    "normal": "นอร์มอล",
+    "normal": "ธรรมดา",
     "magic": "เมจิก",
     "rare": "แรร์",
-    "unique": "ยูนีค",
-    "currency": "เคอร์เรนซี",
-    "gem": "เจม",
+    "unique": "ยูนิค",
+    "currency": "เงินตรา",
+    "gem": "หิน",
     "other": "อื่น ๆ"
   },
   "misc": {
     "item_level": "เลเวลไอเทม",
     "quality": "คุณภาพ",
-    "gem_level": "เลเวลเจม",
-    "waystone_tier": "เทียร์เวย์สโตน",
-    "sockets": "ซ็อกเก็ต",
-    "corrupted": "คอร์รัปต์",
+    "gem_level": "เลเวลหิน",
+    "waystone_tier": "ระดับศิลานำทาง",
+    "sockets": "รู",
+    "corrupted": "มีมลทิน",
     "any": "ทั้งหมด",
     "yes": "ใช่",
     "no": "ไม่"
@@ -88,7 +88,7 @@
     "divine": "div",
     "exalted": "ex",
     "chaos": "chaos",
-    "gold": "โกลด์"
+    "gold": "ทอง"
   },
   "errors": {
     "parse": "อ่านไอเทมนี้ไม่ได้",

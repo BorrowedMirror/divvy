@@ -200,7 +200,7 @@
     "overlay_always_on_top": "오버레이 항상 위",
     "overlay_click_through": "클릭 통과 오버레이",
     "global_hotkeys": "전역 단축키",
-    "passive_hook": "수동 입력 후킹",
+    "passive_hook": "패시브 입력 후킹",
     "keystroke_injection": "키 입력 전송 (아이템 복사)",
     "clipboard": "클립보드 접근"
   },
