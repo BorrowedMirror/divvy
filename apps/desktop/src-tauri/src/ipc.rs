@@ -105,8 +105,7 @@ pub fn get_diagnostics(state: State<'_, Arc<AppState>>) -> Diagnostics {
         backend: state.backend,
         capabilities: state.capabilities(),
         data_version: state
-            .data
-            .as_ref()
+            .data()
             .map(|d| d.manifest.game_version.clone().unwrap_or_else(|| d.manifest.generated_at.clone())),
         league: Some(state.league()),
         settings_path: state.paths.as_ref().map(|p| p.settings_file.display().to_string()),

@@ -133,6 +133,23 @@ fn create_platform(kind: BackendKind, errors: &mut Vec<String>) -> Option<Arc<Pl
     }
 }
 
+/// Decode the bundled game data off the main thread so the event loop starts immediately;
+/// item parsing waits for it via [`AppState::wait_data`].
+fn spawn_data_decode(state: &Arc<AppState>) {
+    let decode = |st: &AppState| {
+        let data = kalandra_data::bundled()
+            .map(Arc::new)
+            .inspect_err(|e| st.record_error(format!("bundled game data failed to load: {e}")))
+            .ok();
+        let _ = st.data.set(data);
+    };
+    let st = Arc::clone(state);
+    if let Err(e) = std::thread::Builder::new().name("kalandra-data".into()).spawn(move || decode(&st)) {
+        state.record_error(format!("spawn data thread: {e}"));
+        decode(state);
+    }
+}
+
 /// Install the shell's signal handlers. SIGUSR1 (pinned) is always ours: unhandled, its default
 /// action terminates the process. SIGUSR2 is ours unless a Wayland platform already maps it.
 #[cfg(unix)]
@@ -191,14 +208,7 @@ pub fn run() {
             None
         }
     };
-    let data = match kalandra_data::bundled() {
-        Ok(d) => Some(Arc::new(d)),
-        Err(e) => {
-            errors.push(format!("bundled game data failed to load: {e}"));
-            None
-        }
-    };
-    let state = match AppState::new(paths, settings, data, platform, backend, log_path) {
+    let state = match AppState::new(paths, settings, platform, backend, log_path) {
         Ok(s) => Arc::new(s),
         Err(e) => {
             eprintln!("kalandra: failed to initialise: {e}");
@@ -208,6 +218,7 @@ pub fn run() {
     for e in errors {
         state.record_error(e);
     }
+    spawn_data_decode(&state);
 
     let builder = specta_builder();
     let app = tauri::Builder::default().plugin(tauri_plugin_opener::init());
@@ -274,7 +285,7 @@ pub fn run() {
             let st = Arc::clone(&state);
             tauri::async_runtime::spawn(async move {
                 match st.sources().trade.leagues().await {
-                    Ok(l) => *st.leagues.lock().expect("leagues lock") = Some(l),
+                    Ok(l) => st.set_leagues_if_unset(l),
                     Err(e) => st.record_error(format!("league auto-detect failed: {e}")),
                 }
             });

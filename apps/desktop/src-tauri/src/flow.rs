@@ -29,7 +29,8 @@ pub fn handle_item_text(
 ) -> Result<(ParsedItem, FilterSet), IpcError> {
     let settings = state.settings();
     let opts = logic::query_options(&settings, &state.league());
-    let catalog = state.data.as_deref().map(|d| d as &dyn Catalog);
+    let data = state.wait_data();
+    let catalog = data.as_deref().map(|d| d as &dyn Catalog);
     let (item, filters) = logic::process_item_text(text, catalog, &opts).inspect_err(|e| state.record_error(e))?;
     *state.last_item.lock().expect("last item lock") = Some((item.clone(), filters.clone()));
     state.set_pinned(pinned);

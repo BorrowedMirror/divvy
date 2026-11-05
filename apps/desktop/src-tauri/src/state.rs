@@ -2,7 +2,7 @@
 use std::{
     collections::VecDeque,
     sync::{
-        Arc, Mutex, RwLock,
+        Arc, Mutex, OnceLock, RwLock,
         atomic::{AtomicBool, Ordering},
     },
 };
@@ -111,7 +111,8 @@ impl Sources {
 pub struct AppState {
     pub paths: Option<Paths>,
     pub settings: RwLock<Settings>,
-    pub data: Option<Arc<GameData>>,
+    /// Bundled game data, decoded on a background thread at startup (`None` inside = failed).
+    pub data: OnceLock<Option<Arc<GameData>>>,
     pub sources: RwLock<Arc<Sources>>,
     pub platform: Option<Arc<Platform>>,
     pub backend: BackendKind,
@@ -135,7 +136,6 @@ impl AppState {
     pub fn new(
         paths: Option<Paths>,
         settings: Settings,
-        data: Option<Arc<GameData>>,
         platform: Option<Arc<Platform>>,
         backend: BackendKind,
         log_path: Option<std::path::PathBuf>,
@@ -144,7 +144,7 @@ impl AppState {
         Ok(Self {
             paths,
             settings: RwLock::new(settings),
-            data,
+            data: OnceLock::new(),
             sources: RwLock::new(Arc::new(sources)),
             platform,
             backend,
@@ -189,6 +189,21 @@ impl AppState {
         logic::resolve_league(&settings, leagues.as_deref())
     }
 
+    /// Game data if decoding has finished (diagnostics; never blocks).
+    pub fn data(&self) -> Option<Arc<GameData>> {
+        self.data.get().cloned().flatten()
+    }
+
+    /// Game data, waiting for the startup decode to finish (item parsing needs the catalog).
+    pub fn wait_data(&self) -> Option<Arc<GameData>> {
+        self.data.wait().clone()
+    }
+
+    /// Store the auto-detected league list unless a newer `list_leagues` result is already there.
+    pub fn set_leagues_if_unset(&self, leagues: Vec<League>) {
+        self.leagues.lock().expect("leagues lock").get_or_insert(leagues);
+    }
+
     pub fn set_pinned(&self, pinned: bool) {
         self.pinned.store(pinned, Ordering::SeqCst);
     }
@@ -201,6 +216,33 @@ impl AppState {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn state() -> AppState {
+        AppState::new(None, Settings::default(), None, BackendKind::X11, None).unwrap()
+    }
+
+    fn league(id: &str) -> League {
+        League { id: id.into(), realm: None, text: None }
+    }
+
+    #[test]
+    fn auto_detect_does_not_overwrite_newer_leagues() {
+        let st = state();
+        *st.leagues.lock().unwrap() = Some(vec![league("Fresh")]);
+        st.set_leagues_if_unset(vec![league("Stale")]);
+        assert_eq!(st.leagues.lock().unwrap().as_ref().unwrap()[0].id, "Fresh");
+        let empty = state();
+        empty.set_leagues_if_unset(vec![league("Dawn")]);
+        assert_eq!(empty.league(), "Dawn");
+    }
+
+    #[test]
+    fn data_is_absent_until_decoded() {
+        let st = state();
+        assert!(st.data().is_none());
+        st.data.set(None).unwrap();
+        assert!(st.wait_data().is_none(), "a failed decode unblocks waiters");
+    }
 
     #[test]
     fn updated_sources_keep_unchanged_clients() {
