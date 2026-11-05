@@ -170,11 +170,14 @@
     "fake": "Atrapa (testy)"
   },
   "hotkeys": {
-    "help": "Kliknij skrót, a potem naciśnij nową kombinację klawiszy. Esc anuluje.",
+    "help": "Kliknij skrót, a potem naciśnij nową kombinację klawiszy. Esc anuluje, Wyczyść go usuwa. Ponowne naciśnięcie skrótu zamyka okno, które otworzył.",
     "price_check": "Sprawdzanie ceny",
     "price_check_pinned": "Sprawdzanie ceny (przypięte)",
     "open_settings": "Otwórz ustawienia",
     "pressKeys": "Naciśnij klawisze…",
+    "notSet": "Nie ustawiono",
+    "clear": "Wyczyść",
+    "clearAria": "Wyczyść skrót: {{action}}",
     "needsModifier": "Dodaj Ctrl, Alt, Shift lub Meta (same działają tylko klawisze F).",
     "rebindFailed": "Nie udało się przypisać skrótu: {{message}}",
     "advancedCopy": "Zaawansowane kopiowanie przedmiotu",

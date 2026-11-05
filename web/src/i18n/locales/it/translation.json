@@ -168,11 +168,14 @@
     "fake": "Fittizio (test)"
   },
   "hotkeys": {
-    "help": "Fai clic su una scorciatoia, poi premi la nuova combinazione di tasti. Esc annulla.",
+    "help": "Fai clic su una scorciatoia, poi premi la nuova combinazione di tasti. Esc annulla, Cancella la rimuove. Premendo di nuovo una scorciatoia si chiude la finestra che ha aperto.",
     "price_check": "Controllo prezzi",
     "price_check_pinned": "Controllo prezzi (fissato)",
     "open_settings": "Apri impostazioni",
     "pressKeys": "Premi i tasti…",
+    "notSet": "Non impostata",
+    "clear": "Cancella",
+    "clearAria": "Cancella la scorciatoia {{action}}",
     "needsModifier": "Aggiungi Ctrl, Alt, Maiusc o Meta (solo i tasti F funzionano da soli).",
     "rebindFailed": "Impossibile assegnare la scorciatoia: {{message}}",
     "advancedCopy": "Copia avanzata dell'oggetto",

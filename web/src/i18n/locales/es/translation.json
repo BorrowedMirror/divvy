@@ -168,11 +168,14 @@
     "fake": "Simulado (pruebas)"
   },
   "hotkeys": {
-    "help": "Haz clic en un atajo y pulsa la nueva combinación de teclas. Esc cancela.",
+    "help": "Haz clic en un atajo y pulsa la nueva combinación de teclas. Esc cancela y Borrar lo elimina. Pulsar de nuevo un atajo cierra la ventana que abrió.",
     "price_check": "Consulta de precio",
     "price_check_pinned": "Consulta de precio (fijada)",
     "open_settings": "Abrir ajustes",
     "pressKeys": "Pulsa las teclas…",
+    "notSet": "Sin asignar",
+    "clear": "Borrar",
+    "clearAria": "Borrar el atajo de {{action}}",
     "needsModifier": "Añade Ctrl, Alt, Shift o Meta (solo las teclas F funcionan solas).",
     "rebindFailed": "No se pudo asignar el atajo: {{message}}",
     "advancedCopy": "Copia avanzada de objetos",

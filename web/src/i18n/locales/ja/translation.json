@@ -164,11 +164,14 @@
     "fake": "ダミー (テスト用)"
   },
   "hotkeys": {
-    "help": "ショートカットをクリックし、新しいキーの組み合わせを押してください。Esc でキャンセルします。",
+    "help": "ショートカットをクリックし、新しいキーの組み合わせを押してください。Esc でキャンセル、クリアで削除します。ショートカットをもう一度押すと、開いたウィンドウを閉じます。",
     "price_check": "価格チェック",
     "price_check_pinned": "価格チェック (固定)",
     "open_settings": "設定を開く",
     "pressKeys": "キーを押してください…",
+    "notSet": "未設定",
+    "clear": "クリア",
+    "clearAria": "{{action}} のショートカットをクリア",
     "needsModifier": "Ctrl、Alt、Shift、Meta のいずれかを追加してください (単独で使えるのは F キーのみです)。",
     "rebindFailed": "ショートカットを割り当てられませんでした: {{message}}",
     "advancedCopy": "詳細アイテムコピー",

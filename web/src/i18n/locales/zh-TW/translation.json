@@ -164,11 +164,14 @@
     "fake": "模擬（測試用）"
   },
   "hotkeys": {
-    "help": "點選一個熱鍵，再按下新的按鍵組合。按 Esc 取消。",
+    "help": "點選一個熱鍵，再按下新的按鍵組合。按 Esc 取消，點選「清除」即可移除。再次按下熱鍵會關閉它開啟的視窗。",
     "price_check": "查價",
     "price_check_pinned": "查價（釘選）",
     "open_settings": "開啟設定",
     "pressKeys": "請按鍵…",
+    "notSet": "未設定",
+    "clear": "清除",
+    "clearAria": "清除{{action}}熱鍵",
     "needsModifier": "請加上 Ctrl、Alt、Shift 或 Meta（只有 F 鍵可單獨使用）。",
     "rebindFailed": "無法綁定該熱鍵：{{message}}",
     "advancedCopy": "進階物品複製",

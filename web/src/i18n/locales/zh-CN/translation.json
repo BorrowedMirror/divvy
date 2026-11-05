@@ -164,11 +164,14 @@
     "fake": "模拟（测试用）"
   },
   "hotkeys": {
-    "help": "点击一个快捷键，然后按下新的组合键。按 Esc 取消。",
+    "help": "点击一个快捷键，然后按下新的组合键。按 Esc 取消，点击“清除”将其移除。再次按下快捷键会关闭它打开的窗口。",
     "price_check": "查价",
     "price_check_pinned": "查价（固定）",
     "open_settings": "打开设置",
     "pressKeys": "请按键…",
+    "notSet": "未设置",
+    "clear": "清除",
+    "clearAria": "清除{{action}}快捷键",
     "needsModifier": "请加上 Ctrl、Alt、Shift 或 Meta（只有 F 键可单独使用）。",
     "rebindFailed": "无法绑定该快捷键：{{message}}",
     "advancedCopy": "高级物品复制",

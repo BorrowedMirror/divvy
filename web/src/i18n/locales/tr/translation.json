@@ -166,11 +166,14 @@
     "fake": "Sahte (test için)"
   },
   "hotkeys": {
-    "help": "Bir kısayola tıklayın, ardından yeni tuş birleşimine basın. Esc iptal eder.",
+    "help": "Bir kısayola tıklayın, ardından yeni tuş birleşimine basın. Esc iptal eder, Temizle kısayolu kaldırır. Bir kısayola tekrar basmak, açtığı pencereyi kapatır.",
     "price_check": "Fiyat kontrolü",
     "price_check_pinned": "Fiyat kontrolü (sabit)",
     "open_settings": "Ayarları aç",
     "pressKeys": "Tuşlara basın…",
+    "notSet": "Atanmadı",
+    "clear": "Temizle",
+    "clearAria": "{{action}} kısayolunu temizle",
     "needsModifier": "Ctrl, Alt, Shift veya Meta ekleyin (yalnızca F tuşları tek başına çalışır).",
     "rebindFailed": "Kısayol atanamadı: {{message}}",
     "advancedCopy": "Gelişmiş eşya kopyalama",

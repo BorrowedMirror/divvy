@@ -168,11 +168,14 @@
     "fake": "Simulado (testes)"
   },
   "hotkeys": {
-    "help": "Clique em um atalho e pressione a nova combinação de teclas. Esc cancela.",
+    "help": "Clique em um atalho e pressione a nova combinação de teclas. Esc cancela e Limpar o remove. Pressionar um atalho de novo fecha a janela que ele abriu.",
     "price_check": "Consulta de preço",
     "price_check_pinned": "Consulta de preço (fixada)",
     "open_settings": "Abrir configurações",
     "pressKeys": "Pressione as teclas…",
+    "notSet": "Não definido",
+    "clear": "Limpar",
+    "clearAria": "Limpar o atalho de {{action}}",
     "needsModifier": "Adicione Ctrl, Alt, Shift ou Meta (só as teclas F funcionam sozinhas).",
     "rebindFailed": "Não foi possível definir o atalho: {{message}}",
     "advancedCopy": "Cópia avançada de itens",

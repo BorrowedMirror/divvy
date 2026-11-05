@@ -168,11 +168,14 @@
     "fake": "Factice (test)"
   },
   "hotkeys": {
-    "help": "Cliquez sur un raccourci, puis appuyez sur la nouvelle combinaison de touches. Échap pour annuler.",
+    "help": "Cliquez sur un raccourci, puis appuyez sur la nouvelle combinaison de touches. Échap pour annuler, Effacer pour le supprimer. Appuyer à nouveau sur un raccourci ferme la fenêtre qu'il a ouverte.",
     "price_check": "Vérification de prix",
     "price_check_pinned": "Vérification de prix (épinglée)",
     "open_settings": "Ouvrir les paramètres",
     "pressKeys": "Appuyez sur des touches…",
+    "notSet": "Non défini",
+    "clear": "Effacer",
+    "clearAria": "Effacer le raccourci {{action}}",
     "needsModifier": "Ajoutez Ctrl, Alt, Maj ou Méta (seules les touches F fonctionnent seules).",
     "rebindFailed": "Impossible d'attribuer ce raccourci : {{message}}",
     "advancedCopy": "Copie avancée de l'objet",

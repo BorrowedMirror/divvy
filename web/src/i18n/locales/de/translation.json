@@ -166,11 +166,14 @@
     "fake": "Fake (Test)"
   },
   "hotkeys": {
-    "help": "Ein Tastenkürzel anklicken, dann die neue Tastenkombination drücken. Esc bricht ab.",
+    "help": "Ein Tastenkürzel anklicken, dann die neue Tastenkombination drücken. Esc bricht ab, Löschen entfernt es. Erneutes Drücken eines Tastenkürzels schließt das damit geöffnete Fenster.",
     "price_check": "Preisprüfung",
     "price_check_pinned": "Preisprüfung (angeheftet)",
     "open_settings": "Einstellungen öffnen",
     "pressKeys": "Tasten drücken…",
+    "notSet": "Nicht belegt",
+    "clear": "Löschen",
+    "clearAria": "Tastenkürzel für {{action}} löschen",
     "needsModifier": "Strg, Alt, Umschalt oder Meta hinzufügen (nur F-Tasten funktionieren allein).",
     "rebindFailed": "Tastenkürzel konnte nicht belegt werden: {{message}}",
     "advancedCopy": "Erweitertes Kopieren",
