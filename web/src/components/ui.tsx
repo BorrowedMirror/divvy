@@ -149,6 +149,7 @@ export function SelectField<T extends string>({
   hideLabel,
   disabled,
   className,
+  id,
 }: {
   value: T;
   onChange: (v: T) => void;
@@ -157,9 +158,12 @@ export function SelectField<T extends string>({
   hideLabel?: boolean;
   disabled?: boolean;
   className?: string;
+  /** Lets an external `<label htmlFor>` target the trigger. */
+  id?: string;
 }) {
   return (
     <Select.Root
+      id={id}
       items={options}
       value={value}
       disabled={disabled}
@@ -215,7 +219,9 @@ export function NumberInput({
   disabled,
   className,
   invalid,
+  id,
 }: {
+  id?: string;
   value: number | null;
   onChange: (v: number | null) => void;
   label: string;
@@ -236,6 +242,7 @@ export function NumberInput({
       step={step}
       disabled={disabled}
       className={className}
+      id={id}
     >
       <NumberField.Group>
         <NumberField.Input

@@ -5,6 +5,7 @@ import { mockIPC } from "@tauri-apps/api/mocks";
 import { act } from "react";
 import { AppProviders } from "../App";
 import { createQueryClient } from "../hooks/queries";
+import type { Chord, HotkeyAction, Settings_Serialize } from "../bindings";
 import { diagnostics, leagues, settings } from "./fixtures";
 
 export type Call = { cmd: string; args: Record<string, unknown> | undefined };
@@ -16,21 +17,35 @@ export function fail(error: unknown): Promise<never> {
 }
 
 const defaults: Record<string, Handler> = {
-  get_settings: () => settings(),
   get_diagnostics: () => diagnostics(),
   list_leagues: () => leagues,
-  save_settings: (a) => a?.settings,
   hide_overlay: () => null,
   set_overlay_pinned: () => null,
   open_trade: () => null,
   open_settings: () => null,
-  rebind_hotkey: () => null,
 };
 
 /** Install `mockIPC` with event mocking; returns the recorded command calls. */
 export function setupIpc(handlers: Record<string, Handler> = {}): Call[] {
   const calls: Call[] = [];
-  const all = { ...defaults, ...handlers };
+  // Like the Rust side, save_settings and rebind_hotkey persist and emit `settings-changed`.
+  let current = settings();
+  const all: Record<string, Handler> = {
+    get_settings: () => current,
+    save_settings: async (a) => {
+      current = a?.settings as Settings_Serialize;
+      await emit("settings-changed", { settings: current });
+      return current;
+    },
+    rebind_hotkey: async (a) => {
+      const action = a?.action as HotkeyAction;
+      current = { ...current, hotkeys: { ...current.hotkeys, [action]: a?.chord as Chord } };
+      await emit("settings-changed", { settings: current });
+      return null;
+    },
+    ...defaults,
+    ...handlers,
+  };
   mockIPC(
     (cmd, args) => {
       const a = args as Record<string, unknown> | undefined;

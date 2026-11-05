@@ -87,18 +87,40 @@ describe("settings store", () => {
     expect(s().externalChange).toBe(false);
   });
 
-  test("external change with unsaved edits keeps the draft and flags it", () => {
+  test("external change rebases unsaved edits onto untouched fields", () => {
     s().load(settings());
     s().update((d) => ({ ...d, ui: { ...d.ui, theme: "light" } }));
     s().external(settings({ ui: { language: "de", theme: "dark", start_minimised: false } }));
+    expect(s().draft?.ui).toEqual({ language: "de", theme: "light", start_minimised: false });
+    expect(s().base?.ui.language).toBe("de");
+    expect(s().externalChange).toBe(false);
+  });
+
+  test("external change to a field the user edited flags a conflict", () => {
+    s().load(settings());
+    s().update((d) => ({ ...d, ui: { ...d.ui, theme: "light" } }));
+    s().external(settings({ ui: { language: "en", theme: "system", start_minimised: false } }));
     expect(s().draft?.ui.theme).toBe("light");
     expect(s().externalChange).toBe(true);
     s().discard();
-    expect(s().draft?.ui.language).toBe("de");
+    expect(s().draft?.ui.theme).toBe("system");
+    expect(s().externalChange).toBe(false);
+  });
+
+  test("persisted changes update base and draft without dirtying", () => {
+    s().load(settings());
+    s().update((d) => ({ ...d, ui: { ...d.ui, theme: "light" } }));
+    const chord = { modifiers: ["alt" as const], key: "KeyQ" };
+    s().persisted((x) => ({ ...x, hotkeys: { ...x.hotkeys, price_check: chord } }));
+    expect(s().base?.hotkeys.price_check).toEqual(chord);
+    expect(s().draft?.hotkeys.price_check).toEqual(chord);
+    s().discard();
+    expect(isDirty(s())).toBe(false);
   });
 
   test("update before load is a no-op", () => {
     s().update((d) => d);
+    s().persisted((d) => d);
     expect(s().draft).toBeNull();
   });
 });
