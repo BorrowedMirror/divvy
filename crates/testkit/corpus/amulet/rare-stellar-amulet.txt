@@ -1,0 +1,18 @@
+Item Class: Amulets
+Rarity: Rare
+Dusk Locket
+Stellar Amulet
+--------
+Requires: Level 55
+--------
+Item Level: 80
+--------
++11 to all Attributes (implicit)
+--------
++1 to Level of all Spell Skills
++87 to maximum Energy Shield
+21% increased Mana Regeneration Rate
++33% to Lightning Resistance
++24 to Intelligence
+--------
+Note: ~price 4 divine

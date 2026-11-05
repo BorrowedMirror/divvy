@@ -1,0 +1,74 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Claws
+category: equipment
+rarity: magic
+name: ~
+base_type: Glinting Hooked Claw of Ease
+item_level: 25
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 18
+  str: ~
+  dex: 32
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 37.4
+  elemental_dps: ~
+  total_dps: 37.4
+  attacks_per_second: 1.7
+  critical_hit_chance: 5
+properties:
+  - name: Physical Damage
+    value: 12-32
+    augmented: true
+  - name: Critical Hit Chance
+    value: 5.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.70"
+    augmented: true
+modifiers:
+  - text: Grants 8 Life per Enemy Hit
+    template: "Grants # Life per Enemy Hit"
+    kind: implicit
+    values:
+      - 8
+    stat_id: ~
+    advanced: ~
+  - text: Adds 3 to 6 Physical Damage
+    template: "Adds # to # Physical Damage"
+    kind: explicit
+    values:
+      - 3
+      - 6
+    stat_id: ~
+    advanced: ~
+  - text: 8% increased Attack Speed
+    template: "#% increased Attack Speed"
+    kind: explicit
+    values:
+      - 8
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

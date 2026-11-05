@@ -1,0 +1,107 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: amulet
+category: equipment
+rarity: rare
+name: Golem Talisman
+base_type: Gold Amulet
+item_level: 81
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 48
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: 15% increased Rarity of Items found
+    template: "#% increased Rarity of Items found"
+    kind: implicit
+    values:
+      - 15
+    stat_id: ~
+    advanced:
+      affix: implicit
+      name: ~
+      tier: ~
+      ranges:
+        - min: 12
+          max: 20
+  - text: 14% increased Rarity of Items found
+    template: "#% increased Rarity of Items found"
+    kind: explicit
+    values:
+      - 14
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Prosperous
+      tier: 2
+      ranges:
+        - min: 13
+          max: 18
+  - text: +74 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 74
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Virile
+      tier: 4
+      ranges:
+        - min: 70
+          max: 84
+  - text: +28% to Cold Resistance
+    template: "+#% to Cold Resistance"
+    kind: explicit
+    values:
+      - 28
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Ice
+      tier: 5
+      ranges:
+        - min: 26
+          max: 30
+  - text: +21 to Strength
+    template: "+# to Strength"
+    kind: explicit
+    values:
+      - 21
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Bear
+      tier: 3
+      ranges:
+        - min: 17
+          max: 24
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

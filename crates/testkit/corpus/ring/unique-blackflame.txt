@@ -1,0 +1,15 @@
+Item Class: Rings
+Rarity: Unique
+Blackflame
+Amethyst Ring
+--------
+Requires: Level 40
+--------
+Item Level: 74
+--------
++11% to Chaos Resistance (implicit)
+--------
+Ignites you inflict deal Chaos Damage instead of Fire Damage
++19% to Fire Resistance
+--------
+A flame that burns cold and dark.

@@ -1,0 +1,50 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "armour.gloves"
+          },
+          "ilvl": {
+            "min": 52.0
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": false,
+            "id": "explicit.stat_3744174416",
+            "value": {
+              "min": 51.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_4235394652",
+            "value": {
+              "min": 18.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    }
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

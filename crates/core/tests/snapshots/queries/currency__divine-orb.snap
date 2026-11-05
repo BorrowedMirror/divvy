@@ -1,0 +1,30 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "currency"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Divine Orb"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

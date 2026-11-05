@@ -1,0 +1,10 @@
+Item Class: Stackable Currency
+Rarity: Currency
+Distilled Ire
+--------
+Stack Size: 4/10
+--------
+Can be combined with other Distilled Emotions to Instill an Amulet with a Notable Passive Skill
+--------
+Use on an Amulet at the Reforging Bench, or to Instill a Delirium Waystone.
+Shift click to unstack.

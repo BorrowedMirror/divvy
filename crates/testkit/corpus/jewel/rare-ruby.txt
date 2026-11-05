@@ -1,0 +1,13 @@
+Item Class: Jewels
+Rarity: Rare
+Chimeric Spark
+Ruby
+--------
+Item Level: 80
+--------
+14% increased Melee Damage
+8% increased Armour
++6% to Fire Resistance
+3% increased Attack Speed with Two Handed Weapons
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.

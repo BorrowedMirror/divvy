@@ -1,0 +1,73 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: Talismans
+category: equipment
+rarity: rare
+name: Bear Fang
+base_type: Wolf Talisman
+item_level: 70
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 52
+  str: 70
+  dex: ~
+  int: 70
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 105.95
+  elemental_dps: ~
+  total_dps: 105.95
+  attacks_per_second: 1.3
+  critical_hit_chance: 7
+properties:
+  - name: Physical Damage
+    value: 61-102
+    augmented: true
+  - name: Critical Hit Chance
+    value: 7.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.30"
+    augmented: false
+modifiers:
+  - text: "Grants Skill: Level 15 Shapeshift: Wolf"
+    template: "Grants Skill: Level # Shapeshift: Wolf"
+    kind: skill
+    values:
+      - 15
+    stat_id: ~
+    advanced: ~
+  - text: 111% increased Physical Damage
+    template: "#% increased Physical Damage"
+    kind: explicit
+    values:
+      - 111
+    stat_id: ~
+    advanced: ~
+  - text: +64 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 64
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

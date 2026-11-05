@@ -200,14 +200,387 @@ pub struct StackSize {
     pub max: u32,
 }
 
+/// Weapon class headers as printed by PoE2 (plural form).
+pub const WEAPON_CLASSES: &[&str] = &[
+    "Bows",
+    "Crossbows",
+    "Wands",
+    "Staves",
+    "Warstaves",
+    "Quarterstaves",
+    "Talismans",
+    "One Hand Maces",
+    "Two Hand Maces",
+    "One Hand Swords",
+    "Two Hand Swords",
+    "One Hand Axes",
+    "Two Hand Axes",
+    "Sceptres",
+    "Spears",
+    "Flails",
+    "Daggers",
+    "Claws",
+    "Traps",
+    "Fishing Rods",
+];
+
 impl ItemClass {
     /// Map an `Item Class:` header value (e.g. "Stackable Currency") to an [`ItemClass`].
-    pub fn from_header(_value: &str) -> Self {
-        todo!("workstream A: map every PoE2 item class header")
+    ///
+    /// Matching is case-insensitive and tolerant of singular/plural spellings.
+    /// Unknown values are preserved in [`ItemClass::Other`]; weapon subclasses keep
+    /// their raw header in [`ItemClass::Weapon`].
+    pub fn from_header(value: &str) -> Self {
+        let raw = value.trim();
+        let key = raw.to_ascii_lowercase();
+        match key.as_str() {
+            "stackable currency" | "currency" => Self::StackableCurrency,
+            "omen" | "omens" => Self::Omen,
+            "essence" | "essences" => Self::Essence,
+            "soul core" | "soul cores" => Self::SoulCore,
+            "rune" | "runes" | "augment" | "augments" | "socketable" | "socketables" => Self::Rune,
+            "talisman socketable" | "talisman socketables" => Self::Talisman,
+            "distilled emotion" | "distilled emotions" => Self::DistilledEmotion,
+            "splinter" | "splinters" | "breach splinter" | "breach splinters" => Self::Splinter,
+            "catalyst" | "catalysts" | "breach catalyst" | "breach catalysts" => Self::Catalyst,
+            "skill gem" | "skill gems" | "active skill gems" => Self::SkillGem,
+            "support gem" | "support gems" => Self::SupportGem,
+            "uncut skill gem" | "uncut skill gems" | "uncut support gem" | "uncut support gems"
+            | "uncut spirit gem" | "uncut spirit gems" | "uncut gems" => Self::UncutGem,
+            "waystone" | "waystones" | "map" | "maps" => Self::Waystone,
+            "tablet" | "tablets" | "precursor tablet" | "precursor tablets" => Self::Tablet,
+            "jewel" | "jewels" => Self::Jewel,
+            "life flask" | "life flasks" => Self::LifeFlask,
+            "mana flask" | "mana flasks" => Self::ManaFlask,
+            "charm" | "charms" | "utility flask" | "utility flasks" => Self::Charm,
+            "relic" | "relics" => Self::Relic,
+            "amulet" | "amulets" => Self::Amulet,
+            "ring" | "rings" => Self::Ring,
+            "belt" | "belts" => Self::Belt,
+            "body armour" | "body armours" => Self::BodyArmour,
+            "helmet" | "helmets" => Self::Helmet,
+            "glove" | "gloves" => Self::Gloves,
+            "boot" | "boots" => Self::Boots,
+            "shield" | "shields" => Self::Shield,
+            "buckler" | "bucklers" => Self::Buckler,
+            "focus" | "foci" => Self::Focus,
+            "quiver" | "quivers" => Self::Quiver,
+            _ if WEAPON_CLASSES.iter().any(|w| w.eq_ignore_ascii_case(raw)) || is_weapon_singular(&key) => {
+                Self::Weapon(raw.to_owned())
+            }
+            _ => Self::Other(raw.to_owned()),
+        }
     }
 
     /// Category used for routing.
-    pub fn category(&self, _rarity: Rarity) -> ItemCategory {
-        todo!("workstream A")
+    ///
+    /// Currency-like and gem classes keep their category regardless of rarity; any other
+    /// unique item routes as [`ItemCategory::Unique`].
+    pub fn category(&self, rarity: Rarity) -> ItemCategory {
+        let base = match self {
+            Self::StackableCurrency
+            | Self::Omen
+            | Self::Essence
+            | Self::SoulCore
+            | Self::Rune
+            | Self::Talisman
+            | Self::DistilledEmotion
+            | Self::Splinter
+            | Self::Catalyst => return ItemCategory::Currency,
+            Self::SkillGem | Self::SupportGem | Self::UncutGem => return ItemCategory::Gem,
+            Self::Waystone => ItemCategory::Waystone,
+            Self::Tablet => ItemCategory::Tablet,
+            Self::Jewel => ItemCategory::Jewel,
+            Self::LifeFlask | Self::ManaFlask => ItemCategory::Flask,
+            Self::Charm => ItemCategory::Charm,
+            Self::Relic => ItemCategory::Relic,
+            Self::Amulet
+            | Self::Ring
+            | Self::Belt
+            | Self::BodyArmour
+            | Self::Helmet
+            | Self::Gloves
+            | Self::Boots
+            | Self::Shield
+            | Self::Buckler
+            | Self::Focus
+            | Self::Quiver
+            | Self::Weapon(_) => ItemCategory::Equipment,
+            Self::Other(_) => match rarity {
+                Rarity::Currency => return ItemCategory::Currency,
+                Rarity::Gem => return ItemCategory::Gem,
+                _ => ItemCategory::Other,
+            },
+        };
+        if rarity == Rarity::Unique { ItemCategory::Unique } else { base }
+    }
+
+    /// Trade2 `type_filters.category` option for this class, when one exists.
+    ///
+    /// Ids follow `/api/trade2/data/filters` (`weapon.bow`, `armour.helmet`, ...).
+    pub fn trade_category(&self) -> Option<&'static str> {
+        Some(match self {
+            Self::StackableCurrency | Self::Catalyst | Self::Essence | Self::DistilledEmotion | Self::Splinter => {
+                "currency"
+            }
+            Self::Omen => "currency.omen",
+            Self::SoulCore => "currency.soulcore",
+            Self::Rune => "currency.rune",
+            Self::Talisman => "currency.socketable",
+            Self::SkillGem => "gem.activegem",
+            Self::SupportGem => "gem.supportgem",
+            Self::UncutGem => "gem",
+            Self::Waystone => "map.waystone",
+            Self::Tablet => "map.tablet",
+            Self::Jewel => "jewel",
+            Self::LifeFlask => "flask.life",
+            Self::ManaFlask => "flask.mana",
+            Self::Charm => "flask.charm",
+            Self::Relic => "sanctum.relic",
+            Self::Amulet => "accessory.amulet",
+            Self::Ring => "accessory.ring",
+            Self::Belt => "accessory.belt",
+            Self::BodyArmour => "armour.chest",
+            Self::Helmet => "armour.helmet",
+            Self::Gloves => "armour.gloves",
+            Self::Boots => "armour.boots",
+            Self::Shield => "armour.shield",
+            Self::Buckler => "armour.buckler",
+            Self::Focus => "armour.focus",
+            Self::Quiver => "armour.quiver",
+            Self::Weapon(raw) => return weapon_trade_category(raw),
+            Self::Other(raw) if raw.eq_ignore_ascii_case("Meta Gems") => "gem.metagem",
+            Self::Other(_) => return None,
+        })
+    }
+
+    /// Whether this class is a weapon.
+    pub fn is_weapon(&self) -> bool {
+        matches!(self, Self::Weapon(_))
+    }
+}
+
+fn weapon_trade_category(raw: &str) -> Option<&'static str> {
+    let key = raw.to_ascii_lowercase();
+    let key = key.trim_end_matches('s');
+    Some(match key {
+        "bow" => "weapon.bow",
+        "crossbow" => "weapon.crossbow",
+        "wand" => "weapon.wand",
+        "stave" | "staff" => "weapon.staff",
+        "quarterstave" | "quarterstaff" | "warstave" | "warstaff" => "weapon.warstaff",
+        "one hand mace" => "weapon.onemace",
+        "two hand mace" => "weapon.twomace",
+        "one hand sword" => "weapon.onesword",
+        "two hand sword" => "weapon.twosword",
+        "one hand axe" => "weapon.oneaxe",
+        "two hand axe" => "weapon.twoaxe",
+        "sceptre" => "weapon.sceptre",
+        "spear" => "weapon.spear",
+        "flail" => "weapon.flail",
+        "dagger" => "weapon.dagger",
+        "claw" => "weapon.claw",
+        "trap" => "weapon.trap",
+        "talisman" => "weapon.talisman",
+        "fishing rod" => "weapon.rod",
+        _ => return None,
+    })
+}
+
+fn is_weapon_singular(key: &str) -> bool {
+    WEAPON_CLASSES.iter().any(|w| {
+        let w = w.to_ascii_lowercase();
+        let singular = w
+            .strip_suffix("ves")
+            .map(|s| format!("{s}ff"))
+            .or_else(|| w.strip_suffix('s').map(str::to_owned))
+            .unwrap_or_default();
+        singular == key
+    })
+}
+
+impl Rarity {
+    /// Parse the value of a `Rarity:` line.
+    pub fn from_header(value: &str) -> Option<Self> {
+        Some(match value.trim().to_ascii_lowercase().as_str() {
+            "normal" => Self::Normal,
+            "magic" => Self::Magic,
+            "rare" => Self::Rare,
+            "unique" => Self::Unique,
+            "currency" => Self::Currency,
+            "gem" => Self::Gem,
+            "quest" | "divination card" | "other" => Self::Other,
+            _ => return None,
+        })
+    }
+
+    /// Lower-case trade2 rarity option (`normal`, `magic`, `rare`, `unique`), if any.
+    pub fn trade_option(self) -> Option<&'static str> {
+        match self {
+            Self::Normal => Some("normal"),
+            Self::Magic => Some("magic"),
+            Self::Rare => Some("rare"),
+            Self::Unique => Some("unique"),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn maps_every_known_header() {
+        let cases: &[(&str, ItemClass)] = &[
+            ("Stackable Currency", ItemClass::StackableCurrency),
+            ("Omen", ItemClass::Omen),
+            ("Essence", ItemClass::Essence),
+            ("Essences", ItemClass::Essence),
+            ("Soul Cores", ItemClass::SoulCore),
+            ("Runes", ItemClass::Rune),
+            ("Socketable", ItemClass::Rune),
+            ("Augment", ItemClass::Rune),
+            ("Distilled Emotions", ItemClass::DistilledEmotion),
+            ("Splinter", ItemClass::Splinter),
+            ("Catalysts", ItemClass::Catalyst),
+            ("Skill Gems", ItemClass::SkillGem),
+            ("Support Gems", ItemClass::SupportGem),
+            ("Uncut Skill Gems", ItemClass::UncutGem),
+            ("Uncut Support Gems", ItemClass::UncutGem),
+            ("Uncut Spirit Gems", ItemClass::UncutGem),
+            ("Waystones", ItemClass::Waystone),
+            ("Tablet", ItemClass::Tablet),
+            ("Precursor Tablets", ItemClass::Tablet),
+            ("Jewels", ItemClass::Jewel),
+            ("Life Flasks", ItemClass::LifeFlask),
+            ("Mana Flasks", ItemClass::ManaFlask),
+            ("Charms", ItemClass::Charm),
+            ("Relics", ItemClass::Relic),
+            ("Amulets", ItemClass::Amulet),
+            ("Rings", ItemClass::Ring),
+            ("Belts", ItemClass::Belt),
+            ("Body Armours", ItemClass::BodyArmour),
+            ("Helmets", ItemClass::Helmet),
+            ("Gloves", ItemClass::Gloves),
+            ("Boots", ItemClass::Boots),
+            ("Shields", ItemClass::Shield),
+            ("Bucklers", ItemClass::Buckler),
+            ("Foci", ItemClass::Focus),
+            ("Quivers", ItemClass::Quiver),
+            ("  helmets \r", ItemClass::Helmet),
+        ];
+        for (header, want) in cases {
+            assert_eq!(&ItemClass::from_header(header), want, "{header}");
+        }
+    }
+
+    #[test]
+    fn weapons_preserve_raw_header() {
+        for w in WEAPON_CLASSES {
+            assert_eq!(ItemClass::from_header(w), ItemClass::Weapon((*w).to_owned()));
+            assert!(ItemClass::from_header(w).is_weapon());
+        }
+        assert_eq!(ItemClass::from_header("Bow"), ItemClass::Weapon("Bow".into()));
+        assert_eq!(ItemClass::from_header("Staff"), ItemClass::Weapon("Staff".into()));
+        assert_eq!(ItemClass::from_header("Quarterstaff"), ItemClass::Weapon("Quarterstaff".into()));
+    }
+
+    #[test]
+    fn unknown_is_other() {
+        assert_eq!(ItemClass::from_header("Pinnacle Keys"), ItemClass::Other("Pinnacle Keys".into()));
+        assert!(!ItemClass::from_header("Rings").is_weapon());
+    }
+
+    #[test]
+    fn weapon_trade_categories() {
+        for w in WEAPON_CLASSES {
+            assert!(ItemClass::from_header(w).trade_category().is_some(), "{w} has no trade category");
+        }
+        assert_eq!(ItemClass::Weapon("Lances".into()).trade_category(), None);
+        assert_eq!(ItemClass::Other("x".into()).trade_category(), None);
+        assert_eq!(ItemClass::Other("Meta Gems".into()).trade_category(), Some("gem.metagem"));
+        assert_eq!(ItemClass::from_header("Talismans").trade_category(), Some("weapon.talisman"));
+        assert_eq!(ItemClass::Helmet.trade_category(), Some("armour.helmet"));
+    }
+
+    #[test]
+    fn every_class_has_category() {
+        let all = [
+            ItemClass::StackableCurrency,
+            ItemClass::Omen,
+            ItemClass::Essence,
+            ItemClass::SoulCore,
+            ItemClass::Rune,
+            ItemClass::Talisman,
+            ItemClass::DistilledEmotion,
+            ItemClass::Splinter,
+            ItemClass::Catalyst,
+            ItemClass::SkillGem,
+            ItemClass::SupportGem,
+            ItemClass::UncutGem,
+            ItemClass::Waystone,
+            ItemClass::Tablet,
+            ItemClass::Jewel,
+            ItemClass::LifeFlask,
+            ItemClass::ManaFlask,
+            ItemClass::Charm,
+            ItemClass::Relic,
+            ItemClass::Amulet,
+            ItemClass::Ring,
+            ItemClass::Belt,
+            ItemClass::BodyArmour,
+            ItemClass::Helmet,
+            ItemClass::Gloves,
+            ItemClass::Boots,
+            ItemClass::Shield,
+            ItemClass::Buckler,
+            ItemClass::Focus,
+            ItemClass::Quiver,
+        ];
+        for c in &all {
+            assert!(c.trade_category().is_some(), "{c:?}");
+            let _ = c.category(Rarity::Rare);
+        }
+    }
+
+    #[test]
+    fn categories() {
+        assert_eq!(ItemClass::StackableCurrency.category(Rarity::Currency), ItemCategory::Currency);
+        assert_eq!(ItemClass::Omen.category(Rarity::Unique), ItemCategory::Currency);
+        assert_eq!(ItemClass::SkillGem.category(Rarity::Gem), ItemCategory::Gem);
+        assert_eq!(ItemClass::UncutGem.category(Rarity::Currency), ItemCategory::Gem);
+        assert_eq!(ItemClass::Helmet.category(Rarity::Rare), ItemCategory::Equipment);
+        assert_eq!(ItemClass::Helmet.category(Rarity::Unique), ItemCategory::Unique);
+        assert_eq!(ItemClass::Jewel.category(Rarity::Unique), ItemCategory::Unique);
+        assert_eq!(ItemClass::Jewel.category(Rarity::Magic), ItemCategory::Jewel);
+        assert_eq!(ItemClass::Waystone.category(Rarity::Rare), ItemCategory::Waystone);
+        assert_eq!(ItemClass::Tablet.category(Rarity::Magic), ItemCategory::Tablet);
+        assert_eq!(ItemClass::LifeFlask.category(Rarity::Normal), ItemCategory::Flask);
+        assert_eq!(ItemClass::Charm.category(Rarity::Normal), ItemCategory::Charm);
+        assert_eq!(ItemClass::Relic.category(Rarity::Magic), ItemCategory::Relic);
+        assert_eq!(ItemClass::Relic.category(Rarity::Unique), ItemCategory::Unique);
+        assert_eq!(ItemClass::Weapon("Bows".into()).category(Rarity::Normal), ItemCategory::Equipment);
+        assert_eq!(ItemClass::Other("x".into()).category(Rarity::Currency), ItemCategory::Currency);
+        assert_eq!(ItemClass::Other("x".into()).category(Rarity::Gem), ItemCategory::Gem);
+        assert_eq!(ItemClass::Other("x".into()).category(Rarity::Normal), ItemCategory::Other);
+        assert_eq!(ItemClass::Other("x".into()).category(Rarity::Unique), ItemCategory::Unique);
+    }
+
+    #[test]
+    fn rarity_header() {
+        assert_eq!(Rarity::from_header("Rare"), Some(Rarity::Rare));
+        assert_eq!(Rarity::from_header("Normal"), Some(Rarity::Normal));
+        assert_eq!(Rarity::from_header("Magic"), Some(Rarity::Magic));
+        assert_eq!(Rarity::from_header("Unique"), Some(Rarity::Unique));
+        assert_eq!(Rarity::from_header("Currency"), Some(Rarity::Currency));
+        assert_eq!(Rarity::from_header("Gem"), Some(Rarity::Gem));
+        assert_eq!(Rarity::from_header("Quest"), Some(Rarity::Other));
+        assert_eq!(Rarity::from_header("Legendary"), None);
+        assert_eq!(Rarity::Rare.trade_option(), Some("rare"));
+        assert_eq!(Rarity::Normal.trade_option(), Some("normal"));
+        assert_eq!(Rarity::Magic.trade_option(), Some("magic"));
+        assert_eq!(Rarity::Unique.trade_option(), Some("unique"));
+        assert_eq!(Rarity::Gem.trade_option(), None);
     }
 }

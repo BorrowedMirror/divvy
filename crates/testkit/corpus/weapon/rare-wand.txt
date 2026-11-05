@@ -1,0 +1,16 @@
+Item Class: Wands
+Rarity: Rare
+Spirit Song
+Attuned Wand
+--------
+Requires: Level 65, 139 Int
+--------
+Item Level: 81
+--------
+Grants Skill: Level 19 Mana Drain
+--------
++3 to Level of all Lightning Spell Skills
+98% increased Spell Damage
+24% increased Cast Speed
+Gain 12% of Damage as Extra Lightning Damage
++90 to maximum Mana

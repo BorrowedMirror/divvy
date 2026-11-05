@@ -1,0 +1,17 @@
+Item Class: Life Flasks
+Rarity: Magic
+Concentrated Ultimate Life Flask of the Surgeon
+--------
+Quality: +20% (augmented)
+Recovers 1243 (augmented) Life over 3 Seconds
+Consumes 10 of 75 Charges on use
+Currently has 75 Charges
+--------
+Requires: Level 50
+--------
+Item Level: 81
+--------
+30% increased Amount Recovered
+23% chance to gain a Flask Charge when you deal a Critical Hit
+--------
+Right click to drink. Can only hold charges while in belt. Refill at Wells or by killing monsters.

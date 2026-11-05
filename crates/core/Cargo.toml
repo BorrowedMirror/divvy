@@ -22,3 +22,4 @@ thiserror.workspace = true
 insta.workspace = true
 pretty_assertions.workspace = true
 proptest.workspace = true
+toml.workspace = true

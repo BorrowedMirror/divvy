@@ -1,0 +1,16 @@
+Item Class: Rings
+Rarity: Rare
+Rapture Loop
+Ruby Ring
+--------
+Requires: Level 44
+--------
+Item Level: 79
+--------
++25% to Fire Resistance (implicit)
+--------
++61 to maximum Life
++35% to Cold Resistance
++29% to Lightning Resistance
++136 to Accuracy Rating
+Adds 6 to 13 Physical Damage to Attacks

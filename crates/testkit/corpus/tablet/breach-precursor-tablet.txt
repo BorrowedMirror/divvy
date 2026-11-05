@@ -1,0 +1,13 @@
+Item Class: Tablet
+Rarity: Magic
+Breach Precursor Tablet of the Hive
+--------
+Uses Remaining: 10
+--------
+Item Level: 79
+--------
+Your Maps contain an additional Breach (implicit)
+--------
+Breach Splinters dropped in your Maps have 30% chance to be duplicated
+--------
+Can be used in a completed Tower on your Atlas to influence surrounding Maps. Tablets are consumed once placed into a Tower.

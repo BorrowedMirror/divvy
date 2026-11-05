@@ -1,0 +1,20 @@
+Item Class: Skill Gems
+Rarity: Gem
+Spark
+--------
+Lightning, Spell, Projectile, Duration
+Level: 18
+Mana Cost: 31
+Cast Time: 0.70 sec
+Critical Hit Chance: 9.00%
+Effectiveness of Added Damage: 80%
+--------
+Requires: Level 82, 144 Int
+--------
+Launches a spray of sparking Projectiles that travel erratically along the ground until they hit an enemy or expire.
+--------
+Deals 4 to 75 Lightning Damage
+Fires 8 Projectiles
+Projectile duration is 2 seconds
+--------
+Place into an empty skill gem socket in the Skills Panel to gain this skill. Right click to remove from the Skills Panel.

@@ -1,0 +1,62 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "jewel"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": false,
+            "id": "explicit.stat_3645886926",
+            "value": {
+              "min": 12.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_2843538259",
+            "value": {
+              "min": 7.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_2073410902",
+            "value": {
+              "min": 5.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_1149888955",
+            "value": {
+              "min": 2.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Ruby"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

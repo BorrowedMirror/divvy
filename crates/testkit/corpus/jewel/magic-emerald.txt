@@ -1,0 +1,10 @@
+Item Class: Jewels
+Rarity: Magic
+Sharpshooter's Emerald of Celerity
+--------
+Item Level: 74
+--------
+12% increased Projectile Damage
+4% increased Attack Speed
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.

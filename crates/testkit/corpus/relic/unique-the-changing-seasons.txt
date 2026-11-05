@@ -1,0 +1,13 @@
+Item Class: Relics
+Rarity: Unique
+The Changing Seasons
+Seal Relic
+--------
+Item Level: 70
+--------
+Your Honour is restored by 25% when you defeat a Boss
+Rooms with Honour Shrines have an additional Shrine
+--------
+Each season brings its own trials.
+--------
+Place this item on any Relic Altar at the start of a Trial of the Sekhemas to apply its effects.

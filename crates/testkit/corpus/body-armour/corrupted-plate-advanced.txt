@@ -1,0 +1,28 @@
+Item Class: Body Armours
+Rarity: Rare
+Havoc Carapace
+Conqueror Plate
+--------
+Quality: +12% (augmented)
+Armour: 1104 (augmented)
+--------
+Requires: Level 65, 121 Str
+--------
+Sockets: S S S
+--------
+Item Level: 81
+--------
+20% increased Armour (rune)
+--------
++1 to Level of all Minion Skills (enchant)
+--------
+{ Prefix Modifier "Impenetrable" (Tier: 1) — Defences }
+95(91-100)% increased Armour
+{ Prefix Modifier "Rotund" (Tier: 2) — Life }
++164(150-174) to maximum Life
+{ Suffix Modifier "of the Kiln" (Tier: 3) — Elemental, Fire, Resistance }
++35(31-35)% to Fire Resistance
+{ Desecrated Suffix Modifier "of Ulaman" (Tier: 1) }
+5(4-6)% of Damage taken Recouped as Life
+--------
+Corrupted

@@ -184,3 +184,15 @@ Workstreams needing a new workspace dependency add it to the root `Cargo.toml`
   generated, plus `#% increased`<->`#% reduced` / `#% more`<->`#% less` (negate=true). The
   matcher should therefore extract unsigned numbers and apply `negate`.
   `base_in_magic_name` matches whole-word runs only, longest wins.
+- **A (core)**, additive only:
+  - New helpers: `item::WEAPON_CLASSES`, `ItemClass::{trade_category, is_weapon}`, `Rarity::{from_header, trade_option}`,
+    `matcher::extract_values`, `query::{widen_min, DEFAULT_ENABLED_STATS}`, `ExchangeRates::{rate, convert}`,
+    `pricing::{trim_outliers, TRIM_MIN_LISTINGS}`.
+  - `parser::looks_like_item` also accepts text starting with `Rarity: Gem` (meta gems have no `Item Class:` line;
+    they parse as `ItemClass::Other("Meta Gems")`, category `Gem`, trade category `gem.metagem`).
+  - `Item Class: Talismans` is a weapon (`Weapon("Talismans")`, `weapon.talisman`); `Augment` maps to `Rune`, refined to
+    `SoulCore` by base name. `Stackable Currency` is refined to `Essence`/`DistilledEmotion`/`Splinter`/`Catalyst`/`Omen`
+    by base name.
+  - Magic items keep the full name line in `base_type`; `StatMatcher::match_item` moves it to `name` and sets
+    `base_type` to the base found by `Catalog::base_in_magic_name`. Negated matches flip the sign of `Modifier::values`.
+  - `FilterSet::to_trade_query` always returns the search body; the `Exchange` route body is built by `kalandra-trade`.

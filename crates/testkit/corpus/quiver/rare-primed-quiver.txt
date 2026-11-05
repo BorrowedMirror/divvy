@@ -1,0 +1,15 @@
+Item Class: Quivers
+Rarity: Rare
+Kraken Fletch
+Primed Quiver
+--------
+Requires: Level 55
+--------
+Item Level: 79
+--------
+Adds 6 to 11 Physical Damage to Attacks (implicit)
+--------
++2 to Level of all Projectile Skills
+38% increased Projectile Damage
++74 to maximum Life
+18% increased Attack Speed

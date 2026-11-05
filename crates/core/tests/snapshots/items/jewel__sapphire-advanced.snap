@@ -1,0 +1,81 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: jewel
+category: jewel
+rarity: rare
+name: Dread Glimmer
+base_type: Sapphire
+item_level: 82
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: 15% increased Lightning Damage
+    template: "#% increased Lightning Damage"
+    kind: explicit
+    values:
+      - 15
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Arcing
+      tier: 1
+      ranges:
+        - min: 10
+          max: 15
+  - text: 4% increased Cast Speed
+    template: "#% increased Cast Speed"
+    kind: explicit
+    values:
+      - 4
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Surging
+      tier: 1
+      ranges:
+        - min: 2
+          max: 4
+  - text: 12% increased Mana Regeneration Rate
+    template: "#% increased Mana Regeneration Rate"
+    kind: explicit
+    values:
+      - 12
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Focus
+      tier: ~
+      ranges:
+        - min: 10
+          max: 15
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

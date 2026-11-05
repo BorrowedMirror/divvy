@@ -1,0 +1,18 @@
+Item Class: Charms
+Rarity: Magic
+Thawing Charm of the Hare
+--------
+Lasts 3.40 (augmented) Seconds
+Consumes 40 of 80 Charges on use
+Currently has 80 Charges
+Grants Immunity to Freeze
+--------
+Requires: Level 24
+--------
+Item Level: 66
+--------
+Used when you become Frozen (implicit)
+--------
+24% increased Duration
+--------
+Used automatically when condition is met. Can only hold charges while in belt. Refill at Wells or by killing monsters.

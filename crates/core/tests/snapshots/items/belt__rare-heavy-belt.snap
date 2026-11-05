@@ -1,0 +1,84 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: belt
+category: equipment
+rarity: rare
+name: Kraken Lash
+base_type: Heavy Belt
+item_level: 80
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 55
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: 19% increased Stun Threshold
+    template: "#% increased Stun Threshold"
+    kind: implicit
+    values:
+      - 19
+    stat_id: ~
+    advanced: ~
+  - text: +98 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 98
+    stat_id: ~
+    advanced: ~
+  - text: +142 to Armour
+    template: "+# to Armour"
+    kind: explicit
+    values:
+      - 142
+    stat_id: ~
+    advanced: ~
+  - text: +38% to Fire Resistance
+    template: "+#% to Fire Resistance"
+    kind: explicit
+    values:
+      - 38
+    stat_id: ~
+    advanced: ~
+  - text: 21% increased Flask Life Recovery rate
+    template: "#% increased Flask Life Recovery rate"
+    kind: explicit
+    values:
+      - 21
+    stat_id: ~
+    advanced: ~
+  - text: +27 to Strength
+    template: "+# to Strength"
+    kind: explicit
+    values:
+      - 27
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

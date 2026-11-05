@@ -1,0 +1,23 @@
+Item Class: Belts
+Rarity: Unique
+Headhunter
+Heavy Belt
+--------
+Requires: Level 60
+--------
+Item Level: 83
+--------
+{ Implicit Modifier — Defences }
+20(20-30)% increased Stun Threshold (implicit)
+--------
+{ Unique Modifier — Attribute }
++49(40-55) to Strength
+{ Unique Modifier — Attribute }
++47(40-55) to Dexterity
+{ Unique Modifier — Life }
++66(50-70) to maximum Life
+{ Unique Modifier }
+When you kill a Rare monster, you gain its Modifiers for 20 seconds
+--------
+"A man's soul rules from a cavern of bone, eats and drinks
+from the flesh of others, and seeks dominion over all."

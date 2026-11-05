@@ -1,0 +1,15 @@
+Item Class: One Hand Swords
+Rarity: Rare
+Blood Song
+Shortsword
+--------
+Physical Damage: 22-38 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.55
+--------
+Requires: Level 15, 22 Str, 22 Dex
+--------
+Item Level: 22
+--------
+71% increased Physical Damage
++31 to Accuracy Rating

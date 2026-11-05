@@ -1,0 +1,9 @@
+Item Class: Wands
+Rarity: Normal
+Withered Wand
+--------
+Requires: Level 1
+--------
+Item Level: 3
+--------
+Grants Skill: Level 1 Chaos Bolt

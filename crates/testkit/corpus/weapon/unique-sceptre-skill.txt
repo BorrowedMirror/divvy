@@ -1,0 +1,18 @@
+Item Class: Sceptres
+Rarity: Unique
+The Dark Defiler
+Rattling Sceptre
+--------
+Spirit: 100
+--------
+Requires: Level 52, 50 Str, 50 Int
+--------
+Item Level: 66
+--------
+Grants Skill: Level 16 Skeletal Warrior
+--------
++20 to Intelligence
+40% increased Spirit
+Minions deal 38% increased Damage
+--------
+The dead serve those who remember them.

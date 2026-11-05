@@ -1,0 +1,12 @@
+Item Class: Two Hand Axes
+Rarity: Normal
+Superior Splitting Greataxe
+--------
+Quality: +10% (augmented)
+Physical Damage: 22-39 (augmented)
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.10
+--------
+Requires: Level 6, 15 Str
+--------
+Item Level: 10

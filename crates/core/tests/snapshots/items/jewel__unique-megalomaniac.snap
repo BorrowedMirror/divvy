@@ -1,0 +1,60 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: jewel
+category: unique
+rarity: unique
+name: Megalomaniac
+base_type: Diamond
+item_level: 84
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties: []
+modifiers:
+  - text: Allocates Sturdy Mind
+    template: Allocates Sturdy Mind
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced: ~
+  - text: Allocates Heavy Frost
+    template: Allocates Heavy Frost
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced: ~
+  - text: Allocates Bleeding Out
+    template: Allocates Bleeding Out
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

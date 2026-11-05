@@ -1,0 +1,11 @@
+Item Class: Rings
+Rarity: Rare
+Topaz Ring
+--------
+Requires: Level 30
+--------
+Item Level: 68
+--------
++22% to Lightning Resistance (implicit)
+--------
+Unidentified

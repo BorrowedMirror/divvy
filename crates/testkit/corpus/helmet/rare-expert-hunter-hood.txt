@@ -1,0 +1,21 @@
+Item Class: Helmets
+Rarity: Rare
+Doom Visor
+Expert Hunter Hood
+--------
+Quality: +20% (augmented)
+Evasion Rating: 532 (augmented)
+--------
+Requires: Level 65, 87 Dex
+--------
+Sockets: S
+--------
+Item Level: 79
+--------
++12% to Cold Resistance (rune)
+--------
++81 to maximum Life
+74% increased Evasion Rating
++34% to Fire Resistance
++19% to Chaos Resistance
++92 to Accuracy Rating

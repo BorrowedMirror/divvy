@@ -1,0 +1,114 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: body_armour
+category: equipment
+rarity: rare
+name: Havoc Carapace
+base_type: Conqueror Plate
+item_level: 81
+quality: 12
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 3
+requirements:
+  level: 65
+  str: 121
+  dex: ~
+  int: ~
+stats:
+  armour: 1104
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Quality
+    value: +12%
+    augmented: true
+  - name: Armour
+    value: "1104"
+    augmented: true
+modifiers:
+  - text: 20% increased Armour
+    template: "#% increased Armour"
+    kind: rune
+    values:
+      - 20
+    stat_id: ~
+    advanced: ~
+  - text: +1 to Level of all Minion Skills
+    template: "+# to Level of all Minion Skills"
+    kind: enchant
+    values:
+      - 1
+    stat_id: ~
+    advanced: ~
+  - text: 95% increased Armour
+    template: "#% increased Armour"
+    kind: explicit
+    values:
+      - 95
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Impenetrable
+      tier: 1
+      ranges:
+        - min: 91
+          max: 100
+  - text: +164 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 164
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Rotund
+      tier: 2
+      ranges:
+        - min: 150
+          max: 174
+  - text: +35% to Fire Resistance
+    template: "+#% to Fire Resistance"
+    kind: explicit
+    values:
+      - 35
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Kiln
+      tier: 3
+      ranges:
+        - min: 31
+          max: 35
+  - text: 5% of Damage taken Recouped as Life
+    template: "#% of Damage taken Recouped as Life"
+    kind: desecrated
+    values:
+      - 5
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of Ulaman
+      tier: 1
+      ranges:
+        - min: 4
+          max: 6
+corrupted: true
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

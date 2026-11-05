@@ -1,0 +1,45 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: waystone
+category: waystone
+rarity: normal
+name: ~
+base_type: Waystone (Tier 10)
+item_level: 74
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: 10
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Waystone Tier
+    value: "10"
+    augmented: false
+modifiers: []
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

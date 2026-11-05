@@ -1,0 +1,20 @@
+Item Class: Rings
+Rarity: Rare
+Cataclysm Coil
+Sapphire Ring
+--------
+Requires: Level 52
+--------
+Item Level: 82
+--------
+{ Implicit Modifier — Elemental, Cold, Resistance }
++24(20-30)% to Cold Resistance (implicit)
+--------
+{ Prefix Modifier "Fecund" (Tier: 2) — Life }
++93(85-99) to maximum Life
+{ Prefix Modifier "Glinting" (Tier: 3) — Damage, Elemental, Cold, Attack }
+Adds 7(5-8) to 14(12-15) Cold damage to Attacks
+{ Suffix Modifier "of the Lightning" (Tier: 2) — Elemental, Lightning, Resistance }
++38(36-40)% to Lightning Resistance
+{ Fractured Suffix Modifier "of Tzteosh" (Tier: 1) — Elemental, Fire, Resistance }
++44(41-45)% to Fire Resistance

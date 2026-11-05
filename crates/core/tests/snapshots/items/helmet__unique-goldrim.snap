@@ -1,0 +1,73 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: helmet
+category: unique
+rarity: unique
+name: Goldrim
+base_type: Felt Cap
+item_level: 12
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: ~
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: 41
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Evasion Rating
+    value: "41"
+    augmented: true
+modifiers:
+  - text: +34 to Evasion Rating
+    template: "+# to Evasion Rating"
+    kind: explicit
+    values:
+      - 34
+    stat_id: ~
+    advanced: ~
+  - text: 10% increased Rarity of Items found
+    template: "#% increased Rarity of Items found"
+    kind: explicit
+    values:
+      - 10
+    stat_id: ~
+    advanced: ~
+  - text: +32% to all Elemental Resistances
+    template: "+#% to all Elemental Resistances"
+    kind: explicit
+    values:
+      - 32
+    stat_id: ~
+    advanced: ~
+  - text: Reflects 4 Physical Damage to Melee Attackers
+    template: "Reflects # Physical Damage to Melee Attackers"
+    kind: explicit
+    values:
+      - 4
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

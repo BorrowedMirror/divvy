@@ -1,0 +1,82 @@
+---
+source: crates/core/tests/corpus.rs
+expression: query
+---
+{
+  "query": {
+    "filters": {
+      "map_filters": {
+        "filters": {
+          "map_tier": {
+            "max": 15.0,
+            "min": 15.0
+          }
+        }
+      },
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "map.waystone"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": false,
+            "id": "explicit.stat_1820976362",
+            "value": {
+              "min": 23.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_841382131",
+            "value": {
+              "min": 18.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_1067789507",
+            "value": {}
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_3349532322",
+            "value": {
+              "min": 36.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_3168998540",
+            "value": {
+              "min": 1.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_2332823926",
+            "value": {
+              "min": 63.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Waystone (Tier 15)"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

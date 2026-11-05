@@ -1,0 +1,15 @@
+Item Class: Tablet
+Rarity: Rare
+Grim Crest
+Precursor Tablet
+--------
+Uses Remaining: 10
+--------
+Item Level: 80
+--------
+12% increased Quantity of Items found in your Maps
+19% increased Rarity of Items found in your Maps
+Rare Monsters in your Maps have 25% chance to have an additional Modifier
+8% increased Experience gain in your Maps
+--------
+Can be used in a completed Tower on your Atlas to influence surrounding Maps. Tablets are consumed once placed into a Tower.

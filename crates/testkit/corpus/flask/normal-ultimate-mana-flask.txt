@@ -1,0 +1,13 @@
+Item Class: Mana Flasks
+Rarity: Normal
+Ultimate Mana Flask
+--------
+Recovers 315 Mana over 2.80 Seconds
+Consumes 10 of 75 Charges on use
+Currently has 0 Charges
+--------
+Requires: Level 50
+--------
+Item Level: 65
+--------
+Right click to drink. Can only hold charges while in belt. Refill at Wells or by killing monsters.

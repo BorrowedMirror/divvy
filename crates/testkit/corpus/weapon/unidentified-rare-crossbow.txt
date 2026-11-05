@@ -1,0 +1,14 @@
+Item Class: Crossbows
+Rarity: Rare
+Tense Crossbow
+--------
+Physical Damage: 9-37
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.60
+Reload Time: 0.80
+--------
+Requires: Level 10, 13 Str, 13 Dex
+--------
+Item Level: 18
+--------
+Unidentified

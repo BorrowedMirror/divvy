@@ -1,0 +1,74 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: life_flask
+category: flask
+rarity: magic
+name: ~
+base_type: Abundant Greater Life Flask of the Medic
+item_level: 50
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 20
+  str: ~
+  dex: ~
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Recovers 465 Life over 3 Seconds
+    value: ""
+    augmented: false
+  - name: Consumes 10 of 85 (augmented) Charges on use
+    value: ""
+    augmented: false
+  - name: Currently has 85 Charges
+    value: ""
+    augmented: false
+modifiers:
+  - text: +15 to maximum Charges
+    template: "+# to maximum Charges"
+    kind: explicit
+    values:
+      - 15
+    stat_id: ~
+    advanced:
+      affix: prefix
+      name: Abundant
+      tier: 2
+      ranges:
+        - min: 14
+          max: 17
+  - text: Removes Bleeding on use
+    template: Removes Bleeding on use
+    kind: explicit
+    values: []
+    stat_id: ~
+    advanced:
+      affix: suffix
+      name: of the Medic
+      tier: 3
+      ranges: []
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: true
+raw: "[raw]"

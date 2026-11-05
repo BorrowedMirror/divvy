@@ -1,0 +1,18 @@
+Item Class: Boots
+Rarity: Rare
+Havoc Stride
+Dragonscale Boots
+--------
+Armour: 112 (augmented)
+Evasion Rating: 98 (augmented)
+--------
+Requires: Level 70, 62 Str, 62 Dex
+--------
+Item Level: 82
+--------
+{ Prefix Modifier "Cheetah's" (Tier: 2) — Speed }
+30(30-34)% increased Movement Speed
+{ Prefix Modifier "Vigorous" (Tier: 5) — Life }
++76(70-84) to maximum Life
+{ Suffix Modifier "of the Rainbow" (Tier: 4) — Elemental, Resistance }
++12(10-12)% to all Elemental Resistances

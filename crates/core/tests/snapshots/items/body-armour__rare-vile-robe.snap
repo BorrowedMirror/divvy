@@ -1,0 +1,90 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: body_armour
+category: equipment
+rarity: rare
+name: Soul Shroud
+base_type: Vile Robe
+item_level: 80
+quality: 20
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 2
+requirements:
+  level: 65
+  str: ~
+  dex: ~
+  int: 121
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: 412
+  spirit: ~
+  block_chance: ~
+  physical_dps: ~
+  elemental_dps: ~
+  total_dps: ~
+  attacks_per_second: ~
+  critical_hit_chance: ~
+properties:
+  - name: Quality
+    value: +20%
+    augmented: true
+  - name: Energy Shield
+    value: "412"
+    augmented: true
+modifiers:
+  - text: +14% to Lightning Resistance
+    template: "+#% to Lightning Resistance"
+    kind: rune
+    values:
+      - 14
+    stat_id: ~
+    advanced: ~
+  - text: 92% increased Energy Shield
+    template: "#% increased Energy Shield"
+    kind: explicit
+    values:
+      - 92
+    stat_id: ~
+    advanced: ~
+  - text: +71 to maximum Energy Shield
+    template: "+# to maximum Energy Shield"
+    kind: explicit
+    values:
+      - 71
+    stat_id: ~
+    advanced: ~
+  - text: +89 to maximum Life
+    template: "+# to maximum Life"
+    kind: explicit
+    values:
+      - 89
+    stat_id: ~
+    advanced: ~
+  - text: +37% to Cold Resistance
+    template: "+#% to Cold Resistance"
+    kind: explicit
+    values:
+      - 37
+    stat_id: ~
+    advanced: ~
+  - text: 18% increased Mana Regeneration Rate
+    template: "#% increased Mana Regeneration Rate"
+    kind: explicit
+    values:
+      - 18
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

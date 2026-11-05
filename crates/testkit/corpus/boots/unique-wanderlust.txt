@@ -1,0 +1,15 @@
+Item Class: Boots
+Rarity: Unique
+Wanderlust
+Wrapped Sandals
+--------
+Energy Shield: 25 (augmented)
+--------
+Item Level: 15
+--------
++5 to Dexterity
++20 to maximum Mana
+20% increased Movement Speed
+Immune to Freeze
+--------
+All the world is my home.

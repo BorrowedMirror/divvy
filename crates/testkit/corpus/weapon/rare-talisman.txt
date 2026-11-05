@@ -1,0 +1,17 @@
+Item Class: Talismans
+Rarity: Rare
+Bear Fang
+Wolf Talisman
+--------
+Physical Damage: 61-102 (augmented)
+Critical Hit Chance: 7.00%
+Attacks per Second: 1.30
+--------
+Requires: Level 52, 70 Str, 70 Int
+--------
+Item Level: 70
+--------
+Grants Skill: Level 15 Shapeshift: Wolf
+--------
+111% increased Physical Damage
++64 to maximum Life

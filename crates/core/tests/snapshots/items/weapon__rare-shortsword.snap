@@ -1,0 +1,66 @@
+---
+source: crates/core/tests/corpus.rs
+expression: item
+---
+class:
+  type: weapon
+  value: One Hand Swords
+category: equipment
+rarity: rare
+name: Blood Song
+base_type: Shortsword
+item_level: 22
+quality: ~
+stack_size: ~
+gem_level: ~
+waystone_tier: ~
+area_level: ~
+sockets: 0
+requirements:
+  level: 15
+  str: 22
+  dex: 22
+  int: ~
+stats:
+  armour: ~
+  evasion: ~
+  energy_shield: ~
+  spirit: ~
+  block_chance: ~
+  physical_dps: 46.5
+  elemental_dps: ~
+  total_dps: 46.5
+  attacks_per_second: 1.55
+  critical_hit_chance: 5
+properties:
+  - name: Physical Damage
+    value: 22-38
+    augmented: true
+  - name: Critical Hit Chance
+    value: 5.00%
+    augmented: false
+  - name: Attacks per Second
+    value: "1.55"
+    augmented: false
+modifiers:
+  - text: 71% increased Physical Damage
+    template: "#% increased Physical Damage"
+    kind: explicit
+    values:
+      - 71
+    stat_id: ~
+    advanced: ~
+  - text: +31 to Accuracy Rating
+    template: "+# to Accuracy Rating"
+    kind: explicit
+    values:
+      - 31
+    stat_id: ~
+    advanced: ~
+corrupted: false
+unidentified: false
+mirrored: false
+sanctified: false
+note: ~
+advanced: false
+raw: "[raw]"

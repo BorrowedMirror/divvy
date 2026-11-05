@@ -1,0 +1,15 @@
+Item Class: Jewels
+Rarity: Unique
+Megalomaniac
+Diamond
+--------
+Item Level: 84
+--------
+Allocates Sturdy Mind
+Allocates Heavy Frost
+Allocates Bleeding Out
+--------
+"Are you a god?" they asked.
+"No," he replied. "But that has never stopped me."
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.

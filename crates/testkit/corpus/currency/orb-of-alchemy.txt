@@ -1,0 +1,10 @@
+Item Class: Stackable Currency
+Rarity: Currency
+Orb of Alchemy
+--------
+Stack Size: 1/20
+--------
+Upgrades a Normal item to a Rare item with four random modifiers
+--------
+Right click this item then left click a Normal item to apply it.
+Shift click to unstack.
