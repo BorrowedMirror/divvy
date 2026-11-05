@@ -66,18 +66,16 @@ when only `WAYLAND_DISPLAY` / `XDG_SESSION_TYPE=wayland` is present, and X11 oth
 
 **Compositor shortcut fallback.** When global hotkeys are unavailable, bind a compositor
 shortcut to `kalandra --trigger` (price check) or `kalandra --trigger --pinned` (pinned
-panel). The command reads the running instance's pid from `kalandra.pid` in the cache
-directory and sends it `SIGUSR2` or `SIGUSR1` respectively (`pkill -USR2 kalandra` works too).
-If you set `KALANDRA_CONFIG_DIR` for the app, set it for the command as well. On the
-Wayland-native backend only `SIGUSR2` is handled at the moment, so use `kalandra --trigger`
-without `--pinned` there.
+panel). The command hands the request to the already running instance (kalandra allows only
+one instance per user) and exits; `pkill -USR2 kalandra` (price check) and `pkill -USR1
+kalandra` (pinned) work too.
 
 ## Configuration
 
 Settings live in `settings.toml` in the per-OS config directory (project directories for
 `au.nerv.kalandra`):
 
-| OS | Settings | Cache (pid file) | Logs |
+| OS | Settings | Cache | Logs |
 | --- | --- | --- | --- |
 | Windows | `%APPDATA%\nerv\kalandra\config\settings.toml` | `%LOCALAPPDATA%\nerv\kalandra\cache` | `%LOCALAPPDATA%\nerv\kalandra\data\logs` |
 | macOS | `~/Library/Application Support/au.nerv.kalandra/settings.toml` | `~/Library/Caches/au.nerv.kalandra` | `~/Library/Application Support/au.nerv.kalandra/logs` |

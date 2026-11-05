@@ -178,12 +178,18 @@ each `pub fn prepare(&tauri::WebviewWindow) -> Result<(), String>`. In addition:
 - `macos.rs`: `plugin()` (tauri-nspanel; must be registered before `setup`) and
   `set_click_through(&WebviewWindow, bool)`.
 
-CLI and signals (`src/cli.rs`, Unix): `kalandra [--trigger [--pinned]]`. A running instance
-writes its pid to `<cache_dir>/kalandra.pid`. `--trigger` reads it and sends `SIGUSR2`
-(price check) or, with `--pinned`, `SIGUSR1` (pinned price check), then exits; it exits 1 if
-the pid file is missing or corrupt. The app handles SIGUSR1/SIGUSR2 itself on the x11 (and
-macOS) backends; on the Wayland-native backend SIGUSR2 arrives through the backend's hotkey
-stream instead.
+CLI, single instance and signals (`src/cli.rs`, `src/lib.rs`): `kalandra [--trigger [--pinned]]`.
+`tauri-plugin-single-instance` keeps one instance per user on every OS. A second launch focuses
+the settings window; with `--trigger` (`--pinned`) it forwards a price check (pinned price check)
+to the running instance and exits 0, or exits 1 with "no running instance". There is no pid
+file. The app also handles `SIGUSR1` (pinned) and, unless the Wayland-native backend owns it,
+`SIGUSR2` (price check), so `pkill -USR2 kalandra` works too. Price-check triggers from any
+source are serialised (150 ms debounce; presses during a running copy are dropped with
+`IpcError { kind: "busy" }`). The single-instance plugin is skipped when the test hook is on.
+
+Test hook auth: when `KALANDRA_TEST_HOOK_TOKEN` is set, every connection must send
+`auth <token>` as its first line (no reply); lines starting with an HTTP method close the
+connection. Extra commands: `settings` (JSON) and `save_settings <json>` (`ok`/`err`).
 
 Bindings: `cargo xtask gen` (or `KALANDRA_UPDATE_BINDINGS=1 cargo test -p kalandra-desktop --test bindings`)
 regenerates `web/src/bindings.ts`; the `bindings` test fails when stale.
