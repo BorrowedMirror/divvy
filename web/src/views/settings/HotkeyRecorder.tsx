@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import type { Chord, HotkeyAction } from "../../bindings";
-import { commands } from "../../bindings";
-import { cx } from "../../components/ui";
-import { captureChord, formatChord, isUnbound, sameChord, UNBOUND } from "../../lib/chord";
+import type { Chord, HotkeyAction } from "@src/bindings";
+import { commands } from "@src/bindings";
+import { cx } from "@components/ui";
+import { captureChord, formatChord, isUnbound, sameChord, UNBOUND } from "@lib/chord";
 
 type Props = {
   action: HotkeyAction;

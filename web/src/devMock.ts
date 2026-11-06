@@ -1,6 +1,6 @@
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC } from "@tauri-apps/api/mocks";
-import { diagnostics, itemCopied, leagues, priceSummary, settings } from "./test/fixtures";
+import { diagnostics, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";
 
 /**
  * Browser-only preview (`pnpm dev` outside Tauri): fake the backend with fixtures so the views

@@ -1,11 +1,11 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
-import type { Settings_Serialize } from "../../bindings";
-import { useSettingsStore } from "../../stores/settings";
-import { ipcError, settings } from "../../test/fixtures";
-import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
-import { SettingsView } from "./SettingsView";
+import type { Settings_Serialize } from "@src/bindings";
+import { useSettingsStore } from "@stores/settings";
+import { ipcError, settings } from "@test/fixtures";
+import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "@test/ipc";
+import { SettingsView } from "@views/settings/SettingsView";
 
 async function mount(handlers: Parameters<typeof setupIpc>[0] = {}) {
   const calls = setupIpc(handlers);

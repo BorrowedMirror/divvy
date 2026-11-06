@@ -1,4 +1,4 @@
-import type { Listing_Serialize } from "../bindings";
+import type { Listing_Serialize } from "@src/bindings";
 
 export type ListingRow = { listing: Listing_Serialize; count: number };
 

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { callsOf, setupIpc } from "../test/ipc";
-import { useFitWindowHeight } from "./useFitWindowHeight";
+import { callsOf, setupIpc } from "@test/ipc";
+import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
 
 let observed: (() => void) | null = null;
 let height = 300;

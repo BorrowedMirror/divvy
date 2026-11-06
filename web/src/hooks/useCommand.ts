@@ -1,7 +1,7 @@
 import { Toast } from "@base-ui/react/toast";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import type { IpcError_Serialize } from "../bindings";
+import type { IpcError_Serialize } from "@src/bindings";
 
 type Result<T> = { status: "ok"; data: T } | { status: "error"; error: IpcError_Serialize };
 

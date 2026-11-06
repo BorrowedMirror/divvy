@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { CurrencyIcon, Price } from "../bindings";
-import { commands } from "../bindings";
-import { formatAmount } from "../lib/format";
-import { unwrap } from "../lib/ipc";
+import type { CurrencyIcon, Price } from "@src/bindings";
+import { commands } from "@src/bindings";
+import { formatAmount } from "@lib/format";
+import { unwrap } from "@lib/ipc";
 
 export const currencyIconsKey = ["currencyIcons"] as const;
 

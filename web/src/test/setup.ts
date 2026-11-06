@@ -2,10 +2,10 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { clearMocks } from "@tauri-apps/api/mocks";
 import { afterEach, beforeEach } from "vitest";
-import i18n from "../i18n";
-import { useOverlayStore } from "../stores/overlay";
-import { useSettingsStore } from "../stores/settings";
-import { useUpdateStore } from "../stores/update";
+import i18n from "@i18n/index";
+import { useOverlayStore } from "@stores/overlay";
+import { useSettingsStore } from "@stores/settings";
+import { useUpdateStore } from "@stores/update";
 
 // jsdom gaps that Base UI's floating/positioning code touches.
 class ResizeObserverStub {

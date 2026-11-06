@@ -1,4 +1,4 @@
-import glyphUrl from "../assets/rkl-glyph.svg";
+import glyphUrl from "@assets/rkl-glyph.svg";
 
 /** The Chaos Claw glyph (assets/brand). Decorative: the adjacent heading names the screen. */
 export function BrandMark({ size = 24 }: { size?: number }) {

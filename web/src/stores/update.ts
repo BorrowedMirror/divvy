@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { UpdateAvailable_Serialize } from "../bindings";
+import type { UpdateAvailable_Serialize } from "@src/bindings";
 
 export type UpdateStore = {
   /** Latest `update-available` payload. */

@@ -1,4 +1,4 @@
-import type { Chord, KeyModifier } from "../bindings";
+import type { Chord, KeyModifier } from "@src/bindings";
 
 const MODIFIER_CODES = new Set([
   "ControlLeft",

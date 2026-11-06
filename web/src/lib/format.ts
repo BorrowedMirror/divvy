@@ -1,5 +1,5 @@
-import type { Price } from "../bindings";
-import i18n from "../i18n";
+import type { Price } from "@src/bindings";
+import i18n from "@i18n/index";
 
 /** Locale for `Intl` formatting: the active UI language unless a caller passes one. */
 export function activeLocale(): string {

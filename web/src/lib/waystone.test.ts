@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { flagFor, toggleFlag, verdictFor } from "./waystone";
+import { flagFor, toggleFlag, verdictFor } from "@lib/waystone";
 
 const flags = { "Monsters fire # additional Projectiles": "danger", "#% increased Pack Size in Map": "good" } as const;
 

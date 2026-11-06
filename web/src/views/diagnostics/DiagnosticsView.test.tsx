@@ -1,10 +1,10 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
-import i18n from "../../i18n";
-import { diagnostics } from "../../test/fixtures";
-import { fail, renderWithProviders, setupIpc } from "../../test/ipc";
-import { DiagnosticsView, buildReport, guidanceFor } from "./DiagnosticsView";
+import i18n from "@i18n/index";
+import { diagnostics } from "@test/fixtures";
+import { fail, renderWithProviders, setupIpc } from "@test/ipc";
+import { DiagnosticsView, buildReport, guidanceFor } from "@views/diagnostics/DiagnosticsView";
 
 describe("DiagnosticsView", () => {
   test("renders facts, capability checklist, guidance and errors", async () => {

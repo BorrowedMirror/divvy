@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { priceSummary } from "../test/fixtures";
-import { groupBySeller, ungrouped } from "./listings";
+import { priceSummary } from "@test/fixtures";
+import { groupBySeller, ungrouped } from "@lib/listings";
 
 test("groupBySeller keeps each seller's first listing with a count and never merges unknown sellers", () => {
   const [base] = priceSummary().listings;

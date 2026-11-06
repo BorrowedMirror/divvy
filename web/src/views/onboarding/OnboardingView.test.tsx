@@ -1,10 +1,10 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import type { PermissionInfo_Serialize, PermissionReport_Serialize, Settings_Serialize } from "../../bindings";
-import { PERMISSION_POLL_MS, permissionPollInterval } from "../../hooks/queries";
-import { callsOf, emitEvent, fail, renderWithProviders, setupIpc } from "../../test/ipc";
-import { OnboardingView, isBlocked } from "./OnboardingView";
+import type { PermissionInfo_Serialize, PermissionReport_Serialize, Settings_Serialize } from "@src/bindings";
+import { PERMISSION_POLL_MS, permissionPollInterval } from "@hooks/queries";
+import { callsOf, emitEvent, fail, renderWithProviders, setupIpc } from "@test/ipc";
+import { OnboardingView, isBlocked } from "@views/onboarding/OnboardingView";
 
 const URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_";
 

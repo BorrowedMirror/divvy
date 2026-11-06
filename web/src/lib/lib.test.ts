@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { filterSet, settings } from "../test/fixtures";
-import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from "./chord";
-import i18n from "../i18n";
-import { activeLocale, ageOf, formatAge, formatAmount, formatDateTime, formatPrice } from "./format";
-import { IpcFailure, toIpcError, unwrap } from "./ipc";
-import { rewiden, rewidenStat, widenValue } from "./rewiden";
-import { looksLikeEmail, validateSettings } from "./validate";
+import { filterSet, settings } from "@test/fixtures";
+import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from "@lib/chord";
+import i18n from "@i18n/index";
+import { activeLocale, ageOf, formatAge, formatAmount, formatDateTime, formatPrice } from "@lib/format";
+import { IpcFailure, toIpcError, unwrap } from "@lib/ipc";
+import { rewiden, rewidenStat, widenValue } from "@lib/rewiden";
+import { looksLikeEmail, validateSettings } from "@lib/validate";
 
 const key = (code: string, mods: Partial<Record<"ctrlKey" | "altKey" | "shiftKey" | "metaKey", boolean>> = {}) => ({
   code,
@@ -118,7 +118,7 @@ describe("chord capture", () => {
 
 describe("unbound chords", () => {
   test("never clash and are recognised", async () => {
-    const { UNBOUND, isUnbound, sameChord } = await import("./chord");
+    const { UNBOUND, isUnbound, sameChord } = await import("@lib/chord");
     expect(isUnbound(UNBOUND)).toBe(true);
     expect(isUnbound({ modifiers: ["ctrl"], key: "KeyD" })).toBe(false);
     expect(sameChord(UNBOUND, { modifiers: [], key: "" })).toBe(false);

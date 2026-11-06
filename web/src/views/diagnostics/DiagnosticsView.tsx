@@ -1,9 +1,9 @@
 import { Toast } from "@base-ui/react/toast";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import type { Capabilities, Diagnostics_Serialize } from "../../bindings";
-import { Button, cx } from "../../components/ui";
-import { useDiagnostics } from "../../hooks/queries";
+import type { Capabilities, Diagnostics_Serialize } from "@src/bindings";
+import { Button, cx } from "@components/ui";
+import { useDiagnostics } from "@hooks/queries";
 
 export const CAPABILITY_KEYS = [
   "window_tracking",

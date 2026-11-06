@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Settings_Serialize } from "../bindings";
+import type { Settings_Serialize } from "@src/bindings";
 
 export type SettingsStore = {
   /** Last settings known to be persisted by the backend. */

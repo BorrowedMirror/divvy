@@ -1,4 +1,4 @@
-import type { ModFlag } from "../bindings";
+import type { ModFlag } from "@src/bindings";
 
 export type Flags = Partial<Record<string, ModFlag>>;
 

@@ -5,10 +5,10 @@
  */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import type en from "./locales/en/translation.json";
-import { LANGUAGES, type LanguageCode } from "./languages";
+import type en from "@i18n/locales/en/translation.json";
+import { LANGUAGES, type LanguageCode } from "@i18n/languages";
 
-export { LANGUAGES, type LanguageCode } from "./languages";
+export { LANGUAGES, type LanguageCode } from "@i18n/languages";
 
 type Tree = { [k: string]: string | Tree };
 export type Messages = typeof en;

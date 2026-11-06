@@ -1,16 +1,16 @@
 import { Toast } from "@base-ui/react/toast";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { IpcError_Serialize, ListingColumn, Listing_Serialize, PriceSummary_Serialize } from "../../bindings";
-import { commands } from "../../bindings";
-import { ExternalIcon } from "../../components/icons";
-import { PriceTag, useCurrencyIcons } from "../../components/PriceTag";
-import { useCommand } from "../../hooks/useCommand";
-import { cx } from "../../components/ui";
-import { useSettingsQuery } from "../../hooks/queries";
-import type { Age } from "../../lib/format";
-import { ageOf, formatAge, formatDateTime } from "../../lib/format";
-import { groupBySeller, ungrouped } from "../../lib/listings";
+import type { IpcError_Serialize, ListingColumn, Listing_Serialize, PriceSummary_Serialize } from "@src/bindings";
+import { commands } from "@src/bindings";
+import { ExternalIcon } from "@components/icons";
+import { PriceTag, useCurrencyIcons } from "@components/PriceTag";
+import { useCommand } from "@hooks/useCommand";
+import { cx } from "@components/ui";
+import { useSettingsQuery } from "@hooks/queries";
+import type { Age } from "@lib/format";
+import { ageOf, formatAge, formatDateTime } from "@lib/format";
+import { groupBySeller, ungrouped } from "@lib/listings";
 
 export function Results({ summary, now: nowProp }: { summary: PriceSummary_Serialize; now?: number }) {
   const { t } = useTranslation();

@@ -9,8 +9,8 @@ import type {
   PriceSummary_Serialize,
   RangeFilter_Serialize,
   StatFilter_Serialize,
-} from "../bindings";
-import { rewiden } from "../lib/rewiden";
+} from "@src/bindings";
+import { rewiden } from "@lib/rewiden";
 
 export type Phase = "idle" | "loading" | "ready" | "error";
 

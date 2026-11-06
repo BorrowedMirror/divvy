@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
-import { commands } from "../bindings";
+import { commands } from "@src/bindings";
 
 /**
  * Keep the (Tauri) window exactly as tall as `ref`'s content: measures it with a

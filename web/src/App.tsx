@@ -5,16 +5,16 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { commands, events } from "./bindings";
-import { createQueryClient, keys, useSettingsQuery } from "./hooks/queries";
-import { useTauriEvent } from "./hooks/useTauriEvent";
-import i18n, { supportedLanguage } from "./i18n";
-import { type Route, routeFromHash } from "./route";
-import { DiagnosticsView } from "./views/diagnostics/DiagnosticsView";
-import { OnboardingView } from "./views/onboarding/OnboardingView";
-import { OverlayView } from "./views/overlay/OverlayView";
-import { SettingsView } from "./views/settings/SettingsView";
-import { UpdateBanner, UpdateSync } from "./views/update/UpdateBanner";
+import { commands, events } from "@src/bindings";
+import { createQueryClient, keys, useSettingsQuery } from "@hooks/queries";
+import { useTauriEvent } from "@hooks/useTauriEvent";
+import i18n, { supportedLanguage } from "@i18n/index";
+import { type Route, routeFromHash } from "@src/route";
+import { DiagnosticsView } from "@views/diagnostics/DiagnosticsView";
+import { OnboardingView } from "@views/onboarding/OnboardingView";
+import { OverlayView } from "@views/overlay/OverlayView";
+import { SettingsView } from "@views/settings/SettingsView";
+import { UpdateBanner, UpdateSync } from "@views/update/UpdateBanner";
 
 /** Keeps the settings query in sync with `settings-changed` and applies language + theme. */
 function SettingsSync() {

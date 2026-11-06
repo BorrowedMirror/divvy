@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import type { ParsedItem_Serialize, Rarity } from "../../bindings";
-import { cx } from "../../components/ui";
+import type { ParsedItem_Serialize, Rarity } from "@src/bindings";
+import { cx } from "@components/ui";
 
 const RARITY_CLASS: Record<Rarity, string> = {
   normal: "text-rarity-normal",

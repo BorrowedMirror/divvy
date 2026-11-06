@@ -1,4 +1,4 @@
-import type { FilterSet_Serialize, StatFilter_Serialize } from "../bindings";
+import type { FilterSet_Serialize, StatFilter_Serialize } from "@src/bindings";
 
 /**
  * Local mirror of `FilterSet::rewiden` (crates/core/src/query.rs).

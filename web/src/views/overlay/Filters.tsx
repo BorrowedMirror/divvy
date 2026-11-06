@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
-import type { FilterSet_Serialize, ParsedItem_Serialize } from "../../bindings";
+import type { FilterSet_Serialize, ParsedItem_Serialize } from "@src/bindings";
 import {
   CheckboxField,
   NumberInput,
   SelectField,
   cx,
-} from "../../components/ui";
-import { type RangeKey, useOverlayStore } from "../../stores/overlay";
+} from "@components/ui";
+import { type RangeKey, useOverlayStore } from "@stores/overlay";
 
 function formatValues(values: (number | null)[]): string {
   return values.filter((v): v is number => v !== null).join(" / ");

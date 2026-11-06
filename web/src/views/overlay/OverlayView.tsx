@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "../../bindings";
-import { commands, events } from "../../bindings";
-import { CloseIcon, GearIcon, PinIcon } from "../../components/icons";
-import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "../../components/ui";
-import { useLeagues, useQueryPrice, useSettingsQuery } from "../../hooks/queries";
-import { useAutoHide } from "../../hooks/useAutoHide";
-import { useCommand } from "../../hooks/useCommand";
-import { useCountdown } from "../../hooks/useCountdown";
-import { useTauriEvent } from "../../hooks/useTauriEvent";
-import { formatChord, isUnbound } from "../../lib/chord";
-import { toIpcError } from "../../lib/ipc";
-import { useOverlayStore } from "../../stores/overlay";
-import { MiscFilters, StatFilters } from "./Filters";
-import { ItemHeader } from "./ItemHeader";
-import { ErrorNotice, Results } from "./Results";
-import { useFitWindowHeight } from "../../hooks/useFitWindowHeight";
-import { ItemLinks } from "./ItemLinks";
-import { WaystoneMods } from "./WaystoneMods";
+import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "@src/bindings";
+import { commands, events } from "@src/bindings";
+import { CloseIcon, GearIcon, PinIcon } from "@components/icons";
+import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "@components/ui";
+import { useLeagues, useQueryPrice, useSettingsQuery } from "@hooks/queries";
+import { useAutoHide } from "@hooks/useAutoHide";
+import { useCommand } from "@hooks/useCommand";
+import { useCountdown } from "@hooks/useCountdown";
+import { useTauriEvent } from "@hooks/useTauriEvent";
+import { formatChord, isUnbound } from "@lib/chord";
+import { toIpcError } from "@lib/ipc";
+import { useOverlayStore } from "@stores/overlay";
+import { MiscFilters, StatFilters } from "@views/overlay/Filters";
+import { ItemHeader } from "@views/overlay/ItemHeader";
+import { ErrorNotice, Results } from "@views/overlay/Results";
+import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
+import { ItemLinks } from "@views/overlay/ItemLinks";
+import { WaystoneMods } from "@views/overlay/WaystoneMods";
 
 /**
  * Runs `query_price`, discarding responses that a newer query (or a `price-failed` event, via

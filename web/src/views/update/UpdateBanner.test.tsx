@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
-import { App } from "../../App";
-import { useUpdateStore } from "../../stores/update";
-import { ipcError } from "../../test/fixtures";
-import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
-import { UpdateBanner } from "./UpdateBanner";
+import { App } from "@src/App";
+import { useUpdateStore } from "@stores/update";
+import { ipcError } from "@test/fixtures";
+import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "@test/ipc";
+import { UpdateBanner } from "@views/update/UpdateBanner";
 
 const update = { version: "0.2.0", notes: "Faster price checks.", date: "2026-11-01T00:00:00Z" };
 

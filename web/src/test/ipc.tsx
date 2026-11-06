@@ -3,10 +3,10 @@ import type { ReactElement } from "react";
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC } from "@tauri-apps/api/mocks";
 import { act } from "react";
-import { AppProviders } from "../App";
-import { createQueryClient } from "../hooks/queries";
-import type { Chord, HotkeyAction, Settings_Serialize } from "../bindings";
-import { diagnostics, leagues, settings } from "./fixtures";
+import { AppProviders } from "@src/App";
+import { createQueryClient } from "@hooks/queries";
+import type { Chord, HotkeyAction, Settings_Serialize } from "@src/bindings";
+import { diagnostics, leagues, settings } from "@test/fixtures";
 
 export type Call = { cmd: string; args: Record<string, unknown> | undefined };
 type Handler = (args: Record<string, unknown> | undefined) => unknown;

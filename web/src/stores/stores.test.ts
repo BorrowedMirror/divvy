@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { filterSet, ipcError, itemCopied, priceSummary, settings } from "../test/fixtures";
-import { useOverlayStore } from "./overlay";
-import { isDirty, useSettingsStore } from "./settings";
+import { filterSet, ipcError, itemCopied, priceSummary, settings } from "@test/fixtures";
+import { useOverlayStore } from "@stores/overlay";
+import { isDirty, useSettingsStore } from "@stores/settings";
 
 describe("overlay store", () => {
   const s = () => useOverlayStore.getState();

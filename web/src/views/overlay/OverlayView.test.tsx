@@ -1,11 +1,11 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
-import { useOverlayStore } from "../../stores/overlay";
-import { filterSet, ipcError, itemCopied, parsedItem, priceSummary, settings } from "../../test/fixtures";
-import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
-import { cardPosition, OverlayView } from "./OverlayView";
-import { Results } from "./Results";
+import { useOverlayStore } from "@stores/overlay";
+import { filterSet, ipcError, itemCopied, parsedItem, priceSummary, settings } from "@test/fixtures";
+import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "@test/ipc";
+import { cardPosition, OverlayView } from "@views/overlay/OverlayView";
+import { Results } from "@views/overlay/Results";
 
 async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
   const calls = setupIpc({ query_price: () => priceSummary(), ...handlers });

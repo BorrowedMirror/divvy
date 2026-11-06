@@ -1,9 +1,9 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test } from "vitest";
-import { priceSummary, settings } from "../../test/fixtures";
-import { callsOf, renderWithProviders, setupIpc } from "../../test/ipc";
-import { Results } from "./Results";
+import { priceSummary, settings } from "@test/fixtures";
+import { callsOf, renderWithProviders, setupIpc } from "@test/ipc";
+import { Results } from "@views/overlay/Results";
 
 const [first] = priceSummary().listings;
 if (!first) throw new Error("fixture has listings");

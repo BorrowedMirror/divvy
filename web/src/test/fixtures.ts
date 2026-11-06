@@ -7,7 +7,7 @@ import type {
   ParsedItem_Serialize,
   PriceSummary_Serialize,
   Settings_Serialize,
-} from "../bindings";
+} from "@src/bindings";
 
 export function parsedItem(overrides: Partial<ParsedItem_Serialize> = {}): ParsedItem_Serialize {
   return {

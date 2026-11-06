@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: { tsconfigPaths: true },
   clearScreen: false,
   server: { port: 5173, strictPort: true },
   envPrefix: ["VITE_", "TAURI_ENV_"],

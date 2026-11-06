@@ -1,11 +1,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test } from "vitest";
-import { App } from "./App";
-import i18n from "./i18n";
-import { routeFromHash } from "./route";
-import { settings } from "./test/fixtures";
-import { callsOf, emitEvent, flush, setupIpc } from "./test/ipc";
+import { App } from "@src/App";
+import i18n from "@i18n/index";
+import { routeFromHash } from "@src/route";
+import { settings } from "@test/fixtures";
+import { callsOf, emitEvent, flush, setupIpc } from "@test/ipc";
 
 test("routeFromHash", () => {
   expect(routeFromHash("#/overlay")).toBe("overlay");

@@ -1,4 +1,4 @@
-import type { IpcError_Serialize } from "../bindings";
+import type { IpcError_Serialize } from "@src/bindings";
 
 /** Error thrown by `unwrap` so TanStack Query / callers get a typed IPC error. */
 export class IpcFailure extends Error {

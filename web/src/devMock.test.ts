@@ -1,8 +1,8 @@
 import { listen } from "@tauri-apps/api/event";
 import { expect, test, vi } from "vitest";
-import { commands } from "./bindings";
-import { installDevMock } from "./devMock";
-import { diagnostics, filterSet, itemCopied, leagues, priceSummary, settings } from "./test/fixtures";
+import { commands } from "@src/bindings";
+import { installDevMock } from "@src/devMock";
+import { diagnostics, filterSet, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";
 
 test("dev mock answers every command from fixtures", async () => {
   installDevMock("settings");

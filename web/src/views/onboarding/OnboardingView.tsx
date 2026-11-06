@@ -1,11 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "../../bindings";
-import { BrandMark } from "../../components/BrandMark";
-import { Button, cx } from "../../components/ui";
-import { keys, usePermissions, useRequestPermission, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
-import { toIpcError } from "../../lib/ipc";
+import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "@src/bindings";
+import { BrandMark } from "@components/BrandMark";
+import { Button, cx } from "@components/ui";
+import { keys, usePermissions, useRequestPermission, useSaveSettings, useSettingsQuery } from "@hooks/queries";
+import { toIpcError } from "@lib/ipc";
 
 /** Example compositor bindings for `rkl --trigger` (code, not translated). */
 export const TRIGGER_EXAMPLES = [

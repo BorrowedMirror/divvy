@@ -15,19 +15,19 @@ import type {
   Settings_Serialize,
   Theme,
   ModFlag,
-} from "../../bindings";
-import { commands, events } from "../../bindings";
-import { BrandMark } from "../../components/BrandMark";
-import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
-import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
-import { useTauriEvent } from "../../hooks/useTauriEvent";
-import { LANGUAGES } from "../../i18n";
-import { toIpcError } from "../../lib/ipc";
-import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "../../lib/validate";
-import { isDirty, useSettingsStore } from "../../stores/settings";
-import { HotkeyRecorder } from "./HotkeyRecorder";
-import { toggleFlag } from "../../lib/waystone";
-import { unwrap } from "../../lib/ipc";
+} from "@src/bindings";
+import { commands, events } from "@src/bindings";
+import { BrandMark } from "@components/BrandMark";
+import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "@components/ui";
+import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "@hooks/queries";
+import { useTauriEvent } from "@hooks/useTauriEvent";
+import { LANGUAGES } from "@i18n/index";
+import { toIpcError } from "@lib/ipc";
+import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "@lib/validate";
+import { isDirty, useSettingsStore } from "@stores/settings";
+import { HotkeyRecorder } from "@views/settings/HotkeyRecorder";
+import { toggleFlag } from "@lib/waystone";
+import { unwrap } from "@lib/ipc";
 
 type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };

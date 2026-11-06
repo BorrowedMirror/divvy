@@ -1,13 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
-import "./index.css";
-import { routeFromHash } from "./route";
+import { App } from "@src/App";
+import "@src/index.css";
+import { routeFromHash } from "@src/route";
 
 async function boot() {
   // Plain-browser dev preview: no Tauri runtime, so fake the backend with fixtures.
   if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window)) {
-    const { installDevMock } = await import("./devMock");
+    const { installDevMock } = await import("@src/devMock");
     installDevMock(routeFromHash(window.location.hash));
   }
   const root = document.getElementById("root");

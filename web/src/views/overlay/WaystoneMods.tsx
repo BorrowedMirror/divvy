@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
-import type { ModFlag, ParsedItem_Serialize } from "../../bindings";
-import { commands } from "../../bindings";
-import { cx } from "../../components/ui";
-import { useCommand } from "../../hooks/useCommand";
-import { useSettingsQuery } from "../../hooks/queries";
-import { type Flags, flagFor, toggleFlag, verdictFor } from "../../lib/waystone";
+import type { ModFlag, ParsedItem_Serialize } from "@src/bindings";
+import { commands } from "@src/bindings";
+import { cx } from "@components/ui";
+import { useCommand } from "@hooks/useCommand";
+import { useSettingsQuery } from "@hooks/queries";
+import { type Flags, flagFor, toggleFlag, verdictFor } from "@lib/waystone";
 
 const FLAGS: ModFlag[] = ["danger", "warn", "good"];
 
