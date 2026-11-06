@@ -1,10 +1,11 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
+
 import { useOverlayStore } from "@stores/overlay";
 import { filterSet, ipcError, itemCopied, parsedItem, priceSummary, settings } from "@test/fixtures";
 import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "@test/ipc";
-import { cardPosition, OverlayView } from "@views/overlay/OverlayView";
+import { OverlayView, cardPosition } from "@views/overlay/OverlayView";
 import { Results } from "@views/overlay/Results";
 
 async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
@@ -51,11 +52,18 @@ describe("OverlayView", () => {
   test("only the item links ticked in settings are shown", async () => {
     setupIpc({
       get_overlay_snapshot: () => itemCopied(),
-      get_settings: () => settings({ overlay: { ...settings().overlay, links: { poe2db: false, wiki: true, craft_of_exile: false } } }),
+      get_settings: () =>
+        settings({ overlay: { ...settings().overlay, links: { poe2db: false, wiki: true, craft_of_exile: false } } }),
     });
     renderWithProviders(<OverlayView />);
     const links = await screen.findByTestId("item-links");
-    await waitFor(() => expect(within(links).getAllByRole("button").map((b) => b.textContent)).toEqual(["Wiki"]));
+    await waitFor(() =>
+      expect(
+        within(links)
+          .getAllByRole("button")
+          .map((b) => b.textContent),
+      ).toEqual(["Wiki"]),
+    );
   });
 
   test("waystones show a verdict and flag mods from the panel", async () => {
@@ -77,24 +85,38 @@ describe("OverlayView", () => {
     const section = await screen.findByTestId("waystone-mods");
     expect(within(section).getByTestId("waystone-verdict")).toHaveAttribute("data-kind", "danger");
     expect(within(section).getByText("Don't run: 1 dangerous mod")).toBeInTheDocument();
-    expect(within(section).getAllByRole("listitem").map((r) => r.dataset.flag)).toEqual(["danger", "good", "none"]);
+    expect(
+      within(section)
+        .getAllByRole("listitem")
+        .map((r) => r.dataset.flag),
+    ).toEqual(["danger", "good", "none"]);
     await user.click(within(section).getByRole("button", { name: "Flag “Monsters have 41% increased Life” as Warn" }));
     await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
-    const saved = callsOf(calls, "save_settings")[0]?.args as { settings: { waystone: { flags: Record<string, string> } } };
+    const saved = callsOf(calls, "save_settings")[0]?.args as {
+      settings: { waystone: { flags: Record<string, string> } };
+    };
     expect(saved.settings.waystone.flags["Monsters have #% increased Life"]).toBe("warn");
     await user.click(within(section).getByRole("button", { name: "Edit flags" }));
     expect(callsOf(calls, "open_settings_tab")[0]?.args).toEqual({ tab: "waystones" });
   });
 
   test("dragging the header reports start, moves and end; Rust moves the card", async () => {
-    const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 100, y: 50 }), drag_card: () => null });
+    const calls = setupIpc({
+      get_overlay_snapshot: () => null,
+      get_overlay_layout: () => ({ cover: true, x: 100, y: 50 }),
+      drag_card: () => null,
+    });
     renderWithProviders(<OverlayView />);
     await screen.findByTestId("overlay-backdrop");
     const handle = screen.getByTestId("drag-handle");
     fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
     fireEvent.pointerMove(handle, { pointerId: 1 });
     fireEvent.pointerUp(handle, { pointerId: 1 });
-    expect(callsOf(calls, "drag_card").map((c) => c.args)).toEqual([{ phase: "start" }, { phase: "move" }, { phase: "end" }]);
+    expect(callsOf(calls, "drag_card").map((c) => c.args)).toEqual([
+      { phase: "start" },
+      { phase: "move" },
+      { phase: "end" },
+    ]);
     await emitEvent("overlay-layout", { cover: true, x: 140, y: 60 });
     await waitFor(() => expect(screen.getByTestId("overlay-card").style.left).toBe("140px"));
   });
@@ -112,7 +134,9 @@ describe("OverlayView", () => {
     const user = userEvent.setup();
     const calls = setupIpc({
       get_overlay_snapshot: () =>
-        itemCopied({ filters: filterSet({ name: null, rarity: "unique", unique_candidates: ["Andvarius", "Ventor's Gamble"] }) }),
+        itemCopied({
+          filters: filterSet({ name: null, rarity: "unique", unique_candidates: ["Andvarius", "Ventor's Gamble"] }),
+        }),
       query_price: () => priceSummary(),
     });
     renderWithProviders(<OverlayView />);
@@ -120,13 +144,17 @@ describe("OverlayView", () => {
     expect(within(group).getByRole("button", { name: "Unidentified" })).toHaveAttribute("aria-pressed", "true");
     await user.click(within(group).getByRole("button", { name: "Andvarius" }));
     await waitFor(() => expect(callsOf(calls, "query_price").length).toBeGreaterThanOrEqual(2));
-    const last = callsOf(calls, "query_price").at(-1)?.args as { filters: { name: string; misc: { identified: boolean | null } } };
+    const last = callsOf(calls, "query_price").at(-1)?.args as {
+      filters: { name: string; misc: { identified: boolean | null } };
+    };
     expect(last.filters.name).toBe("Andvarius");
     expect(last.filters.misc.identified).toBeNull();
     expect(within(group).getByRole("button", { name: "Andvarius" })).toHaveAttribute("aria-pressed", "true");
     await user.click(within(group).getByRole("button", { name: "Unidentified" }));
     await waitFor(() => {
-      const again = callsOf(calls, "query_price").at(-1)?.args as { filters: { name: string | null; misc: { identified: boolean | null } } };
+      const again = callsOf(calls, "query_price").at(-1)?.args as {
+        filters: { name: string | null; misc: { identified: boolean | null } };
+      };
       expect([again.filters.name, again.filters.misc.identified]).toEqual([null, false]);
     });
   });
@@ -158,7 +186,10 @@ describe("OverlayView", () => {
   });
 
   test("covering the game: dimmed backdrop closes on click, the card does not", async () => {
-    const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 300, y: 120 }) });
+    const calls = setupIpc({
+      get_overlay_snapshot: () => null,
+      get_overlay_layout: () => ({ cover: true, x: 300, y: 120 }),
+    });
     renderWithProviders(<OverlayView />);
     const backdrop = await screen.findByTestId("overlay-backdrop");
     const card = screen.getByTestId("overlay-card");
@@ -174,7 +205,10 @@ describe("OverlayView", () => {
   test("covering the game: leaving the card does not auto-hide", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     try {
-      const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 0, y: 0 }) });
+      const calls = setupIpc({
+        get_overlay_snapshot: () => null,
+        get_overlay_layout: () => ({ cover: true, x: 0, y: 0 }),
+      });
       renderWithProviders(<OverlayView />);
       await screen.findByTestId("overlay-backdrop");
       const article = screen.getByRole("article");
@@ -505,7 +539,21 @@ describe("overlay extras", () => {
     async function mountAutoHide(ms: number) {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const calls = setupIpc({
-        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true }, results: "below" } }),
+        get_settings: () =>
+          settings({
+            overlay: {
+              auto_hide_ms: ms,
+              opacity: 1,
+              side: "cursor",
+              group_by_seller: true,
+              listing_columns: ["seller", "listed"],
+              scale: 1,
+              backdrop_dim: 0.6,
+              close_pinned_on_game_focus: false,
+              links: { poe2db: true, wiki: true, craft_of_exile: true },
+              results: "below",
+            },
+          }),
         query_price: () => priceSummary(),
       });
       renderWithProviders(<OverlayView />);

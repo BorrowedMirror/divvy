@@ -24,12 +24,18 @@ export function widenValue(values: readonly (number | null)[], pct: number): num
 
 /** `{ min, max }` bounds for the item values: a minimum for positive values, a maximum for
  * negative ("reduced") ones where more negative is better. */
-export function widenBounds(values: readonly (number | null)[], pct: number): { min: number | null; max: number | null } | null {
+export function widenBounds(
+  values: readonly (number | null)[],
+  pct: number,
+): { min: number | null; max: number | null } | null {
   const nums = values.filter((v): v is number => typeof v === "number" && Number.isFinite(v));
   if (nums.length === 0) return null;
   const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
   if (mean < 0) {
-    const mirrored = widenValue(nums.map((n) => -n), pct);
+    const mirrored = widenValue(
+      nums.map((n) => -n),
+      pct,
+    );
     return { min: null, max: mirrored === null ? null : -mirrored };
   }
   return { min: widenValue(nums, pct), max: null };

@@ -1,7 +1,9 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
+
 import { clearMocks } from "@tauri-apps/api/mocks";
+import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach } from "vitest";
+
 import i18n from "@i18n/index";
 import { useOverlayStore } from "@stores/overlay";
 import { useSettingsStore } from "@stores/settings";

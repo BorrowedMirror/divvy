@@ -1,33 +1,34 @@
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import { Tabs } from "@base-ui/react/tabs";
 import { Toast } from "@base-ui/react/toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type {
-  BackendKind,
-  Chord,
-  ListingColumn,
-  OnlineStatus,
-  OverlaySide,
-  ResultsLayout,
-  PriceSourceKind,
-  Settings_Serialize,
-  Theme,
-  ModFlag,
-} from "@src/bindings";
-import { commands, events } from "@src/bindings";
+
 import { BrandMark } from "@components/BrandMark";
 import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "@components/ui";
 import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "@hooks/queries";
 import { useTauriEvent } from "@hooks/useTauriEvent";
 import { LANGUAGES } from "@i18n/index";
-import { toIpcError } from "@lib/ipc";
+import { toIpcError, unwrap } from "@lib/ipc";
 import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "@lib/validate";
+import { toggleFlag } from "@lib/waystone";
+import type {
+  BackendKind,
+  Chord,
+  ListingColumn,
+  ModFlag,
+  OnlineStatus,
+  OverlaySide,
+  PriceSourceKind,
+  ResultsLayout,
+  Settings_Serialize,
+  Theme,
+} from "@src/bindings";
+import { commands, events } from "@src/bindings";
 import { isDirty, useSettingsStore } from "@stores/settings";
 import { HotkeyRecorder } from "@views/settings/HotkeyRecorder";
-import { toggleFlag } from "@lib/waystone";
-import { unwrap } from "@lib/ipc";
 
 type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };
@@ -110,7 +111,10 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
         )}
       </header>
       {externalChange && (
-        <div role="status" className="mb-3 flex items-center justify-between rounded-md border border-gold/40 bg-gold/10 p-2 text-sm">
+        <div
+          role="status"
+          className="mb-3 flex items-center justify-between rounded-md border border-gold/40 bg-gold/10 p-2 text-sm"
+        >
           {t("settings.externalChange")}
           <Button onClick={discard}>{t("settings.reload")}</Button>
         </div>
@@ -176,10 +180,24 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  return <div data-testid="settings-root" className="mx-auto min-h-screen max-w-2xl bg-bg p-6 text-fg">{children}</div>;
+  return (
+    <div data-testid="settings-root" className="mx-auto min-h-screen max-w-2xl bg-bg p-6 text-fg">
+      {children}
+    </div>
+  );
 }
 
-function Row({ label, htmlFor, error, children }: { label: string; htmlFor: string; error?: string; children: ReactNode }) {
+function Row({
+  label,
+  htmlFor,
+  error,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  error?: string;
+  children: ReactNode;
+}) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-1 py-1.5">
@@ -285,16 +303,27 @@ function InGameTab({ s, update, errors }: TabProps) {
     const i = chords.indexOf(mine);
     return chords.filter((_, j) => j !== i);
   };
-  const setChat = (commands: Settings_Serialize["chat"]["commands"]) => update((d) => ({ ...d, chat: { ...d.chat, commands } }));
-  const gameLog = useQuery({ queryKey: ["gameLog", s.chat.game_log], queryFn: () => commands.findGameLog(s.chat.game_log) });
-  const setStash = (patch: Partial<Settings_Serialize["stash"]>) => update((d) => ({ ...d, stash: { ...d.stash, ...patch } }));
-  const input = "min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-2 py-1 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold";
+  const setChat = (commands: Settings_Serialize["chat"]["commands"]) =>
+    update((d) => ({ ...d, chat: { ...d.chat, commands } }));
+  const gameLog = useQuery({
+    queryKey: ["gameLog", s.chat.game_log],
+    queryFn: () => commands.findGameLog(s.chat.game_log),
+  });
+  const setStash = (patch: Partial<Settings_Serialize["stash"]>) =>
+    update((d) => ({ ...d, stash: { ...d.stash, ...patch } }));
+  const input =
+    "min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-2 py-1 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold";
   return (
     <div className="flex flex-col gap-5">
       <section aria-labelledby="chat-heading" className="flex flex-col gap-2">
-        <h3 id="chat-heading" className="text-sm font-semibold">{t("ingame.chat")}</h3>
+        <h3 id="chat-heading" className="text-sm font-semibold">
+          {t("ingame.chat")}
+        </h3>
         <p className="text-xs text-muted">{t("ingame.chatHelp")}</p>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-md border border-line bg-surface-2 px-3 py-2 text-xs" aria-label={t("ingame.placeholders")}>
+        <dl
+          className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-md border border-line bg-surface-2 px-3 py-2 text-xs"
+          aria-label={t("ingame.placeholders")}
+        >
           <dt className="font-mono text-gold">@last</dt>
           <dd className="text-muted">{t("ingame.placeholderLast")}</dd>
           <dt className="font-mono text-gold">@area</dt>
@@ -309,7 +338,9 @@ function InGameTab({ s, update, errors }: TabProps) {
               aria-label={t("ingame.commandText", { n: i + 1 })}
               className={input}
               value={c.text}
-              onChange={(e) => setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)))}
+              onChange={(e) =>
+                setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)))
+              }
             />
             <CheckboxField
               label={t("ingame.send")}
@@ -326,7 +357,10 @@ function InGameTab({ s, update, errors }: TabProps) {
               error={errors[`chat.commands[${i}]`]}
               onBound={(chord) => setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, chord } : x)))}
             />
-            <Button aria-label={t("ingame.remove", { what: c.text || t("ingame.chat") })} onClick={() => setChat(s.chat.commands.filter((_, j) => j !== i))}>
+            <Button
+              aria-label={t("ingame.remove", { what: c.text || t("ingame.chat") })}
+              onClick={() => setChat(s.chat.commands.filter((_, j) => j !== i))}
+            >
               ×
             </Button>
           </div>
@@ -353,11 +387,17 @@ function InGameTab({ s, update, errors }: TabProps) {
           />
         </label>
         <p className="text-xs text-muted" data-testid="game-log-status">
-          {gameLog.data ? t("ingame.gameLogFound", { path: gameLog.data }) : gameLog.isSuccess ? t("ingame.gameLogMissing") : null}
+          {gameLog.data
+            ? t("ingame.gameLogFound", { path: gameLog.data })
+            : gameLog.isSuccess
+              ? t("ingame.gameLogMissing")
+              : null}
         </p>
       </section>
       <section aria-labelledby="stash-heading" className="flex flex-col gap-2">
-        <h3 id="stash-heading" className="text-sm font-semibold">{t("ingame.stash")}</h3>
+        <h3 id="stash-heading" className="text-sm font-semibold">
+          {t("ingame.stash")}
+        </h3>
         <p className="text-xs text-muted">{t("ingame.stashHelp")}</p>
         {s.stash.searches.map((c, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: editable rows have no id; the position is their identity.
@@ -366,7 +406,11 @@ function InGameTab({ s, update, errors }: TabProps) {
               aria-label={t("ingame.searchText", { n: i + 1 })}
               className={input}
               value={c.text}
-              onChange={(e) => setStash({ searches: s.stash.searches.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)) })}
+              onChange={(e) =>
+                setStash({
+                  searches: s.stash.searches.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)),
+                })
+              }
             />
             <HotkeyRecorder
               action={{ stash_search: i }}
@@ -376,9 +420,14 @@ function InGameTab({ s, update, errors }: TabProps) {
               chord={c.chord}
               others={others(c.chord)}
               error={errors[`stash.searches[${i}]`]}
-              onBound={(chord) => setStash({ searches: s.stash.searches.map((x, j) => (j === i ? { ...x, chord } : x)) })}
+              onBound={(chord) =>
+                setStash({ searches: s.stash.searches.map((x, j) => (j === i ? { ...x, chord } : x)) })
+              }
             />
-            <Button aria-label={t("ingame.remove", { what: c.text || t("ingame.stash") })} onClick={() => setStash({ searches: s.stash.searches.filter((_, j) => j !== i) })}>
+            <Button
+              aria-label={t("ingame.remove", { what: c.text || t("ingame.stash") })}
+              onClick={() => setStash({ searches: s.stash.searches.filter((_, j) => j !== i) })}
+            >
               ×
             </Button>
           </div>
@@ -386,7 +435,9 @@ function InGameTab({ s, update, errors }: TabProps) {
         <div>
           <Button
             disabled={s.stash.searches.length >= 20}
-            onClick={() => setStash({ searches: [...s.stash.searches, { chord: { modifiers: [], key: "" }, text: "" }] })}
+            onClick={() =>
+              setStash({ searches: [...s.stash.searches, { chord: { modifiers: [], key: "" }, text: "" }] })
+            }
           >
             {t("ingame.addSearch")}
           </Button>
@@ -407,9 +458,11 @@ function TradeTab({ s, update, errors }: TabProps) {
   const leagues = useLeagues();
   const leagueOptions = (leagues.data ?? []).map((l) => ({ value: l.id, label: l.text ?? l.id }));
   const current = s.league.league;
-  if (current && !leagueOptions.some((o) => o.value === current)) leagueOptions.unshift({ value: current, label: current });
+  if (current && !leagueOptions.some((o) => o.value === current))
+    leagueOptions.unshift({ value: current, label: current });
   const [forgot, setForgot] = useState(false);
-  const setTrade = (patch: Partial<Settings_Serialize["trade"]>) => update((d) => ({ ...d, trade: { ...d.trade, ...patch } }));
+  const setTrade = (patch: Partial<Settings_Serialize["trade"]>) =>
+    update((d) => ({ ...d, trade: { ...d.trade, ...patch } }));
 
   return (
     <div className="flex flex-col">
@@ -435,7 +488,7 @@ function TradeTab({ s, update, errors }: TabProps) {
           </p>
         ) : (
           <SelectField
-          id="set-league"
+            id="set-league"
             label={t("settings.league")}
             hideLabel
             disabled={s.league.auto_detect || leagueOptions.length === 0}
@@ -536,7 +589,11 @@ const CHOICES = ["danger", "warn", "good", null] as const;
 
 function WaystonesTab({ s, update }: TabProps) {
   const { t } = useTranslation();
-  const catalog = useQuery({ queryKey: ["waystoneMods"], queryFn: async () => unwrap(await commands.waystoneMods()), staleTime: Infinity });
+  const catalog = useQuery({
+    queryKey: ["waystoneMods"],
+    queryFn: async () => unwrap(await commands.waystoneMods()),
+    staleTime: Infinity,
+  });
   const [query, setQuery] = useState("");
   const flags = s.waystone.flags;
   const setFlags = (next: Record<string, ModFlag>) => update((d) => ({ ...d, waystone: { flags: next } }));
@@ -547,13 +604,25 @@ function WaystonesTab({ s, update }: TabProps) {
   const count = (f: ModFlag) => Object.values(flags).filter((v) => v === f).length;
   const preset = (name: string) => {
     if (name === "choose") return;
-    if (name === "dangers") setFlags({ ...Object.fromEntries(Object.entries(flags).filter(([, v]) => v)), ...Object.fromEntries(DEFAULT_DANGERS.map((m) => [m, "danger" as const])) });
+    if (name === "dangers")
+      setFlags({
+        ...Object.fromEntries(Object.entries(flags).filter(([, v]) => v)),
+        ...Object.fromEntries(DEFAULT_DANGERS.map((m) => [m, "danger" as const])),
+      });
     if (name === "clear") setFlags({});
   };
   const row = (text: string) => (
-    <li key={text} className="grid grid-cols-[minmax(0,1fr)_17rem] items-center gap-3 border-t border-line/60 px-3 py-1.5" data-testid="waystone-catalog-row">
+    <li
+      key={text}
+      className="grid grid-cols-[minmax(0,1fr)_17rem] items-center gap-3 border-t border-line/60 px-3 py-1.5"
+      data-testid="waystone-catalog-row"
+    >
       <span className="text-sm">{text}</span>
-      <div role="radiogroup" aria-label={t("waystone.flagFor", { mod: text })} className="grid grid-cols-4 overflow-hidden rounded-md border border-line text-xs">
+      <div
+        role="radiogroup"
+        aria-label={t("waystone.flagFor", { mod: text })}
+        className="grid grid-cols-4 overflow-hidden rounded-md border border-line text-xs"
+      >
         {CHOICES.map((c) => {
           const on = (flags[text] ?? null) === c;
           return (
@@ -607,9 +676,15 @@ function WaystonesTab({ s, update }: TabProps) {
           className="min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold"
         />
         <span className="flex gap-1.5 text-xs" data-testid="waystone-counts">
-          <span className="rounded-full bg-bad/15 px-2 py-1 text-bad">{t("waystone.count.danger", { count: count("danger") })}</span>
-          <span className="rounded-full bg-warn/15 px-2 py-1 text-warn">{t("waystone.count.warn", { count: count("warn") })}</span>
-          <span className="rounded-full bg-good/15 px-2 py-1 text-good">{t("waystone.count.good", { count: count("good") })}</span>
+          <span className="rounded-full bg-bad/15 px-2 py-1 text-bad">
+            {t("waystone.count.danger", { count: count("danger") })}
+          </span>
+          <span className="rounded-full bg-warn/15 px-2 py-1 text-warn">
+            {t("waystone.count.warn", { count: count("warn") })}
+          </span>
+          <span className="rounded-full bg-good/15 px-2 py-1 text-good">
+            {t("waystone.count.good", { count: count("good") })}
+          </span>
         </span>
       </div>
       <div className="max-h-[26rem] overflow-y-auto rounded-lg border border-line bg-surface">
@@ -618,7 +693,10 @@ function WaystonesTab({ s, update }: TabProps) {
           if (items.length === 0) return null;
           return (
             <section key={g} aria-labelledby={`waystone-group-${g}`}>
-              <h3 id={`waystone-group-${g}`} className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase">
+              <h3
+                id={`waystone-group-${g}`}
+                className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase"
+              >
                 {t(`waystone.group.${g}`)}
               </h3>
               <ul>{items.map((m) => row(m.text))}</ul>
@@ -627,7 +705,10 @@ function WaystonesTab({ s, update }: TabProps) {
         })}
         {others.length > 0 && (
           <section aria-labelledby="waystone-group-other">
-            <h3 id="waystone-group-other" className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase">
+            <h3
+              id="waystone-group-other"
+              className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase"
+            >
               {t("waystone.group.other")}
             </h3>
             <ul>{others.map(row)}</ul>
@@ -681,7 +762,10 @@ function OverlayTab({ s, update, errors }: TabProps) {
           label={t("settings.scale")}
           hideLabel
           value={String(s.overlay.scale)}
-          options={["0.75", "0.9", "1", "1.1", "1.25", "1.5"].map((v) => ({ value: v, label: `${Math.round(Number(v) * 100)}%` }))}
+          options={["0.75", "0.9", "1", "1.1", "1.25", "1.5"].map((v) => ({
+            value: v,
+            label: `${Math.round(Number(v) * 100)}%`,
+          }))}
           onChange={(v) => setOverlay({ scale: Number(v) })}
         />
       </Row>
@@ -726,7 +810,10 @@ function OverlayTab({ s, update, errors }: TabProps) {
           label={t("settings.results")}
           hideLabel
           value={s.overlay.results}
-          options={(["below", "left", "right", "auto"] as const).map((v) => ({ value: v, label: t(`resultsLayout.${v}`) }))}
+          options={(["below", "left", "right", "auto"] as const).map((v) => ({
+            value: v,
+            label: t(`resultsLayout.${v}`),
+          }))}
           onChange={(results) => setOverlay({ results })}
         />
       </Row>

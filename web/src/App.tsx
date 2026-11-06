@@ -1,14 +1,16 @@
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+
 import { Toast } from "@base-ui/react/toast";
 import { Tooltip } from "@base-ui/react/tooltip";
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { commands, events } from "@src/bindings";
+
 import { createQueryClient, keys, useSettingsQuery } from "@hooks/queries";
 import { useTauriEvent } from "@hooks/useTauriEvent";
 import i18n, { supportedLanguage } from "@i18n/index";
+import { commands, events } from "@src/bindings";
 import { type Route, routeFromHash } from "@src/route";
 import { DiagnosticsView } from "@views/diagnostics/DiagnosticsView";
 import { OnboardingView } from "@views/onboarding/OnboardingView";
@@ -161,7 +163,11 @@ export function Routes() {
         {route === "diagnostics" && (
           <>
             <nav className="mx-auto max-w-2xl px-6 pt-4">
-              <button type="button" className="text-sm text-muted underline hover:text-fg" onClick={() => navigate("settings")}>
+              <button
+                type="button"
+                className="text-sm text-muted underline hover:text-fg"
+                onClick={() => navigate("settings")}
+              >
                 ← {t("settings.title")}
               </button>
             </nav>

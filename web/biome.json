@@ -7,15 +7,10 @@
     "root": ".."
   },
   "files": {
-    "includes": [
-      "**",
-      "!dist",
-      "!coverage",
-      "!src/bindings.ts"
-    ]
+    "includes": ["**", "!dist", "!coverage", "!src/bindings.ts"]
   },
   "formatter": {
-    "enabled": false,
+    "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 120
@@ -28,9 +23,46 @@
     }
   },
   "assist": {
+    "enabled": true,
     "actions": {
       "source": {
-        "organizeImports": "off"
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              "react",
+              ":BLANK_LINE:",
+              [
+                ":NODE:",
+                ":PACKAGE:",
+                "!@assets/**",
+                "!@components/**",
+                "!@hooks/**",
+                "!@i18n/**",
+                "!@lib/**",
+                "!@stores/**",
+                "!@test/**",
+                "!@views/**",
+                "!@src/**"
+              ],
+              ":BLANK_LINE:",
+              [
+                "@assets/**",
+                "@components/**",
+                "@hooks/**",
+                "@i18n/**",
+                "@lib/**",
+                "@stores/**",
+                "@test/**",
+                "@views/**",
+                "@src/**"
+              ],
+              ":BLANK_LINE:",
+              ":PATH:"
+            ],
+            "identifierOrder": "lexicographic"
+          }
+        }
       }
     }
   },
@@ -53,18 +85,13 @@
           "options": {
             "paths": {
               "@tauri-apps/api/core": {
-                "importNames": [
-                  "invoke"
-                ],
+                "importNames": ["invoke"],
                 "message": "Use the generated commands from src/bindings.ts instead of invoke()."
               }
             },
             "patterns": [
               {
-                "group": [
-                  "./**",
-                  "../**"
-                ],
+                "group": ["./**", "../**"],
                 "message": "Import through the folder aliases (@components/…, @lib/…, @src/…) instead of a relative path."
               }
             ]
@@ -80,15 +107,19 @@
   },
   "overrides": [
     {
-      "includes": [
-        "vite.config.ts"
-      ],
+      "includes": ["vite.config.ts"],
       "linter": {
         "rules": {
           "style": {
             "noRestrictedImports": "off"
           }
         }
+      }
+    },
+    {
+      "includes": ["src/i18n/locales/**", "!src/i18n/locales/en/**"],
+      "formatter": {
+        "enabled": false
       }
     }
   ]

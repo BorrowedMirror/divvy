@@ -1,7 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { expect, test } from "vitest";
-import { renderWithProviders, setupIpc } from "@test/ipc";
+
 import { PriceTag, useCurrencyIcons } from "@components/PriceTag";
+import { renderWithProviders, setupIpc } from "@test/ipc";
 
 const divine = { id: "divine", name: "Divine Orb", icon: "https://web.poecdn.com/gen/image/x/Divine.png" };
 

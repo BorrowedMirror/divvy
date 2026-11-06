@@ -1,4 +1,6 @@
 import { create } from "zustand";
+
+import { rewiden } from "@lib/rewiden";
 import type {
   FilterSet_Serialize,
   IpcError_Serialize,
@@ -10,7 +12,6 @@ import type {
   RangeFilter_Serialize,
   StatFilter_Serialize,
 } from "@src/bindings";
-import { rewiden } from "@lib/rewiden";
 
 export type Phase = "idle" | "loading" | "ready" | "error";
 

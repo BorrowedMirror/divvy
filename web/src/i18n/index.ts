@@ -5,8 +5,9 @@
  */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import type en from "@i18n/locales/en/translation.json";
+
 import { LANGUAGES, type LanguageCode } from "@i18n/languages";
+import type en from "@i18n/locales/en/translation.json";
 
 export { LANGUAGES, type LanguageCode } from "@i18n/languages";
 

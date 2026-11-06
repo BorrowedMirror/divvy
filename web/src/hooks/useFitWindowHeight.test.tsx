@@ -1,7 +1,8 @@
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { callsOf, setupIpc } from "@test/ipc";
+
 import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
+import { callsOf, setupIpc } from "@test/ipc";
 
 let observed: (() => void) | null = null;
 let height = 300;
@@ -24,7 +25,8 @@ beforeEach(() => {
     return 1;
   });
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-    () => ({ height, width: 420, top: 0, left: 0, right: 420, bottom: height, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect,
+    () =>
+      ({ height, width: 420, top: 0, left: 0, right: 420, bottom: height, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect,
   );
 });
 

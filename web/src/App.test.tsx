@@ -1,8 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test } from "vitest";
-import { App } from "@src/App";
+
 import i18n from "@i18n/index";
+import { App } from "@src/App";
 import { routeFromHash } from "@src/route";
 import { settings } from "@test/fixtures";
 import { callsOf, emitEvent, flush, setupIpc } from "@test/ipc";
@@ -45,13 +46,36 @@ test("hashchange switches routes", async () => {
 });
 
 test("applies theme and language from settings, and follows settings-changed", async () => {
-  setupIpc({ get_settings: () => settings({ ui: { language: "de", theme: "light", start_minimised: false, check_updates: true, onboarding_done: false, autostart: false } }) });
+  setupIpc({
+    get_settings: () =>
+      settings({
+        ui: {
+          language: "de",
+          theme: "light",
+          start_minimised: false,
+          check_updates: true,
+          onboarding_done: false,
+          autostart: false,
+        },
+      }),
+  });
   render(<App />);
   await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
   await waitFor(() => expect(i18n.language).toBe("de"));
   expect(await screen.findByRole("heading", { name: "Einstellungen" })).toBeInTheDocument();
   await flush();
-  await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "dark", start_minimised: false, check_updates: true, onboarding_done: false, autostart: false } }) });
+  await emitEvent("settings-changed", {
+    settings: settings({
+      ui: {
+        language: "en",
+        theme: "dark",
+        start_minimised: false,
+        check_updates: true,
+        onboarding_done: false,
+        autostart: false,
+      },
+    }),
+  });
   await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
   expect(i18n.language).toBe("en");
 });

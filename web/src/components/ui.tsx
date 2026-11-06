@@ -1,3 +1,5 @@
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
 import { Checkbox } from "@base-ui/react/checkbox";
 import { NumberField } from "@base-ui/react/number-field";
 import { Select } from "@base-ui/react/select";
@@ -5,7 +7,6 @@ import { Switch } from "@base-ui/react/switch";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Tooltip } from "@base-ui/react/tooltip";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -303,7 +304,10 @@ export function Segmented<T extends string>({
 export function Spinner({ label }: { label: string }) {
   return (
     <span role="status" className="inline-flex items-center gap-2 text-sm text-muted">
-      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gold border-t-transparent" aria-hidden="true" />
+      <span
+        className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gold border-t-transparent"
+        aria-hidden="true"
+      />
       {label}
     </span>
   );

@@ -1,6 +1,7 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
+
 import type { Settings_Serialize } from "@src/bindings";
 import { useSettingsStore } from "@stores/settings";
 import { ipcError, settings } from "@test/fixtures";
@@ -36,11 +37,20 @@ describe("SettingsView", () => {
     await user.click(screen.getByRole("combobox", { name: "Theme" }));
     await user.click(await screen.findByRole("option", { name: "Light" }));
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false });
+    expect(draft().ui).toEqual({
+      language: "en",
+      theme: "light",
+      start_minimised: true,
+      check_updates: true,
+      onboarding_done: false,
+      autostart: false,
+    });
 
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
-    expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize | undefined)?.ui.theme).toBe("light");
+    expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize | undefined)?.ui.theme).toBe(
+      "light",
+    );
     expect(await screen.findByText("Settings saved")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
@@ -193,7 +203,11 @@ describe("SettingsView", () => {
     expect(within(res).getByRole("radio", { name: "Danger" })).toHaveAttribute("aria-checked", "true");
     await user.click(within(projectiles).getByRole("radio", { name: "Warn" }));
     expect(draft().waystone.flags["Monsters fire # additional Projectiles"]).toBe("warn");
-    await user.click(within(screen.getByRole("radiogroup", { name: "Flag for #% increased Pack Size in Map" })).getByRole("radio", { name: "Ignore" }));
+    await user.click(
+      within(screen.getByRole("radiogroup", { name: "Flag for #% increased Pack Size in Map" })).getByRole("radio", {
+        name: "Ignore",
+      }),
+    );
     expect(draft().waystone.flags["#% increased Pack Size in Map"]).toBeUndefined();
     await user.type(screen.getByRole("searchbox", { name: "Search waystone mods" }), "pack");
     await waitFor(() => expect(screen.getAllByTestId("waystone-catalog-row")).toHaveLength(1));
@@ -219,7 +233,9 @@ describe("SettingsView", () => {
     const text = screen.getByRole("textbox", { name: "Command 2" });
     await user.clear(text);
     await user.type(text, "/kingsmarch");
-    await user.click(within(screen.getAllByTestId("chat-command")[1] as HTMLElement).getByRole("checkbox", { name: "Send" }));
+    await user.click(
+      within(screen.getAllByTestId("chat-command")[1] as HTMLElement).getByRole("checkbox", { name: "Send" }),
+    );
     const hotkey = screen.getByRole("button", { name: /^Command 2 hotkey/ });
     await user.click(hotkey);
     fireEvent.keyDown(hotkey, { code: "F6" });
@@ -308,7 +324,18 @@ describe("SettingsView", () => {
   test("settings-changed adopts external settings when clean", async () => {
     await mount();
     await flush();
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false } }) });
+    await emitEvent("settings-changed", {
+      settings: settings({
+        ui: {
+          language: "en",
+          theme: "light",
+          start_minimised: true,
+          check_updates: true,
+          onboarding_done: false,
+          autostart: false,
+        },
+      }),
+    });
     expect(screen.getByRole("switch", { name: "Start minimised to tray" })).toBeChecked();
   });
 
@@ -320,7 +347,22 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true }, results: "below" } }) });
+    await emitEvent("settings-changed", {
+      settings: settings({
+        overlay: {
+          auto_hide_ms: 2000,
+          opacity: 1,
+          side: "cursor",
+          group_by_seller: true,
+          listing_columns: ["seller", "listed"],
+          scale: 1,
+          backdrop_dim: 0.6,
+          close_pinned_on_game_focus: false,
+          links: { poe2db: true, wiki: true, craft_of_exile: true },
+          results: "below",
+        },
+      }),
+    });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
     expect(draft().overlay.auto_hide_ms).toBe(2000);
@@ -331,9 +373,26 @@ describe("SettingsView", () => {
     await mount();
     await flush();
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false, check_updates: true, onboarding_done: false, autostart: false } }) });
+    await emitEvent("settings-changed", {
+      settings: settings({
+        ui: {
+          language: "en",
+          theme: "light",
+          start_minimised: false,
+          check_updates: true,
+          onboarding_done: false,
+          autostart: false,
+        },
+      }),
+    });
     expect(screen.queryByText("Settings were changed elsewhere.")).toBeNull();
-    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false });
+    expect(draft().ui).toMatchObject({
+      theme: "light",
+      start_minimised: true,
+      check_updates: true,
+      onboarding_done: false,
+      autostart: false,
+    });
   });
 });
 

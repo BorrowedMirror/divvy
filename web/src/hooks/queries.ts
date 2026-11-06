@@ -1,8 +1,9 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { commands, events } from "@src/bindings";
-import type { FilterSet_Serialize, PriceSummary_Serialize, Settings_Serialize } from "@src/bindings";
-import { unwrap } from "@lib/ipc";
+
 import { useTauriEvent } from "@hooks/useTauriEvent";
+import { unwrap } from "@lib/ipc";
+import type { FilterSet_Serialize, PriceSummary_Serialize, Settings_Serialize } from "@src/bindings";
+import { commands, events } from "@src/bindings";
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({

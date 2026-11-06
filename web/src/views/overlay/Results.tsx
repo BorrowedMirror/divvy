@@ -1,16 +1,18 @@
-import { Toast } from "@base-ui/react/toast";
 import { useState } from "react";
+
+import { Toast } from "@base-ui/react/toast";
 import { useTranslation } from "react-i18next";
-import type { IpcError_Serialize, ListingColumn, Listing_Serialize, PriceSummary_Serialize } from "@src/bindings";
-import { commands } from "@src/bindings";
+
 import { ExternalIcon } from "@components/icons";
 import { PriceTag, useCurrencyIcons } from "@components/PriceTag";
-import { useCommand } from "@hooks/useCommand";
 import { cx } from "@components/ui";
 import { useSettingsQuery } from "@hooks/queries";
+import { useCommand } from "@hooks/useCommand";
 import type { Age } from "@lib/format";
 import { ageOf, formatAge, formatDateTime } from "@lib/format";
 import { groupBySeller, ungrouped } from "@lib/listings";
+import type { IpcError_Serialize, ListingColumn, Listing_Serialize, PriceSummary_Serialize } from "@src/bindings";
+import { commands } from "@src/bindings";
 
 export function Results({ summary, now: nowProp }: { summary: PriceSummary_Serialize; now?: number }) {
   const { t } = useTranslation();
@@ -22,10 +24,12 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
   const toast = Toast.useToastManager();
   const settings = useSettingsQuery().data;
   const columns = settings?.overlay.listing_columns ?? DEFAULT_COLUMNS;
-  const rows = (settings?.overlay.group_by_seller ?? true) ? groupBySeller(summary.listings) : ungrouped(summary.listings);
+  const rows =
+    (settings?.overlay.group_by_seller ?? true) ? groupBySeller(summary.listings) : ungrouped(summary.listings);
   const copyWhisper = async (text: string) => {
     const res = await command(commands.copyText(text));
-    if (res.status === "ok") toast.add({ title: t("results.whisperCopied"), description: t("results.whisperCopiedHelp"), timeout: 3000 });
+    if (res.status === "ok")
+      toast.add({ title: t("results.whisperCopied"), description: t("results.whisperCopiedHelp"), timeout: 3000 });
   };
 
   return (
@@ -80,7 +84,11 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
                     {t("results.price")}
                   </th>
                   {columns.map((c) => (
-                    <th key={c} scope="col" className={cx("px-2 py-1 font-medium", c === "listed" ? "text-right" : "text-left")}>
+                    <th
+                      key={c}
+                      scope="col"
+                      className={cx("px-2 py-1 font-medium", c === "listed" ? "text-right" : "text-left")}
+                    >
                       {t(`results.column.${c}`)}
                     </th>
                   ))}
@@ -134,7 +142,17 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
 
 const DEFAULT_COLUMNS: ListingColumn[] = ["seller", "listed"];
 
-function ListingCell({ column, listing: l, count, age }: { column: ListingColumn; listing: Listing_Serialize; count: number; age: Age | null }) {
+function ListingCell({
+  column,
+  listing: l,
+  count,
+  age,
+}: {
+  column: ListingColumn;
+  listing: Listing_Serialize;
+  count: number;
+  age: Age | null;
+}) {
   const { t, i18n } = useTranslation();
   switch (column) {
     case "seller":
@@ -143,7 +161,10 @@ function ListingCell({ column, listing: l, count, age }: { column: ListingColumn
           {l.online && <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />}
           {l.seller ?? t("results.unknownSeller")}
           {count > 1 && (
-            <span className="ml-1 rounded bg-surface-3 px-1 text-[10px] text-muted" title={t("results.sellerCount", { count })}>
+            <span
+              className="ml-1 rounded bg-surface-3 px-1 text-[10px] text-muted"
+              title={t("results.sellerCount", { count })}
+            >
               ×{count}
             </span>
           )}
@@ -164,7 +185,15 @@ function ListingCell({ column, listing: l, count, age }: { column: ListingColumn
 
 function ChatIcon() {
   return (
-    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
       <path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" strokeLinejoin="round" />
     </svg>
   );

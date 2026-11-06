@@ -1,9 +1,10 @@
 import { Toast } from "@base-ui/react/toast";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import type { Capabilities, Diagnostics_Serialize } from "@src/bindings";
+
 import { Button, cx } from "@components/ui";
 import { useDiagnostics } from "@hooks/queries";
+import type { Capabilities, Diagnostics_Serialize } from "@src/bindings";
 
 export const CAPABILITY_KEYS = [
   "window_tracking",
@@ -55,7 +56,12 @@ export function DiagnosticsView() {
   const query = useDiagnostics();
   const toast = Toast.useToastManager();
 
-  if (query.isPending) return <Page><p className="text-muted">{t("common.loading")}</p></Page>;
+  if (query.isPending)
+    return (
+      <Page>
+        <p className="text-muted">{t("common.loading")}</p>
+      </Page>
+    );
   if (query.isError) {
     return (
       <Page>

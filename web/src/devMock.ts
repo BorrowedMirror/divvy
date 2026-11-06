@@ -1,5 +1,6 @@
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC } from "@tauri-apps/api/mocks";
+
 import { diagnostics, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";
 
 /**

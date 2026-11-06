@@ -1,5 +1,5 @@
-import type { HotkeyAction, Settings_Serialize } from "@src/bindings";
 import { sameChord } from "@lib/chord";
+import type { HotkeyAction, Settings_Serialize } from "@src/bindings";
 
 /** Field path -> i18n key of the validation message. */
 export type ValidationErrors = Partial<Record<string, string>>;

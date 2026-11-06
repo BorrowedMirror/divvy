@@ -1,6 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
+
 import i18n from "@i18n/index";
 import { diagnostics } from "@test/fixtures";
 import { fail, renderWithProviders, setupIpc } from "@test/ipc";
@@ -71,13 +72,14 @@ describe("DiagnosticsView", () => {
 describe("guidance + report", () => {
   test("wayland, gnome/x11 and unknown permissions", () => {
     const base = diagnostics().capabilities;
-    expect(guidanceFor(diagnostics({ os: "linux", backend: "wayland", capabilities: { ...base, missing_permissions: [] } }))).toEqual([
-      "guidance.wayland",
-    ]);
-    expect(guidanceFor(diagnostics({ os: "linux", backend: "x11", capabilities: { ...base, missing_permissions: ["input"] } }))).toEqual([
-      "permission:input",
-      "guidance.gnome",
-    ]);
+    expect(
+      guidanceFor(diagnostics({ os: "linux", backend: "wayland", capabilities: { ...base, missing_permissions: [] } })),
+    ).toEqual(["guidance.wayland"]);
+    expect(
+      guidanceFor(
+        diagnostics({ os: "linux", backend: "x11", capabilities: { ...base, missing_permissions: ["input"] } }),
+      ),
+    ).toEqual(["permission:input", "guidance.gnome"]);
   });
 
   test("report lists capabilities and placeholders", () => {

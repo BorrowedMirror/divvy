@@ -1,11 +1,13 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "@src/bindings";
+
 import { BrandMark } from "@components/BrandMark";
 import { Button, cx } from "@components/ui";
 import { keys, usePermissions, useRequestPermission, useSaveSettings, useSettingsQuery } from "@hooks/queries";
 import { toIpcError } from "@lib/ipc";
+import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "@src/bindings";
 
 /** Example compositor bindings for `rkl --trigger` (code, not translated). */
 export const TRIGGER_EXAMPLES = [
@@ -113,7 +115,9 @@ function MacosSteps({ permissions }: { permissions: PermissionInfo_Serialize[] }
     <>
       {permissions.map((p) => {
         const known = KNOWN_PERMISSIONS.includes(p.kind);
-        const name = known ? t(`onboarding.permission.${p.kind}.name`) : t("onboarding.permission.unknown", { kind: p.kind });
+        const name = known
+          ? t(`onboarding.permission.${p.kind}.name`)
+          : t("onboarding.permission.unknown", { kind: p.kind });
         return (
           <li
             key={p.kind}

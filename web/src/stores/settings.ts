@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import type { Settings_Serialize } from "@src/bindings";
 
 export type SettingsStore = {
@@ -65,7 +66,6 @@ export const useSettingsStore = create<SettingsStore>()((set) => ({
       return { base: s, draft, externalChange: st.externalChange || conflict };
     }),
   update: (fn) => set((st) => (st.draft ? { draft: fn(st.draft) } : {})),
-  persisted: (fn) =>
-    set((st) => (st.base && st.draft ? { base: fn(st.base), draft: fn(st.draft) } : {})),
+  persisted: (fn) => set((st) => (st.base && st.draft ? { base: fn(st.base), draft: fn(st.draft) } : {})),
   discard: () => set((st) => ({ draft: st.base, externalChange: false })),
 }));

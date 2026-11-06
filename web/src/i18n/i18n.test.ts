@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import i18n, { LANGUAGES, resources, supportedLanguage } from ".";
+
 import en from "@i18n/locales/en/translation.json";
+
+import i18n, { LANGUAGES, resources, supportedLanguage } from ".";
 
 type Tree = { [k: string]: string | Tree };
 

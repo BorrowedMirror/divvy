@@ -1,10 +1,12 @@
-import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { act } from "react";
+
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC } from "@tauri-apps/api/mocks";
-import { act } from "react";
-import { AppProviders } from "@src/App";
+import { render } from "@testing-library/react";
+
 import { createQueryClient } from "@hooks/queries";
+import { AppProviders } from "@src/App";
 import type { Chord, HotkeyAction, Settings_Serialize } from "@src/bindings";
 import { diagnostics, leagues, settings } from "@test/fixtures";
 

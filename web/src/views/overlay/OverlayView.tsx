@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useTranslation } from "react-i18next";
-import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "@src/bindings";
-import { commands, events } from "@src/bindings";
+
 import { CloseIcon, GearIcon, PinIcon } from "@components/icons";
 import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "@components/ui";
 import { useLeagues, useQueryPrice, useSettingsQuery } from "@hooks/queries";
 import { useAutoHide } from "@hooks/useAutoHide";
 import { useCommand } from "@hooks/useCommand";
 import { useCountdown } from "@hooks/useCountdown";
+import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
 import { useTauriEvent } from "@hooks/useTauriEvent";
 import { formatChord, isUnbound } from "@lib/chord";
 import { toIpcError } from "@lib/ipc";
+import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "@src/bindings";
+import { commands, events } from "@src/bindings";
 import { useOverlayStore } from "@stores/overlay";
 import { MiscFilters, StatFilters } from "@views/overlay/Filters";
 import { ItemHeader } from "@views/overlay/ItemHeader";
-import { ErrorNotice, Results } from "@views/overlay/Results";
-import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
 import { ItemLinks } from "@views/overlay/ItemLinks";
+import { ErrorNotice, Results } from "@views/overlay/Results";
 import { WaystoneMods } from "@views/overlay/WaystoneMods";
 
 /**
@@ -154,64 +156,78 @@ export function OverlayView() {
         )}
       >
         <div ref={contentRef} className="flex flex-col gap-3">
-        <header
-          className="flex cursor-grab items-start gap-2 select-none active:cursor-grabbing"
-          title={t("overlay.dragHint")}
-          data-testid="drag-handle"
-          {...dragHandlers}
-        >
-          <div className="min-w-0 flex-1">
-            {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">RKL</h1>}
-          </div>
-          <IconButton label={t("overlay.openSettings")} onClick={() => void command(commands.openSettings())}>
-            <GearIcon />
-          </IconButton>
-          <IconButton label={pinned ? t("overlay.unpin") : t("overlay.pin")} pressed={pinned} onClick={() => void togglePin()}>
-            <PinIcon filled={pinned} />
-          </IconButton>
-          <IconButton label={t("overlay.close")} onClick={hide}>
-            <CloseIcon />
-          </IconButton>
-        </header>
-        {item && <ItemLinks item={item} />}
-
-        {!item || !filters ? (
-          <div className="flex flex-col gap-3 py-4" aria-live="polite">
-            {error && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
-            <p className="py-4 text-center text-sm text-muted">
-              {t("overlay.empty", {
-                hotkey: settings && !isUnbound(settings.hotkeys.price_check) ? formatChord(settings.hotkeys.price_check) : "Ctrl+D",
-              })}
-            </p>
-          </div>
-        ) : (
-            <div className={side ? "grid grid-cols-2 items-start gap-4" : "flex flex-col gap-3"} data-testid="panel-body" data-results={resultsAt}>
-            <div className={cx("flex min-w-0 flex-col gap-3", resultsAt === "left" && "order-2")}>
-            <div className="flex flex-col gap-3">
-              {item.category === "waystone" && <WaystoneMods item={item} />}
-              {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
-              <Toolbar filters={filters} />
-              <StatFilters filters={filters} />
-              <MiscFilters filters={filters} item={item} />
+          <header
+            className="flex cursor-grab items-start gap-2 select-none active:cursor-grabbing"
+            title={t("overlay.dragHint")}
+            data-testid="drag-handle"
+            {...dragHandlers}
+          >
+            <div className="min-w-0 flex-1">
+              {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">RKL</h1>}
             </div>
-
-            <Button
-              variant="primary"
-              onClick={() => run(filters)}
-              disabled={busy || secondsLeft > 0}
-              className="w-full"
+            <IconButton label={t("overlay.openSettings")} onClick={() => void command(commands.openSettings())}>
+              <GearIcon />
+            </IconButton>
+            <IconButton
+              label={pinned ? t("overlay.unpin") : t("overlay.pin")}
+              pressed={pinned}
+              onClick={() => void togglePin()}
             >
-              {secondsLeft > 0 ? t("errors.retryIn", { count: secondsLeft }) : t("overlay.search")}
-            </Button>
-            </div>
+              <PinIcon filled={pinned} />
+            </IconButton>
+            <IconButton label={t("overlay.close")} onClick={hide}>
+              <CloseIcon />
+            </IconButton>
+          </header>
+          {item && <ItemLinks item={item} />}
 
-            <div className={cx("flex min-w-0 flex-col gap-2", busy && "opacity-70", resultsAt === "left" && "order-1")} aria-live="polite">
-              {busy && <Spinner label={t("overlay.loading")} />}
-              {error && !busy && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
-              {summary && !busy && !error && <Results summary={summary} />}
+          {!item || !filters ? (
+            <div className="flex flex-col gap-3 py-4" aria-live="polite">
+              {error && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
+              <p className="py-4 text-center text-sm text-muted">
+                {t("overlay.empty", {
+                  hotkey:
+                    settings && !isUnbound(settings.hotkeys.price_check)
+                      ? formatChord(settings.hotkeys.price_check)
+                      : "Ctrl+D",
+                })}
+              </p>
             </div>
+          ) : (
+            <div
+              className={side ? "grid grid-cols-2 items-start gap-4" : "flex flex-col gap-3"}
+              data-testid="panel-body"
+              data-results={resultsAt}
+            >
+              <div className={cx("flex min-w-0 flex-col gap-3", resultsAt === "left" && "order-2")}>
+                <div className="flex flex-col gap-3">
+                  {item.category === "waystone" && <WaystoneMods item={item} />}
+                  {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
+                  <Toolbar filters={filters} />
+                  <StatFilters filters={filters} />
+                  <MiscFilters filters={filters} item={item} />
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={() => run(filters)}
+                  disabled={busy || secondsLeft > 0}
+                  className="w-full"
+                >
+                  {secondsLeft > 0 ? t("errors.retryIn", { count: secondsLeft }) : t("overlay.search")}
+                </Button>
+              </div>
+
+              <div
+                className={cx("flex min-w-0 flex-col gap-2", busy && "opacity-70", resultsAt === "left" && "order-1")}
+                aria-live="polite"
+              >
+                {busy && <Spinner label={t("overlay.loading")} />}
+                {error && !busy && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
+                {summary && !busy && !error && <Results summary={summary} />}
+              </div>
             </div>
-        )}
+          )}
         </div>
       </article>
     </div>
@@ -243,7 +259,12 @@ const MIN_VISIBLE = 120;
 /** Position plus a height cap, so a card taller than the screen scrolls inside itself. */
 export function coverCardStyle(layout: OverlayLayout, width: number) {
   const pos = cardPosition(layout, width);
-  return { ...pos, display: "flex", flexDirection: "column" as const, maxHeight: Math.max(120, window.innerHeight - pos.top - EDGE) };
+  return {
+    ...pos,
+    display: "flex",
+    flexDirection: "column" as const,
+    maxHeight: Math.max(120, window.innerHeight - pos.top - EDGE),
+  };
 }
 
 /** `Results: Auto` puts results beside the filters for items with more stats than this. */
@@ -326,7 +347,9 @@ function UniquePicker({ filters, onPick }: { filters: FilterSet_Serialize; onPic
   return (
     // biome-ignore lint/a11y/useSemanticElements: a labelled row of chips; a fieldset needs a legend and resets.
     <div className="flex flex-col gap-1.5" role="group" aria-label={t("overlay.possibleUniques")}>
-      <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t("overlay.possibleUniques")}</span>
+      <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+        {t("overlay.possibleUniques")}
+      </span>
       <div className="flex flex-wrap gap-1.5" data-testid="unique-candidates">
         {chip(t("overlay.unidentifiedBase"), filters.name === null, null)}
         {filters.unique_candidates.map((n) => chip(n, filters.name === n, n))}

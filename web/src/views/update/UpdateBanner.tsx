@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { commands, events } from "@src/bindings";
+
 import { Button } from "@components/ui";
 import { useCommand } from "@hooks/useCommand";
 import { useTauriEvent } from "@hooks/useTauriEvent";
+import { commands, events } from "@src/bindings";
 import { useUpdateStore } from "@stores/update";
 
 /** Records `update-available` for this window. Mounted once in `AppProviders`. */

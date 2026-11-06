@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
+
 import { App } from "@src/App";
 import { useUpdateStore } from "@stores/update";
 import { ipcError } from "@test/fixtures";

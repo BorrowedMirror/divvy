@@ -1,11 +1,7 @@
 import { useTranslation } from "react-i18next";
+
+import { CheckboxField, NumberInput, SelectField, cx } from "@components/ui";
 import type { FilterSet_Serialize, ParsedItem_Serialize } from "@src/bindings";
-import {
-  CheckboxField,
-  NumberInput,
-  SelectField,
-  cx,
-} from "@components/ui";
 import { type RangeKey, useOverlayStore } from "@stores/overlay";
 
 function formatValues(values: (number | null)[]): string {
@@ -24,10 +20,7 @@ function TierBadge({ tier }: { tier: number }) {
   const { t } = useTranslation();
   return (
     <span
-      className={cx(
-        "rounded-sm px-1 py-0.5 font-mono font-semibold",
-        TIER_STYLES[tier - 1] ?? TIER_LOW,
-      )}
+      className={cx("rounded-sm px-1 py-0.5 font-mono font-semibold", TIER_STYLES[tier - 1] ?? TIER_LOW)}
       title={t("overlay.tierTitle", { tier })}
       data-testid="mod-tier"
       data-tier={tier}
@@ -51,13 +44,9 @@ const SOURCES = {
   skill: "skill",
 } as const;
 
-export function statSource(
-  statId: string,
-): (typeof SOURCES)[keyof typeof SOURCES] | null {
+export function statSource(statId: string): (typeof SOURCES)[keyof typeof SOURCES] | null {
   const prefix = statId.split(".", 1)[0] ?? "";
-  return Object.hasOwn(SOURCES, prefix)
-    ? SOURCES[prefix as keyof typeof SOURCES]
-    : null;
+  return Object.hasOwn(SOURCES, prefix) ? SOURCES[prefix as keyof typeof SOURCES] : null;
 }
 
 function SourceLabel({ statId }: { statId: string }) {
@@ -100,11 +89,7 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
             <CheckboxField
               checked={s.enabled}
               onChange={(enabled) => updateStat(i, { enabled })}
-              label={
-                <span className={s.enabled ? "text-fg" : "text-muted"}>
-                  {s.text}
-                </span>
-              }
+              label={<span className={s.enabled ? "text-fg" : "text-muted"}>{s.text}</span>}
             />
             <span className="mt-0.5 ml-6 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] leading-none text-muted">
               <SourceLabel statId={s.stat_id} />
@@ -166,25 +151,16 @@ const RANGE_ROWS: {
 ];
 
 type Tri = "any" | "yes" | "no";
-const toTri = (v: boolean | null): Tri =>
-  v === null ? "any" : v ? "yes" : "no";
+const toTri = (v: boolean | null): Tri => (v === null ? "any" : v ? "yes" : "no");
 const fromTri = (v: Tri): boolean | null => (v === "any" ? null : v === "yes");
 
-export function MiscFilters({
-  filters,
-  item,
-}: {
-  filters: FilterSet_Serialize;
-  item: ParsedItem_Serialize;
-}) {
+export function MiscFilters({ filters, item }: { filters: FilterSet_Serialize; item: ParsedItem_Serialize }) {
   const { t } = useTranslation();
   const updateRange = useOverlayStore((s) => s.updateRange);
   const setCorrupted = useOverlayStore((s) => s.setCorrupted);
   const rows = RANGE_ROWS.filter(({ key, itemValue }) => {
     const f = filters.misc[key];
-    return (
-      f.enabled || f.min !== null || f.max !== null || itemValue(item) !== null
-    );
+    return f.enabled || f.min !== null || f.max !== null || itemValue(item) !== null;
   });
 
   return (
@@ -195,15 +171,8 @@ export function MiscFilters({
       {rows.map(({ key, label }) => {
         const f = filters.misc[key];
         return (
-          <div
-            key={key}
-            className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-center gap-1.5"
-          >
-            <CheckboxField
-              checked={f.enabled}
-              onChange={(enabled) => updateRange(key, { enabled })}
-              label={t(label)}
-            />
+          <div key={key} className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-center gap-1.5">
+            <CheckboxField checked={f.enabled} onChange={(enabled) => updateRange(key, { enabled })} label={t(label)} />
             <NumberInput
               label={t("overlay.statMin", { stat: t(label) })}
               value={f.min}

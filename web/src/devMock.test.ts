@@ -1,5 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { expect, test, vi } from "vitest";
+
 import { commands } from "@src/bindings";
 import { installDevMock } from "@src/devMock";
 import { diagnostics, filterSet, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";

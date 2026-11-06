@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test } from "vitest";
+
 import { priceSummary, settings } from "@test/fixtures";
 import { callsOf, renderWithProviders, setupIpc } from "@test/ipc";
 import { Results } from "@views/overlay/Results";
@@ -10,7 +11,14 @@ if (!first) throw new Error("fixture has listings");
 const base = first;
 const summary = priceSummary({
   listings: [
-    { ...base, id: "1", seller: "Ann", whisper: "@Ann Hi", price: { amount: 40, currency: "chaos" }, equivalent: { amount: 2, currency: "divine" } },
+    {
+      ...base,
+      id: "1",
+      seller: "Ann",
+      whisper: "@Ann Hi",
+      price: { amount: 40, currency: "chaos" },
+      equivalent: { amount: 2, currency: "divine" },
+    },
     { ...base, id: "2", seller: "Ann", whisper: "@Ann Hi again" },
     { ...base, id: "3", seller: "Bob", whisper: null, item_level: 79 },
   ],
@@ -32,7 +40,8 @@ test("groups by seller, shows equivalents and copies whispers", async () => {
 
 test("ungrouped listings and chosen columns", async () => {
   setupIpc({
-    get_settings: () => settings({ overlay: { ...settings().overlay, group_by_seller: false, listing_columns: ["item_level"] } }),
+    get_settings: () =>
+      settings({ overlay: { ...settings().overlay, group_by_seller: false, listing_columns: ["item_level"] } }),
   });
   renderWithProviders(<Results summary={summary} />);
   await waitFor(() => expect(screen.getAllByTestId("listing")).toHaveLength(3));

@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
-import type { ParsedItem_Serialize } from "@src/bindings";
-import { commands } from "@src/bindings";
+
 import { useSettingsQuery } from "@hooks/queries";
 import { useCommand } from "@hooks/useCommand";
+import type { ParsedItem_Serialize } from "@src/bindings";
+import { commands } from "@src/bindings";
 
 type Site = "poe2db" | "wiki" | "craft_of_exile";
 

@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
+
+import { cx } from "@components/ui";
+import { useSettingsQuery } from "@hooks/queries";
+import { useCommand } from "@hooks/useCommand";
+import { type Flags, flagFor, toggleFlag, verdictFor } from "@lib/waystone";
 import type { ModFlag, ParsedItem_Serialize } from "@src/bindings";
 import { commands } from "@src/bindings";
-import { cx } from "@components/ui";
-import { useCommand } from "@hooks/useCommand";
-import { useSettingsQuery } from "@hooks/queries";
-import { type Flags, flagFor, toggleFlag, verdictFor } from "@lib/waystone";
 
 const FLAGS: ModFlag[] = ["danger", "warn", "good"];
 
@@ -22,7 +23,15 @@ export function FlagIcon({ flag }: { flag: ModFlag }) {
     good: "M7 1.5l1.7 3.5 3.8.5-2.8 2.6.7 3.8L7 10.1 3.6 11.9l.7-3.8L1.5 5.5l3.8-.5z",
   };
   return (
-    <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg
+      viewBox="0 0 14 14"
+      width="13"
+      height="13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
       <path d={paths[flag]} strokeLinejoin="round" />
     </svg>
   );
@@ -63,8 +72,14 @@ export function WaystoneMods({ item }: { item: ParsedItem_Serialize }) {
       >
         {verdict.kind !== "clear" && <FlagIcon flag={verdict.kind} />}
         <div className="flex flex-col">
-          <strong className="text-sm">{t(`waystone.verdict.${verdict.kind}`, { count: verdict[verdict.kind === "clear" ? "danger" : verdict.kind] })}</strong>
-          <span className="text-xs opacity-80">{t("waystone.summary", { danger: verdict.danger, warn: verdict.warn, good: verdict.good })}</span>
+          <strong className="text-sm">
+            {t(`waystone.verdict.${verdict.kind}`, {
+              count: verdict[verdict.kind === "clear" ? "danger" : verdict.kind],
+            })}
+          </strong>
+          <span className="text-xs opacity-80">
+            {t("waystone.summary", { danger: verdict.danger, warn: verdict.warn, good: verdict.good })}
+          </span>
         </div>
       </div>
       <div className="flex items-baseline justify-between">
@@ -87,11 +102,16 @@ export function WaystoneMods({ item }: { item: ParsedItem_Serialize }) {
               // biome-ignore lint/suspicious/noArrayIndexKey: a waystone can roll the same mod text twice.
               key={`${m.text}-${i}`}
               data-flag={flag ?? "none"}
-              className={cx("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 py-1", flag && ROW[flag])}
+              className={cx(
+                "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 py-1",
+                flag && ROW[flag],
+              )}
             >
               <span className="flex items-center gap-2 text-sm">
                 {flag && (
-                  <span className={cx("rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase", TAG[flag])}>
+                  <span
+                    className={cx("rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase", TAG[flag])}
+                  >
                     {t(`waystone.flag.${flag}`)}
                   </span>
                 )}

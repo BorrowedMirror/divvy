@@ -1,11 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { filterSet, settings } from "@test/fixtures";
-import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from "@lib/chord";
+
 import i18n from "@i18n/index";
+import { captureChord, formatChord, isFunctionKey, keyLabel, sameChord } from "@lib/chord";
 import { activeLocale, ageOf, formatAge, formatAmount, formatDateTime, formatPrice } from "@lib/format";
 import { IpcFailure, toIpcError, unwrap } from "@lib/ipc";
 import { rewiden, rewidenStat, widenValue } from "@lib/rewiden";
 import { looksLikeEmail, validateSettings } from "@lib/validate";
+import { filterSet, settings } from "@test/fixtures";
 
 const key = (code: string, mods: Partial<Record<"ctrlKey" | "altKey" | "shiftKey" | "metaKey", boolean>> = {}) => ({
   code,
@@ -58,7 +59,15 @@ describe("rewiden", () => {
   });
 
   test("reduced (negative) stats get an upper bound, mirroring Rust", () => {
-    const s = { stat_id: "x", text: "30% reduced Attribute Requirements", enabled: true, min: -33, max: null, item_values: [-30], tiers: [] };
+    const s = {
+      stat_id: "x",
+      text: "30% reduced Attribute Requirements",
+      enabled: true,
+      min: -33,
+      max: null,
+      item_values: [-30],
+      tiers: [],
+    };
     expect(rewidenStat(s, 10)).toMatchObject({ min: null, max: -27 });
     expect(rewidenStat(s, 0)).toMatchObject({ min: null, max: -30 });
   });
@@ -109,7 +118,9 @@ describe("chord capture", () => {
   });
 
   test("sameChord ignores modifier order", () => {
-    expect(sameChord({ modifiers: ["ctrl", "alt"], key: "KeyD" }, { modifiers: ["alt", "ctrl"], key: "KeyD" })).toBe(true);
+    expect(sameChord({ modifiers: ["ctrl", "alt"], key: "KeyD" }, { modifiers: ["alt", "ctrl"], key: "KeyD" })).toBe(
+      true,
+    );
     expect(sameChord({ modifiers: ["ctrl"], key: "KeyD" }, { modifiers: ["ctrl", "alt"], key: "KeyD" })).toBe(false);
     expect(sameChord({ modifiers: ["ctrl"], key: "KeyD" }, { modifiers: ["ctrl"], key: "KeyE" })).toBe(false);
     expect(sameChord({ modifiers: ["ctrl"], key: "KeyD" }, { modifiers: ["alt"], key: "KeyD" })).toBe(false);
@@ -160,7 +171,9 @@ describe("format", () => {
       expect(activeLocale()).toBe("de");
       expect(formatAmount(1234.56)).toBe("1.234,6");
       expect(formatPrice({ amount: 2.5, currency: "divine" })).toBe("2,5 divine");
-      expect(formatAge({ unit: "minutes", count: 10 })).toBe(new Intl.RelativeTimeFormat("de", { style: "narrow" }).format(-10, "minute"));
+      expect(formatAge({ unit: "minutes", count: 10 })).toBe(
+        new Intl.RelativeTimeFormat("de", { style: "narrow" }).format(-10, "minute"),
+      );
       expect(formatDateTime("2026-11-05T12:00:00Z")).toMatch(/2026/);
     } finally {
       await i18n.changeLanguage("en");
@@ -229,13 +242,27 @@ describe("validateSettings", () => {
         overlay: { ...s.overlay, opacity: 0.1, auto_hide_ms: 10_000 },
       }),
     ).toEqual({});
-    expect(validateSettings({ ...s, overlay: { ...s.overlay, auto_hide_ms: 1.5 } })).toHaveProperty(["overlay.auto_hide_ms"]);
+    expect(validateSettings({ ...s, overlay: { ...s.overlay, auto_hide_ms: 1.5 } })).toHaveProperty([
+      "overlay.auto_hide_ms",
+    ]);
   });
 
   test("e-mail check mirrors looks_like_email", () => {
     expect(looksLikeEmail("me@example.com")).toBe(true);
     expect(looksLikeEmail("a+b@x.y.z")).toBe(true);
-    for (const bad of ["", "@x.y", "a@b", "a@b.", "a@.b", "a@b@c.d", "a b@c.d", "a;b@c.d", "a@(b).c", "ü@b.c", "<a>@b.c"]) {
+    for (const bad of [
+      "",
+      "@x.y",
+      "a@b",
+      "a@b.",
+      "a@.b",
+      "a@b@c.d",
+      "a b@c.d",
+      "a;b@c.d",
+      "a@(b).c",
+      "ü@b.c",
+      "<a>@b.c",
+    ]) {
       expect(looksLikeEmail(bad)).toBe(false);
     }
   });
