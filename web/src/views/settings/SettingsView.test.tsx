@@ -210,6 +210,42 @@ describe("SettingsView", () => {
     expect(draft().overlay.links).toEqual({ poe2db: true, wiki: false, craft_of_exile: true });
   });
 
+  test("in game tab edits chat commands, stash searches and ctrl+scroll", async () => {
+    const user = userEvent.setup();
+    const { calls } = await mount();
+    await user.click(screen.getByRole("tab", { name: "In game" }));
+    expect(screen.getAllByTestId("chat-command")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "Add command" }));
+    const text = screen.getByRole("textbox", { name: "Command 2" });
+    await user.clear(text);
+    await user.type(text, "/kingsmarch");
+    await user.click(within(screen.getAllByTestId("chat-command")[1] as HTMLElement).getByRole("checkbox", { name: "Send" }));
+    const hotkey = screen.getByRole("button", { name: /^Command 2 hotkey/ });
+    await user.click(hotkey);
+    fireEvent.keyDown(hotkey, { code: "F6" });
+    expect(draft().chat.commands[1]).toEqual({ chord: { modifiers: [], key: "F6" }, text: "/kingsmarch", send: false });
+    expect(callsOf(calls, "rebind_hotkey")).toHaveLength(0);
+    await user.click(screen.getByRole("button", { name: "Add search" }));
+    await user.type(screen.getByRole("textbox", { name: "Search 1" }), "rarity: rare");
+    expect(draft().stash.searches[0]?.text).toBe("rarity: rare");
+    await user.click(screen.getByRole("switch", { name: /Switch stash tabs with Ctrl/ }));
+    expect(draft().stash.ctrl_scroll_tabs).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Remove /kingsmarch" }));
+    expect(draft().chat.commands).toHaveLength(1);
+  });
+
+  test("in game hotkeys reject a chord another hotkey uses", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "In game" }));
+    await user.click(screen.getByRole("button", { name: "Add search" }));
+    const hotkey = screen.getByRole("button", { name: /^Search 1 hotkey/ });
+    await user.click(hotkey);
+    fireEvent.keyDown(hotkey, { code: "F5" });
+    expect(await screen.findByText("This shortcut is already used by another action.")).toBeInTheDocument();
+    expect(draft().stash.searches[0]?.chord.key).toBe("");
+  });
+
   test("forget remembered stat choices", async () => {
     const user = userEvent.setup();
     const { calls } = await mount({ clear_filter_memory: () => null });

@@ -235,9 +235,15 @@ fn forward_trigger() -> ! {
 }
 
 pub fn run() {
-    // Process-wide env for the input hook; must run before any thread exists.
+    // Process-wide env for the input hook; must run before any thread exists. The mouse is
+    // only hooked when Ctrl + wheel stash tab switching is on (read straight from the file:
+    // plain I/O, no threads yet).
     #[cfg(feature = "native")]
-    rkl_platform::backend::init_process_env();
+    {
+        let wheel =
+            Paths::resolve().ok().and_then(|p| rkl_config::load(&p).ok()).is_some_and(|s| s.stash.ctrl_scroll_tabs);
+        rkl_platform::backend::init_process_env_with(wheel);
+    }
     let cli = cli::parse(std::env::args().skip(1));
     if cli.trigger {
         forward_trigger();

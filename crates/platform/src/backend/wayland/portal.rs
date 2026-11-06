@@ -24,27 +24,37 @@ enum Cmd {
     Bind(Vec<(HotkeyAction, Chord)>, Reply),
 }
 
-pub(crate) fn action_id(a: HotkeyAction) -> &'static str {
+pub(crate) fn action_id(a: HotkeyAction) -> String {
     match a {
-        HotkeyAction::PriceCheck => "price_check",
-        HotkeyAction::PriceCheckPinned => "price_check_pinned",
-        HotkeyAction::OpenSettings => "open_settings",
-        HotkeyAction::OpenTrade => "open_trade",
+        HotkeyAction::PriceCheck => "price_check".into(),
+        HotkeyAction::PriceCheckPinned => "price_check_pinned".into(),
+        HotkeyAction::OpenSettings => "open_settings".into(),
+        HotkeyAction::OpenTrade => "open_trade".into(),
+        HotkeyAction::Chat(i) => format!("chat_{i}"),
+        HotkeyAction::StashSearch(i) => format!("stash_search_{i}"),
     }
 }
 
 fn action_from_id(id: &str) -> Option<HotkeyAction> {
-    [HotkeyAction::PriceCheck, HotkeyAction::PriceCheckPinned, HotkeyAction::OpenSettings, HotkeyAction::OpenTrade]
-        .into_iter()
-        .find(|a| action_id(*a) == id)
+    let fixed =
+        [HotkeyAction::PriceCheck, HotkeyAction::PriceCheckPinned, HotkeyAction::OpenSettings, HotkeyAction::OpenTrade];
+    if let Some(a) = fixed.into_iter().find(|a| action_id(*a) == id) {
+        return Some(a);
+    }
+    if let Some(i) = id.strip_prefix("stash_search_").and_then(|n| n.parse().ok()) {
+        return Some(HotkeyAction::StashSearch(i));
+    }
+    id.strip_prefix("chat_").and_then(|n| n.parse().ok()).map(HotkeyAction::Chat)
 }
 
-fn description(a: HotkeyAction) -> &'static str {
+fn description(a: HotkeyAction) -> String {
     match a {
-        HotkeyAction::PriceCheck => "Price check the hovered item",
-        HotkeyAction::PriceCheckPinned => "Price check and pin the overlay",
-        HotkeyAction::OpenSettings => "Open RKL settings",
-        HotkeyAction::OpenTrade => "Open the last price check on the trade site",
+        HotkeyAction::PriceCheck => "Price check the hovered item".into(),
+        HotkeyAction::PriceCheckPinned => "Price check and pin the overlay".into(),
+        HotkeyAction::OpenSettings => "Open RKL settings".into(),
+        HotkeyAction::OpenTrade => "Open the last price check on the trade site".into(),
+        HotkeyAction::Chat(i) => format!("Chat command {}", u16::from(i) + 1),
+        HotkeyAction::StashSearch(i) => format!("Stash search {}", u16::from(i) + 1),
     }
 }
 
@@ -304,7 +314,7 @@ mod tests {
             HotkeyAction::OpenSettings,
             HotkeyAction::OpenTrade,
         ] {
-            assert_eq!(action_from_id(action_id(a)), Some(a));
+            assert_eq!(action_from_id(&action_id(a)), Some(a));
             assert!(!description(a).is_empty());
         }
         assert_eq!(action_from_id("nope"), None);

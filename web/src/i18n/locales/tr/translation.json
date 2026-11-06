@@ -132,7 +132,8 @@
       "trade": "Ticaret",
       "overlay": "Arayüz",
       "platform": "Platform",
-      "waystones": "Waystone'lar"
+      "waystones": "Waystone'lar",
+      "ingame": "Oyun içi"
     },
     "language": "Dil",
     "theme": "Tema",
@@ -390,5 +391,21 @@
     "left": "Filtrelerin solunda",
     "right": "Filtrelerin sağında",
     "auto": "Çok özellikli eşyalarda filtrelerin yanında"
+  },
+  "ingame": {
+    "chat": "Sohbet komutları",
+    "chatHelp": "Path of Exile 2 odaktayken her kısayol sohbeti açar, komutu yapıştırır ve gönderir. Her basış bir komut gönderir.",
+    "commandText": "Komut {{n}}",
+    "commandHotkey": "Komut {{n}} kısayolu",
+    "send": "Gönder",
+    "addCommand": "Komut ekle",
+    "stash": "Depo aramaları",
+    "stashHelp": "Her kısayol, depo veya satıcı arama kutusunu (Ctrl+F) kendi metniyle doldurur.",
+    "searchText": "Arama {{n}}",
+    "searchHotkey": "Arama {{n}} kısayolu",
+    "addSearch": "Arama ekle",
+    "remove": "{{what}} öğesini kaldır",
+    "ctrlScroll": "Ctrl + fare tekerleğiyle depo sekmeleri arasında geçiş yap",
+    "ctrlScrollHelp": "Oyunun üzerindeki her tekerlek adımı, sol veya sağ ok tuşuna bir kez basar. RKL yeniden başlatıldıktan sonra geçerli olur."
   }
 }

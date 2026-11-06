@@ -129,7 +129,8 @@
       "trade": "交易",
       "overlay": "浮動視窗",
       "platform": "平台",
-      "waystones": "換界石"
+      "waystones": "換界石",
+      "ingame": "遊戲內"
     },
     "language": "語言",
     "theme": "主題",
@@ -381,5 +382,21 @@
     "left": "條件左側",
     "right": "條件右側",
     "auto": "屬性較多的物品顯示在條件旁邊"
+  },
+  "ingame": {
+    "chat": "聊天指令",
+    "chatHelp": "當 Path of Exile 2 為作用中視窗時，每個熱鍵會開啟聊天框、貼上指令並送出。按一次送出一條指令。",
+    "commandText": "指令 {{n}}",
+    "commandHotkey": "指令 {{n}} 熱鍵",
+    "send": "送出",
+    "addCommand": "新增指令",
+    "stash": "倉庫搜尋",
+    "stashHelp": "每個熱鍵會將其文字填入倉庫或商人的搜尋框（Ctrl+F）。",
+    "searchText": "搜尋 {{n}}",
+    "searchHotkey": "搜尋 {{n}} 熱鍵",
+    "addSearch": "新增搜尋",
+    "remove": "移除{{what}}",
+    "ctrlScroll": "使用 Ctrl+滑鼠滾輪切換倉庫分頁",
+    "ctrlScrollHelp": "在遊戲上方每滾動一格滾輪，就按一次左方向鍵或右方向鍵。重新啟動 RKL 後生效。"
   }
 }

@@ -42,7 +42,7 @@ export function setupIpc(handlers: Record<string, Handler> = {}): Call[] {
       return current;
     },
     rebind_hotkey: async (a) => {
-      const action = a?.action as HotkeyAction;
+      const action = a?.action as Extract<HotkeyAction, string>;
       current = { ...current, hotkeys: { ...current.hotkeys, [action]: a?.chord as Chord } };
       await emit("settings-changed", { settings: current });
       return null;

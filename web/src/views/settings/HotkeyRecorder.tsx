@@ -13,15 +13,22 @@ type Props = {
   others: Chord[];
   onBound: (chord: Chord) => void;
   error?: string;
+  /** Shown name (default: the action's translated name). */
+  label?: string;
+  /** DOM id stem (default: the action name). */
+  id?: string;
+  /** Only edit the draft (saved with the Save button) instead of rebinding right away. */
+  draft?: boolean;
 };
 
-export function HotkeyRecorder({ action, chord, others, onBound, error }: Props) {
+export function HotkeyRecorder({ action, chord, others, onBound, error, label: labelProp, id, draft }: Props) {
   const { t } = useTranslation();
   const [recording, setRecording] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const label = t(`hotkeys.${action}`);
-  const msgId = `hotkey-${action}-msg`;
+  const stem = id ?? (typeof action === "string" ? action : JSON.stringify(action).replace(/\W+/g, "-"));
+  const label = labelProp ?? t(`hotkeys.${typeof action === "string" ? action : "price_check"}`);
+  const msgId = `hotkey-${stem}-msg`;
 
   const onKeyDown = async (e: KeyboardEvent<HTMLButtonElement>) => {
     if (!recording) return;
@@ -50,6 +57,11 @@ export function HotkeyRecorder({ action, chord, others, onBound, error }: Props)
   };
 
   const bind = async (next: Chord) => {
+    if (draft) {
+      setMessage(null);
+      onBound(next);
+      return;
+    }
     setBusy(true);
     const out = await commands.rebindHotkey(action, next);
     setBusy(false);
@@ -67,14 +79,14 @@ export function HotkeyRecorder({ action, chord, others, onBound, error }: Props)
   return (
     <div className="flex flex-col gap-1 py-1.5">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm" id={`hotkey-${action}-label`}>
+        <span className="text-sm" id={`hotkey-${stem}-label`}>
           {label}
         </span>
         <span className="flex items-center gap-1">
         <button
           type="button"
-          aria-labelledby={`hotkey-${action}-label hotkey-${action}-btn`}
-          id={`hotkey-${action}-btn`}
+          aria-labelledby={`hotkey-${stem}-label hotkey-${stem}-btn`}
+          id={`hotkey-${stem}-btn`}
           aria-describedby={shown ? msgId : undefined}
           aria-pressed={recording}
           disabled={busy}

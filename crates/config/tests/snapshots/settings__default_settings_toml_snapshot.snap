@@ -62,6 +62,34 @@ craft_of_exile = true
 "Players have #% less Recovery Rate of Life and Energy Shield" = "danger"
 "Players have -#% to all maximum Resistances" = "danger"
 
+[[chat.commands]]
+text = "/hideout"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = "F5"
+
+[[chat.commands]]
+text = "/kingsmarch"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/exit"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[stash]
+searches = []
+ctrl_scroll_tabs = false
+
 [ui]
 language = "en"
 theme = "system"

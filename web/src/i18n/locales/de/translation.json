@@ -132,7 +132,8 @@
       "trade": "Handel",
       "overlay": "Overlay",
       "platform": "Plattform",
-      "waystones": "Wegsteine"
+      "waystones": "Wegsteine",
+      "ingame": "Im Spiel"
     },
     "language": "Sprache",
     "theme": "Design",
@@ -390,5 +391,21 @@
     "left": "Links der Filter",
     "right": "Rechts der Filter",
     "auto": "Neben den Filtern bei Gegenständen mit vielen Werten"
+  },
+  "ingame": {
+    "chat": "Chatbefehle",
+    "chatHelp": "Jedes Tastenkürzel öffnet den Chat, fügt den Befehl ein und sendet ihn, während Path of Exile 2 im Fokus ist. Ein Tastendruck sendet einen Befehl.",
+    "commandText": "Befehl {{n}}",
+    "commandHotkey": "Tastenkürzel für Befehl {{n}}",
+    "send": "Senden",
+    "addCommand": "Befehl hinzufügen",
+    "stash": "Truhensuchen",
+    "stashHelp": "Jedes Tastenkürzel füllt das Suchfeld der Truhe oder des Händlers (Strg+F) mit seinem Text.",
+    "searchText": "Suche {{n}}",
+    "searchHotkey": "Tastenkürzel für Suche {{n}}",
+    "addSearch": "Suche hinzufügen",
+    "remove": "{{what}} entfernen",
+    "ctrlScroll": "Truhenreiter mit Strg + Mausrad wechseln",
+    "ctrlScrollHelp": "Jeder Mausradschritt über dem Spiel drückt einmal die Pfeiltaste links oder rechts. Wird nach einem Neustart von RKL wirksam."
   }
 }

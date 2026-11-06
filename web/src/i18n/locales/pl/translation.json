@@ -138,7 +138,8 @@
       "trade": "Handel",
       "overlay": "Nakładka",
       "platform": "Platforma",
-      "waystones": "Waystone'y"
+      "waystones": "Waystone'y",
+      "ingame": "W grze"
     },
     "language": "Język",
     "theme": "Motyw",
@@ -408,5 +409,21 @@
     "left": "Na lewo od filtrów",
     "right": "Na prawo od filtrów",
     "auto": "Obok filtrów dla przedmiotów z wieloma statystykami"
+  },
+  "ingame": {
+    "chat": "Polecenia czatu",
+    "chatHelp": "Każdy skrót otwiera czat, wkleja polecenie i je wysyła, gdy Path of Exile 2 jest aktywne. Jedno naciśnięcie wysyła jedno polecenie.",
+    "commandText": "Polecenie {{n}}",
+    "commandHotkey": "Skrót polecenia {{n}}",
+    "send": "Wyślij",
+    "addCommand": "Dodaj polecenie",
+    "stash": "Wyszukiwania w skrytce",
+    "stashHelp": "Każdy skrót wpisuje swój tekst w pole wyszukiwania skrytki lub handlarza (Ctrl+F).",
+    "searchText": "Wyszukiwanie {{n}}",
+    "searchHotkey": "Skrót wyszukiwania {{n}}",
+    "addSearch": "Dodaj wyszukiwanie",
+    "remove": "Usuń: {{what}}",
+    "ctrlScroll": "Przełączaj zakładki skrytki za pomocą Ctrl + kółka myszy",
+    "ctrlScrollHelp": "Każdy krok kółka nad grą naciska raz klawisz strzałki w lewo lub w prawo. Działa po ponownym uruchomieniu RKL."
   }
 }

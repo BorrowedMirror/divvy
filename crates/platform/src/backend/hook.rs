@@ -17,9 +17,20 @@ pub(crate) const HOOK_CHANNEL_CAPACITY: usize = 1024;
 /// The environment variable the rustdesk-org rdev fork reads to hook the keyboard only.
 pub const KEYBOARD_ONLY_ENV: &str = "KEYBOARD_ONLY";
 
+static ENV_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 /// Set `KEYBOARD_ONLY` for rdev. Call it from `main` before any other thread exists; the
-/// hook calls it again (a no-op once set) as a fallback.
+/// hook calls it again (a no-op once done) as a fallback.
 pub fn init_process_env() {
+    init_process_env_with(false);
+}
+
+/// Like [`init_process_env`], but `with_mouse` leaves the mouse hooked too (Ctrl + wheel stash
+/// tab switching needs wheel events; it costs a little mouse latency, most on Windows).
+pub fn init_process_env_with(with_mouse: bool) {
+    if ENV_DONE.swap(true, std::sync::atomic::Ordering::SeqCst) || with_mouse {
+        return;
+    }
     if std::env::var_os(KEYBOARD_ONLY_ENV).is_none() {
         // SAFETY: rdev exposes this switch only as an environment variable. Writing the
         // environment races with concurrent `getenv` in other threads; callers are told to run

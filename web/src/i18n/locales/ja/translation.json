@@ -129,7 +129,8 @@
       "trade": "トレード",
       "overlay": "オーバーレイ",
       "platform": "プラットフォーム",
-      "waystones": "ウェイストーン"
+      "waystones": "ウェイストーン",
+      "ingame": "ゲーム内"
     },
     "language": "言語",
     "theme": "テーマ",
@@ -381,5 +382,21 @@
     "left": "条件の左",
     "right": "条件の右",
     "auto": "ステータスが多いアイテムでは条件の横"
+  },
+  "ingame": {
+    "chat": "チャットコマンド",
+    "chatHelp": "Path of Exile 2 にフォーカスがある間、各ホットキーでチャットを開き、コマンドを貼り付けて送信します。1 回押すごとに 1 つのコマンドを送信します。",
+    "commandText": "コマンド {{n}}",
+    "commandHotkey": "コマンド {{n}} のホットキー",
+    "send": "送信",
+    "addCommand": "コマンドを追加",
+    "stash": "スタッシュ検索",
+    "stashHelp": "各ホットキーで、スタッシュまたは商人の検索欄 (Ctrl+F) にそのテキストを入力します。",
+    "searchText": "検索 {{n}}",
+    "searchHotkey": "検索 {{n}} のホットキー",
+    "addSearch": "検索を追加",
+    "remove": "{{what}} を削除",
+    "ctrlScroll": "Ctrl+マウスホイールでスタッシュタブを切り替える",
+    "ctrlScrollHelp": "ゲーム上でホイールを 1 段回すごとに、左または右の矢印キーを 1 回押します。RKL の再起動後に反映されます。"
   }
 }

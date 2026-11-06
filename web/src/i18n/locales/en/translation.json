@@ -132,7 +132,8 @@
       "trade": "Trade",
       "overlay": "Overlay",
       "platform": "Platform",
-      "waystones": "Waystones"
+      "waystones": "Waystones",
+      "ingame": "In game"
     },
     "language": "Language",
     "theme": "Theme",
@@ -390,5 +391,21 @@
     "left": "Left of the filters",
     "right": "Right of the filters",
     "auto": "Beside the filters for items with many stats"
+  },
+  "ingame": {
+    "chat": "Chat commands",
+    "chatHelp": "Each hotkey opens the chat, pastes the command and sends it, while Path of Exile 2 has focus. One key press sends one command.",
+    "commandText": "Command {{n}}",
+    "commandHotkey": "Command {{n}} hotkey",
+    "send": "Send",
+    "addCommand": "Add command",
+    "stash": "Stash searches",
+    "stashHelp": "Each hotkey fills the stash or vendor search box (Ctrl+F) with its text.",
+    "searchText": "Search {{n}}",
+    "searchHotkey": "Search {{n}} hotkey",
+    "addSearch": "Add search",
+    "remove": "Remove {{what}}",
+    "ctrlScroll": "Switch stash tabs with Ctrl + mouse wheel",
+    "ctrlScrollHelp": "Each wheel step over the game presses the Left or Right arrow key once, with Ctrl still held. Takes effect after restarting RKL (it needs a mouse hook, which adds a little input latency on Windows)."
   }
 }

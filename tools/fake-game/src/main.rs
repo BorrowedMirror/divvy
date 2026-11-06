@@ -46,6 +46,10 @@ struct Args {
     /// Window size `WxH`.
     #[arg(long, default_value = "1280x720", value_parser = parse_size)]
     size: (u32, u32),
+    /// Print `KEY <mods+code>` for every key press, and `PASTE <text>` on Ctrl+V with the
+    /// clipboard's text (chat command / stash search tests).
+    #[arg(long)]
+    log_keys: bool,
 }
 
 fn parse_size(s: &str) -> Result<(u32, u32), String> {
@@ -128,6 +132,7 @@ struct App {
     c_down: bool,
     /// `FAKE_GAME_DEBUG=1`: log every window event to stderr.
     debug: bool,
+    log_keys: bool,
 }
 
 impl App {
@@ -175,6 +180,29 @@ impl App {
         }
     }
 
+    fn log_key(&mut self, key: winit::keyboard::PhysicalKey) {
+        let code = match key {
+            winit::keyboard::PhysicalKey::Code(c) => format!("{c:?}"),
+            other @ winit::keyboard::PhysicalKey::Unidentified(_) => format!("{other:?}"),
+        };
+        let mut name = String::new();
+        if self.mods.control_key() {
+            name.push_str("ctrl+");
+        }
+        if self.mods.alt_key() {
+            name.push_str("alt+");
+        }
+        if self.mods.shift_key() {
+            name.push_str("shift+");
+        }
+        name.push_str(&code);
+        say(&format!("KEY {name}"));
+        if name == "ctrl+KeyV" {
+            let text = self.clipboard.get_text().unwrap_or_default();
+            say(&format!("PASTE {text}"));
+        }
+    }
+
     fn fail(&mut self, el: &ActiveEventLoop, e: anyhow::Error) {
         self.error = Some(e);
         el.exit();
@@ -211,6 +239,9 @@ impl ApplicationHandler for App {
                 event: KeyEvent { physical_key, logical_key, state, repeat: false, .. },
                 ..
             } => {
+                if self.log_keys && state == ElementState::Pressed {
+                    self.log_key(physical_key);
+                }
                 let Some(text) = self.items.for_key(physical_key, &logical_key, self.mods) else { return };
                 let text = text.to_owned();
                 // Copy on press. Virtual keyboards (wtype) swap the keymap right before the
@@ -254,6 +285,7 @@ fn main() -> anyhow::Result<()> {
         error: None,
         c_down: false,
         debug: std::env::var_os("FAKE_GAME_DEBUG").is_some_and(|v| v == "1"),
+        log_keys: args.log_keys,
     };
     event_loop.run_app(&mut app)?;
     say("EXIT");

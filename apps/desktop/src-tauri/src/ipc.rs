@@ -501,6 +501,22 @@ pub async fn rebind_hotkey(
         HotkeyAction::PriceCheckPinned => settings.hotkeys.price_check_pinned = chord,
         HotkeyAction::OpenSettings => settings.hotkeys.open_settings = chord,
         HotkeyAction::OpenTrade => settings.hotkeys.open_trade = chord,
+        HotkeyAction::Chat(n) => {
+            settings
+                .chat
+                .commands
+                .get_mut(usize::from(n))
+                .ok_or_else(|| IpcError::new("config", "no such chat command"))?
+                .chord = chord;
+        }
+        HotkeyAction::StashSearch(n) => {
+            settings
+                .stash
+                .searches
+                .get_mut(usize::from(n))
+                .ok_or_else(|| IpcError::new("config", "no such stash search"))?
+                .chord = chord;
+        }
     }
     apply_off_main(app, Arc::clone(&state), settings).await.map(|_| ())
 }

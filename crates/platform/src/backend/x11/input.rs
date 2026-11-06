@@ -110,6 +110,10 @@ pub(crate) fn enigo_key(code: &str) -> Option<enigo::Key> {
     Some(match code {
         "Escape" => K::Escape,
         "Enter" => K::Return,
+        "ArrowLeft" => K::LeftArrow,
+        "ArrowRight" => K::RightArrow,
+        "ArrowUp" => K::UpArrow,
+        "ArrowDown" => K::DownArrow,
         "Space" => K::Space,
         "Tab" => K::Tab,
         "Backspace" => K::Backspace,
@@ -349,6 +353,12 @@ mod tests {
         let sim = unreachable_enigo().with_fallback(Box::new(fallback));
         sim.send_chord(&chord).unwrap();
         sim.send_chord(&chord).unwrap();
+    }
+
+    #[test]
+    fn maps_arrow_keys() {
+        assert_eq!(enigo_key("ArrowLeft"), Some(enigo::Key::LeftArrow));
+        assert_eq!(enigo_key("ArrowRight"), Some(enigo::Key::RightArrow));
     }
 
     #[test]

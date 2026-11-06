@@ -17,6 +17,8 @@ pub struct Settings {
     pub trade: TradeSettings,
     pub overlay: OverlaySettings,
     pub waystone: WaystoneSettings,
+    pub chat: ChatSettings,
+    pub stash: StashSettings,
     pub ui: UiSettings,
     pub platform: PlatformSettings,
 }
@@ -136,6 +138,53 @@ pub enum OverlaySide {
     Last,
 }
 
+/// Most chat commands / stash searches that can be configured.
+pub const MAX_MACROS: usize = 20;
+
+/// A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. One
+/// key press sends one command, like Sidekick and Exiled Exchange 2.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+pub struct ChatCommand {
+    pub chord: Chord,
+    pub text: String,
+    /// Press Enter after the text (off: leave it in the chat box, e.g. `@last `).
+    pub send: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(default)]
+pub struct ChatSettings {
+    pub commands: Vec<ChatCommand>,
+}
+
+impl Default for ChatSettings {
+    fn default() -> Self {
+        let cmd = |chord: Chord, text: &str| ChatCommand { chord, text: text.into(), send: true };
+        Self {
+            commands: vec![
+                cmd(Chord::new(&[], "F5"), "/hideout"),
+                cmd(Chord::unbound(), "/kingsmarch"),
+                cmd(Chord::unbound(), "/exit"),
+            ],
+        }
+    }
+}
+
+/// A saved stash search: the hotkey fills the stash (or vendor) search box with `text`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+pub struct StashSearch {
+    pub chord: Chord,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize, specta::Type)]
+#[serde(default)]
+pub struct StashSettings {
+    pub searches: Vec<StashSearch>,
+    /// Ctrl + mouse wheel over the game switches stash tabs (one arrow key per wheel step).
+    pub ctrl_scroll_tabs: bool,
+}
+
 /// How a waystone mod is flagged in the panel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "snake_case")]
@@ -204,6 +253,8 @@ impl Default for Settings {
             trade: TradeSettings::default(),
             overlay: OverlaySettings::default(),
             waystone: WaystoneSettings::default(),
+            chat: ChatSettings::default(),
+            stash: StashSettings::default(),
             ui: UiSettings::default(),
             platform: PlatformSettings::default(),
         }
@@ -509,18 +560,34 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         return Err(invalid("league.league", "must be set when league.auto_detect is false"));
     }
 
-    let hotkeys = [
-        ("hotkeys.price_check", &s.hotkeys.price_check),
-        ("hotkeys.price_check_pinned", &s.hotkeys.price_check_pinned),
-        ("hotkeys.open_settings", &s.hotkeys.open_settings),
-        ("hotkeys.open_trade", &s.hotkeys.open_trade),
+    if s.chat.commands.len() > MAX_MACROS || s.stash.searches.len() > MAX_MACROS {
+        return Err(invalid("chat.commands", format!("at most {MAX_MACROS} chat commands and stash searches")));
+    }
+    for (field, text) in s
+        .chat
+        .commands
+        .iter()
+        .map(|c| ("chat.commands", &c.text))
+        .chain(s.stash.searches.iter().map(|c| ("stash.searches", &c.text)))
+    {
+        if text.len() > 200 || text.contains('\n') {
+            return Err(invalid(field, "text must be one line of at most 200 characters"));
+        }
+    }
+    let mut hotkeys: Vec<(String, &Chord)> = vec![
+        ("hotkeys.price_check".into(), &s.hotkeys.price_check),
+        ("hotkeys.price_check_pinned".into(), &s.hotkeys.price_check_pinned),
+        ("hotkeys.open_settings".into(), &s.hotkeys.open_settings),
+        ("hotkeys.open_trade".into(), &s.hotkeys.open_trade),
     ];
+    hotkeys.extend(s.chat.commands.iter().enumerate().map(|(i, c)| (format!("chat.commands[{i}]"), &c.chord)));
+    hotkeys.extend(s.stash.searches.iter().enumerate().map(|(i, c)| (format!("stash.searches[{i}]"), &c.chord)));
     for (i, (field, chord)) in hotkeys.iter().enumerate() {
         validate_chord(field, chord)?;
         if let Some((other, _)) =
             hotkeys[..i].iter().filter(|_| !chord.is_unbound()).find(|(_, c)| chord_key(c) == chord_key(chord))
         {
-            return Err(invalid(*field, format!("`{chord}` is already bound to {other}")));
+            return Err(invalid(field, format!("`{chord}` is already bound to {other}")));
         }
     }
 

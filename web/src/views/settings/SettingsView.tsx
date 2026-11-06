@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   BackendKind,
-  HotkeyAction,
+  Chord,
   ListingColumn,
   OnlineStatus,
   OverlaySide,
@@ -31,7 +31,7 @@ import { unwrap } from "../../lib/ipc";
 type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };
 
-const TABS = ["general", "hotkeys", "trade", "overlay", "waystones", "platform"] as const;
+const TABS = ["general", "hotkeys", "ingame", "trade", "overlay", "waystones", "platform"] as const;
 
 /** `#/settings?tab=waystones` opens that tab (the panel's "Edit flags" link). */
 function initialTab(): (typeof TABS)[number] {
@@ -132,6 +132,9 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
         </Tabs.Panel>
         <Tabs.Panel value="hotkeys">
           <HotkeysTab s={draft} update={update} errors={errors} />
+        </Tabs.Panel>
+        <Tabs.Panel value="ingame">
+          <InGameTab s={draft} update={update} errors={errors} />
         </Tabs.Panel>
         <Tabs.Panel value="trade">
           <TradeTab s={draft} update={update} errors={errors} />
@@ -242,12 +245,12 @@ function HotkeysTab({ s, update, errors }: TabProps) {
   return (
     <div className="flex flex-col">
       <p className="mb-2 text-xs text-muted">{t("hotkeys.help")}</p>
-      {HOTKEY_ACTIONS.map((action: HotkeyAction) => (
+      {HOTKEY_ACTIONS.map((action) => (
         <HotkeyRecorder
           key={action}
           action={action}
           chord={s.hotkeys[action]}
-          others={HOTKEY_ACTIONS.filter((a) => a !== action).map((a) => s.hotkeys[a])}
+          others={allChords(s).filter((c) => c !== s.hotkeys[action])}
           error={errors[`hotkeys.${action}`]}
           onBound={(chord) => persisted((d) => ({ ...d, hotkeys: { ...d.hotkeys, [action]: chord } }))}
         />
@@ -258,6 +261,112 @@ function HotkeysTab({ s, update, errors }: TabProps) {
         checked={s.hotkeys.advanced_copy}
         onChange={(advanced_copy) => update((d) => ({ ...d, hotkeys: { ...d.hotkeys, advanced_copy } }))}
       />
+    </div>
+  );
+}
+
+/** Every hotkey chord in the settings, for clash checks. */
+function allChords(s: Settings_Serialize): Chord[] {
+  return [
+    ...HOTKEY_ACTIONS.map((a) => s.hotkeys[a]),
+    ...s.chat.commands.map((c) => c.chord),
+    ...s.stash.searches.map((c) => c.chord),
+  ];
+}
+
+function InGameTab({ s, update, errors }: TabProps) {
+  const { t } = useTranslation();
+  const chords = allChords(s);
+  const others = (mine: Chord) => {
+    const i = chords.indexOf(mine);
+    return chords.filter((_, j) => j !== i);
+  };
+  const setChat = (commands: Settings_Serialize["chat"]["commands"]) => update((d) => ({ ...d, chat: { commands } }));
+  const setStash = (patch: Partial<Settings_Serialize["stash"]>) => update((d) => ({ ...d, stash: { ...d.stash, ...patch } }));
+  const input = "min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-2 py-1 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold";
+  return (
+    <div className="flex flex-col gap-5">
+      <section aria-labelledby="chat-heading" className="flex flex-col gap-2">
+        <h3 id="chat-heading" className="text-sm font-semibold">{t("ingame.chat")}</h3>
+        <p className="text-xs text-muted">{t("ingame.chatHelp")}</p>
+        {s.chat.commands.map((c, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2" data-testid="chat-command">
+            <input
+              aria-label={t("ingame.commandText", { n: i + 1 })}
+              className={input}
+              value={c.text}
+              onChange={(e) => setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)))}
+            />
+            <CheckboxField
+              label={t("ingame.send")}
+              checked={c.send}
+              onChange={(send) => setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, send } : x)))}
+            />
+            <HotkeyRecorder
+              action={{ chat: i }}
+              id={`chat-${i}`}
+              draft
+              label={t("ingame.commandHotkey", { n: i + 1 })}
+              chord={c.chord}
+              others={others(c.chord)}
+              error={errors[`chat.commands[${i}]`]}
+              onBound={(chord) => setChat(s.chat.commands.map((x, j) => (j === i ? { ...x, chord } : x)))}
+            />
+            <Button aria-label={t("ingame.remove", { what: c.text || t("ingame.chat") })} onClick={() => setChat(s.chat.commands.filter((_, j) => j !== i))}>
+              ×
+            </Button>
+          </div>
+        ))}
+        <div>
+          <Button
+            disabled={s.chat.commands.length >= 20}
+            onClick={() => setChat([...s.chat.commands, { chord: { modifiers: [], key: "" }, text: "/", send: true }])}
+          >
+            {t("ingame.addCommand")}
+          </Button>
+        </div>
+      </section>
+      <section aria-labelledby="stash-heading" className="flex flex-col gap-2">
+        <h3 id="stash-heading" className="text-sm font-semibold">{t("ingame.stash")}</h3>
+        <p className="text-xs text-muted">{t("ingame.stashHelp")}</p>
+        {s.stash.searches.map((c, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2" data-testid="stash-search">
+            <input
+              aria-label={t("ingame.searchText", { n: i + 1 })}
+              className={input}
+              value={c.text}
+              onChange={(e) => setStash({ searches: s.stash.searches.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)) })}
+            />
+            <HotkeyRecorder
+              action={{ stash_search: i }}
+              id={`stash-${i}`}
+              draft
+              label={t("ingame.searchHotkey", { n: i + 1 })}
+              chord={c.chord}
+              others={others(c.chord)}
+              error={errors[`stash.searches[${i}]`]}
+              onBound={(chord) => setStash({ searches: s.stash.searches.map((x, j) => (j === i ? { ...x, chord } : x)) })}
+            />
+            <Button aria-label={t("ingame.remove", { what: c.text || t("ingame.stash") })} onClick={() => setStash({ searches: s.stash.searches.filter((_, j) => j !== i) })}>
+              ×
+            </Button>
+          </div>
+        ))}
+        <div>
+          <Button
+            disabled={s.stash.searches.length >= 20}
+            onClick={() => setStash({ searches: [...s.stash.searches, { chord: { modifiers: [], key: "" }, text: "" }] })}
+          >
+            {t("ingame.addSearch")}
+          </Button>
+        </div>
+        <SwitchField
+          label={t("ingame.ctrlScroll")}
+          description={t("ingame.ctrlScrollHelp")}
+          checked={s.stash.ctrl_scroll_tabs}
+          onChange={(ctrl_scroll_tabs) => setStash({ ctrl_scroll_tabs })}
+        />
+      </section>
     </div>
   );
 }

@@ -617,3 +617,26 @@ fn waystone_flags_default_and_validate() {
     s.waystone.flags.insert("  ".into(), ModFlag::Warn);
     assert!(validate(&s).is_err());
 }
+
+#[test]
+fn chat_commands_and_stash_searches_validate() {
+    let mut s = Settings::default();
+    assert_eq!(s.chat.commands[0].text, "/hideout");
+    assert_eq!(s.chat.commands[0].chord, Chord::new(&[], "F5"));
+    assert!(s.stash.searches.is_empty() && !s.stash.ctrl_scroll_tabs);
+    validate(&s).unwrap();
+    s.stash.searches.push(rkl_config::StashSearch { chord: Chord::new(&[], "F5"), text: "\"Rarity: Rare\"".into() });
+    let err = validate(&s).unwrap_err().to_string();
+    assert!(err.contains("already bound"), "F5 is used twice: {err}");
+    s.stash.searches[0].chord = Chord::new(&[KeyModifier::Alt], "Digit1");
+    validate(&s).unwrap();
+    s.chat.commands[1].text = "a\nb".into();
+    assert!(validate(&s).is_err(), "one line only");
+    s.chat.commands[1].text = "/kingsmarch".into();
+    s.chat.commands.extend((0..20).map(|i| rkl_config::ChatCommand {
+        chord: Chord::unbound(),
+        text: format!("/c{i}"),
+        send: true,
+    }));
+    assert!(validate(&s).is_err(), "too many");
+}

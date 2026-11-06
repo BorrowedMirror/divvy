@@ -49,6 +49,55 @@ pub fn handle_item_text(
     Ok((item, filters))
 }
 
+/// Pause between macro steps, so the game keeps up.
+const MACRO_STEP_GAP: std::time::Duration = std::time::Duration::from_millis(40);
+
+/// Run a chat command / stash search in the game: only while the game has focus, one at a
+/// time, on a worker thread; the clipboard text it borrows for pasting is put back afterwards.
+pub fn run_macro(app: &AppHandle, steps: Vec<logic::MacroStep>) {
+    let app = app.clone();
+    let _ = std::thread::Builder::new().name("rkl-macro".into()).spawn(move || {
+        let state = app.state::<Arc<AppState>>();
+        let Some(platform) = state.platform.clone() else { return };
+        if !logic::may_copy(platform.capabilities.window_tracking, || platform.window_tracker.is_game_focused()) {
+            return;
+        }
+        let Ok(_one_at_a_time) = state.macro_lock.lock() else { return };
+        let previous = platform.clipboard.get_text().ok().flatten();
+        let mut pasted = false;
+        for step in steps {
+            let result = match step {
+                logic::MacroStep::Press(chord) => platform.input_simulator.send_chord(&chord),
+                logic::MacroStep::Paste(text) => {
+                    pasted = true;
+                    platform.clipboard.set_text(&text).and_then(|()| {
+                        std::thread::sleep(MACRO_STEP_GAP);
+                        platform
+                            .input_simulator
+                            .send_chord(&rkl_platform::Chord::new(&[rkl_platform::KeyModifier::Ctrl], "KeyV"))
+                    })
+                }
+            };
+            if let Err(e) = result {
+                state.record_error(format!("chat command / stash search: {e}"));
+                break;
+            }
+            std::thread::sleep(MACRO_STEP_GAP);
+        }
+        if pasted {
+            std::thread::sleep(std::time::Duration::from_millis(150));
+            let restored = match previous {
+                Some(text) => platform.clipboard.set_text(&text),
+                None if !platform.clipboard.has_non_text() => platform.clipboard.clear(),
+                None => Ok(()),
+            };
+            if let Err(e) = restored {
+                state.record_error(format!("restore clipboard: {e}"));
+            }
+        }
+    });
+}
+
 /// Full hotkey flow: copy from the game, then [`handle_item_text`].
 pub async fn run_price_check(
     app: AppHandle,
@@ -550,6 +599,24 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
         (HotkeyAction::OpenTrade, settings.hotkeys.open_trade.clone()),
     ]
     .into_iter()
+    .chain(
+        settings
+            .chat
+            .commands
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| !c.text.trim().is_empty())
+            .map(|(i, c)| (HotkeyAction::Chat(i as u8), c.chord.clone())),
+    )
+    .chain(
+        settings
+            .stash
+            .searches
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| !c.text.trim().is_empty())
+            .map(|(i, c)| (HotkeyAction::StashSearch(i as u8), c.chord.clone())),
+    )
     .filter(|(_, chord)| !chord.is_unbound())
     .collect();
     platform.hotkeys.register_all(&bindings)?;
@@ -623,6 +690,18 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
                 logic::HotkeyEffect::HideSettings => {
                     let _ = hide_settings(&app);
                 }
+                logic::HotkeyEffect::RunChat(i) => {
+                    let cmd = state.settings().chat.commands.get(usize::from(i)).cloned();
+                    if let Some(c) = cmd {
+                        run_macro(&app, logic::chat_steps(&c.text, c.send));
+                    }
+                }
+                logic::HotkeyEffect::RunStash(i) => {
+                    let search = state.settings().stash.searches.get(usize::from(i)).cloned();
+                    if let Some(s) = search {
+                        run_macro(&app, logic::stash_steps(&s.text));
+                    }
+                }
                 logic::HotkeyEffect::OpenTrade => {
                     let url = state.last_price.lock().ok().and_then(|p| p.as_ref().and_then(|s| s.trade_url.clone()));
                     match url {
@@ -663,14 +742,34 @@ pub fn spawn_input_loop(app: &AppHandle, state: &AppState) {
     };
     let app = app.clone();
     let spawned = std::thread::Builder::new().name("rkl-input".into()).spawn(move || {
+        let mut ctrl = false;
         for ev in rx {
-            if let rkl_platform::InputEvent::KeyDown { key } = ev
-                && is_close_key(&key)
-            {
-                let state = app.state::<Arc<AppState>>();
-                if state.overlay_visible.load(Ordering::SeqCst) && !state.is_pinned() {
-                    let _ = hide_overlay(&app, &state);
+            match ev {
+                rkl_platform::InputEvent::KeyDown { key } if logic::is_ctrl_key(&key) => ctrl = true,
+                rkl_platform::InputEvent::KeyUp { key } if logic::is_ctrl_key(&key) => ctrl = false,
+                rkl_platform::InputEvent::KeyDown { key } if is_close_key(&key) => {
+                    let state = app.state::<Arc<AppState>>();
+                    if state.overlay_visible.load(Ordering::SeqCst) && !state.is_pinned() {
+                        let _ = hide_overlay(&app, &state);
+                    }
                 }
+                // Ctrl + wheel over the game: one arrow key per wheel step switches stash tabs.
+                rkl_platform::InputEvent::Wheel { delta } if ctrl => {
+                    let state = app.state::<Arc<AppState>>();
+                    if state.settings().stash.ctrl_scroll_tabs
+                        && let Some(key) = logic::wheel_tab_key(delta)
+                        && let Some(platform) = state.platform.as_ref()
+                        && platform.window_tracker.is_game_focused()
+                        // Ctrl+Arrow with the user's Ctrl left down (like Exiled Exchange 2):
+                        // releasing it would hide the user's own release from the hook.
+                        && let Err(e) = platform
+                            .input_simulator
+                            .send_chord(&rkl_platform::Chord::new(&[rkl_platform::KeyModifier::Ctrl], key))
+                    {
+                        state.record_error(format!("stash tab scroll: {e}"));
+                    }
+                }
+                _ => {}
             }
         }
     });

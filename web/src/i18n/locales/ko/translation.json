@@ -129,7 +129,8 @@
       "trade": "거래",
       "overlay": "오버레이",
       "platform": "플랫폼",
-      "waystones": "경로석"
+      "waystones": "경로석",
+      "ingame": "게임 내"
     },
     "language": "언어",
     "theme": "테마",
@@ -381,5 +382,21 @@
     "left": "조건 왼쪽",
     "right": "조건 오른쪽",
     "auto": "능력치가 많은 아이템은 조건 옆"
+  },
+  "ingame": {
+    "chat": "채팅 명령어",
+    "chatHelp": "Path of Exile 2에 포커스가 있는 동안 각 단축키는 채팅을 열고 명령어를 붙여 넣은 뒤 전송합니다. 한 번 누르면 명령어 하나가 전송됩니다.",
+    "commandText": "명령어 {{n}}",
+    "commandHotkey": "명령어 {{n}} 단축키",
+    "send": "전송",
+    "addCommand": "명령어 추가",
+    "stash": "보관함 검색",
+    "stashHelp": "각 단축키는 보관함 또는 상인 검색창(Ctrl+F)에 해당 텍스트를 입력합니다.",
+    "searchText": "검색 {{n}}",
+    "searchHotkey": "검색 {{n}} 단축키",
+    "addSearch": "검색 추가",
+    "remove": "{{what}} 삭제",
+    "ctrlScroll": "Ctrl + 마우스 휠로 보관함 탭 전환",
+    "ctrlScrollHelp": "게임 위에서 휠을 한 칸 돌릴 때마다 왼쪽 또는 오른쪽 화살표 키를 한 번 누릅니다. RKL을 다시 시작하면 적용됩니다."
   }
 }

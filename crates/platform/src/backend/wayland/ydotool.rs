@@ -49,6 +49,10 @@ pub(crate) fn evdev_code(key: &str) -> Option<u16> {
         "Escape" => 1,
         "Tab" => 15,
         "Enter" => 28,
+        "ArrowUp" => 103,
+        "ArrowLeft" => 105,
+        "ArrowRight" => 106,
+        "ArrowDown" => 108,
         "Space" => 57,
         _ => return None,
     })
@@ -108,6 +112,7 @@ mod tests {
         assert_eq!(evdev_code("F12"), Some(88));
         assert_eq!(evdev_code("F13"), None);
         assert_eq!(evdev_code("Space"), Some(57));
+        assert_eq!((evdev_code("ArrowLeft"), evdev_code("ArrowRight")), (Some(105), Some(106)));
         assert_eq!(evdev_code("Keya"), None);
         assert_eq!(modifier_code(KeyModifier::Shift), 42);
         assert_eq!(modifier_code(KeyModifier::Meta), 125);

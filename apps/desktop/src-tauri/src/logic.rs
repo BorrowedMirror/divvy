@@ -258,6 +258,8 @@ pub enum HotkeyEffect {
     ShowSettings,
     HideSettings,
     OpenTrade,
+    RunChat(u8),
+    RunStash(u8),
 }
 
 pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, settings_open: bool) -> HotkeyEffect {
@@ -269,6 +271,8 @@ pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, set
         A::OpenSettings if settings_open => HotkeyEffect::HideSettings,
         A::OpenSettings => HotkeyEffect::ShowSettings,
         A::OpenTrade => HotkeyEffect::OpenTrade,
+        A::Chat(i) => HotkeyEffect::RunChat(i),
+        A::StashSearch(i) => HotkeyEffect::RunStash(i),
     }
 }
 
@@ -386,6 +390,48 @@ pub fn intersect(a: Area, b: Area) -> Area {
     let (x0, y0) = (a.x.max(b.x), a.y.max(b.y));
     let (x1, y1) = ((a.x + a.width).min(b.x + b.width), (a.y + a.height).min(b.y + b.height));
     if x1 <= x0 || y1 <= y0 { a } else { Area { x: x0, y: y0, width: x1 - x0, height: y1 - y0 } }
+}
+
+/// One step of a chat command or stash search: press a chord, or paste text (clipboard +
+/// Ctrl+V, which works with any keyboard layout).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MacroStep {
+    Press(rkl_platform::Chord),
+    Paste(String),
+}
+
+fn press(mods: &[rkl_platform::KeyModifier], key: &str) -> MacroStep {
+    MacroStep::Press(rkl_platform::Chord::new(mods, key))
+}
+
+/// Enter opens the chat box, the text is pasted, and Enter sends it (unless `send` is off).
+pub fn chat_steps(text: &str, send: bool) -> Vec<MacroStep> {
+    let mut steps = vec![press(&[], "Enter"), MacroStep::Paste(text.to_owned())];
+    if send {
+        steps.push(press(&[], "Enter"));
+    }
+    steps
+}
+
+/// Ctrl+F focuses the stash (or vendor) search box, Ctrl+A selects what is there, the text is
+/// pasted over it and Enter confirms.
+pub fn stash_steps(text: &str) -> Vec<MacroStep> {
+    use rkl_platform::KeyModifier::Ctrl;
+    vec![press(&[Ctrl], "KeyF"), press(&[Ctrl], "KeyA"), MacroStep::Paste(text.to_owned()), press(&[], "Enter")]
+}
+
+/// Ctrl + wheel over the game: wheel up shows the previous stash tab, down the next.
+pub fn wheel_tab_key(delta: i32) -> Option<&'static str> {
+    match delta.signum() {
+        1 => Some("ArrowLeft"),
+        -1 => Some("ArrowRight"),
+        _ => None,
+    }
+}
+
+/// Keys that count as Ctrl in the passive input hook.
+pub fn is_ctrl_key(key: &str) -> bool {
+    matches!(key, "ControlLeft" | "ControlRight" | "Control" | "Ctrl")
 }
 
 #[cfg(test)]
@@ -511,6 +557,34 @@ mod tests {
         assert_eq!(intersect(game, half), half);
         let apart = Area { x: 0, y: 0, width: 10, height: 10 };
         assert_eq!(intersect(game, apart), game, "no overlap keeps the first area");
+    }
+
+    #[test]
+    fn chat_stash_and_wheel_steps() {
+        use rkl_platform::{Chord, KeyModifier::Ctrl};
+        let enter = MacroStep::Press(Chord::new(&[], "Enter"));
+        assert_eq!(
+            chat_steps("/hideout", true),
+            vec![enter.clone(), MacroStep::Paste("/hideout".into()), enter.clone()]
+        );
+        assert_eq!(chat_steps("@last ", false), vec![enter.clone(), MacroStep::Paste("@last ".into())]);
+        assert_eq!(
+            stash_steps("\"Rarity: Rare\""),
+            vec![
+                MacroStep::Press(Chord::new(&[Ctrl], "KeyF")),
+                MacroStep::Press(Chord::new(&[Ctrl], "KeyA")),
+                MacroStep::Paste("\"Rarity: Rare\"".into()),
+                enter
+            ]
+        );
+        assert_eq!(
+            (wheel_tab_key(1), wheel_tab_key(-3), wheel_tab_key(0)),
+            (Some("ArrowLeft"), Some("ArrowRight"), None)
+        );
+        assert!(is_ctrl_key("ControlLeft") && is_ctrl_key("ControlRight") && !is_ctrl_key("ShiftLeft"));
+        use rkl_platform::HotkeyAction as A;
+        assert_eq!(hotkey_effect(A::Chat(2), true, true), HotkeyEffect::RunChat(2));
+        assert_eq!(hotkey_effect(A::StashSearch(0), false, false), HotkeyEffect::RunStash(0));
     }
 
     #[test]

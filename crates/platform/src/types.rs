@@ -112,6 +112,10 @@ pub enum HotkeyAction {
     PriceCheckPinned,
     OpenSettings,
     OpenTrade,
+    /// A chat command hotkey (index into the configured chat commands).
+    Chat(u8),
+    /// A stash search hotkey (index into the configured stash searches).
+    StashSearch(u8),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]

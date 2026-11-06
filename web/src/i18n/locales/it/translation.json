@@ -135,7 +135,8 @@
       "trade": "Scambi",
       "overlay": "Overlay",
       "platform": "Piattaforma",
-      "waystones": "Waystone"
+      "waystones": "Waystone",
+      "ingame": "In gioco"
     },
     "language": "Lingua",
     "theme": "Tema",
@@ -399,5 +400,21 @@
     "left": "A sinistra dei filtri",
     "right": "A destra dei filtri",
     "auto": "Accanto ai filtri per gli oggetti con molte statistiche"
+  },
+  "ingame": {
+    "chat": "Comandi chat",
+    "chatHelp": "Ogni scorciatoia apre la chat, incolla il comando e lo invia mentre Path of Exile 2 è in primo piano. Ogni pressione invia un comando.",
+    "commandText": "Comando {{n}}",
+    "commandHotkey": "Scorciatoia del comando {{n}}",
+    "send": "Invia",
+    "addCommand": "Aggiungi comando",
+    "stash": "Ricerche nel deposito",
+    "stashHelp": "Ogni scorciatoia compila la casella di ricerca del deposito o del mercante (Ctrl+F) con il suo testo.",
+    "searchText": "Ricerca {{n}}",
+    "searchHotkey": "Scorciatoia della ricerca {{n}}",
+    "addSearch": "Aggiungi ricerca",
+    "remove": "Rimuovi {{what}}",
+    "ctrlScroll": "Cambia scheda del deposito con Ctrl + rotellina",
+    "ctrlScrollHelp": "Ogni scatto della rotellina sopra il gioco preme una volta la freccia sinistra o destra. Ha effetto dopo il riavvio di RKL."
   }
 }

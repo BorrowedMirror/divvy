@@ -135,7 +135,8 @@
       "trade": "Trocas",
       "overlay": "Overlay",
       "platform": "Plataforma",
-      "waystones": "Pedras-guia"
+      "waystones": "Pedras-guia",
+      "ingame": "No jogo"
     },
     "language": "Idioma",
     "theme": "Tema",
@@ -399,5 +400,21 @@
     "left": "À esquerda dos filtros",
     "right": "À direita dos filtros",
     "auto": "Ao lado dos filtros em itens com muitos atributos"
+  },
+  "ingame": {
+    "chat": "Comandos de chat",
+    "chatHelp": "Cada atalho abre o chat, cola o comando e o envia enquanto o Path of Exile 2 está em foco. Cada toque envia um comando.",
+    "commandText": "Comando {{n}}",
+    "commandHotkey": "Atalho do comando {{n}}",
+    "send": "Enviar",
+    "addCommand": "Adicionar comando",
+    "stash": "Buscas no baú",
+    "stashHelp": "Cada atalho preenche a caixa de busca do baú ou do vendedor (Ctrl+F) com o seu texto.",
+    "searchText": "Busca {{n}}",
+    "searchHotkey": "Atalho da busca {{n}}",
+    "addSearch": "Adicionar busca",
+    "remove": "Remover {{what}}",
+    "ctrlScroll": "Trocar de aba do baú com Ctrl + roda do mouse",
+    "ctrlScrollHelp": "Cada passo da roda sobre o jogo pressiona uma vez a seta para a esquerda ou para a direita. Vale após reiniciar o RKL."
   }
 }

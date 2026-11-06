@@ -129,7 +129,8 @@
       "trade": "交易",
       "overlay": "浮窗",
       "platform": "平台",
-      "waystones": "引路石"
+      "waystones": "引路石",
+      "ingame": "游戏内"
     },
     "language": "语言",
     "theme": "主题",
@@ -381,5 +382,21 @@
     "left": "条件左侧",
     "right": "条件右侧",
     "auto": "属性较多的物品显示在条件旁边"
+  },
+  "ingame": {
+    "chat": "聊天命令",
+    "chatHelp": "当 Path of Exile 2 处于焦点时，每个快捷键会打开聊天框、粘贴命令并发送。按一次发送一条命令。",
+    "commandText": "命令 {{n}}",
+    "commandHotkey": "命令 {{n}} 快捷键",
+    "send": "发送",
+    "addCommand": "添加命令",
+    "stash": "仓库搜索",
+    "stashHelp": "每个快捷键会将其文本填入仓库或商人的搜索框（Ctrl+F）。",
+    "searchText": "搜索 {{n}}",
+    "searchHotkey": "搜索 {{n}} 快捷键",
+    "addSearch": "添加搜索",
+    "remove": "移除{{what}}",
+    "ctrlScroll": "使用 Ctrl+鼠标滚轮切换仓库标签页",
+    "ctrlScrollHelp": "在游戏上方每滚动一格滚轮，就按一次左方向键或右方向键。重启 RKL 后生效。"
   }
 }

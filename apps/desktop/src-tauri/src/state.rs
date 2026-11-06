@@ -164,6 +164,8 @@ pub struct AppState {
     pub drag_origin: Mutex<Option<DragOrigin>>,
     /// The user dragged the card since it was last shown (then it stays where they put it).
     pub card_moved: AtomicBool,
+    /// Serialises chat commands and stash searches (they borrow the clipboard).
+    pub macro_lock: Mutex<()>,
     /// Current price panel layout (also served to the web view on mount).
     pub overlay_layout: Mutex<crate::events::OverlayLayout>,
     /// Card position on screen (physical px) and its last measured height (logical px).
@@ -215,6 +217,7 @@ impl AppState {
             last_position: Mutex::new(last_position),
             drag_origin: Mutex::new(None),
             card_moved: AtomicBool::new(false),
+            macro_lock: Mutex::new(()),
             overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
             overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
             card_css_width: Mutex::new(CARD_WIDTH),

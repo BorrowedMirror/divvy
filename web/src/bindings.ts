@@ -128,6 +128,27 @@ export type Capabilities = {
 	notes: string[],
 };
 
+/**
+ *  A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. One
+ *  key press sends one command, like Sidekick and Exiled Exchange 2.
+ */
+export type ChatCommand = {
+	chord: Chord,
+	text: string,
+	/**  Press Enter after the text (off: leave it in the chat box, e.g. `@last `). */
+	send: boolean,
+};
+
+export type ChatSettings = ChatSettings_Serialize | ChatSettings_Deserialize;
+
+export type ChatSettings_Deserialize = {
+	commands?: ChatCommand[],
+};
+
+export type ChatSettings_Serialize = {
+	commands: ChatCommand[],
+};
+
 /**  A key chord such as `Ctrl+Alt+D`. `key` uses W3C `KeyboardEvent.code` names (`KeyD`, `F5`). */
 export type Chord = {
 	modifiers: KeyModifier[],
@@ -214,7 +235,11 @@ export type FilterSet_Serialize = {
 	unique_candidates: string[],
 };
 
-export type HotkeyAction = "price_check" | "price_check_pinned" | "open_settings" | "open_trade";
+export type HotkeyAction = "price_check" | "price_check_pinned" | "open_settings" | "open_trade" | 
+/**  A chat command hotkey (index into the configured chat commands). */
+({ chat: number }) & { stash_search?: never } | 
+/**  A stash search hotkey (index into the configured stash searches). */
+({ stash_search: number }) & { chat?: never };
 
 export type HotkeySettings = HotkeySettings_Serialize | HotkeySettings_Deserialize;
 
@@ -854,6 +879,8 @@ export type Settings_Deserialize = {
 	trade?: TradeSettings_Deserialize,
 	overlay?: OverlaySettings_Deserialize,
 	waystone?: WaystoneSettings_Deserialize,
+	chat?: ChatSettings_Deserialize,
+	stash?: StashSettings_Deserialize,
 	ui?: UiSettings_Deserialize,
 	platform?: PlatformSettings_Deserialize,
 };
@@ -865,6 +892,8 @@ export type Settings_Serialize = {
 	trade: TradeSettings_Serialize,
 	overlay: OverlaySettings_Serialize,
 	waystone: WaystoneSettings_Serialize,
+	chat: ChatSettings_Serialize,
+	stash: StashSettings_Serialize,
 	ui: UiSettings_Serialize,
 	platform: PlatformSettings_Serialize,
 };
@@ -872,6 +901,26 @@ export type Settings_Serialize = {
 export type StackSize = {
 	current: number,
 	max: number,
+};
+
+/**  A saved stash search: the hotkey fills the stash (or vendor) search box with `text`. */
+export type StashSearch = {
+	chord: Chord,
+	text: string,
+};
+
+export type StashSettings = StashSettings_Serialize | StashSettings_Deserialize;
+
+export type StashSettings_Deserialize = {
+	searches?: StashSearch[],
+	/**  Ctrl + mouse wheel over the game switches stash tabs (one arrow key per wheel step). */
+	ctrl_scroll_tabs?: boolean,
+};
+
+export type StashSettings_Serialize = {
+	searches: StashSearch[],
+	/**  Ctrl + mouse wheel over the game switches stash tabs (one arrow key per wheel step). */
+	ctrl_scroll_tabs: boolean,
 };
 
 /**  One editable stat row in the price panel. */

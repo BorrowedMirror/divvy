@@ -135,7 +135,8 @@
       "trade": "Comercio",
       "overlay": "Overlay",
       "platform": "Plataforma",
-      "waystones": "Piedras guía"
+      "waystones": "Piedras guía",
+      "ingame": "En el juego"
     },
     "language": "Idioma",
     "theme": "Tema",
@@ -399,5 +400,21 @@
     "left": "A la izquierda de los filtros",
     "right": "A la derecha de los filtros",
     "auto": "Junto a los filtros en objetos con muchas estadísticas"
+  },
+  "ingame": {
+    "chat": "Comandos de chat",
+    "chatHelp": "Cada atajo abre el chat, pega el comando y lo envía mientras Path of Exile 2 tiene el foco. Cada pulsación envía un comando.",
+    "commandText": "Comando {{n}}",
+    "commandHotkey": "Atajo del comando {{n}}",
+    "send": "Enviar",
+    "addCommand": "Añadir comando",
+    "stash": "Búsquedas en el alijo",
+    "stashHelp": "Cada atajo rellena el cuadro de búsqueda del alijo o del vendedor (Ctrl+F) con su texto.",
+    "searchText": "Búsqueda {{n}}",
+    "searchHotkey": "Atajo de la búsqueda {{n}}",
+    "addSearch": "Añadir búsqueda",
+    "remove": "Eliminar {{what}}",
+    "ctrlScroll": "Cambiar de pestaña del alijo con Ctrl + rueda del ratón",
+    "ctrlScrollHelp": "Cada paso de la rueda sobre el juego pulsa una vez la flecha izquierda o derecha. Se aplica al reiniciar RKL."
   }
 }

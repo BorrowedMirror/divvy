@@ -135,7 +135,8 @@
       "trade": "Échange",
       "overlay": "Overlay",
       "platform": "Plateforme",
-      "waystones": "Pierres"
+      "waystones": "Pierres",
+      "ingame": "En jeu"
     },
     "language": "Langue",
     "theme": "Thème",
@@ -399,5 +400,21 @@
     "left": "À gauche des filtres",
     "right": "À droite des filtres",
     "auto": "À côté des filtres pour les objets avec beaucoup de stats"
+  },
+  "ingame": {
+    "chat": "Commandes de chat",
+    "chatHelp": "Chaque raccourci ouvre le chat, colle la commande et l'envoie lorsque Path of Exile 2 a le focus. Un appui envoie une commande.",
+    "commandText": "Commande {{n}}",
+    "commandHotkey": "Raccourci de la commande {{n}}",
+    "send": "Envoyer",
+    "addCommand": "Ajouter une commande",
+    "stash": "Recherches dans le coffre",
+    "stashHelp": "Chaque raccourci remplit la zone de recherche du coffre ou du marchand (Ctrl+F) avec son texte.",
+    "searchText": "Recherche {{n}}",
+    "searchHotkey": "Raccourci de la recherche {{n}}",
+    "addSearch": "Ajouter une recherche",
+    "remove": "Supprimer {{what}}",
+    "ctrlScroll": "Changer d'onglet du coffre avec Ctrl + molette",
+    "ctrlScrollHelp": "Chaque cran de molette au-dessus du jeu appuie une fois sur la flèche gauche ou droite. Prend effet après le redémarrage de RKL."
   }
 }
