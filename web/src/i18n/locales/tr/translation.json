@@ -174,7 +174,8 @@
     "autostart": "Oturum açtığımda RKL'yi başlat",
     "scale": "Panel boyutu",
     "backdropDim": "Panelin arkasındaki arka plan",
-    "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat"
+    "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat",
+    "itemLinks": "Paneldeki eşya bağlantıları"
   },
   "theme": {
     "system": "Sistem",
@@ -336,9 +337,7 @@
     "label": "Bu eşyayı ara",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Eşya Craft of Exile için kopyalandı",
-    "craftCopiedHelp": "Sayfada Import item'a tıklayın ve Ctrl+V ile yapıştırın."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Waystone modları",

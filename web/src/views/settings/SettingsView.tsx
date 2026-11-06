@@ -464,6 +464,19 @@ function OverlayTab({ s, update, errors }: TabProps) {
         checked={s.overlay.close_pinned_on_game_focus}
         onChange={(close_pinned_on_game_focus) => setOverlay({ close_pinned_on_game_focus })}
       />
+      <fieldset className="flex flex-col gap-1.5 py-1.5">
+        <legend className="text-sm">{t("settings.itemLinks")}</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+          {(["poe2db", "wiki", "craft_of_exile"] as const).map((site) => (
+            <CheckboxField
+              key={site}
+              label={t(`links.${site}`)}
+              checked={s.overlay.links[site]}
+              onChange={(on) => setOverlay({ links: { ...s.overlay.links, [site]: on } })}
+            />
+          ))}
+        </div>
+      </fieldset>
       <SwitchField
         label={t("settings.groupBySeller")}
         checked={s.overlay.group_by_seller}

@@ -180,7 +180,8 @@
     "autostart": "Запускати RKL під час входу в систему",
     "scale": "Розмір панелі",
     "backdropDim": "Тло за панеллю",
-    "closePinnedOnGameFocus": "Закривати закріплену панель, коли я знову клацаю в гру"
+    "closePinnedOnGameFocus": "Закривати закріплену панель, коли я знову клацаю в гру",
+    "itemLinks": "Посилання на предмет на панелі"
   },
   "theme": {
     "system": "Системна",
@@ -342,9 +343,7 @@
     "label": "Знайти цей предмет",
     "poe2db": "poe2db",
     "wiki": "Вікі",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Предмет скопійовано для Craft of Exile",
-    "craftCopiedHelp": "На сторінці натисніть Import item і вставте його за допомогою Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Модифікатори шляхового каменя",

@@ -18,14 +18,23 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 describe("OverlayView", () => {
   test("lookup links open the unique by name and a rare by its base", async () => {
     const user = userEvent.setup();
-    const calls = setupIpc({ get_overlay_snapshot: () => itemCopied(), open_lookup: (a) => a?.site === "craft_of_exile" });
+    const calls = setupIpc({ get_overlay_snapshot: () => itemCopied(), open_lookup: () => null });
     renderWithProviders(<OverlayView />);
     const links = await screen.findByTestId("item-links");
     await user.click(within(links).getByRole("button", { name: "poe2db" }));
     expect(callsOf(calls, "open_lookup")[0]?.args).toEqual({ site: "poe2db", name: parsedItem().base_type });
     await user.click(within(links).getByRole("button", { name: "Craft of Exile" }));
     expect(callsOf(calls, "open_lookup")[1]?.args).toMatchObject({ site: "craft_of_exile" });
-    expect(await screen.findByText("Item copied for Craft of Exile")).toBeInTheDocument();
+  });
+
+  test("only the item links ticked in settings are shown", async () => {
+    setupIpc({
+      get_overlay_snapshot: () => itemCopied(),
+      get_settings: () => settings({ overlay: { ...settings().overlay, links: { poe2db: false, wiki: true, craft_of_exile: false } } }),
+    });
+    renderWithProviders(<OverlayView />);
+    const links = await screen.findByTestId("item-links");
+    await waitFor(() => expect(within(links).getAllByRole("button").map((b) => b.textContent)).toEqual(["Wiki"]));
   });
 
   test("waystones list their mods with avoid and want highlighted", async () => {
@@ -436,7 +445,7 @@ describe("overlay extras", () => {
     async function mountAutoHide(ms: number) {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const calls = setupIpc({
-        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false } }),
+        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true } } }),
         query_price: () => priceSummary(),
       });
       renderWithProviders(<OverlayView />);

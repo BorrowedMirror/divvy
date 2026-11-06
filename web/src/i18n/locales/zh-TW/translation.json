@@ -171,7 +171,8 @@
     "backdropDim": "面板後方的背景",
     "closePinnedOnGameFocus": "點擊回到遊戲時關閉已釘選的面板",
     "checkUpdates": "自動檢查更新",
-    "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。"
+    "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。",
+    "itemLinks": "面板中的物品連結"
   },
   "theme": {
     "system": "依系統",
@@ -333,9 +334,7 @@
     "label": "查詢此物品",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "已為 Craft of Exile 複製物品",
-    "craftCopiedHelp": "在頁面上點選 Import item，然後按 Ctrl+V 貼上。"
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "換界石詞綴",

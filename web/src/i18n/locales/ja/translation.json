@@ -171,7 +171,8 @@
     "backdropDim": "パネルの背後の背景",
     "closePinnedOnGameFocus": "ゲームをクリックして戻ったら固定したパネルを閉じる",
     "checkUpdates": "アップデートを自動的に確認",
-    "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。"
+    "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。",
+    "itemLinks": "パネルのアイテムリンク"
   },
   "theme": {
     "system": "システム",
@@ -333,9 +334,7 @@
     "label": "このアイテムを調べる",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Craft of Exile 用にアイテムをコピーしました",
-    "craftCopiedHelp": "ページで Import item をクリックし、Ctrl+V で貼り付けてください。"
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "ウェイストーンのMod",

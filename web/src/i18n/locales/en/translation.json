@@ -174,7 +174,8 @@
     "autostart": "Start RKL when I log in",
     "scale": "Panel size",
     "backdropDim": "Backdrop behind the panel",
-    "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game"
+    "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game",
+    "itemLinks": "Item links in the panel"
   },
   "theme": {
     "system": "System",
@@ -336,9 +337,7 @@
     "label": "Look up this item",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Item copied for Craft of Exile",
-    "craftCopiedHelp": "On the page, click Import item and paste it with Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Waystone mods",

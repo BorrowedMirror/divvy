@@ -176,6 +176,14 @@ describe("SettingsView", () => {
     expect(draft().waystone.want).toEqual(["Pack Size", "Rarity"]);
   });
 
+  test("item link tickboxes", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    await user.click(screen.getByRole("checkbox", { name: "Wiki" }));
+    expect(draft().overlay.links).toEqual({ poe2db: true, wiki: false, craft_of_exile: true });
+  });
+
   test("forget remembered stat choices", async () => {
     const user = userEvent.setup();
     const { calls } = await mount({ clear_filter_memory: () => null });
@@ -235,7 +243,7 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false } }) });
+    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true } } }) });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
     expect(draft().overlay.auto_hide_ms).toBe(2000);

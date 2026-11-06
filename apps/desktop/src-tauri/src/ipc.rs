@@ -232,8 +232,7 @@ pub fn copy_text(state: State<'_, Arc<AppState>>, text: String) -> Result<(), Ip
 }
 
 /// Open the current item on poe2db, the wiki or Craft of Exile in the browser. Craft of Exile
-/// has no way to pass an item in a link, but its "Import item" box takes the game's copied item
-/// text, so that text is put on the clipboard first. Returns whether it was.
+/// gets the game's copied item text in its URL and imports it with every affix.
 #[tauri::command]
 #[specta::specta]
 pub fn open_lookup(
@@ -241,21 +240,12 @@ pub fn open_lookup(
     state: State<'_, Arc<AppState>>,
     site: crate::logic::LookupSite,
     name: String,
-) -> Result<bool, IpcError> {
+) -> Result<(), IpcError> {
     use tauri_plugin_opener::OpenerExt;
-    let url = crate::logic::lookup_url(site, &name).ok_or_else(|| IpcError::new("internal", "nothing to look up"))?;
-    let mut copied = false;
-    if site == crate::logic::LookupSite::CraftOfExile
-        && let Some(text) = state.last_item_text.lock().ok().and_then(|t| t.clone())
-        && let Some(platform) = state.platform.as_ref()
-    {
-        match platform.clipboard.set_text(&text) {
-            Ok(()) => copied = true,
-            Err(e) => state.record_error(format!("copy item for Craft of Exile: {e}")),
-        }
-    }
-    app.opener().open_url(url.as_str(), None::<&str>).map_err(|e| IpcError::new("internal", e.to_string()))?;
-    Ok(copied)
+    let text = state.last_item_text.lock().ok().and_then(|t| t.clone());
+    let url = crate::logic::lookup_url(site, &name, text.as_deref())
+        .ok_or_else(|| IpcError::new("internal", "nothing to look up"))?;
+    app.opener().open_url(url.as_str(), None::<&str>).map_err(|e| IpcError::new("internal", e.to_string()))
 }
 
 #[tauri::command]

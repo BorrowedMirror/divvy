@@ -174,7 +174,8 @@
     "autostart": "RKL beim Anmelden starten",
     "scale": "Panelgröße",
     "backdropDim": "Hintergrund hinter dem Panel",
-    "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke"
+    "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke",
+    "itemLinks": "Links zum Gegenstand im Panel"
   },
   "theme": {
     "system": "System",
@@ -336,9 +337,7 @@
     "label": "Dieses Item nachschlagen",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Item für Craft of Exile kopiert",
-    "craftCopiedHelp": "Klicke auf der Seite auf Import item und füge es mit Strg+V ein."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Wegstein-Mods",

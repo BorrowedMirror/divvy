@@ -171,7 +171,8 @@
     "backdropDim": "패널 뒤 배경",
     "closePinnedOnGameFocus": "게임을 다시 클릭하면 고정된 패널 닫기",
     "checkUpdates": "업데이트 자동 확인",
-    "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다."
+    "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다.",
+    "itemLinks": "패널의 아이템 링크"
   },
   "theme": {
     "system": "시스템",
@@ -333,9 +334,7 @@
     "label": "이 아이템 찾아보기",
     "poe2db": "poe2db",
     "wiki": "위키",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Craft of Exile용으로 아이템을 복사했습니다",
-    "craftCopiedHelp": "페이지에서 Import item을 클릭한 다음 Ctrl+V로 붙여 넣으세요."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "경로석 속성",

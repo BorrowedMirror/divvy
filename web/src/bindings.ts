@@ -47,10 +47,9 @@ export const commands = {
 	dragCard: (phase: DragPhase) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("drag_card", { phase })),
 	/**
 	 *  Open the current item on poe2db, the wiki or Craft of Exile in the browser. Craft of Exile
-	 *  has no way to pass an item in a link, but its "Import item" box takes the game's copied item
-	 *  text, so that text is put on the clipboard first. Returns whether it was.
+	 *  gets the game's copied item text in its URL and imports it with every affix.
 	 */
-	openLookup: (site: LookupSite, name: string) => typedError<boolean, IpcError_Serialize>(__TAURI_INVOKE("open_lookup", { site, name })),
+	openLookup: (site: LookupSite, name: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_lookup", { site, name })),
 	/**  Forget every remembered stat choice. */
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
@@ -344,6 +343,23 @@ export type League_Serialize = {
 	text: string | null,
 };
 
+/**  Lookup links shown in the price panel. */
+export type LinkSettings = LinkSettings_Serialize | LinkSettings_Deserialize;
+
+/**  Lookup links shown in the price panel. */
+export type LinkSettings_Deserialize = {
+	poe2db?: boolean,
+	wiki?: boolean,
+	craft_of_exile?: boolean,
+};
+
+/**  Lookup links shown in the price panel. */
+export type LinkSettings_Serialize = {
+	poe2db: boolean,
+	wiki: boolean,
+	craft_of_exile: boolean,
+};
+
 /**  One listing from a price source. */
 export type Listing = Listing_Serialize | Listing_Deserialize;
 
@@ -480,6 +496,8 @@ export type OverlaySettings_Deserialize = {
 	backdrop_dim?: number | null,
 	/**  Close a pinned panel as soon as the game window gets focus again. */
 	close_pinned_on_game_focus?: boolean,
+	/**  Which lookup links the panel shows under the item name. */
+	links?: LinkSettings_Deserialize,
 };
 
 export type OverlaySettings_Serialize = {
@@ -497,6 +515,8 @@ export type OverlaySettings_Serialize = {
 	backdrop_dim: number | null,
 	/**  Close a pinned panel as soon as the game window gets focus again. */
 	close_pinned_on_game_focus: boolean,
+	/**  Which lookup links the panel shows under the item name. */
+	links: LinkSettings_Serialize,
 };
 
 export type OverlaySide = 

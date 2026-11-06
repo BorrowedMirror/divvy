@@ -171,7 +171,8 @@
     "backdropDim": "面板背后的背景",
     "closePinnedOnGameFocus": "点击回到游戏时关闭已固定的面板",
     "checkUpdates": "自动检查更新",
-    "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。"
+    "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。",
+    "itemLinks": "面板中的物品链接"
   },
   "theme": {
     "system": "跟随系统",
@@ -333,9 +334,7 @@
     "label": "查询此物品",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "已为 Craft of Exile 复制物品",
-    "craftCopiedHelp": "在页面上点击 Import item，然后按 Ctrl+V 粘贴。"
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "引路石词缀",

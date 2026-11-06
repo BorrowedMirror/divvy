@@ -307,18 +307,22 @@ pub enum LookupSite {
 }
 
 /// Page for `name` (a unique's name or a base type) on `site`. The hosts are fixed here, so the
-/// web view can only open these three sites. Craft of Exile has no per-item URL; it opens the
-/// PoE2 crafting page.
-pub fn lookup_url(site: LookupSite, name: &str) -> Option<url::Url> {
+/// web view can only open these three sites. Craft of Exile imports `item_text` (the game's
+/// copied item text, advanced Ctrl+Alt+C for mods) from its `eimport` query parameter, which
+/// its page submits to its Item Importer on load.
+pub fn lookup_url(site: LookupSite, name: &str, item_text: Option<&str>) -> Option<url::Url> {
+    if site == LookupSite::CraftOfExile {
+        let mut url = url::Url::parse("https://beta.craftofexile.com/?game=poe2").ok()?;
+        if let Some(text) = item_text.map(|t| t.replace("\r\n", "\n")).filter(|t| !t.trim().is_empty()) {
+            url.query_pairs_mut().append_pair("eimport", &text);
+        }
+        return Some(url);
+    }
     let page = name.trim().replace(' ', "_");
-    let (base, needs_name) = match site {
-        LookupSite::Poe2db => ("https://poe2db.tw/us/", true),
-        LookupSite::Wiki => ("https://www.poe2wiki.net/wiki/", true),
-        LookupSite::CraftOfExile => return url::Url::parse("https://www.craftofexile.com/?game=poe2").ok(),
-    };
-    if needs_name && page.is_empty() {
+    if page.is_empty() {
         return None;
     }
+    let base = if site == LookupSite::Poe2db { "https://poe2db.tw/us/" } else { "https://www.poe2wiki.net/wiki/" };
     let mut url = url::Url::parse(base).ok()?;
     url.path_segments_mut().ok()?.pop_if_empty().push(&page);
     Some(url)
@@ -388,19 +392,28 @@ mod tests {
 
     #[test]
     fn lookup_urls_use_fixed_hosts_and_encode_names() {
-        assert_eq!(lookup_url(LookupSite::Poe2db, "Gold Ring").unwrap().as_str(), "https://poe2db.tw/us/Gold_Ring");
+        let url = |site, name| lookup_url(site, name, None).map(|u| u.to_string());
+        assert_eq!(url(LookupSite::Poe2db, "Gold Ring").as_deref(), Some("https://poe2db.tw/us/Gold_Ring"));
         assert_eq!(
-            lookup_url(LookupSite::Wiki, "Ventor's Gamble").unwrap().as_str(),
-            "https://www.poe2wiki.net/wiki/Ventor's_Gamble"
+            url(LookupSite::Wiki, "Ventor's Gamble").as_deref(),
+            Some("https://www.poe2wiki.net/wiki/Ventor's_Gamble")
         );
-        assert_eq!(
-            lookup_url(LookupSite::Wiki, "a/b?c#d").unwrap().as_str(),
-            "https://www.poe2wiki.net/wiki/a%2Fb%3Fc%23d"
-        );
-        assert_eq!(lookup_url(LookupSite::Poe2db, "  "), None);
-        assert_eq!(
-            lookup_url(LookupSite::CraftOfExile, "").unwrap().as_str(),
-            "https://www.craftofexile.com/?game=poe2"
+        assert_eq!(url(LookupSite::Wiki, "a/b?c#d").as_deref(), Some("https://www.poe2wiki.net/wiki/a%2Fb%3Fc%23d"));
+        assert_eq!(url(LookupSite::Poe2db, "  "), None);
+        assert_eq!(url(LookupSite::CraftOfExile, "").as_deref(), Some("https://beta.craftofexile.com/?game=poe2"));
+    }
+
+    #[test]
+    fn craft_of_exile_imports_the_item_text_from_the_url() {
+        let text =
+            "Item Class: Rings\r\nRarity: Rare\r\nGale Coil\r\nGold Ring\r\n--------\r\n+20% to Fire Resistance & more";
+        let u = lookup_url(LookupSite::CraftOfExile, "Gold Ring", Some(text)).unwrap();
+        assert_eq!(u.host_str(), Some("beta.craftofexile.com"));
+        let q: Vec<(String, String)> = u.query_pairs().map(|(k, v)| (k.into_owned(), v.into_owned())).collect();
+        assert_eq!(q[0], ("game".into(), "poe2".into()));
+        assert_eq!(q[1], ("eimport".into(), text.replace("\r\n", "\n")), "round-trips exactly, with \\n line ends");
+        assert!(
+            lookup_url(LookupSite::CraftOfExile, "", Some("  ")).unwrap().query_pairs().all(|(k, _)| k != "eimport")
         );
     }
 

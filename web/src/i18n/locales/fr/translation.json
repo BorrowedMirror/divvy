@@ -177,7 +177,8 @@
     "autostart": "Lancer RKL à l'ouverture de ma session",
     "scale": "Taille du panneau",
     "backdropDim": "Arrière-plan derrière le panneau",
-    "closePinnedOnGameFocus": "Fermer un panneau épinglé quand je clique de nouveau dans le jeu"
+    "closePinnedOnGameFocus": "Fermer un panneau épinglé quand je clique de nouveau dans le jeu",
+    "itemLinks": "Liens de l'objet dans le panneau"
   },
   "theme": {
     "system": "Système",
@@ -339,9 +340,7 @@
     "label": "Rechercher cet objet",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Objet copié pour Craft of Exile",
-    "craftCopiedHelp": "Sur la page, cliquez sur Import item et collez-le avec Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Modificateurs de la pierre",

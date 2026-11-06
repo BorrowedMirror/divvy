@@ -180,7 +180,8 @@
     "autostart": "Запускать RKL при входе в систему",
     "scale": "Размер панели",
     "backdropDim": "Фон за панелью",
-    "closePinnedOnGameFocus": "Закрывать закреплённую панель, когда я снова кликаю в игру"
+    "closePinnedOnGameFocus": "Закрывать закреплённую панель, когда я снова кликаю в игру",
+    "itemLinks": "Ссылки на предмет на панели"
   },
   "theme": {
     "system": "Системная",
@@ -342,9 +343,7 @@
     "label": "Найти этот предмет",
     "poe2db": "poe2db",
     "wiki": "Вики",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Предмет скопирован для Craft of Exile",
-    "craftCopiedHelp": "На странице нажмите Import item и вставьте его с помощью Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Модификаторы путевого камня",

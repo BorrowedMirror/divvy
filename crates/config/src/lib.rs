@@ -80,6 +80,23 @@ pub struct OverlaySettings {
     pub backdrop_dim: f64,
     /// Close a pinned panel as soon as the game window gets focus again.
     pub close_pinned_on_game_focus: bool,
+    /// Which lookup links the panel shows under the item name.
+    pub links: LinkSettings,
+}
+
+/// Lookup links shown in the price panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(default)]
+pub struct LinkSettings {
+    pub poe2db: bool,
+    pub wiki: bool,
+    pub craft_of_exile: bool,
+}
+
+impl Default for LinkSettings {
+    fn default() -> Self {
+        Self { poe2db: true, wiki: true, craft_of_exile: true }
+    }
 }
 
 /// Optional columns of the listing table (the price column is always shown).
@@ -216,6 +233,7 @@ impl Default for OverlaySettings {
             scale: 1.0,
             backdrop_dim: 0.6,
             close_pinned_on_game_focus: false,
+            links: LinkSettings::default(),
         }
     }
 }

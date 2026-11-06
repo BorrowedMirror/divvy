@@ -177,7 +177,8 @@
     "autostart": "Iniciar o RKL quando eu fizer login",
     "scale": "Tamanho do painel",
     "backdropDim": "Fundo atrás do painel",
-    "closePinnedOnGameFocus": "Fechar um painel fixado quando eu clicar de volta no jogo"
+    "closePinnedOnGameFocus": "Fechar um painel fixado quando eu clicar de volta no jogo",
+    "itemLinks": "Links do item no painel"
   },
   "theme": {
     "system": "Sistema",
@@ -339,9 +340,7 @@
     "label": "Pesquisar este item",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Item copiado para o Craft of Exile",
-    "craftCopiedHelp": "Na página, clique em Import item e cole com Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Modificadores da pedra-guia",

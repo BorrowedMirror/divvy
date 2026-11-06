@@ -171,7 +171,8 @@
     "backdropDim": "พื้นหลังด้านหลังแผง",
     "closePinnedOnGameFocus": "ปิดแผงที่ปักหมุดไว้เมื่อฉันคลิกกลับเข้าเกม",
     "checkUpdates": "ตรวจหาอัปเดตโดยอัตโนมัติ",
-    "checkUpdatesHelp": "ตรวจหาเวอร์ชันใหม่หลังเปิดโปรแกรมไม่นานและวันละครั้ง จะไม่ดาวน์โหลดอะไรจนกว่าคุณจะเลือกติดตั้ง"
+    "checkUpdatesHelp": "ตรวจหาเวอร์ชันใหม่หลังเปิดโปรแกรมไม่นานและวันละครั้ง จะไม่ดาวน์โหลดอะไรจนกว่าคุณจะเลือกติดตั้ง",
+    "itemLinks": "ลิงก์ไอเทมในแผง"
   },
   "theme": {
     "system": "ตามระบบ",
@@ -333,9 +334,7 @@
     "label": "ค้นหาไอเท็มนี้",
     "poe2db": "poe2db",
     "wiki": "วิกิ",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "คัดลอกไอเท็มสำหรับ Craft of Exile แล้ว",
-    "craftCopiedHelp": "ในหน้าเว็บ คลิก Import item แล้ววางด้วย Ctrl+V"
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "ม็อดของศิลานำทาง",

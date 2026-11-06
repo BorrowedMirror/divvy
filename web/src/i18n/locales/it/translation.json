@@ -177,7 +177,8 @@
     "autostart": "Avvia RKL all'accesso",
     "scale": "Dimensione del pannello",
     "backdropDim": "Sfondo dietro il pannello",
-    "closePinnedOnGameFocus": "Chiudi un pannello fissato quando torno a cliccare nel gioco"
+    "closePinnedOnGameFocus": "Chiudi un pannello fissato quando torno a cliccare nel gioco",
+    "itemLinks": "Link dell'oggetto nel pannello"
   },
   "theme": {
     "system": "Sistema",
@@ -339,9 +340,7 @@
     "label": "Cerca questo oggetto",
     "poe2db": "poe2db",
     "wiki": "Wiki",
-    "craft_of_exile": "Craft of Exile",
-    "craftCopied": "Oggetto copiato per Craft of Exile",
-    "craftCopiedHelp": "Nella pagina, fai clic su Import item e incollalo con Ctrl+V."
+    "craft_of_exile": "Craft of Exile"
   },
   "waystone": {
     "heading": "Modificatori Waystone",
