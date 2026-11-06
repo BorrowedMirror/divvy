@@ -37,7 +37,7 @@ function TierBadge({ tier }: { tier: number }) {
   );
 }
 
-/** Where a stat comes from, from its trade stat id prefix (`rune.` is an augment). */
+/** Where a stat comes from, from its trade stat id prefix (`rune.` is an augment), as a pill. */
 const SOURCES = {
   explicit: "explicit",
   implicit: "implicit",
@@ -67,8 +67,10 @@ function SourceLabel({ statId }: { statId: string }) {
   return (
     <span
       className={cx(
-        "tracking-wide uppercase",
-        source === "augment" ? "font-semibold text-augment" : "text-muted",
+        "rounded-sm px-1 py-0.5 tracking-wide uppercase ring-1",
+        source === "augment"
+          ? "bg-augment/15 font-semibold text-augment ring-augment/50"
+          : "bg-surface-2 text-muted ring-line",
       )}
       data-testid="stat-source"
     >
@@ -104,10 +106,10 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
               }
             />
             <span className="mt-0.5 ml-6 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] leading-none text-muted">
+              <SourceLabel statId={s.stat_id} />
               {s.tiers.map((tier, n) => (
                 <TierBadge key={n} tier={tier} />
               ))}
-              <SourceLabel statId={s.stat_id} />
               {s.item_values.length > 0 && (
                 <span>
                   {t("overlay.itemValue", {
