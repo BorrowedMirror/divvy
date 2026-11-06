@@ -181,6 +181,8 @@ pub struct AppState {
     pub flow_gate: Arc<logic::FlowGate>,
     /// Held for a whole settings apply (register hotkeys, persist, swap state).
     pub apply_lock: Mutex<()>,
+    /// Hotkeys are grabbed only while the game has focus (set when its focus is tracked).
+    pub hotkeys_follow_focus: AtomicBool,
     /// Set once the primary instance has opened its log file.
     pub log_path: OnceLock<std::path::PathBuf>,
 }
@@ -226,6 +228,7 @@ impl AppState {
             close_quits: AtomicBool::new(false),
             flow_gate: Arc::default(),
             apply_lock: Mutex::new(()),
+            hotkeys_follow_focus: AtomicBool::new(false),
             log_path: OnceLock::new(),
         })
     }

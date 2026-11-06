@@ -19,6 +19,8 @@ panel that does not auto-hide; **Ctrl+Alt+S** opens the settings. All three can 
 - Price sources: official trade2 API (default), poe.ninja, poe2scout.
 - Header-driven rate limiting that respects GGG's `X-Rate-Limit-*` and `Retry-After` headers.
 - Settings window, tray icon, hotkey rebinding, league auto-detect, diagnostics page.
+- Hotkeys are only taken while the game window has focus, so the same keys keep working in
+  other apps (Wayland-native excepted: the portal holds them all the time).
 
 ## Requirements
 

@@ -579,11 +579,17 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
             return;
         }
     };
+    state.hotkeys_follow_focus.store(true, Ordering::SeqCst);
     let app = app.clone();
     let spawned = std::thread::Builder::new().name("rkl-game-follow".into()).spawn(move || {
         use rkl_platform::WindowEvent;
+        // Startup registration may have finished before following focus was switched on.
+        sync_hotkeys_to_focus(&app.state::<Arc<AppState>>());
         for ev in rx {
             let state = app.state::<Arc<AppState>>();
+            if matches!(ev, WindowEvent::Found(_) | WindowEvent::FocusChanged { .. } | WindowEvent::Lost) {
+                sync_hotkeys_to_focus(&state);
+            }
             // Clicking back into a fullscreen game makes WMs such as openbox raise it above
             // "always on top" windows; keep a pinned panel stacked above it (without taking
             // keyboard focus back from the game).
@@ -634,7 +640,29 @@ pub fn open_trade(app: &AppHandle, url: &str) -> Result<(), IpcError> {
     app.opener().open_url(url, None::<&str>).map_err(|e| IpcError::new("internal", e.to_string()))
 }
 
-/// (Re)register every hotkey from settings.
+/// Grab the hotkeys while the game has focus and release them otherwise, so the same keys
+/// still work in other apps. Only once the game's focus is tracked (not on Wayland, where every
+/// portal registration asks the user); until then the hotkeys stay grabbed everywhere.
+pub fn sync_hotkeys_to_focus(state: &AppState) {
+    let Some(platform) = state.platform.as_ref() else { return };
+    if !state.hotkeys_follow_focus.load(Ordering::SeqCst) || !platform.capabilities.global_hotkeys {
+        return;
+    }
+    let _guard = state.apply_lock.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let focused = platform.window_tracker.is_game_focused();
+    tracing::debug!(focused, "game focus changed; {} hotkeys", if focused { "grabbing" } else { "releasing" });
+    let result = if focused {
+        register_hotkeys(state, &state.settings())
+    } else {
+        platform.hotkeys.unregister_all().map_err(IpcError::from)
+    };
+    if let Err(e) = result {
+        state.record_error(format!("hotkeys: {e}"));
+    }
+}
+
+/// (Re)register every hotkey from settings. When hotkeys follow the game's focus and the game
+/// is not focused, they are released again right away: registering still checks the chords.
 pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), IpcError> {
     let Some(platform) = state.platform.as_ref() else { return Ok(()) };
     if !platform.capabilities.global_hotkeys {
@@ -671,6 +699,9 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
     .filter(|(_, chord)| !chord.is_unbound())
     .collect();
     platform.hotkeys.register_all(&bindings)?;
+    if state.hotkeys_follow_focus.load(Ordering::SeqCst) && !platform.window_tracker.is_game_focused() {
+        platform.hotkeys.unregister_all()?;
+    }
     Ok(())
 }
 
