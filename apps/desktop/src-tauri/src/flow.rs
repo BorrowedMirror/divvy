@@ -164,7 +164,7 @@ pub const NOT_FOCUSED: &str = "game window is not focused";
 pub const NOTHING_COPIED: &str = "no item under the cursor";
 
 /// A failed copy. Nothing arriving, or text that is not an item, means there was no item under
-/// the cursor: like Exiled Exchange 2, the panel stays closed for that. Real backend failures
+/// the cursor, so the panel stays closed. Real backend failures
 /// still show.
 pub fn copy_error(e: rkl_platform::PlatformError) -> IpcError {
     match e {
@@ -804,7 +804,7 @@ pub fn spawn_input_loop(app: &AppHandle, state: &AppState) {
                         && let Some(key) = logic::wheel_tab_key(delta)
                         && let Some(platform) = state.platform.as_ref()
                         && platform.window_tracker.is_game_focused()
-                        // Ctrl+Arrow with the user's Ctrl left down (like Exiled Exchange 2):
+                        // Ctrl+Arrow with the user's Ctrl left down:
                         // releasing it would hide the user's own release from the hook.
                         && let Err(e) = platform
                             .input_simulator

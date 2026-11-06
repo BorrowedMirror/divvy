@@ -142,8 +142,7 @@ pub enum OverlaySide {
 pub const MAX_MACROS: usize = 20;
 
 /// A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. `&&`
-/// chains several lines in one key press; `@last` and `@area` are filled from the game log, as
-/// in Exiled Exchange 2.
+/// chains several lines in one key press; `@last` and `@area` are filled from the game log.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 pub struct ChatCommand {
     pub chord: Chord,

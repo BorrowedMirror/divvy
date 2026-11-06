@@ -135,8 +135,7 @@ export type Capabilities = {
 
 /**
  *  A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. `&&`
- *  chains several lines in one key press; `@last` and `@area` are filled from the game log, as
- *  in Exiled Exchange 2.
+ *  chains several lines in one key press; `@last` and `@area` are filled from the game log.
  */
 export type ChatCommand = {
 	chord: Chord,

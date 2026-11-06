@@ -327,7 +327,7 @@ impl TradeClient {
     }
 }
 
-/// Bulk-exchange body (EE2 `createTradeRequest` shape). Prices are asked in exalted and
+/// Bulk-exchange body, as the trade site sends it. Prices are asked in exalted and
 /// divine, except for the currency being priced itself.
 pub fn exchange_body(want: &str, status: OnlineStatus) -> serde_json::Value {
     let have: Vec<&str> = ["exalted", "divine"].into_iter().filter(|c| *c != want).collect();

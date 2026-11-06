@@ -1,7 +1,6 @@
 # Rust King Ledger (RKL)
 
-An open-source price-check overlay for **Path of Exile 2**, in the spirit of Exiled Exchange 2
-and Sidekick. Rust + Tauri 2 + React.
+An open-source price-check overlay for **Path of Exile 2**. Rust + Tauri 2 + React.
 
 Hover an item in game, press **Ctrl+D**, and RKL copies the item text, parses it, queries
 the official trade API and shows a price panel beside your cursor. **Ctrl+Alt+D** opens a pinned

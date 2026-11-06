@@ -14,7 +14,7 @@ use crate::{InputEvent, PlatformError};
 /// Events buffered before new ones are dropped (consumer stalled).
 pub(crate) const HOOK_CHANNEL_CAPACITY: usize = 1024;
 
-/// The environment variable the rustdesk-org rdev fork reads to hook the keyboard only.
+/// The environment variable our rdev fork reads to hook the keyboard only.
 pub const KEYBOARD_ONLY_ENV: &str = "KEYBOARD_ONLY";
 
 static ENV_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);

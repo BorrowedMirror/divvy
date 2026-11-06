@@ -70,8 +70,7 @@ whenever the binary changes. Release builds must be signed with a stable Develop
 
 ## Copy chord: Cmd or Ctrl?
 
-The trade-helper ecosystem (Awakened PoE Trade, Exiled Exchange 2) documents the copy flow as
-Ctrl+C and Ctrl+Alt+C on Windows. The native macOS client follows platform convention, so
+On Windows the copy flow is Ctrl+C and Ctrl+Alt+C. The native macOS client follows platform convention, so
 item copy is Cmd+C and the advanced copy is Cmd+Option+C. The Windows client running under
 CrossOver/Wine receives Ctrl+C, because Wine maps Ctrl to Ctrl. Neither could be verified
 on hardware from this workstream, so the modifier is configurable:

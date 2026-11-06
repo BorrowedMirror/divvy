@@ -1,6 +1,5 @@
 /**
- * Supported UI languages. Union of what Exiled Exchange 2 and Sidekick ship plus other common
- * PoE player languages. `code` is the Crowdin/BCP-47 locale and the directory name under
+ * Supported UI languages: the ones most PoE players use. `code` is the Crowdin/BCP-47 locale and the directory name under
  * `locales/`; `name` is the endonym shown in the language picker.
  */
 export const LANGUAGES = [

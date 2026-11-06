@@ -5,9 +5,6 @@ User-Agent `rkl-research/0.1 (+https://github.com/nightah/rust-king-ledger)`, no
 POESESSID. Eight requests total. Cloudflare did not block us. Trimmed and
 anonymised copies are in `crates/trade/tests/fixtures/`.
 
-Cross-checked against Exiled Exchange 2 (`Kvan7/Exiled-Exchange-2`,
-`renderer/src/web/price-check/trade/{pathofexile-trade,pathofexile-bulk}.ts`).
-
 ## Endpoints
 
 | Purpose | Method + path | Rate-limit policy |
@@ -22,8 +19,7 @@ Cross-checked against Exiled Exchange 2 (`Kvan7/Exiled-Exchange-2`,
 | Bulk exchange | `POST /api/trade2/exchange/poe2/{league}` | `trade-exchange-request-limit` |
 
 The search path **includes the realm segment**: `/api/trade2/search/poe2/Standard`
-returned 200. (EE2 builds `/api/trade2/search/${leagueId}` where its league id
-already carries the realm prefix.) League names with spaces are percent-encoded
+returned 200. League names with spaces are percent-encoded
 as a path segment (`Forbidden%20Rites`).
 
 Trade site URLs (what the overlay opens in the browser):
@@ -79,7 +75,7 @@ Stackables also carry `stackSize`. Mods in trade2 are objects
 (`{"description","domain","hash","mods":[{"magnitudes":[{"min","max"}]}]}`), unlike PoE1 strings.
 
 ### `exchange/poe2/{league}`
-Request (EE2 `createTradeRequest`):
+Request:
 ```json
 {"query":{"status":{"option":"online"},"have":["exalted"],"want":["divine"],"minimum":1},"sort":{"have":"asc"},"engine":"new"}
 ```
@@ -125,7 +121,7 @@ purpose; the 429 header fixture (`headers/search.429.txt`) is synthesised from t
 format. While restricted, every request extends the penalty, so the client must not
 send anything until the restriction expires.
 
-Error bodies are `{"error":{"code":N,"message":"..."}}` (EE2 checks `_data.error.message`).
+Error bodies are `{"error":{"code":N,"message":"..."}}`.
 
 ## Other notes
 
