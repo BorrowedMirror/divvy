@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next";
 import type { FilterSet_Serialize, ParsedItem_Serialize } from "../../bindings";
-import { CheckboxField, NumberInput, SelectField, cx } from "../../components/ui";
+import {
+  CheckboxField,
+  NumberInput,
+  SelectField,
+  cx,
+} from "../../components/ui";
 import { type RangeKey, useOverlayStore } from "../../stores/overlay";
 
 function formatValues(values: (number | null)[]): string {
@@ -9,9 +14,9 @@ function formatValues(values: (number | null)[]): string {
 
 /** T1 is the best roll range: solid gold, T2 gold outline, T3 plain, T4 and lower fade out. */
 const TIER_STYLES = [
-  "bg-gold-bright text-bg font-bold ring-1 ring-gold-bright shadow-[0_0_6px_var(--k-gold)]",
-  "bg-gold/20 text-gold-bright font-semibold ring-1 ring-gold/70",
-  "bg-surface-3 text-fg font-semibold ring-1 ring-line",
+  "bg-gold-bright text-bg ring-1 ring-gold-bright shadow-[0_0_5px_var(--k-gold)]",
+  "bg-gold/20 text-gold-bright ring-1 ring-gold/70",
+  "bg-surface-3 text-fg ring-1 ring-line",
 ] as const;
 const TIER_LOW = "bg-surface-2 text-muted ring-1 ring-line/60";
 
@@ -20,7 +25,7 @@ function TierBadge({ tier }: { tier: number }) {
   return (
     <span
       className={cx(
-        "mr-1.5 inline-block rounded px-1.5 py-0.5 align-[1px] font-mono text-[11px] leading-none",
+        "rounded-sm px-1 py-0.5 font-mono font-semibold",
         TIER_STYLES[tier - 1] ?? TIER_LOW,
       )}
       title={t("overlay.tierTitle", { tier })}
@@ -46,9 +51,13 @@ const SOURCES = {
   skill: "skill",
 } as const;
 
-export function statSource(statId: string): (typeof SOURCES)[keyof typeof SOURCES] | null {
+export function statSource(
+  statId: string,
+): (typeof SOURCES)[keyof typeof SOURCES] | null {
   const prefix = statId.split(".", 1)[0] ?? "";
-  return Object.hasOwn(SOURCES, prefix) ? SOURCES[prefix as keyof typeof SOURCES] : null;
+  return Object.hasOwn(SOURCES, prefix)
+    ? SOURCES[prefix as keyof typeof SOURCES]
+    : null;
 }
 
 function SourceLabel({ statId }: { statId: string }) {
@@ -58,8 +67,8 @@ function SourceLabel({ statId }: { statId: string }) {
   return (
     <span
       className={cx(
-        "rounded px-1 py-px leading-none tracking-wide uppercase",
-        source === "augment" ? "bg-augment/20 font-semibold text-augment" : "text-muted",
+        "tracking-wide uppercase",
+        source === "augment" ? "font-semibold text-augment" : "text-muted",
       )}
       data-testid="stat-source"
     >
@@ -90,17 +99,21 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
               onChange={(enabled) => updateStat(i, { enabled })}
               label={
                 <span className={s.enabled ? "text-fg" : "text-muted"}>
-                  {s.tiers.map((tier, n) => (
-                    <TierBadge key={n} tier={tier} />
-                  ))}
                   {s.text}
                 </span>
               }
             />
-            <span className="ml-6 flex items-center gap-1.5 text-[10px] text-muted">
+            <span className="mt-0.5 ml-6 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] leading-none text-muted">
+              {s.tiers.map((tier, n) => (
+                <TierBadge key={n} tier={tier} />
+              ))}
               <SourceLabel statId={s.stat_id} />
               {s.item_values.length > 0 && (
-                <span>{t("overlay.itemValue", { value: formatValues(s.item_values) })}</span>
+                <span>
+                  {t("overlay.itemValue", {
+                    value: formatValues(s.item_values),
+                  })}
+                </span>
               )}
             </span>
           </div>
@@ -124,25 +137,50 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
   );
 }
 
-const RANGE_ROWS: { key: RangeKey; label: string; itemValue: (item: ParsedItem_Serialize) => number | null }[] = [
-  { key: "item_level", label: "misc.item_level", itemValue: (i) => i.item_level },
+const RANGE_ROWS: {
+  key: RangeKey;
+  label: string;
+  itemValue: (item: ParsedItem_Serialize) => number | null;
+}[] = [
+  {
+    key: "item_level",
+    label: "misc.item_level",
+    itemValue: (i) => i.item_level,
+  },
   { key: "quality", label: "misc.quality", itemValue: (i) => i.quality },
   { key: "gem_level", label: "misc.gem_level", itemValue: (i) => i.gem_level },
-  { key: "waystone_tier", label: "misc.waystone_tier", itemValue: (i) => i.waystone_tier },
-  { key: "sockets", label: "misc.sockets", itemValue: (i) => (i.sockets > 0 ? i.sockets : null) },
+  {
+    key: "waystone_tier",
+    label: "misc.waystone_tier",
+    itemValue: (i) => i.waystone_tier,
+  },
+  {
+    key: "sockets",
+    label: "misc.sockets",
+    itemValue: (i) => (i.sockets > 0 ? i.sockets : null),
+  },
 ];
 
 type Tri = "any" | "yes" | "no";
-const toTri = (v: boolean | null): Tri => (v === null ? "any" : v ? "yes" : "no");
+const toTri = (v: boolean | null): Tri =>
+  v === null ? "any" : v ? "yes" : "no";
 const fromTri = (v: Tri): boolean | null => (v === "any" ? null : v === "yes");
 
-export function MiscFilters({ filters, item }: { filters: FilterSet_Serialize; item: ParsedItem_Serialize }) {
+export function MiscFilters({
+  filters,
+  item,
+}: {
+  filters: FilterSet_Serialize;
+  item: ParsedItem_Serialize;
+}) {
   const { t } = useTranslation();
   const updateRange = useOverlayStore((s) => s.updateRange);
   const setCorrupted = useOverlayStore((s) => s.setCorrupted);
   const rows = RANGE_ROWS.filter(({ key, itemValue }) => {
     const f = filters.misc[key];
-    return f.enabled || f.min !== null || f.max !== null || itemValue(item) !== null;
+    return (
+      f.enabled || f.min !== null || f.max !== null || itemValue(item) !== null
+    );
   });
 
   return (
@@ -153,8 +191,15 @@ export function MiscFilters({ filters, item }: { filters: FilterSet_Serialize; i
       {rows.map(({ key, label }) => {
         const f = filters.misc[key];
         return (
-          <div key={key} className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-center gap-1.5">
-            <CheckboxField checked={f.enabled} onChange={(enabled) => updateRange(key, { enabled })} label={t(label)} />
+          <div
+            key={key}
+            className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-center gap-1.5"
+          >
+            <CheckboxField
+              checked={f.enabled}
+              onChange={(enabled) => updateRange(key, { enabled })}
+              label={t(label)}
+            />
             <NumberInput
               label={t("overlay.statMin", { stat: t(label) })}
               value={f.min}
