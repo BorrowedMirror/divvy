@@ -21,6 +21,20 @@ expression: query
         "filters": [
           {
             "disabled": false,
+            "id": "pseudo.pseudo_total_elemental_resistance",
+            "value": {
+              "min": 5.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "pseudo.pseudo_total_fire_resistance",
+            "value": {
+              "min": 5.0
+            }
+          },
+          {
+            "disabled": false,
             "id": "explicit.stat_3645886926",
             "value": {
               "min": 12.0
@@ -34,7 +48,7 @@ expression: query
             }
           },
           {
-            "disabled": false,
+            "disabled": true,
             "id": "explicit.stat_2073410902",
             "value": {
               "min": 5.0

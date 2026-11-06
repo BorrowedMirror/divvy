@@ -99,6 +99,7 @@ export function filterSet(overrides: Partial<FilterSet_Serialize> = {}): FilterS
     },
     widen_pct: 10,
     route: "search",
+    unique_candidates: [],
     ...overrides,
   };
 }
@@ -159,6 +160,7 @@ export function settings(overrides: Partial<Settings_Serialize> = {}): Settings_
       sellers: "any",
       listing_count: 20,
       convert_prices: true,
+      remember_filters: true,
       widen_pct: 10,
       enable_all_stats: false,
       contact: null,

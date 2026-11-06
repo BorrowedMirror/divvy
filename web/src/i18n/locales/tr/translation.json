@@ -32,7 +32,9 @@
     "search": "Ara",
     "loading": "Aranıyor…",
     "mouseCaptured": "Path of Exile 2 fareyi yakalıyor, bu yüzden bu panele tıklanamıyor. Sistem tepsisindeki RKL menüsünden Tanılama'yı açın ve Proton fare yakalamayı kapatın.",
-    "tierTitle": "Mod kademesi {{tier}} (1 en iyi değer aralığıdır)"
+    "tierTitle": "Mod kademesi {{tier}} (1 en iyi değer aralığıdır)",
+    "possibleUniques": "Olası eşsizler",
+    "unidentifiedBase": "Tanımlanmamış"
   },
   "item": {
     "rarityLabel": "Nadirlik:",
@@ -163,7 +165,11 @@
     "convertPrices": "Fiyatları para birimleri arasında karşılaştır",
     "convertPricesHelp": "poe2scout'tan döviz kurlarını alır; böylece exalted, chaos ve divine ilanları birlikte sayılır ve her biri divine veya exalted değerini gösterir.",
     "groupBySeller": "İlanları satıcıya göre grupla",
-    "listingColumns": "İlan sütunları"
+    "listingColumns": "İlan sütunları",
+    "rememberFilters": "Özellik seçimlerini eşya türüne göre hatırla",
+    "rememberFiltersHelp": "Bir sonraki yüzük, yay vb. o türü en son aradığınızda açık veya kapalı olan özelliklerle başlar.",
+    "forgetFilters": "Hatırlanan seçimleri unut",
+    "forgotFilters": "Unutuldu."
   },
   "theme": {
     "system": "Sistem",

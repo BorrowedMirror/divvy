@@ -31,7 +31,12 @@ pub fn handle_item_text(
     let opts = logic::query_options(&settings, &state.league());
     let data = state.wait_data();
     let catalog = data.as_deref().map(|d| d as &dyn Catalog);
-    let (item, filters) = logic::process_item_text(text, catalog, &opts).inspect_err(|e| state.record_error(e))?;
+    let (item, mut filters) = logic::process_item_text(text, catalog, &opts).inspect_err(|e| state.record_error(e))?;
+    if settings.trade.remember_filters
+        && let Ok(memory) = state.filter_memory.lock()
+    {
+        memory.apply(&mut filters);
+    }
     *state.last_item.lock().expect("last item lock") = Some((item.clone(), filters.clone()));
     set_pinned(app, state, pinned);
     show_overlay(app, state);

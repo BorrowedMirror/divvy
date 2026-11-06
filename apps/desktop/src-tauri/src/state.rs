@@ -132,6 +132,8 @@ pub struct AppState {
     pub settings_overlay: AtomicBool,
     /// Last probe found the game holding the mouse while the panel was open (Wine capture).
     pub mouse_captured: AtomicBool,
+    /// Remembered stat choices per item category (see `filter_memory`).
+    pub filter_memory: Mutex<crate::filter_memory::FilterMemory>,
     /// Current price panel layout (also served to the web view on mount).
     pub overlay_layout: Mutex<crate::events::OverlayLayout>,
     /// Card position on screen (physical px) and its last measured height (logical px).
@@ -157,6 +159,10 @@ impl AppState {
         backend: BackendKind,
     ) -> Result<Self, String> {
         let sources = Sources::from_settings(&settings)?;
+        let memory = paths
+            .as_ref()
+            .map(|p| crate::filter_memory::FilterMemory::load(&p.cache_dir.join(crate::filter_memory::FILE_NAME)))
+            .unwrap_or_default();
         Ok(Self {
             paths,
             settings: RwLock::new(settings),
@@ -172,6 +178,7 @@ impl AppState {
             overlay_visible: AtomicBool::new(false),
             settings_overlay: AtomicBool::new(false),
             mouse_captured: AtomicBool::new(false),
+            filter_memory: Mutex::new(memory),
             overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
             overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
             show_seq: std::sync::atomic::AtomicU64::new(0),

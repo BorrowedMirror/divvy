@@ -54,6 +54,8 @@ pub struct TradeSettings {
     /// Fetch currency rates (from poe2scout) to compare listings in other currencies and show
     /// each price's divine or exalted equivalent.
     pub convert_prices: bool,
+    /// Start each item with the stats the user last had on or off for its category.
+    pub remember_filters: bool,
     /// Optional e-mail appended to the User-Agent, as GGG requests.
     pub contact: Option<String>,
     /// Optional POESESSID; stored in plain text, so off by default.
@@ -161,6 +163,7 @@ impl Default for TradeSettings {
             enable_all_stats: false,
             listing_count: 20,
             convert_prices: true,
+            remember_filters: true,
             contact: None,
             poesessid: None,
         }

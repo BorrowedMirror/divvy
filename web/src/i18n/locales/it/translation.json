@@ -32,7 +32,9 @@
     "search": "Cerca",
     "loading": "Ricerca…",
     "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di RKL nell'area di notifica e disattiva la cattura del mouse di Proton.",
-    "tierTitle": "Tier del modificatore {{tier}} (1 è l'intervallo di valori migliore)"
+    "tierTitle": "Tier del modificatore {{tier}} (1 è l'intervallo di valori migliore)",
+    "possibleUniques": "Possibili unici",
+    "unidentifiedBase": "Non identificato"
   },
   "item": {
     "rarityLabel": "Rarità:",
@@ -166,7 +168,11 @@
     "convertPrices": "Confronta i prezzi tra valute",
     "convertPricesHelp": "Recupera i tassi di cambio da poe2scout così le inserzioni in exalted, chaos e divine vengono contate insieme e ognuna mostra il suo valore in divine o exalted.",
     "groupBySeller": "Raggruppa le inserzioni per venditore",
-    "listingColumns": "Colonne delle inserzioni"
+    "listingColumns": "Colonne delle inserzioni",
+    "rememberFilters": "Ricorda le statistiche scelte per tipo di oggetto",
+    "rememberFiltersHelp": "Il prossimo anello, arco e così via parte con le statistiche che avevi attivato o disattivato l'ultima volta che ne hai cercato uno.",
+    "forgetFilters": "Dimentica le scelte memorizzate",
+    "forgotFilters": "Dimenticate."
   },
   "theme": {
     "system": "Sistema",

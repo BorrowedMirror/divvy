@@ -12,6 +12,7 @@ pub mod item;
 pub mod matcher;
 pub mod parser;
 pub mod pricing;
+pub mod pseudo;
 pub mod query;
 
 pub use error::{CoreError, ParseError};

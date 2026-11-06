@@ -24,13 +24,34 @@ expression: query
         "filters": [
           {
             "disabled": false,
+            "id": "pseudo.pseudo_total_elemental_resistance",
+            "value": {
+              "min": 18.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "pseudo.pseudo_total_life",
+            "value": {
+              "min": 51.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "pseudo.pseudo_total_cold_resistance",
+            "value": {
+              "min": 18.0
+            }
+          },
+          {
+            "disabled": true,
             "id": "explicit.stat_3744174416",
             "value": {
               "min": 51.0
             }
           },
           {
-            "disabled": false,
+            "disabled": true,
             "id": "explicit.stat_4235394652",
             "value": {
               "min": 18.0

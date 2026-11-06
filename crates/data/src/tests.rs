@@ -350,3 +350,13 @@ fn bundled_manifest_snapshot() {
         ".*.sha256" => "[sha256]",
     });
 }
+
+#[test]
+fn uniques_by_base_lists_every_unique_for_a_base() {
+    use rkl_core::catalog::Catalog;
+    let data = crate::bundled().unwrap();
+    let names: Vec<&str> = data.uniques_by_base("Gold Ring").iter().map(|u| u.name.as_str()).collect();
+    assert!(names.len() >= 2, "{names:?}");
+    assert!(names.windows(2).all(|w| w[0] < w[1]), "sorted, no duplicates: {names:?}");
+    assert!(data.uniques_by_base("Not A Base").is_empty());
+}

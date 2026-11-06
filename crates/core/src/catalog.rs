@@ -57,5 +57,10 @@ pub trait Catalog: Send + Sync {
     /// Find the base contained in a magic item's full name (`Prefix Base of Suffix`).
     fn base_in_magic_name(&self, full_name: &str) -> Option<&BaseDef>;
     fn unique(&self, name: &str) -> Option<&UniqueDef>;
+    /// Every unique that uses `base_type` (for pricing unidentified uniques). Default: none.
+    fn uniques_by_base(&self, base_type: &str) -> Vec<&UniqueDef> {
+        let _ = base_type;
+        Vec::new()
+    }
     fn static_item(&self, text: &str) -> Option<&StaticDef>;
 }

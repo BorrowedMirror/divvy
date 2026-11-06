@@ -35,7 +35,14 @@ pub fn process_item_text(
     if let Some(catalog) = catalog {
         StatMatcher::new(catalog).match_item(&mut item);
     }
-    let filters = build_filters(&item, opts);
+    let mut filters = build_filters(&item, opts);
+    if item.rarity == rkl_core::item::Rarity::Unique
+        && item.unidentified
+        && let Some(catalog) = catalog
+    {
+        filters.unique_candidates =
+            catalog.uniques_by_base(&item.base_type).into_iter().map(|u| u.name.clone()).collect();
+    }
     Ok((item, filters))
 }
 
@@ -300,6 +307,26 @@ mod tests {
         assert_eq!(panel_position(S::Left, (3000, 700), (420, 600), area), (2568, 400));
         assert_eq!(panel_position(S::Right, (3000, 700), (420, 600), area), (5572, 400));
         assert_eq!(panel_position(S::Right, (3000, 700), (5000, 600), area).0, 2560);
+    }
+
+    #[test]
+    fn unidentified_uniques_list_their_possible_uniques() {
+        let data = rkl_data::bundled().unwrap();
+        let text = "Item Class: Rings\nRarity: Unique\nGold Ring\n--------\nItem Level: 75\n--------\nUnidentified\n";
+        let opts = query_options(&Settings::default(), "Standard");
+        let (_, f) = process_item_text(text, Some(&data as &dyn rkl_core::catalog::Catalog), &opts).unwrap();
+        assert!(f.unique_candidates.len() >= 2, "{:?}", f.unique_candidates);
+        assert_eq!(
+            (f.name.as_deref(), f.base_type.as_deref(), f.misc.identified),
+            (None, Some("Gold Ring"), Some(false))
+        );
+        let (_, rare) = process_item_text(
+            "Item Class: Rings\nRarity: Rare\nX\nGold Ring\n",
+            Some(&data as &dyn rkl_core::catalog::Catalog),
+            &opts,
+        )
+        .unwrap();
+        assert!(rare.unique_candidates.is_empty());
     }
 
     #[test]

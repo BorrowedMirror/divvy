@@ -32,7 +32,9 @@
     "search": "Suchen",
     "loading": "Suche läuft…",
     "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im rkl-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten.",
-    "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)"
+    "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)",
+    "possibleUniques": "Mögliche einzigartige Gegenstände",
+    "unidentifiedBase": "Nicht identifiziert"
   },
   "item": {
     "rarityLabel": "Seltenheit:",
@@ -163,7 +165,11 @@
     "convertPrices": "Preise über Währungen hinweg vergleichen",
     "convertPricesHelp": "Ruft Währungskurse von poe2scout ab, damit Angebote in Exalted, Chaos und Divine gemeinsam zählen und jedes seinen Divine- oder Exalted-Wert zeigt.",
     "groupBySeller": "Angebote nach Verkäufer gruppieren",
-    "listingColumns": "Angebotsspalten"
+    "listingColumns": "Angebotsspalten",
+    "rememberFilters": "Werteauswahl je Gegenstandsart merken",
+    "rememberFiltersHelp": "Der nächste Ring, Bogen usw. startet mit den Werten, die bei der letzten Suche nach dieser Art an oder aus waren.",
+    "forgetFilters": "Gemerkte Auswahl vergessen",
+    "forgotFilters": "Vergessen."
   },
   "theme": {
     "system": "System",

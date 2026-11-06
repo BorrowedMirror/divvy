@@ -32,7 +32,9 @@
     "search": "Rechercher",
     "loading": "Recherche…",
     "mouseCaptured": "Path of Exile 2 capture la souris, ce panneau ne peut donc pas être cliqué. Ouvrez Diagnostics depuis le menu de RKL dans la zone de notification et désactivez la capture de la souris par Proton.",
-    "tierTitle": "Palier de mod {{tier}} (1 est la meilleure plage de valeurs)"
+    "tierTitle": "Palier de mod {{tier}} (1 est la meilleure plage de valeurs)",
+    "possibleUniques": "Uniques possibles",
+    "unidentifiedBase": "Non identifié"
   },
   "item": {
     "rarityLabel": "Rareté :",
@@ -166,7 +168,11 @@
     "convertPrices": "Comparer les prix entre devises",
     "convertPricesHelp": "Récupère les taux de change depuis poe2scout afin que les annonces en exalted, chaos et divine soient comptées ensemble et que chacune affiche sa valeur en divine ou en exalted.",
     "groupBySeller": "Regrouper les annonces par vendeur",
-    "listingColumns": "Colonnes des annonces"
+    "listingColumns": "Colonnes des annonces",
+    "rememberFilters": "Mémoriser le choix des stats par type d'objet",
+    "rememberFiltersHelp": "Le prochain anneau, arc, etc. reprend les stats activées ou désactivées lors de votre dernière recherche de ce type.",
+    "forgetFilters": "Oublier les choix mémorisés",
+    "forgotFilters": "Oublié."
   },
   "theme": {
     "system": "Système",

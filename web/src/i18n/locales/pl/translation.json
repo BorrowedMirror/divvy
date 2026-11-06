@@ -32,7 +32,9 @@
     "search": "Szukaj",
     "loading": "Wyszukiwanie…",
     "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu RKL w zasobniku i wyłącz przechwytywanie myszy przez Proton.",
-    "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)"
+    "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)",
+    "possibleUniques": "Możliwe unikaty",
+    "unidentifiedBase": "Niezidentyfikowany"
   },
   "item": {
     "rarityLabel": "Rzadkość:",
@@ -169,7 +171,11 @@
     "convertPrices": "Porównuj ceny między walutami",
     "convertPricesHelp": "Pobiera kursy walut z poe2scout, aby oferty w exalted, chaos i divine liczyły się razem, a każda pokazywała swoją wartość w divine lub exalted.",
     "groupBySeller": "Grupuj oferty według sprzedającego",
-    "listingColumns": "Kolumny ofert"
+    "listingColumns": "Kolumny ofert",
+    "rememberFilters": "Zapamiętuj wybór statystyk dla typu przedmiotu",
+    "rememberFiltersHelp": "Następny pierścień, łuk itd. zaczyna ze statystykami włączonymi lub wyłączonymi przy ostatnim wyszukiwaniu takiego przedmiotu.",
+    "forgetFilters": "Zapomnij zapamiętane wybory",
+    "forgotFilters": "Zapomniano."
   },
   "theme": {
     "system": "Systemowy",

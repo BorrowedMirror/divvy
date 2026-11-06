@@ -20,6 +20,41 @@ expression: query
       {
         "filters": [
           {
+            "disabled": false,
+            "id": "pseudo.pseudo_total_elemental_resistance",
+            "value": {
+              "min": 95.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "pseudo.pseudo_total_life",
+            "value": {
+              "min": 83.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "pseudo.pseudo_total_fire_resistance",
+            "value": {
+              "min": 39.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "pseudo.pseudo_total_cold_resistance",
+            "value": {
+              "min": 21.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "pseudo.pseudo_total_lightning_resistance",
+            "value": {
+              "min": 34.0
+            }
+          },
+          {
             "disabled": true,
             "id": "implicit.stat_4235394652",
             "value": {
@@ -27,7 +62,7 @@ expression: query
             }
           },
           {
-            "disabled": false,
+            "disabled": true,
             "id": "explicit.stat_3744174416",
             "value": {
               "min": 83.0
@@ -41,14 +76,14 @@ expression: query
             }
           },
           {
-            "disabled": false,
+            "disabled": true,
             "id": "explicit.stat_2650726450",
             "value": {
               "min": 34.0
             }
           },
           {
-            "disabled": false,
+            "disabled": true,
             "id": "fractured.stat_2073410902",
             "value": {
               "min": 39.0

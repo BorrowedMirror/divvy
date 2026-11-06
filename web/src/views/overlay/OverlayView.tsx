@@ -167,6 +167,7 @@ export function OverlayView() {
         ) : (
           <>
             <div className="flex flex-col gap-3">
+              {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
               <Toolbar filters={filters} />
               <StatFilters filters={filters} />
               <MiscFilters filters={filters} item={item} />
@@ -244,6 +245,39 @@ function useElementHeight(ref: RefObject<HTMLElement | null>): number {
     return () => observer.disconnect();
   }, [ref]);
   return height;
+}
+
+/** Unidentified unique: search the unidentified base, or one of the uniques it can be. */
+function UniquePicker({ filters, onPick }: { filters: FilterSet_Serialize; onPick: (f: FilterSet_Serialize) => void }) {
+  const { t } = useTranslation();
+  const pick = (name: string | null) => {
+    useOverlayStore.getState().pickUnique(name);
+    const next = useOverlayStore.getState().filters;
+    if (next) onPick(next);
+  };
+  const chip = (label: string, active: boolean, name: string | null) => (
+    <button
+      key={label}
+      type="button"
+      aria-pressed={active}
+      onClick={() => pick(name)}
+      className={cx(
+        "rounded-full border px-2 py-0.5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-gold",
+        active ? "border-gold bg-gold/15 text-gold" : "border-line text-muted hover:text-fg",
+      )}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div className="flex flex-col gap-1.5" role="group" aria-label={t("overlay.possibleUniques")}>
+      <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t("overlay.possibleUniques")}</span>
+      <div className="flex flex-wrap gap-1.5" data-testid="unique-candidates">
+        {chip(t("overlay.unidentifiedBase"), filters.name === null, null)}
+        {filters.unique_candidates.map((n) => chip(n, filters.name === n, n))}
+      </div>
+    </div>
+  );
 }
 
 function Toolbar({ filters }: { filters: FilterSet_Serialize }) {

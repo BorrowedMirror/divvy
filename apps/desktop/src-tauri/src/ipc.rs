@@ -158,6 +158,9 @@ pub async fn query_price(state: State<'_, Arc<AppState>>, filters: FilterSet) ->
     let settings = state.settings();
     let source = state.sources().pick(settings.trade.source, &item);
     let league = filters.league.clone();
+    if settings.trade.remember_filters {
+        remember_filters(&state, &filters);
+    }
     let req = PriceRequest { item, filters };
     match source.price(&req).await {
         Ok(summary) => {
@@ -192,6 +195,32 @@ async fn with_rates_if_wanted(
             summary
         }
     }
+}
+
+/// Save the stat choices of a search the user ran (best effort; a failed save only loses them).
+fn remember_filters(state: &AppState, filters: &FilterSet) {
+    let Some(paths) = state.paths.as_ref() else { return };
+    let Ok(mut memory) = state.filter_memory.lock() else { return };
+    if memory.record(filters)
+        && let Err(e) = memory.save(&paths.cache_dir.join(crate::filter_memory::FILE_NAME))
+    {
+        state.record_error(format!("save remembered filters: {e}"));
+    }
+}
+
+/// Forget every remembered stat choice.
+#[tauri::command]
+#[specta::specta]
+pub fn clear_filter_memory(state: State<'_, Arc<AppState>>) -> Result<(), IpcError> {
+    let mut memory = state.filter_memory.lock().map_err(|_| IpcError::new("internal", "filter memory lock"))?;
+    *memory = crate::filter_memory::FilterMemory::default();
+    if let Some(paths) = state.paths.as_ref() {
+        let path = paths.cache_dir.join(crate::filter_memory::FILE_NAME);
+        if path.exists() {
+            std::fs::remove_file(&path).map_err(|e| IpcError::new("config", e.to_string()))?;
+        }
+    }
+    Ok(())
 }
 
 /// Put `text` on the system clipboard (e.g. a listing's whisper).

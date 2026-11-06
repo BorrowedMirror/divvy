@@ -78,6 +78,9 @@ pub struct FilterSet {
     pub widen_pct: f64,
     /// Route: bulk exchange (currency/fragments) vs item search.
     pub route: QueryRoute,
+    /// Unidentified unique: the uniques that use this base, to price one of them by name.
+    #[serde(default)]
+    pub unique_candidates: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -196,6 +199,19 @@ fn range(enabled: bool, min: Option<u32>) -> RangeFilter {
     RangeFilter { enabled: enabled && min.is_some(), min: min.map(f64::from), max: None }
 }
 
+/// Prepend pseudo totals to `stats` and turn off the mods an enabled total covers.
+fn add_pseudo_stats(item: &ParsedItem, stats: &mut Vec<StatFilter>, widen_pct: f64) {
+    let (pseudo, covered) = crate::pseudo::pseudo_filters(&item.modifiers, &item.class, widen_pct);
+    let covered_ids: Vec<String> =
+        covered.iter().filter_map(|&i| item.modifiers[i].stat_id.as_deref().map(search_stat_id)).collect();
+    for s in stats.iter_mut() {
+        if covered_ids.contains(&s.stat_id) {
+            s.enabled = false;
+        }
+    }
+    stats.splice(0..0, pseudo);
+}
+
 /// Build default filters for an item.
 ///
 /// * uniques search by `name` + `type`, stats present but disabled;
@@ -261,7 +277,12 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
             ))
         })
         .collect();
-    let stats = merge_same_stats(stats, opts.widen_pct);
+    let mut stats = merge_same_stats(stats, opts.widen_pct);
+    // Totals the trade site sums across mods (resistances, life, ...): enabled pseudo rows go
+    // first and replace the mods they cover, which stay listed but start disabled.
+    if !unique && !currency_like {
+        add_pseudo_stats(item, &mut stats, opts.widen_pct);
+    }
 
     let gem = item.category == ItemCategory::Gem;
     let base_item = matches!(item.rarity, Rarity::Normal | Rarity::Magic)
@@ -297,6 +318,7 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
         misc,
         widen_pct: opts.widen_pct,
         route,
+        unique_candidates: Vec::new(),
     }
 }
 
@@ -447,6 +469,10 @@ mod tests {
         item
     }
 
+    fn stat<'a>(f: &'a FilterSet, text: &str) -> &'a StatFilter {
+        f.stats.iter().find(|s| s.text == text).unwrap_or_else(|| panic!("no stat {text:?} in {:#?}", f.stats))
+    }
+
     #[test]
     fn rare_defaults() {
         let f = build_filters(&rare_bow(), &opts());
@@ -456,17 +482,33 @@ mod tests {
         assert_eq!(f.name, None);
         assert_eq!(f.category.as_deref(), Some("weapon.bow"));
         assert_eq!(f.rarity.as_deref(), Some("nonunique"));
-        assert_eq!(f.stats.len(), 6);
-        assert!(!f.stats[0].enabled, "implicit disabled");
-        assert_eq!(f.stats.iter().filter(|s| s.enabled).count(), DEFAULT_ENABLED_STATS);
-        assert_eq!(f.stats[1].min, Some(37.0));
-        assert_eq!(f.stats[4].min, Some(4.95)); // avg of 3 and 8, fractional
+        // 6 mods plus pseudo totals: elemental resistance and life (enabled), fire and cold.
+        assert_eq!(f.stats.len(), 10);
+        let ids: Vec<&str> = f.stats.iter().take(4).map(|s| s.stat_id.as_str()).collect();
+        assert_eq!(
+            ids,
+            [
+                "pseudo.pseudo_total_elemental_resistance",
+                "pseudo.pseudo_total_life",
+                "pseudo.pseudo_total_fire_resistance",
+                "pseudo.pseudo_total_cold_resistance"
+            ]
+        );
+        assert_eq!(stat(&f, "+63% total Elemental Resistance").min, Some(56.0));
+        assert!(stat(&f, "+63% total Elemental Resistance").enabled && stat(&f, "+42 total maximum Life").enabled);
+        assert!(!stat(&f, "+20% to Fire Resistance").enabled, "implicit disabled");
+        assert!(!stat(&f, "+42 to maximum Life").enabled, "covered by the life total");
+        assert!(!stat(&f, "+31% to Cold Resistance").enabled, "covered by the resistance total");
+        assert_eq!(stat(&f, "+42 to maximum Life").min, Some(37.0));
+        assert_eq!(stat(&f, "Adds 3 to 8 Physical Damage").min, Some(4.95)); // avg of 3 and 8, fractional
+        assert!(stat(&f, "Adds 3 to 8 Physical Damage").enabled);
+        assert!(f.stats.iter().all(|s| !s.stat_id.contains("movement")), "no pseudo row for a penalty");
         assert_eq!(f.misc.corrupted, Some(true));
         assert!(!f.misc.item_level.enabled);
 
         let all =
             build_filters(&rare_bow(), &QueryOptions { enable_all_stats: true, status: OnlineStatus::Any, ..opts() });
-        assert_eq!(all.stats.iter().filter(|s| s.enabled).count(), 5);
+        assert_eq!(all.stats.iter().filter(|s| s.enabled).count(), 4, "pseudo totals + uncovered mods");
         assert_eq!(all.status, OnlineStatus::Any);
     }
 
@@ -475,14 +517,16 @@ mod tests {
         let mut f = build_filters(&rare_bow(), &opts());
         f.rewiden(0.0);
         assert!(f.widen_pct.abs() < f64::EPSILON);
-        assert_eq!(f.stats[1].min, Some(42.0));
+        assert_eq!(stat(&f, "+42 to maximum Life").min, Some(42.0));
         f.rewiden(50.0);
-        assert_eq!(f.stats[1].min, Some(21.0));
+        assert_eq!(stat(&f, "+42 to maximum Life").min, Some(21.0));
+        assert_eq!(stat(&f, "+42 total maximum Life").min, Some(21.0), "pseudo rows rewiden too");
         // Negated stat ("10% reduced ..." -> -10): more negative is better, so it gets an upper
         // bound widened towards zero instead of a minimum that would match any item.
-        assert_eq!(f.stats[5].item_values, vec![-10.0]);
-        assert_eq!(f.stats[5].min, None);
-        assert_eq!(f.stats[5].max, Some(-5.0));
+        let ms = stat(&f, "10% reduced Movement Speed");
+        assert_eq!(ms.item_values, vec![-10.0]);
+        assert_eq!(ms.min, None);
+        assert_eq!(ms.max, Some(-5.0));
     }
 
     #[test]
@@ -495,8 +539,11 @@ mod tests {
         assert_eq!(q["query"]["status"]["option"], "securable");
         assert_eq!(q["query"]["type"], "Recurve Bow");
         assert_eq!(q["query"]["stats"][0]["type"], "and");
-        assert_eq!(q["query"]["stats"][0]["filters"][0]["disabled"], true);
-        assert_eq!(q["query"]["stats"][0]["filters"][1]["value"]["min"], 37.0);
+        let filters = q["query"]["stats"][0]["filters"].as_array().unwrap();
+        let by_id = |id: &str| filters.iter().find(|f| f["id"] == id).unwrap();
+        assert_eq!(by_id("pseudo.pseudo_total_life")["value"]["min"], 37.0);
+        assert_eq!(by_id("pseudo.pseudo_total_life")["disabled"], false);
+        assert_eq!(filters[2]["disabled"], true, "fire total starts off");
         assert_eq!(q["query"]["filters"]["type_filters"]["filters"]["category"]["option"], "weapon.bow");
         assert_eq!(q["query"]["filters"]["misc_filters"]["filters"]["corrupted"]["option"], "true");
         assert_eq!(q["query"]["filters"]["misc_filters"]["filters"]["identified"]["option"], "false");

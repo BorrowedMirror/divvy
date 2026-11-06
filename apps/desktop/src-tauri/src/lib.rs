@@ -1,6 +1,7 @@
 //! Tauri shell. Wiring only: business logic lives in the crates.
 pub mod cli;
 pub mod events;
+pub mod filter_memory;
 pub mod flow;
 pub mod ipc;
 pub mod logic;
@@ -42,6 +43,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::resize_overlay,
             ipc::currency_icons,
             ipc::copy_text,
+            ipc::clear_filter_memory,
             ipc::get_overlay_layout,
             proton::get_proton_mouse_status,
             proton::set_proton_mouse_capture,

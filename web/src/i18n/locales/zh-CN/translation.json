@@ -32,7 +32,9 @@
     "search": "搜索",
     "loading": "搜索中…",
     "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 RKL 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。",
-    "tierTitle": "词缀阶级 {{tier}}（1 为最佳数值范围）"
+    "tierTitle": "词缀阶级 {{tier}}（1 为最佳数值范围）",
+    "possibleUniques": "可能的传奇",
+    "unidentifiedBase": "未鉴定"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -159,6 +161,10 @@
     "convertPricesHelp": "从 poe2scout 获取通货汇率，使 exalted、chaos 和 divine 标价的在售合并统计，并显示每条的 divine 或 exalted 价值。",
     "groupBySeller": "按卖家分组在售",
     "listingColumns": "在售列",
+    "rememberFilters": "按物品类型记住属性选择",
+    "rememberFiltersHelp": "下次查询戒指、弓等物品时，将沿用上次查询同类物品时启用或停用的属性。",
+    "forgetFilters": "清除记住的选择",
+    "forgotFilters": "已清除。",
     "checkUpdates": "自动检查更新",
     "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。"
   },

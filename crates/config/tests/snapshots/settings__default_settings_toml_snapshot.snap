@@ -36,6 +36,7 @@ widen_pct = 10.0
 enable_all_stats = false
 listing_count = 20
 convert_prices = true
+remember_filters = true
 
 [overlay]
 auto_hide_ms = 400

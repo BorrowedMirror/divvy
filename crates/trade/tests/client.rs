@@ -73,6 +73,7 @@ fn filters(route: QueryRoute, base: &str) -> FilterSet {
         misc: MiscFilters::default(),
         widen_pct: 10.0,
         route,
+        unique_candidates: Vec::new(),
     }
 }
 

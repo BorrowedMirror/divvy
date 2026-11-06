@@ -38,6 +38,8 @@ export const commands = {
 	currencyIcons: () => typedError<CurrencyIcon[], IpcError_Serialize>(__TAURI_INVOKE("currency_icons")),
 	/**  Put `text` on the system clipboard (e.g. a listing's whisper). */
 	copyText: (text: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("copy_text", { text })),
+	/**  Forget every remembered stat choice. */
+	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
 	getOverlayLayout: () => __TAURI_INVOKE<OverlayLayout>("get_overlay_layout"),
 	/**  Current state of Wine's mouse capture for PoE2 (Linux only; `supported = false` elsewhere). */
@@ -178,6 +180,8 @@ export type FilterSet_Deserialize = {
 	widen_pct: number | null,
 	/**  Route: bulk exchange (currency/fragments) vs item search. */
 	route: QueryRoute,
+	/**  Unidentified unique: the uniques that use this base, to price one of them by name. */
+	unique_candidates?: string[],
 };
 
 /**  Everything the user can edit before (re)querying. Round-trips through IPC. */
@@ -195,6 +199,8 @@ export type FilterSet_Serialize = {
 	widen_pct: number | null,
 	/**  Route: bulk exchange (currency/fragments) vs item search. */
 	route: QueryRoute,
+	/**  Unidentified unique: the uniques that use this base, to price one of them by name. */
+	unique_candidates: string[],
 };
 
 export type HotkeyAction = "price_check" | "price_check_pinned" | "open_settings" | "open_trade";
@@ -888,6 +894,8 @@ export type TradeSettings_Deserialize = {
 	 *  each price's divine or exalted equivalent.
 	 */
 	convert_prices?: boolean,
+	/**  Start each item with the stats the user last had on or off for its category. */
+	remember_filters?: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */
 	contact?: string | null,
 	/**  Optional POESESSID; stored in plain text, so off by default. */
@@ -907,6 +915,8 @@ export type TradeSettings_Serialize = {
 	 *  each price's divine or exalted equivalent.
 	 */
 	convert_prices: boolean,
+	/**  Start each item with the stats the user last had on or off for its category. */
+	remember_filters: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */
 	contact: string | null,
 	/**  Optional POESESSID; stored in plain text, so off by default. */

@@ -173,4 +173,11 @@ impl Catalog for GameData {
     fn static_item(&self, text: &str) -> Option<&StaticDef> {
         self.inner.statics.get(text).map(|&i| &self.inner.bundle.statics[i])
     }
+
+    fn uniques_by_base(&self, base_type: &str) -> Vec<&UniqueDef> {
+        let mut out: Vec<&UniqueDef> = self.inner.bundle.uniques.iter().filter(|u| u.base_type == base_type).collect();
+        out.sort_by(|a, b| a.name.cmp(&b.name));
+        out.dedup_by(|a, b| a.name == b.name);
+        out
+    }
 }

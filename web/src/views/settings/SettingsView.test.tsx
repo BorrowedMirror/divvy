@@ -146,6 +146,17 @@ describe("SettingsView", () => {
     await user.click(await screen.findByRole("option", { name: "40" }));
     await user.click(screen.getByRole("switch", { name: /Compare prices across currencies/ }));
     expect(draft().trade).toMatchObject({ listing_count: 40, convert_prices: false });
+    await user.click(screen.getByRole("switch", { name: /Remember stat choices per item type/ }));
+    expect(draft().trade.remember_filters).toBe(false);
+  });
+
+  test("forget remembered stat choices", async () => {
+    const user = userEvent.setup();
+    const { calls } = await mount({ clear_filter_memory: () => null });
+    await user.click(screen.getByRole("tab", { name: "Trade" }));
+    await user.click(screen.getByRole("button", { name: "Forget remembered choices" }));
+    expect(callsOf(calls, "clear_filter_memory")).toHaveLength(1);
+    expect(await screen.findByText("Forgotten.")).toBeInTheDocument();
   });
 
   test("clearing a numeric field keeps the last valid value instead of null", async () => {

@@ -176,7 +176,7 @@ fn is_local(stat: &StatDef) -> bool {
 }
 
 /// Weapons and armour pieces use local variants of damage / defence stats.
-fn prefers_local(class: &ItemClass) -> bool {
+pub(crate) fn prefers_local(class: &ItemClass) -> bool {
     matches!(
         class,
         ItemClass::Weapon(_)

@@ -14,7 +14,7 @@ import type {
   Settings_Serialize,
   Theme,
 } from "../../bindings";
-import { events } from "../../bindings";
+import { commands, events } from "../../bindings";
 import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
 import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
 import { useTauriEvent } from "../../hooks/useTauriEvent";
@@ -243,6 +243,7 @@ function TradeTab({ s, update, errors }: TabProps) {
   const leagueOptions = (leagues.data ?? []).map((l) => ({ value: l.id, label: l.text ?? l.id }));
   const current = s.league.league;
   if (current && !leagueOptions.some((o) => o.value === current)) leagueOptions.unshift({ value: current, label: current });
+  const [forgot, setForgot] = useState(false);
   const setTrade = (patch: Partial<Settings_Serialize["trade"]>) => update((d) => ({ ...d, trade: { ...d.trade, ...patch } }));
 
   return (
@@ -314,6 +315,27 @@ function TradeTab({ s, update, errors }: TabProps) {
           onChange={(v) => setTrade({ listing_count: Number(v) })}
         />
       </Row>
+      <SwitchField
+        label={t("settings.rememberFilters")}
+        description={t("settings.rememberFiltersHelp")}
+        checked={s.trade.remember_filters}
+        onChange={(remember_filters) => setTrade({ remember_filters })}
+      />
+      <div>
+        <Button
+          onClick={async () => {
+            const res = await commands.clearFilterMemory();
+            if (res.status === "ok") setForgot(true);
+          }}
+        >
+          {t("settings.forgetFilters")}
+        </Button>
+        {forgot && (
+          <span role="status" className="ml-2 text-xs text-good">
+            {t("settings.forgotFilters")}
+          </span>
+        )}
+      </div>
       <SwitchField
         label={t("settings.convertPrices")}
         description={t("settings.convertPricesHelp")}

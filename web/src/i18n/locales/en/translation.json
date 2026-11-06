@@ -32,7 +32,9 @@
     "search": "Search",
     "loading": "Searching…",
     "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the RKL tray menu and turn off Proton mouse capture.",
-    "tierTitle": "Mod tier {{tier}} (1 is the best roll range)"
+    "tierTitle": "Mod tier {{tier}} (1 is the best roll range)",
+    "possibleUniques": "Possible uniques",
+    "unidentifiedBase": "Unidentified"
   },
   "item": {
     "rarityLabel": "Rarity:",
@@ -163,7 +165,11 @@
     "convertPrices": "Compare prices across currencies",
     "convertPricesHelp": "Fetches currency rates from poe2scout so listings in exalted, chaos and divine count together and each shows its divine or exalted value.",
     "groupBySeller": "Group listings by seller",
-    "listingColumns": "Listing columns"
+    "listingColumns": "Listing columns",
+    "rememberFilters": "Remember stat choices per item type",
+    "rememberFiltersHelp": "The next ring, bow and so on starts with the stats you had on or off when you last searched one.",
+    "forgetFilters": "Forget remembered choices",
+    "forgotFilters": "Forgotten."
   },
   "theme": {
     "system": "System",

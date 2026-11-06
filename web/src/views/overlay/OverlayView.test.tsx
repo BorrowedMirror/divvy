@@ -16,6 +16,29 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test("unidentified unique: pick a possible unique to search it by name", async () => {
+    const user = userEvent.setup();
+    const calls = setupIpc({
+      get_overlay_snapshot: () =>
+        itemCopied({ filters: filterSet({ name: null, rarity: "unique", unique_candidates: ["Andvarius", "Ventor's Gamble"] }) }),
+      query_price: () => priceSummary(),
+    });
+    renderWithProviders(<OverlayView />);
+    const group = await screen.findByTestId("unique-candidates");
+    expect(within(group).getByRole("button", { name: "Unidentified" })).toHaveAttribute("aria-pressed", "true");
+    await user.click(within(group).getByRole("button", { name: "Andvarius" }));
+    await waitFor(() => expect(callsOf(calls, "query_price").length).toBeGreaterThanOrEqual(2));
+    const last = callsOf(calls, "query_price").at(-1)?.args as { filters: { name: string; misc: { identified: boolean | null } } };
+    expect(last.filters.name).toBe("Andvarius");
+    expect(last.filters.misc.identified).toBeNull();
+    expect(within(group).getByRole("button", { name: "Andvarius" })).toHaveAttribute("aria-pressed", "true");
+    await user.click(within(group).getByRole("button", { name: "Unidentified" }));
+    await waitFor(() => {
+      const again = callsOf(calls, "query_price").at(-1)?.args as { filters: { name: string | null; misc: { identified: boolean | null } } };
+      expect([again.filters.name, again.filters.misc.identified]).toEqual([null, false]);
+    });
+  });
+
   test("stat rows show the mod tier when known", async () => {
     setupIpc({ get_overlay_snapshot: () => itemCopied() });
     renderWithProviders(<OverlayView />);

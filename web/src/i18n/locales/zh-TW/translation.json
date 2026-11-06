@@ -32,7 +32,9 @@
     "search": "搜尋",
     "loading": "搜尋中…",
     "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 RKL 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。",
-    "tierTitle": "詞綴階級 {{tier}}（1 為最佳數值範圍）"
+    "tierTitle": "詞綴階級 {{tier}}（1 為最佳數值範圍）",
+    "possibleUniques": "可能的傳奇",
+    "unidentifiedBase": "未鑑定"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -159,6 +161,10 @@
     "convertPricesHelp": "從 poe2scout 取得通貨匯率，讓以 exalted、chaos 和 divine 標價的刊登合併計算，並顯示每筆的 divine 或 exalted 價值。",
     "groupBySeller": "依賣家分組刊登",
     "listingColumns": "刊登欄位",
+    "rememberFilters": "依物品類型記住屬性選擇",
+    "rememberFiltersHelp": "下次查詢戒指、弓等物品時，會沿用上次查詢同類物品時啟用或停用的屬性。",
+    "forgetFilters": "清除記住的選擇",
+    "forgotFilters": "已清除。",
     "checkUpdates": "自動檢查更新",
     "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。"
   },

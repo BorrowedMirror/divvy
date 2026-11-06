@@ -32,7 +32,9 @@
     "search": "検索",
     "loading": "検索中…",
     "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。RKL のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。",
-    "tierTitle": "Mod のティア {{tier}}（1 が最良の数値範囲）"
+    "tierTitle": "Mod のティア {{tier}}（1 が最良の数値範囲）",
+    "possibleUniques": "候補のユニーク",
+    "unidentifiedBase": "未鑑定"
   },
   "item": {
     "rarityLabel": "レアリティ:",
@@ -159,6 +161,10 @@
     "convertPricesHelp": "poe2scout から通貨レートを取得し、exalted・chaos・divine の出品をまとめて集計して、それぞれの divine または exalted 換算額を表示します。",
     "groupBySeller": "出品を出品者ごとにまとめる",
     "listingColumns": "出品の列",
+    "rememberFilters": "アイテムの種類ごとにステータスの選択を記憶する",
+    "rememberFiltersHelp": "次に指輪や弓などを検索すると、前回その種類を検索したときにオン/オフにしたステータスから始まります。",
+    "forgetFilters": "記憶した選択を消去",
+    "forgotFilters": "消去しました",
     "checkUpdates": "アップデートを自動的に確認",
     "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。"
   },

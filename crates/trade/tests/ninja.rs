@@ -63,6 +63,7 @@ fn request(item: ParsedItem) -> PriceRequest {
             misc: MiscFilters::default(),
             widen_pct: 10.0,
             route: QueryRoute::Exchange,
+            unique_candidates: Vec::new(),
         },
         item,
     }

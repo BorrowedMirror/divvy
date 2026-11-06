@@ -32,7 +32,9 @@
     "search": "검색",
     "loading": "검색 중…",
     "mouseCaptured": "Path of Exile 2가 마우스를 점유하고 있어 이 패널을 클릭할 수 없습니다. RKL 트레이 메뉴에서 진단을 열고 Proton 마우스 캡처를 끄세요.",
-    "tierTitle": "옵션 등급 {{tier}} (1이 가장 좋은 수치 범위)"
+    "tierTitle": "옵션 등급 {{tier}} (1이 가장 좋은 수치 범위)",
+    "possibleUniques": "가능한 고유 아이템",
+    "unidentifiedBase": "미확인"
   },
   "item": {
     "rarityLabel": "희귀도:",
@@ -159,6 +161,10 @@
     "convertPricesHelp": "poe2scout에서 화폐 시세를 가져와 exalted, chaos, divine 매물을 함께 집계하고 각 매물의 divine 또는 exalted 환산 가치를 표시합니다.",
     "groupBySeller": "판매자별로 매물 묶기",
     "listingColumns": "매물 열",
+    "rememberFilters": "아이템 종류별 능력치 선택 기억",
+    "rememberFiltersHelp": "다음에 반지, 활 등을 검색하면 마지막으로 같은 종류를 검색했을 때 켜거나 끈 능력치로 시작합니다.",
+    "forgetFilters": "기억한 선택 지우기",
+    "forgotFilters": "지웠습니다",
     "checkUpdates": "업데이트 자동 확인",
     "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다."
   },

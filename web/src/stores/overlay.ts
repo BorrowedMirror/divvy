@@ -32,6 +32,9 @@ export type OverlayStore = {
   setCorrupted: (v: boolean | null) => void;
   setStatus: (status: OnlineStatus) => void;
   setLeague: (league: string) => void;
+  /** Unidentified unique: search one possible unique by name (identified), or `null` for the
+   * unidentified base again. */
+  pickUnique: (name: string | null) => void;
   widen: (pct: number) => void;
   queryStarted: () => void;
   priceReady: (summary: PriceSummary_Serialize) => void;
@@ -70,6 +73,8 @@ export const useOverlayStore = create<OverlayStore>()((set) => {
     setCorrupted: (corrupted) => patchFilters((f) => ({ ...f, misc: { ...f.misc, corrupted } })),
     setStatus: (status) => patchFilters((f) => ({ ...f, status })),
     setLeague: (league) => patchFilters((f) => ({ ...f, league })),
+    pickUnique: (name) =>
+      patchFilters((f) => ({ ...f, name, misc: { ...f.misc, identified: name === null ? false : null } })),
     widen: (pct) => patchFilters((f) => rewiden(f, pct)),
     queryStarted: () => set({ phase: "loading", error: null }),
     priceReady: (summary) => set({ summary, phase: "ready", error: null, retryAt: null }),

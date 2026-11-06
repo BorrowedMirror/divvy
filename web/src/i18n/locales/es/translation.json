@@ -32,7 +32,9 @@
     "search": "Buscar",
     "loading": "Buscando…",
     "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de RKL en la bandeja y desactiva la captura del ratón de Proton.",
-    "tierTitle": "Grado de modificador {{tier}} (1 es el mejor rango de valores)"
+    "tierTitle": "Grado de modificador {{tier}} (1 es el mejor rango de valores)",
+    "possibleUniques": "Únicos posibles",
+    "unidentifiedBase": "Sin identificar"
   },
   "item": {
     "rarityLabel": "Rareza:",
@@ -166,7 +168,11 @@
     "convertPrices": "Comparar precios entre monedas",
     "convertPricesHelp": "Obtiene los tipos de cambio de poe2scout para que los anuncios en exalted, chaos y divine cuenten juntos y cada uno muestre su valor en divine o exalted.",
     "groupBySeller": "Agrupar anuncios por vendedor",
-    "listingColumns": "Columnas de anuncios"
+    "listingColumns": "Columnas de anuncios",
+    "rememberFilters": "Recordar la selección de estadísticas por tipo de objeto",
+    "rememberFiltersHelp": "El próximo anillo, arco, etc. empieza con las estadísticas que tenías activadas o desactivadas la última vez que buscaste uno.",
+    "forgetFilters": "Olvidar la selección recordada",
+    "forgotFilters": "Olvidado."
   },
   "theme": {
     "system": "Sistema",
