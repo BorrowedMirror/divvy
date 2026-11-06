@@ -114,6 +114,14 @@ pub fn get_diagnostics(state: State<'_, Arc<AppState>>) -> Diagnostics {
     }
 }
 
+/// Currency icons (exchange tag -> name and GGG CDN image URL) for showing prices as icons.
+/// Served from the trade site's `data/static`, cached by the trade client.
+#[tauri::command]
+#[specta::specta]
+pub async fn currency_icons(state: State<'_, Arc<AppState>>) -> Result<Vec<rkl_trade::client::CurrencyIcon>, IpcError> {
+    Ok(state.sources().trade.currency_icons().await?)
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn list_leagues(state: State<'_, Arc<AppState>>) -> Result<Vec<League>, IpcError> {

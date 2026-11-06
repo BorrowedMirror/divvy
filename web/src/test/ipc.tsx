@@ -21,6 +21,7 @@ const defaults: Record<string, Handler> = {
   list_leagues: () => leagues,
   hide_overlay: () => null,
   get_overlay_layout: () => ({ cover: false, x: 0, y: 0 }),
+  currency_icons: () => [],
   resize_overlay: () => null,
   set_overlay_pinned: () => null,
   get_overlay_snapshot: () => null,

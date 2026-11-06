@@ -566,3 +566,35 @@ async fn price_full_search_path() {
     assert!(summary.min.is_some());
     assert!(summary.trade_url.unwrap().contains("/trade2/search/poe2/Standard/"));
 }
+
+#[tokio::test]
+async fn currency_icons_come_from_static_data() {
+    let server = MockServer::start().await;
+    Mock::given(path("/api/trade2/data/static"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(fixture("static.sample.json")))
+        .expect(1)
+        .mount(&server)
+        .await;
+    let c = client(&server);
+    let icons = c.currency_icons().await.unwrap();
+    let wisdom = icons.iter().find(|i| i.id == "wisdom").expect("wisdom icon");
+    assert_eq!(wisdom.name, "Scroll of Wisdom");
+    assert!(wisdom.icon.starts_with("https://web.poecdn.com/gen/image/"), "{}", wisdom.icon);
+    assert_eq!(icons.iter().filter(|i| i.id == "wisdom").count(), 1);
+    // Cached: the second call does not hit the server again (`expect(1)`).
+    assert_eq!(c.currency_icons().await.unwrap(), icons);
+}
+
+#[test]
+fn currency_icons_skip_missing_images_and_keep_absolute_urls() {
+    let v = serde_json::json!({"result": [{"id": "Currency", "entries": [
+        {"id": "a", "text": "A", "image": "/gen/a.png"},
+        {"id": "b", "text": "B"},
+        {"id": "c", "image": "https://cdn.example/c.png"},
+        {"id": "a", "text": "dup", "image": "/gen/x.png"}
+    ]}]});
+    let icons = rkl_trade::client::currency_icons_from(&v);
+    assert_eq!(icons.len(), 2);
+    assert_eq!(icons[0].icon, "https://web.poecdn.com/gen/a.png");
+    assert_eq!((icons[1].name.as_str(), icons[1].icon.as_str()), ("c", "https://cdn.example/c.png"));
+}

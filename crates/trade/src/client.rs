@@ -279,6 +279,13 @@ impl TradeClient {
         })
     }
 
+    /// Currency icons from `data/static`: every exchange tag that has an image, with its name
+    /// and the absolute image URL on GGG's CDN (the URLs the official trade site uses; the
+    /// images are not bundled).
+    pub async fn currency_icons(&self) -> Result<Vec<CurrencyIcon>, TradeError> {
+        Ok(currency_icons_from(&*self.data_cached("static").await?))
+    }
+
     /// Exchange tag (`divine`, `exalted`, ...) for an item name, from `data/static`.
     pub async fn static_id(&self, text: &str) -> Result<Option<String>, TradeError> {
         let v = self.data_cached("static").await?;
@@ -398,4 +405,33 @@ impl PriceSource for TradeClient {
         summary.trade_url = Some(page.trade_url.to_string());
         Ok(summary)
     }
+}
+
+/// Base for the relative image paths in `data/static`.
+pub const IMAGE_CDN: &str = "https://web.poecdn.com";
+
+/// One currency (exchange tag) and its icon.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct CurrencyIcon {
+    /// Exchange tag, as used in listing prices (`divine`, `exalted`, `chaos`, ...).
+    pub id: String,
+    /// English item name (`Divine Orb`).
+    pub name: String,
+    /// Absolute image URL.
+    pub icon: String,
+}
+
+/// Extract [`CurrencyIcon`]s from a `data/static` response. Entries without an image are
+/// skipped; the first entry wins for a repeated id.
+pub fn currency_icons_from(v: &serde_json::Value) -> Vec<CurrencyIcon> {
+    let mut out: Vec<CurrencyIcon> = Vec::new();
+    for e in v["result"].as_array().into_iter().flatten().flat_map(|g| g["entries"].as_array().into_iter().flatten()) {
+        let (Some(id), Some(image)) = (e["id"].as_str(), e["image"].as_str()) else { continue };
+        if image.is_empty() || out.iter().any(|c| c.id == id) {
+            continue;
+        }
+        let icon = if image.starts_with("https://") { image.to_owned() } else { format!("{IMAGE_CDN}{image}") };
+        out.push(CurrencyIcon { id: id.to_owned(), name: e["text"].as_str().unwrap_or(id).to_owned(), icon });
+    }
+    out
 }

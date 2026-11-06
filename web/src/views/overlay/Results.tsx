@@ -3,20 +3,15 @@ import { useTranslation } from "react-i18next";
 import type { IpcError_Serialize, PriceSummary_Serialize } from "../../bindings";
 import { commands } from "../../bindings";
 import { ExternalIcon } from "../../components/icons";
+import { PriceTag, useCurrencyIcons } from "../../components/PriceTag";
 import { useCommand } from "../../hooks/useCommand";
-import { ageOf, formatAge, formatDateTime, formatPrice } from "../../lib/format";
-
-function useCurrencyLabel() {
-  const { t } = useTranslation();
-  return (id: string) => t(`currency.${id}`, { defaultValue: id });
-}
+import { ageOf, formatAge, formatDateTime } from "../../lib/format";
 
 export function Results({ summary, now: nowProp }: { summary: PriceSummary_Serialize; now?: number }) {
   const { t, i18n } = useTranslation();
   const [mountedAt] = useState(() => Date.now());
   const now = nowProp ?? mountedAt;
-  const currency = useCurrencyLabel();
-  const fmt = (p: PriceSummary_Serialize["min"]) => formatPrice(p, i18n.language, currency);
+  const icons = useCurrencyIcons();
   const tradeUrl = summary.trade_url;
   const command = useCommand();
 
@@ -58,7 +53,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
               <div key={k} className="rounded-md border border-line bg-surface-2 px-2 py-1">
                 <dt className="text-[10px] tracking-wider text-muted uppercase">{t(`results.${k}`)}</dt>
                 <dd className={k === "median" ? "font-semibold text-gold" : "text-fg"} data-testid={`price-${k}`}>
-                  {fmt(p)}
+                  <PriceTag price={p} icons={icons} />
                 </dd>
               </div>
             ))}
@@ -84,7 +79,9 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
                   const age = ageOf(l.indexed, now);
                   return (
                     <tr key={l.id} className="border-t border-line/60">
-                      <td className="px-2 py-1 tabular-nums">{formatPrice(l.price, i18n.language, currency)}</td>
+                      <td className="px-2 py-1 tabular-nums">
+                        <PriceTag price={l.price} icons={icons} />
+                      </td>
                       <td className="max-w-32 truncate px-2 py-1" title={l.seller ?? undefined}>
                         {l.online && (
                           <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />

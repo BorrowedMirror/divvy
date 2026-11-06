@@ -31,6 +31,11 @@ export const commands = {
 	 *  on screen.
 	 */
 	resizeOverlay: (height: number | null) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("resize_overlay", { height })),
+	/**
+	 *  Currency icons (exchange tag -> name and GGG CDN image URL) for showing prices as icons.
+	 *  Served from the trade site's `data/static`, cached by the trade client.
+	 */
+	currencyIcons: () => typedError<CurrencyIcon[], IpcError_Serialize>(__TAURI_INVOKE("currency_icons")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
 	getOverlayLayout: () => __TAURI_INVOKE<OverlayLayout>("get_overlay_layout"),
 	/**  Current state of Wine's mouse capture for PoE2 (Linux only; `supported = false` elsewhere). */
@@ -115,6 +120,16 @@ export type Capabilities = {
 export type Chord = {
 	modifiers: KeyModifier[],
 	key: string,
+};
+
+/**  One currency (exchange tag) and its icon. */
+export type CurrencyIcon = {
+	/**  Exchange tag, as used in listing prices (`divine`, `exalted`, `chaos`, ...). */
+	id: string,
+	/**  English item name (`Divine Orb`). */
+	name: string,
+	/**  Absolute image URL. */
+	icon: string,
 };
 
 export type Diagnostics = Diagnostics_Serialize | Diagnostics_Deserialize;
