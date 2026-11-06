@@ -178,7 +178,8 @@
     "scale": "Tamaño del panel",
     "backdropDim": "Fondo detrás del panel",
     "closePinnedOnGameFocus": "Cerrar un panel fijado al volver a hacer clic en el juego",
-    "itemLinks": "Enlaces del objeto en el panel"
+    "itemLinks": "Enlaces del objeto en el panel",
+    "results": "Precios y anuncios"
   },
   "theme": {
     "system": "Sistema",
@@ -392,5 +393,11 @@
       "other": "Otros modificadores marcados"
     },
     "footnote": "Los modificadores provienen de los datos del juego de RKL; # representa el valor obtenido. Los modificadores que marques desde el panel también aparecen aquí."
+  },
+  "resultsLayout": {
+    "below": "Debajo de los filtros",
+    "left": "A la izquierda de los filtros",
+    "right": "A la derecha de los filtros",
+    "auto": "Junto a los filtros en objetos con muchas estadísticas"
   }
 }

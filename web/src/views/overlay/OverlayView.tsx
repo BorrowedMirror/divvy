@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "../../bindings";
 import { commands, events } from "../../bindings";
@@ -115,10 +114,18 @@ export function OverlayView() {
   const opacity = settings?.overlay.opacity ?? 1;
   const busy = phase === "loading";
   // The window grows with the number of stats instead of scrolling them.
-  const fitRef = useFitWindowHeight<HTMLDivElement>();
+
+  // Results beside the filters (two columns) or below them; "auto" goes beside for items with
+  // many stats, where the stacked panel would need scrolling.
+  const resultsSetting = settings?.overlay.results ?? "below";
+  const resultsAt: "below" | "left" | "right" =
+    resultsSetting === "auto" ? ((filters?.stats.length ?? 0) > AUTO_SIDE_STATS ? "right" : "below") : resultsSetting;
+  const side = resultsAt !== "below" && !!item && !!filters;
   const layout = useOverlayLayout();
   const dragHandlers = useCardDrag();
-  const cardHeight = useElementHeight(fitRef);
+  // Full content height (not the capped card): Rust places a tall card so it fits on screen.
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const fitRef = useFitWindowHeight<HTMLDivElement>(contentRef, () => CARD_CHROME);
 
   const card = (
     <div
@@ -126,8 +133,10 @@ export function OverlayView() {
       data-testid="overlay-card"
       // As a card-sized window (pinned) the card fills the window exactly and the window is
       // shaped to its rounded corners, so compositor shadows (picom) follow the card.
-      className={layout.cover ? "absolute w-[420px] p-1.5" : "flex w-full items-start"}
-      style={layout.cover ? cardPosition(layout, cardHeight) : undefined}
+      // No padding in either layout: the saved position is the card's own corner, so pinned and
+      // unpinned open at exactly the same spot (the shadow draws outside the card anyway).
+      className={layout.cover ? "absolute w-max" : "flex w-max items-start"}
+      style={layout.cover ? coverCardStyle(layout, side ? 860 : 420) : undefined}
     >
       <article
         aria-label={t("overlay.title")}
@@ -136,11 +145,15 @@ export function OverlayView() {
         onMouseEnter={layout.cover ? undefined : autoHide.onMouseEnter}
         onMouseLeave={layout.cover ? undefined : autoHide.onMouseLeave}
         className={cx(
-          "flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg",
+          "rounded-xl border border-gold/30 bg-surface p-3 text-fg",
+          side ? "w-[860px]" : "w-[420px]",
+          // Over the game the card is capped to the screen and scrolls inside itself.
+          layout.cover && "max-h-full overflow-y-auto overscroll-contain",
           // A card-sized window gets its rounded shape (and shadow) from the window itself.
           layout.cover && "shadow-2xl",
         )}
       >
+        <div ref={contentRef} className="flex flex-col gap-3">
         <header
           className="flex cursor-grab items-start gap-2 select-none active:cursor-grabbing"
           title={t("overlay.dragHint")}
@@ -173,6 +186,8 @@ export function OverlayView() {
           </div>
         ) : (
           <>
+            <div className={side ? "grid grid-cols-2 items-start gap-4" : "flex flex-col gap-3"} data-testid="panel-body" data-results={resultsAt}>
+            <div className={cx("flex min-w-0 flex-col gap-3", resultsAt === "left" && "order-2")}>
             <div className="flex flex-col gap-3">
               {item.category === "waystone" && <WaystoneMods item={item} />}
               {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
@@ -189,14 +204,17 @@ export function OverlayView() {
             >
               {secondsLeft > 0 ? t("errors.retryIn", { count: secondsLeft }) : t("overlay.search")}
             </Button>
+            </div>
 
-            <div className={cx("flex flex-col gap-2", busy && "opacity-70")} aria-live="polite">
+            <div className={cx("flex min-w-0 flex-col gap-2", busy && "opacity-70", resultsAt === "left" && "order-1")} aria-live="polite">
               {busy && <Spinner label={t("overlay.loading")} />}
               {error && !busy && <ErrorNotice error={error} secondsLeft={secondsLeft} />}
               {summary && !busy && !error && <Results summary={summary} />}
             </div>
+            </div>
           </>
         )}
+        </div>
       </article>
     </div>
   );
@@ -219,12 +237,25 @@ export function OverlayView() {
 }
 
 const EDGE = 8;
+/** Card padding and border around its content (px). */
+const CARD_CHROME = 12 * 2 + 2;
+/** How much of a dragged card must stay on screen (px). */
+const MIN_VISIBLE = 120;
+/** Position plus a height cap, so a card taller than the screen scrolls inside itself. */
+export function coverCardStyle(layout: OverlayLayout, width: number) {
+  const pos = cardPosition(layout, width);
+  return { ...pos, display: "flex", flexDirection: "column" as const, maxHeight: Math.max(120, window.innerHeight - pos.top - EDGE) };
+}
 
-/** Keep the card inside the covering window: Rust places it beside the cursor, this clamps
- * it with the card's measured height. */
-export function cardPosition(layout: OverlayLayout, height: number): { left: number; top: number } {
-  const maxLeft = Math.max(EDGE, window.innerWidth - 420 - EDGE);
-  const maxTop = Math.max(0, window.innerHeight - height - EDGE);
+/** `Results: Auto` puts results beside the filters for items with more stats than this. */
+export const AUTO_SIDE_STATS = 6;
+
+/** Keep the card inside the covering window horizontally; vertically it may move anywhere that
+ * leaves at least `MIN_VISIBLE` px of it on screen (a tall card then gets shorter and scrolls).
+ * Rust already places a card that fits so it fits when the panel opens. */
+export function cardPosition(layout: OverlayLayout, width = 420): { left: number; top: number } {
+  const maxLeft = Math.max(EDGE, window.innerWidth - width - EDGE);
+  const maxTop = Math.max(0, window.innerHeight - MIN_VISIBLE);
   return { left: Math.min(Math.max(layout.x ?? 0, 0), maxLeft), top: Math.min(Math.max(layout.y ?? 0, 0), maxTop) };
 }
 
@@ -269,18 +300,6 @@ export function useCardDrag() {
       send("end");
     },
   };
-}
-
-function useElementHeight(ref: RefObject<HTMLElement | null>): number {
-  const [height, setHeight] = useState(0);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(() => setHeight(el.getBoundingClientRect().height));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [ref]);
-  return height;
 }
 
 /** Unidentified unique: search the unidentified base, or one of the uniques it can be. */

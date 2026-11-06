@@ -130,6 +130,45 @@ pub fn apply_panel_scale(app: &AppHandle, scale: f64) {
     }
 }
 
+/// Where a card may sit over the game: the whole game window, docks' strips included (like
+/// the fullscreen game itself).
+pub fn card_bounds(game: rkl_platform::Rect) -> logic::Area {
+    logic::Area { x: game.x, y: game.y, width: game.width as i32, height: game.height as i32 }
+}
+
+/// X11 WMs (openbox) keep a newly mapped window out of docks' reserved strips (polybar), so a
+/// card placed at the very top opens below the dock. Once the window is mapped a move is
+/// honoured, so repeat the position shortly after showing a card-sized window. As a transient
+/// of the fullscreen game it is stacked in the game's layer, above the dock, like the game.
+fn reassert_card_position(app: &AppHandle, state: &AppState) {
+    if !cfg!(target_os = "linux") || state.backend == rkl_platform::BackendKind::Wayland {
+        return;
+    }
+    let seq = state.show_seq.load(Ordering::SeqCst);
+    let app = app.clone();
+    let _ = std::thread::Builder::new().name("rkl-card-position".into()).spawn(move || {
+        for delay in [60, 250] {
+            std::thread::sleep(std::time::Duration::from_millis(delay));
+            let state = app.state::<Arc<AppState>>();
+            if state.show_seq.load(Ordering::SeqCst) != seq
+                || !state.overlay_visible.load(Ordering::SeqCst)
+                || state.overlay_layout.lock().is_ok_and(|l| l.cover)
+                || state.drag_origin.lock().is_ok_and(|d| d.is_some())
+            {
+                return;
+            }
+            let card = state.overlay_card.lock().map(|c| c.0).unwrap_or_default();
+            // Straight to X11: GTK skips a move to where it believes the window already is.
+            #[cfg(target_os = "linux")]
+            if let Some(win) = app.get_webview_window(OVERLAY)
+                && let Err(e) = crate::overlay::linux::move_window(&win, card.0, card.1)
+            {
+                tracing::debug!("reassert card position: {e}");
+            }
+        }
+    });
+}
+
 /// Round a card-sized panel window of `width` x `height` logical px.
 pub fn round_card(win: &tauri::WebviewWindow, width: f64, height: f64, zoom: f64) {
     let scale = win.scale_factor().unwrap_or(1.0);
@@ -158,8 +197,9 @@ pub fn layout_overlay(app: &AppHandle, state: &AppState, win: &tauri::WebviewWin
         // The web view is zoomed by the panel scale: its CSS pixels are `zoom` logical pixels.
         OverlayLayout { cover: true, x: x / zoom, y: y / zoom }
     } else {
-        let _ = win.set_size(tauri::LogicalSize::new(crate::state::CARD_WIDTH * zoom, card_height));
-        round_card(win, crate::state::CARD_WIDTH * zoom, card_height, zoom);
+        let width = state.card_css_width.lock().map_or(crate::state::CARD_WIDTH, |w| *w) * zoom;
+        let _ = win.set_size(tauri::LogicalSize::new(width, card_height));
+        round_card(win, width, card_height, zoom);
         let _ = win.set_position(PhysicalPosition::new(card.0, card.1));
         OverlayLayout { cover: false, x: 0.0, y: 0.0 }
     };
@@ -177,10 +217,13 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     let mut card = state.overlay_card.lock().map_or((0, 0), |c| c.0);
     if let Ok(cursor) = app.cursor_position() {
         let zoom = state.settings().overlay.scale;
-        let size = ((crate::state::CARD_WIDTH * zoom * scale).round() as i32, (card_height * scale).round() as i32);
+        let css_width = state.card_css_width.lock().map_or(crate::state::CARD_WIDTH, |w| *w);
+        let size = ((css_width * zoom * scale).round() as i32, (card_height * scale).round() as i32);
         let monitor =
             app.monitor_from_point(cursor.x, cursor.y).ok().flatten().or_else(|| app.primary_monitor().ok().flatten());
         if let Some(m) = monitor {
+            // The whole monitor, docks such as polybar included: like a fullscreen game, the card
+            // may sit right at the top (and pinned and unpinned open at the same spot).
             let screen = logic::Area {
                 x: m.position().x,
                 y: m.position().y,
@@ -188,11 +231,11 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
                 height: m.size().height as i32,
             };
             // Edges are the game window's when it is tracked (physical px, not macOS points).
-            let area = game_window(state).filter(|_| !cfg!(target_os = "macos")).map_or(screen, |g| logic::Area {
-                x: g.rect.x,
-                y: g.rect.y,
-                width: g.rect.width as i32,
-                height: g.rect.height as i32,
+            let area = game_window(state).filter(|_| !cfg!(target_os = "macos")).map_or(screen, |g| {
+                logic::intersect(
+                    logic::Area { x: g.rect.x, y: g.rect.y, width: g.rect.width as i32, height: g.rect.height as i32 },
+                    screen,
+                )
             });
             let side = state.settings().overlay.side;
             let last = state.last_position.lock().ok().and_then(|p| *p);
@@ -221,6 +264,7 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
             card = (x, y);
         }
     }
+    state.card_moved.store(false, Ordering::SeqCst);
     layout_overlay(app, state, &win, card);
     let _ = win.set_ignore_cursor_events(false);
     let _ = win.show();
@@ -233,6 +277,8 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     }
     state.overlay_visible.store(true, Ordering::SeqCst);
     spawn_focus_guard(app, state, game_id);
+    // After the focus guard, which bumps `show_seq` for this show.
+    reassert_card_position(app, state);
     spawn_pinned_hover(app, state, game_id);
     emit_overlay_state(app, state);
 }

@@ -10,6 +10,7 @@ import type {
   ListingColumn,
   OnlineStatus,
   OverlaySide,
+  ResultsLayout,
   PriceSourceKind,
   Settings_Serialize,
   Theme,
@@ -578,6 +579,16 @@ function OverlayTab({ s, update, errors }: TabProps) {
           ))}
         </div>
       </fieldset>
+      <Row label={t("settings.results")} htmlFor="set-results">
+        <SelectField<ResultsLayout>
+          id="set-results"
+          label={t("settings.results")}
+          hideLabel
+          value={s.overlay.results}
+          options={(["below", "left", "right", "auto"] as const).map((v) => ({ value: v, label: t(`resultsLayout.${v}`) }))}
+          onChange={(results) => setOverlay({ results })}
+        />
+      </Row>
       <SwitchField
         label={t("settings.groupBySeller")}
         checked={s.overlay.group_by_seller}

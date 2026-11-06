@@ -178,7 +178,8 @@
     "scale": "Tamanho do painel",
     "backdropDim": "Fundo atrás do painel",
     "closePinnedOnGameFocus": "Fechar um painel fixado quando eu clicar de volta no jogo",
-    "itemLinks": "Links do item no painel"
+    "itemLinks": "Links do item no painel",
+    "results": "Preços e anúncios"
   },
   "theme": {
     "system": "Sistema",
@@ -392,5 +393,11 @@
       "other": "Outros modificadores marcados"
     },
     "footnote": "Os modificadores vêm dos dados do jogo do RKL; # representa o valor rolado. Os modificadores que você marcar no painel também aparecem aqui."
+  },
+  "resultsLayout": {
+    "below": "Abaixo dos filtros",
+    "left": "À esquerda dos filtros",
+    "right": "À direita dos filtros",
+    "auto": "Ao lado dos filtros em itens com muitos atributos"
   }
 }

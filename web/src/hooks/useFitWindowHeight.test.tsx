@@ -42,7 +42,7 @@ test("reports the content height on mount and whenever it changes", async () => 
   const calls = setupIpc({ resize_overlay: () => null });
   render(<Panel />);
   await vi.waitFor(() => expect(callsOf(calls, "resize_overlay")).toHaveLength(1));
-  expect(callsOf(calls, "resize_overlay")[0]?.args).toEqual({ height: 300 });
+  expect(callsOf(calls, "resize_overlay")[0]?.args).toEqual({ width: 420, height: 300 });
 
   observed?.(); // same height: no new resize
   expect(callsOf(calls, "resize_overlay")).toHaveLength(1);
@@ -50,7 +50,7 @@ test("reports the content height on mount and whenever it changes", async () => 
   height = 512.4;
   observed?.();
   await vi.waitFor(() => expect(callsOf(calls, "resize_overlay")).toHaveLength(2));
-  expect(callsOf(calls, "resize_overlay")[1]?.args).toEqual({ height: 513 });
+  expect(callsOf(calls, "resize_overlay")[1]?.args).toEqual({ width: 420, height: 513 });
 });
 
 test("does nothing without ResizeObserver", () => {

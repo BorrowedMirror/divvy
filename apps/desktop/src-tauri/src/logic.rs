@@ -381,6 +381,13 @@ pub fn waystone_catalog<'a>(explicit_stat_texts: impl Iterator<Item = &'a str>) 
     out
 }
 
+/// Overlap of two areas (the first one when they do not overlap).
+pub fn intersect(a: Area, b: Area) -> Area {
+    let (x0, y0) = (a.x.max(b.x), a.y.max(b.y));
+    let (x1, y1) = ((a.x + a.width).min(b.x + b.width), (a.y + a.height).min(b.y + b.height));
+    if x1 <= x0 || y1 <= y0 { a } else { Area { x: x0, y: y0, width: x1 - x0, height: y1 - y0 } }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -493,6 +500,17 @@ mod tests {
         for m in rkl_config::DEFAULT_DANGEROUS_WAYSTONE_MODS {
             assert!(waystone_group(m).is_some(), "{m} must be in the catalogue");
         }
+    }
+
+    #[test]
+    fn intersect_areas() {
+        let game = Area { x: 2560, y: 0, width: 3440, height: 1440 };
+        let monitor = Area { x: 2560, y: 0, width: 3440, height: 1440 };
+        assert_eq!(intersect(game, monitor), game);
+        let half = Area { x: 2560, y: 0, width: 1000, height: 1440 };
+        assert_eq!(intersect(game, half), half);
+        let apart = Area { x: 0, y: 0, width: 10, height: 10 };
+        assert_eq!(intersect(game, apart), game, "no overlap keeps the first area");
     }
 
     #[test]

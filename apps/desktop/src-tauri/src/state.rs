@@ -162,10 +162,14 @@ pub struct AppState {
     pub last_position: Mutex<Option<(i32, i32)>>,
     /// Header drag in progress: cursor and card position (physical px) when it started.
     pub drag_origin: Mutex<Option<DragOrigin>>,
+    /// The user dragged the card since it was last shown (then it stays where they put it).
+    pub card_moved: AtomicBool,
     /// Current price panel layout (also served to the web view on mount).
     pub overlay_layout: Mutex<crate::events::OverlayLayout>,
     /// Card position on screen (physical px) and its last measured height (logical px).
     pub overlay_card: Mutex<((i32, i32), f64)>,
+    /// Width of the price card in CSS px (420, or wider with results beside the filters).
+    pub card_css_width: Mutex<f64>,
     /// Incremented on every panel show, so a stale focus guard can tell it was superseded.
     pub show_seq: std::sync::atomic::AtomicU64,
     pub quitting: AtomicBool,
@@ -210,8 +214,10 @@ impl AppState {
             filter_memory: Mutex::new(memory),
             last_position: Mutex::new(last_position),
             drag_origin: Mutex::new(None),
+            card_moved: AtomicBool::new(false),
             overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
             overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
+            card_css_width: Mutex::new(CARD_WIDTH),
             show_seq: std::sync::atomic::AtomicU64::new(0),
             quitting: AtomicBool::new(false),
             close_quits: AtomicBool::new(false),

@@ -172,7 +172,8 @@
     "closePinnedOnGameFocus": "点击回到游戏时关闭已固定的面板",
     "checkUpdates": "自动检查更新",
     "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。",
-    "itemLinks": "面板中的物品链接"
+    "itemLinks": "面板中的物品链接",
+    "results": "价格与在售"
   },
   "theme": {
     "system": "跟随系统",
@@ -374,5 +375,11 @@
       "other": "其他已标记词缀"
     },
     "footnote": "词缀来自 RKL 的游戏数据；# 代表随机数值。在面板中标记的词缀也会显示在这里。"
+  },
+  "resultsLayout": {
+    "below": "条件下方",
+    "left": "条件左侧",
+    "right": "条件右侧",
+    "auto": "属性较多的物品显示在条件旁边"
   }
 }

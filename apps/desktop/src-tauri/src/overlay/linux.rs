@@ -138,6 +138,18 @@ fn x11_id(handle: raw_window_handle::RawWindowHandle) -> Option<u64> {
     }
 }
 
+/// X11: move `window` to `(x, y)` (physical px) with a direct configure request. No-op on the
+/// Wayland-native backend.
+pub fn move_window(window: &tauri::WebviewWindow, x: i32, y: i32) -> Result<(), String> {
+    use raw_window_handle::HasWindowHandle;
+    if backend() == BackendKind::Wayland {
+        return Ok(());
+    }
+    let handle = window.window_handle().map_err(|e| format!("window handle: {e}"))?.as_raw();
+    let Some(id) = x11_id(handle) else { return Ok(()) };
+    rkl_platform::backend::x11::move_window(id, x, y).map_err(|e| e.to_string())
+}
+
 /// X11: shape `window` as a rounded rectangle of `size` (physical px) with corner `radius`
 /// (physical px; 0 removes the shape). No-op on the Wayland-native backend.
 pub fn round_window(window: &tauri::WebviewWindow, size: (u32, u32), radius: u32) -> Result<(), String> {

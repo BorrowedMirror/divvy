@@ -6,7 +6,7 @@ mod overlay;
 mod tracker;
 
 pub use overlay::{
-    X11Overlay, activate_window, active_window, disable_compositor_shadow, overlay, rounded_rect_spans,
+    X11Overlay, activate_window, active_window, disable_compositor_shadow, move_window, overlay, rounded_rect_spans,
     set_rounded_shape,
 };
 

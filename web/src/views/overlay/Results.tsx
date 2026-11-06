@@ -71,7 +71,7 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
               </div>
             ))}
           </dl>
-          <div className="max-h-56 overflow-auto rounded-md border border-line">
+          <div className="overflow-x-auto rounded-md border border-line">
             <table className="w-full text-xs">
               <caption className="sr-only">{t("results.listings")}</caption>
               <thead className="sticky top-0 bg-surface-2 text-muted">

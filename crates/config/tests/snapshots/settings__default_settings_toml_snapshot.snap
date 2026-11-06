@@ -50,6 +50,7 @@ listing_columns = [
 scale = 1.0
 backdrop_dim = 0.6
 close_pinned_on_game_focus = false
+results = "below"
 
 [overlay.links]
 poe2db = true

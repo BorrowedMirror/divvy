@@ -175,7 +175,8 @@
     "scale": "Panel boyutu",
     "backdropDim": "Panelin arkasındaki arka plan",
     "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat",
-    "itemLinks": "Paneldeki eşya bağlantıları"
+    "itemLinks": "Paneldeki eşya bağlantıları",
+    "results": "Fiyatlar ve ilanlar"
   },
   "theme": {
     "system": "Sistem",
@@ -383,5 +384,11 @@
       "other": "Diğer işaretli modlar"
     },
     "footnote": "Modlar RKL'nin oyun verilerinden gelir; # gelen değeri temsil eder. Panelden işaretlediğiniz modlar da burada görünür."
+  },
+  "resultsLayout": {
+    "below": "Filtrelerin altında",
+    "left": "Filtrelerin solunda",
+    "right": "Filtrelerin sağında",
+    "auto": "Çok özellikli eşyalarda filtrelerin yanında"
   }
 }

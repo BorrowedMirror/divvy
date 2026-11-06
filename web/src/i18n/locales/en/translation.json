@@ -175,7 +175,8 @@
     "scale": "Panel size",
     "backdropDim": "Backdrop behind the panel",
     "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game",
-    "itemLinks": "Item links in the panel"
+    "itemLinks": "Item links in the panel",
+    "results": "Prices and listings"
   },
   "theme": {
     "system": "System",
@@ -383,5 +384,11 @@
       "other": "Other flagged mods"
     },
     "footnote": "Mods come from RKL's game data; # stands for the rolled value. Mods you flag from the panel appear here too."
+  },
+  "resultsLayout": {
+    "below": "Below the filters",
+    "left": "Left of the filters",
+    "right": "Right of the filters",
+    "auto": "Beside the filters for items with many stats"
   }
 }

@@ -269,7 +269,7 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true } } }) });
+    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true }, results: "below" } }) });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
     expect(draft().overlay.auto_hide_ms).toBe(2000);

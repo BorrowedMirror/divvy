@@ -296,22 +296,50 @@ pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinne
 /// on screen.
 #[tauri::command]
 #[specta::specta]
-pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
+pub fn resize_overlay(app: AppHandle, width: f64, height: f64) -> Result<(), IpcError> {
     let win = tauri::Manager::get_webview_window(&app, flow::OVERLAY)
         .ok_or_else(|| IpcError::new("internal", "overlay window missing"))?;
     let internal = |e: tauri::Error| IpcError::new("internal", e.to_string());
     let scale = win.scale_factor().map_err(internal)?;
     let monitor = win.current_monitor().map_err(internal)?;
-    let width = win.inner_size().map_err(internal)?.to_logical::<f64>(scale).width;
-    let screen_h = monitor.as_ref().map_or(f64::INFINITY, |m| f64::from(m.size().height) / scale);
-    let zoom = tauri::Manager::state::<Arc<AppState>>(&app).settings().overlay.scale;
-    let h = crate::logic::fit_overlay_height(height * zoom, screen_h);
+    let screen = monitor.as_ref().map(|m| (f64::from(m.size().width) / scale, f64::from(m.size().height) / scale));
+    let screen_h = screen.map_or(f64::INFINITY, |s| s.1);
     let state = tauri::Manager::state::<Arc<AppState>>(&app);
+    let zoom = state.settings().overlay.scale;
+    let h = crate::logic::fit_overlay_height(height * zoom, screen_h);
+    // The card is 420 CSS px wide, or wider with results beside the filters; never wider than
+    // the screen.
+    let css_width = width.clamp(crate::state::CARD_WIDTH, screen.map_or(4000.0, |s| s.0 / zoom));
+    let width = css_width * zoom;
     if let Ok(mut c) = state.overlay_card.lock() {
         c.1 = h;
     }
-    // Covering the game: the window stays game-sized; the web view places the card itself.
+    if let Ok(mut w) = state.card_css_width.lock() {
+        *w = css_width;
+    }
+    // Covering the game: the window stays game-sized. A card the user has not moved is pulled
+    // up when its content grows past the bottom of the game (it was placed with the height of
+    // whatever the panel showed before).
     if state.overlay_layout.lock().is_ok_and(|l| l.cover) {
+        if !state.card_moved.load(std::sync::atomic::Ordering::SeqCst)
+            && let Some(g) = flow::game_window(&state)
+        {
+            let card = state.overlay_card.lock().map(|c| c.0).unwrap_or_default();
+            let h_phys = (h * scale).round() as i32;
+            let b = flow::card_bounds(g.rect);
+            let y = crate::logic::keep_on_screen_y(card.1, h_phys, b.y, b.height);
+            if y != card.1 {
+                if let Ok(mut c) = state.overlay_card.lock() {
+                    c.0.1 = y;
+                }
+                let (x, wy) = crate::logic::card_in_window((card.0, y), g.rect, scale, cfg!(target_os = "macos"));
+                let layout = crate::events::OverlayLayout { cover: true, x: x / zoom, y: wy / zoom };
+                if let Ok(mut l) = state.overlay_layout.lock() {
+                    *l = layout;
+                }
+                let _ = tauri_specta::Event::emit(&layout, &app);
+            }
+        }
         return Ok(());
     }
     win.set_size(tauri::LogicalSize::new(width, h)).map_err(internal)?;
@@ -320,9 +348,15 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
         && let Ok(pos) = win.outer_position()
     {
         let h_phys = (h * scale).round() as i32;
+        let w_phys = (width * scale).round() as i32;
+        // The same clamp works on either axis: keep the card on the monitor.
         let y = crate::logic::keep_on_screen_y(pos.y, h_phys, m.position().y, m.size().height as i32);
-        if y != pos.y {
-            win.set_position(tauri::PhysicalPosition::new(pos.x, y)).map_err(internal)?;
+        let x = crate::logic::keep_on_screen_y(pos.x, w_phys, m.position().x, m.size().width as i32);
+        if (x, y) != (pos.x, pos.y) {
+            win.set_position(tauri::PhysicalPosition::new(x, y)).map_err(internal)?;
+            if let Ok(mut c) = state.overlay_card.lock() {
+                c.0 = (x, y);
+            }
         }
     }
     Ok(())
@@ -352,10 +386,24 @@ pub fn drag_card(app: AppHandle, state: State<'_, Arc<AppState>>, phase: DragPha
     let mut origin = state.drag_origin.lock().map_err(|_| internal("drag lock".into()))?;
     if phase == DragPhase::Start {
         *origin = Some(((cursor.x, cursor.y), card_now));
+        state.card_moved.store(true, std::sync::atomic::Ordering::SeqCst);
         return Ok(());
     }
     let Some(((cx, cy), start)) = *origin else { return Ok(()) };
-    let card = (start.0 + (cursor.x - cx).round() as i32, start.1 + (cursor.y - cy).round() as i32);
+    let mut card = (start.0 + (cursor.x - cx).round() as i32, start.1 + (cursor.y - cy).round() as i32);
+    // Over the game, keep the card's left edge on the game and at least 120 CSS px of it visible
+    // (the web view applies the same rule).
+    if state.overlay_layout.lock().is_ok_and(|l| l.cover)
+        && let Some(g) = flow::game_window(&state)
+    {
+        let px = win.scale_factor().unwrap_or(1.0) * state.settings().overlay.scale;
+        let width = (state.card_css_width.lock().map_or(crate::state::CARD_WIDTH, |w| *w) * px).round() as i32;
+        let visible = (120.0 * px).round() as i32;
+        let b = flow::card_bounds(g.rect);
+        let (gx, gy, gw, gh) = (b.x, b.y, b.width, b.height);
+        card.0 = card.0.clamp(gx, (gx + gw - width).max(gx));
+        card.1 = card.1.clamp(gy, (gy + gh - visible).max(gy));
+    }
     if let Ok(mut c) = state.overlay_card.lock() {
         c.0 = card;
     }

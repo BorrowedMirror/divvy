@@ -16,6 +16,27 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test.each([
+    ["below", 2, "below"],
+    ["left", 2, "left"],
+    ["right", 2, "right"],
+    ["auto", 2, "below"],
+    ["auto", 8, "right"],
+  ] as const)("results %s with %i stats sit %s", async (results, stats, expected) => {
+    const base = filterSet();
+    const [stat] = base.stats;
+    if (!stat) throw new Error("fixture has stats");
+    const many = Array.from({ length: stats }, (_, i) => ({ ...stat, stat_id: `explicit.s${i}`, text: `stat ${i}` }));
+    setupIpc({
+      get_overlay_snapshot: () => itemCopied({ filters: { ...base, stats: many } }),
+      get_settings: () => settings({ overlay: { ...settings().overlay, results } }),
+    });
+    renderWithProviders(<OverlayView />);
+    await waitFor(() => expect(screen.getByTestId("panel-body")).toHaveAttribute("data-results", expected));
+    const article = screen.getByRole("article");
+    expect(article.className).toContain(expected === "below" ? "w-[420px]" : "w-[860px]");
+  });
+
   test("lookup links open the unique by name and a rare by its base", async () => {
     const user = userEvent.setup();
     const calls = setupIpc({ get_overlay_snapshot: () => itemCopied(), open_lookup: () => null });
@@ -171,12 +192,26 @@ describe("OverlayView", () => {
     expect(screen.getByTestId("overlay-card")).toBe(before);
   });
 
+  test("over the game a tall card is capped to the screen and scrolls inside itself", async () => {
+    setupIpc({ get_overlay_snapshot: () => itemCopied(), get_overlay_layout: () => ({ cover: true, x: 100, y: 200 }) });
+    renderWithProviders(<OverlayView />);
+    await screen.findByTestId("overlay-backdrop");
+    const card = screen.getByTestId("overlay-card");
+    Object.defineProperty(window, "innerHeight", { value: 1080, configurable: true });
+    await emitEvent("overlay-layout", { cover: true, x: 100, y: 200 });
+    expect(card.style.maxHeight).toBe(`${1080 - 200 - 8}px`);
+    expect(screen.getByRole("article").className).toContain("overflow-y-auto");
+  });
+
   test("cardPosition keeps the card inside the window", () => {
     Object.defineProperty(window, "innerWidth", { value: 1920, configurable: true });
     Object.defineProperty(window, "innerHeight", { value: 1080, configurable: true });
-    expect(cardPosition({ cover: true, x: 100, y: 200 }, 500)).toEqual({ left: 100, top: 200 });
-    expect(cardPosition({ cover: true, x: 1800, y: 900 }, 500)).toEqual({ left: 1492, top: 572 });
-    expect(cardPosition({ cover: true, x: -5, y: null }, 500)).toEqual({ left: 0, top: 0 });
+    expect(cardPosition({ cover: true, x: 100, y: 200 })).toEqual({ left: 100, top: 200 });
+    // Tall cards can still be dragged down: only MIN_VISIBLE (120 px) has to stay on screen.
+    expect(cardPosition({ cover: true, x: 1800, y: 900 })).toEqual({ left: 1492, top: 900 });
+    expect(cardPosition({ cover: true, x: 100, y: 1070 })).toEqual({ left: 100, top: 960 });
+    expect(cardPosition({ cover: true, x: 1800, y: 100 }, 860)).toEqual({ left: 1052, top: 100 });
+    expect(cardPosition({ cover: true, x: -5, y: null })).toEqual({ left: 0, top: 0 });
   });
 
   test("shows the empty hint with the configured hotkey", async () => {
@@ -452,7 +487,7 @@ describe("overlay extras", () => {
     async function mountAutoHide(ms: number) {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const calls = setupIpc({
-        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true } } }),
+        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true }, results: "below" } }),
         query_price: () => priceSummary(),
       });
       renderWithProviders(<OverlayView />);

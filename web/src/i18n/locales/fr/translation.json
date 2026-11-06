@@ -178,7 +178,8 @@
     "scale": "Taille du panneau",
     "backdropDim": "Arrière-plan derrière le panneau",
     "closePinnedOnGameFocus": "Fermer un panneau épinglé quand je clique de nouveau dans le jeu",
-    "itemLinks": "Liens de l'objet dans le panneau"
+    "itemLinks": "Liens de l'objet dans le panneau",
+    "results": "Prix et annonces"
   },
   "theme": {
     "system": "Système",
@@ -392,5 +393,11 @@
       "other": "Autres modificateurs marqués"
     },
     "footnote": "Les modificateurs proviennent des données de jeu de RKL ; # représente la valeur obtenue. Les modificateurs marqués depuis le panneau apparaissent aussi ici."
+  },
+  "resultsLayout": {
+    "below": "Sous les filtres",
+    "left": "À gauche des filtres",
+    "right": "À droite des filtres",
+    "auto": "À côté des filtres pour les objets avec beaucoup de stats"
   }
 }

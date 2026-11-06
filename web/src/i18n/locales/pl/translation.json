@@ -181,7 +181,8 @@
     "scale": "Rozmiar panelu",
     "backdropDim": "Tło za panelem",
     "closePinnedOnGameFocus": "Zamykaj przypięty panel, gdy kliknę z powrotem w grę",
-    "itemLinks": "Linki do przedmiotu w panelu"
+    "itemLinks": "Linki do przedmiotu w panelu",
+    "results": "Ceny i oferty"
   },
   "theme": {
     "system": "Systemowy",
@@ -401,5 +402,11 @@
       "other": "Inne oznaczone modyfikatory"
     },
     "footnote": "Modyfikatory pochodzą z danych gry RKL; # oznacza wylosowaną wartość. Modyfikatory oznaczone w panelu również pojawiają się tutaj."
+  },
+  "resultsLayout": {
+    "below": "Pod filtrami",
+    "left": "Na lewo od filtrów",
+    "right": "Na prawo od filtrów",
+    "auto": "Obok filtrów dla przedmiotów z wieloma statystykami"
   }
 }

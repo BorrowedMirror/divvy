@@ -165,6 +165,14 @@ pub fn disable_compositor_shadow(window: u64) -> Result<(), PlatformError> {
         .map_err(x_err)
 }
 
+/// Move a mapped `window` to `(x, y)` with a plain configure request (WMs such as openbox honour
+/// it even over docks' reserved strips, unlike the placement they apply when a window maps).
+pub fn move_window(window: u64, x: i32, y: i32) -> Result<(), PlatformError> {
+    let window = u32::try_from(window).map_err(|_| PlatformError::Backend("x11 window id out of range".into()))?;
+    let conn = XConn::connect(None)?;
+    conn.conn.configure_window(window, &ConfigureWindowAux::new().x(x).y(y)).map_err(x_err)?.check().map_err(x_err)
+}
+
 /// Row spans `(x, y, width, height)` covering a `width` x `height` rectangle with corners
 /// rounded to `radius` (clamped to half the shorter side): one span per corner row plus the
 /// straight middle band.

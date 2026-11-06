@@ -178,7 +178,8 @@
     "scale": "Dimensione del pannello",
     "backdropDim": "Sfondo dietro il pannello",
     "closePinnedOnGameFocus": "Chiudi un pannello fissato quando torno a cliccare nel gioco",
-    "itemLinks": "Link dell'oggetto nel pannello"
+    "itemLinks": "Link dell'oggetto nel pannello",
+    "results": "Prezzi e inserzioni"
   },
   "theme": {
     "system": "Sistema",
@@ -392,5 +393,11 @@
       "other": "Altri modificatori contrassegnati"
     },
     "footnote": "I modificatori provengono dai dati di gioco di RKL; # indica il valore ottenuto. Anche i modificatori che contrassegni dal pannello compaiono qui."
+  },
+  "resultsLayout": {
+    "below": "Sotto i filtri",
+    "left": "A sinistra dei filtri",
+    "right": "A destra dei filtri",
+    "auto": "Accanto ai filtri per gli oggetti con molte statistiche"
   }
 }

@@ -172,7 +172,8 @@
     "closePinnedOnGameFocus": "點擊回到遊戲時關閉已釘選的面板",
     "checkUpdates": "自動檢查更新",
     "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。",
-    "itemLinks": "面板中的物品連結"
+    "itemLinks": "面板中的物品連結",
+    "results": "價格與刊登"
   },
   "theme": {
     "system": "依系統",
@@ -374,5 +375,11 @@
       "other": "其他已標記詞綴"
     },
     "footnote": "詞綴來自 RKL 的遊戲資料；# 代表隨機數值。在面板中標記的詞綴也會顯示在這裡。"
+  },
+  "resultsLayout": {
+    "below": "條件下方",
+    "left": "條件左側",
+    "right": "條件右側",
+    "auto": "屬性較多的物品顯示在條件旁邊"
   }
 }

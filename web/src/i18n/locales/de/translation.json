@@ -175,7 +175,8 @@
     "scale": "Panelgröße",
     "backdropDim": "Hintergrund hinter dem Panel",
     "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke",
-    "itemLinks": "Links zum Gegenstand im Panel"
+    "itemLinks": "Links zum Gegenstand im Panel",
+    "results": "Preise und Angebote"
   },
   "theme": {
     "system": "System",
@@ -383,5 +384,11 @@
       "other": "Weitere markierte Mods"
     },
     "footnote": "Die Mods stammen aus den Spieldaten von RKL; # steht für den gewürfelten Wert. Im Panel markierte Mods erscheinen ebenfalls hier."
+  },
+  "resultsLayout": {
+    "below": "Unter den Filtern",
+    "left": "Links der Filter",
+    "right": "Rechts der Filter",
+    "auto": "Neben den Filtern bei Gegenständen mit vielen Werten"
   }
 }

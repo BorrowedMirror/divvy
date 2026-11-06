@@ -82,6 +82,22 @@ pub struct OverlaySettings {
     pub close_pinned_on_game_focus: bool,
     /// Which lookup links the panel shows under the item name.
     pub links: LinkSettings,
+    /// Where prices and listings go: below the filters, or in a column beside them.
+    pub results: ResultsLayout,
+}
+
+/// Placement of the results (prices and listings) in the price panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum ResultsLayout {
+    /// Under the Search button (one narrow column).
+    Below,
+    /// In a column to the left of the filters.
+    Left,
+    /// In a column to the right of the filters.
+    Right,
+    /// Beside the filters (right) for items with many stats, below otherwise.
+    Auto,
 }
 
 /// Lookup links shown in the price panel.
@@ -241,6 +257,7 @@ impl Default for OverlaySettings {
             backdrop_dim: 0.6,
             close_pinned_on_game_focus: false,
             links: LinkSettings::default(),
+            results: ResultsLayout::Below,
         }
     }
 }

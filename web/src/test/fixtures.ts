@@ -166,7 +166,7 @@ export function settings(overrides: Partial<Settings_Serialize> = {}): Settings_
       contact: null,
       poesessid: null,
     },
-    overlay: { auto_hide_ms: 1500, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true } },
+    overlay: { auto_hide_ms: 1500, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false, links: { poe2db: true, wiki: true, craft_of_exile: true }, results: "below" },
     waystone: { flags: { "Players have -#% to all maximum Resistances": "danger", "#% increased Pack Size in Map": "good" } },
     ui: { language: "en", theme: "dark", start_minimised: false, check_updates: true, onboarding_done: false, autostart: false },
     platform: { backend_override: null },

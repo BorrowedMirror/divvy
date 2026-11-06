@@ -172,7 +172,8 @@
     "closePinnedOnGameFocus": "게임을 다시 클릭하면 고정된 패널 닫기",
     "checkUpdates": "업데이트 자동 확인",
     "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다.",
-    "itemLinks": "패널의 아이템 링크"
+    "itemLinks": "패널의 아이템 링크",
+    "results": "시세 및 매물"
   },
   "theme": {
     "system": "시스템",
@@ -374,5 +375,11 @@
       "other": "기타 표시된 속성"
     },
     "footnote": "속성은 RKL의 게임 데이터에서 가져옵니다. #은 굴림 값을 나타냅니다. 패널에서 표시한 속성도 여기에 나타납니다."
+  },
+  "resultsLayout": {
+    "below": "조건 아래",
+    "left": "조건 왼쪽",
+    "right": "조건 오른쪽",
+    "auto": "능력치가 많은 아이템은 조건 옆"
   }
 }

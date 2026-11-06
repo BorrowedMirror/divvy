@@ -30,7 +30,7 @@ export const commands = {
 	 *  web view). Width is unchanged; the height is clamped to the monitor and the window is kept
 	 *  on screen.
 	 */
-	resizeOverlay: (height: number | null) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("resize_overlay", { height })),
+	resizeOverlay: (width: number | null, height: number | null) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("resize_overlay", { width, height })),
 	/**
 	 *  Currency icons (exchange tag -> name and GGG CDN image URL) for showing prices as icons.
 	 *  Served from the trade site's `data/static`, cached by the trade client.
@@ -505,6 +505,8 @@ export type OverlaySettings_Deserialize = {
 	close_pinned_on_game_focus?: boolean,
 	/**  Which lookup links the panel shows under the item name. */
 	links?: LinkSettings_Deserialize,
+	/**  Where prices and listings go: below the filters, or in a column beside them. */
+	results?: ResultsLayout,
 };
 
 export type OverlaySettings_Serialize = {
@@ -524,6 +526,8 @@ export type OverlaySettings_Serialize = {
 	close_pinned_on_game_focus: boolean,
 	/**  Which lookup links the panel shows under the item name. */
 	links: LinkSettings_Serialize,
+	/**  Where prices and listings go: below the filters, or in a column beside them. */
+	results: ResultsLayout,
 };
 
 export type OverlaySide = 
@@ -819,6 +823,17 @@ export type Requirements_Serialize = {
 	dex: number | null,
 	int: number | null,
 };
+
+/**  Placement of the results (prices and listings) in the price panel. */
+export type ResultsLayout = 
+/**  Under the Search button (one narrow column). */
+"below" | 
+/**  In a column to the left of the filters. */
+"left" | 
+/**  In a column to the right of the filters. */
+"right" | 
+/**  Beside the filters (right) for items with many stats, below otherwise. */
+"auto";
 
 export type Settings = Settings_Serialize | Settings_Deserialize;
 
