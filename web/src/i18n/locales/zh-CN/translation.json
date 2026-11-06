@@ -338,12 +338,41 @@
   },
   "waystone": {
     "heading": "引路石词缀",
-    "avoidCount_other": "{{count}} 条需避开",
-    "wantCount_other": "{{count}} 条想要",
-    "help": "引路石上包含以下任一短语的词缀会在面板中高亮显示。每行一个短语，不区分大小写。",
-    "avoidLabel": "避开",
-    "wantLabel": "想要",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "选择查价引路石时每条词缀的标记方式。",
+    "editFlags": "编辑标记",
+    "markAs": "将“{{mod}}”标记为{{flag}}",
+    "flagFor": "{{mod}} 的标记",
+    "flag": {
+      "danger": "危险",
+      "warn": "警告",
+      "good": "良好",
+      "ignore": "忽略"
+    },
+    "verdict": {
+      "danger_other": "别刷：{{count}} 条危险词缀",
+      "warn_other": "谨慎刷：{{count}} 条警告",
+      "good_other": "值得刷：{{count}} 条想要的词缀",
+      "clear": "没有标记的词缀"
+    },
+    "summary": "危险 {{danger}} · 警告 {{warn}} · 良好 {{good}}",
+    "count": {
+      "danger_other": "危险 {{count}}",
+      "warn_other": "警告 {{count}}",
+      "good_other": "良好 {{count}}"
+    },
+    "preset": "预设",
+    "presets": {
+      "dangers": "常见危险词缀",
+      "clear": "清除所有标记"
+    },
+    "search": "搜索引路石词缀",
+    "searchPlaceholder": "搜索 {{count}} 条引路石词缀",
+    "group": {
+      "player": "玩家惩罚",
+      "monster": "怪物",
+      "area": "区域与奖励",
+      "other": "其他已标记词缀"
+    },
+    "footnote": "词缀来自 RKL 的游戏数据；# 代表随机数值。在面板中标记的词缀也会显示在这里。"
   }
 }

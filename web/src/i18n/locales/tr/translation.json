@@ -341,14 +341,47 @@
   },
   "waystone": {
     "heading": "Waystone modları",
-    "avoidCount_one": "{{count}} kaçınılacak",
-    "avoidCount_other": "{{count}} kaçınılacak",
-    "wantCount_one": "{{count}} istenen",
-    "wantCount_other": "{{count}} istenen",
-    "help": "Bir waystone üzerinde bu ifadelerden birini içeren modlar panelde vurgulanır. Her satıra bir ifade; büyük/küçük harf fark etmez.",
-    "avoidLabel": "Kaçın",
-    "wantLabel": "İstenen",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Bir waystone'un fiyatını kontrol ederken her modun nasıl işaretleneceğini seçin.",
+    "editFlags": "İşaretleri düzenle",
+    "markAs": "“{{mod}}” modunu {{flag}} olarak işaretle",
+    "flagFor": "{{mod}} için işaret",
+    "flag": {
+      "danger": "Tehlike",
+      "warn": "Uyarı",
+      "good": "İyi",
+      "ignore": "Yoksay"
+    },
+    "verdict": {
+      "danger_one": "Koşmayın: {{count}} tehlikeli mod",
+      "danger_other": "Koşmayın: {{count}} tehlikeli mod",
+      "warn_one": "Dikkatli koşun: {{count}} uyarı",
+      "warn_other": "Dikkatli koşun: {{count}} uyarı",
+      "good_one": "Koşmaya değer: {{count}} istenen mod",
+      "good_other": "Koşmaya değer: {{count}} istenen mod",
+      "clear": "İşaretli mod yok"
+    },
+    "summary": "{{danger}} tehlike · {{warn}} uyarı · {{good}} iyi",
+    "count": {
+      "danger_one": "{{count}} tehlike",
+      "danger_other": "{{count}} tehlike",
+      "warn_one": "{{count}} uyarı",
+      "warn_other": "{{count}} uyarı",
+      "good_one": "{{count}} iyi",
+      "good_other": "{{count}} iyi"
+    },
+    "preset": "Hazır ayar",
+    "presets": {
+      "dangers": "Yaygın tehlikeler",
+      "clear": "Tüm işaretleri temizle"
+    },
+    "search": "Waystone modlarında ara",
+    "searchPlaceholder": "{{count}} waystone modunda ara",
+    "group": {
+      "player": "Oyuncu cezaları",
+      "monster": "Canavarlar",
+      "area": "Bölge ve ödüller",
+      "other": "Diğer işaretli modlar"
+    },
+    "footnote": "Modlar RKL'nin oyun verilerinden gelir; # gelen değeri temsil eder. Panelden işaretlediğiniz modlar da burada görünür."
   }
 }

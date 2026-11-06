@@ -328,6 +328,59 @@ pub fn lookup_url(site: LookupSite, name: &str, item_text: Option<&str>) -> Opti
     Some(url)
 }
 
+/// What a waystone mod affects, for grouping the catalogue.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum WaystoneModGroup {
+    Player,
+    Monster,
+    Area,
+}
+
+/// One entry of the waystone mod catalogue (`text` is the mod template, `#` for numbers).
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct WaystoneMod {
+    pub text: String,
+    pub group: WaystoneModGroup,
+}
+
+/// Waystone mods the trade site's stat list does not carry (seen on real waystones).
+pub const EXTRA_WAYSTONE_MODS: &[&str] =
+    &["Players have -#% to all maximum Resistances", "Monsters have #% increased Life"];
+
+/// Group of a waystone mod by its wording; `None` when it does not read like one.
+pub fn waystone_group(text: &str) -> Option<WaystoneModGroup> {
+    if text.starts_with("Players ") {
+        Some(WaystoneModGroup::Player)
+    } else if ["Monsters ", "Rare Monsters", "Magic Monsters", "Map Boss", "Delirium Monsters"]
+        .iter()
+        .any(|p| text.starts_with(p))
+    {
+        Some(WaystoneModGroup::Monster)
+    } else if text.starts_with("Area ")
+        || text.starts_with("Map ")
+        || text.contains("in this Area")
+        || text.contains("Pack Size")
+    {
+        Some(WaystoneModGroup::Area)
+    } else {
+        None
+    }
+}
+
+/// The catalogue: explicit trade stats that read like waystone mods, plus the known extras,
+/// de-duplicated and sorted by group, then text.
+pub fn waystone_catalog<'a>(explicit_stat_texts: impl Iterator<Item = &'a str>) -> Vec<WaystoneMod> {
+    let mut out: Vec<WaystoneMod> = explicit_stat_texts
+        .chain(EXTRA_WAYSTONE_MODS.iter().copied())
+        .filter(|t| !t.contains('\n'))
+        .filter_map(|t| waystone_group(t).map(|group| WaystoneMod { text: t.to_owned(), group }))
+        .collect();
+    out.sort_by(|a, b| (a.group, &a.text).cmp(&(b.group, &b.text)));
+    out.dedup_by(|a, b| a.text == b.text);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -415,6 +468,31 @@ mod tests {
         assert!(
             lookup_url(LookupSite::CraftOfExile, "", Some("  ")).unwrap().query_pairs().all(|(k, _)| k != "eimport")
         );
+    }
+
+    #[test]
+    fn waystone_catalog_groups_dedupes_and_adds_extras() {
+        let stats = [
+            "Monsters fire # additional Projectiles",
+            "Players have #% less Recovery Rate of Life and Energy Shield",
+            "#% increased Pack Size in Map",
+            "+# to maximum Life",
+            "Monsters fire # additional Projectiles",
+            "Area has patches of Shocked Ground",
+        ];
+        let c = waystone_catalog(stats.into_iter());
+        let texts: Vec<(&str, WaystoneModGroup)> = c.iter().map(|m| (m.text.as_str(), m.group)).collect();
+        assert!(
+            texts.contains(&("Players have -#% to all maximum Resistances", WaystoneModGroup::Player)),
+            "extras included"
+        );
+        assert!(texts.contains(&("#% increased Pack Size in Map", WaystoneModGroup::Area)));
+        assert!(!texts.iter().any(|(t, _)| *t == "+# to maximum Life"), "ordinary item mods are left out");
+        assert_eq!(texts.iter().filter(|(t, _)| *t == "Monsters fire # additional Projectiles").count(), 1);
+        assert!(c.windows(2).all(|w| (w[0].group, &w[0].text) <= (w[1].group, &w[1].text)), "sorted");
+        for m in rkl_config::DEFAULT_DANGEROUS_WAYSTONE_MODS {
+            assert!(waystone_group(m).is_some(), "{m} must be in the catalogue");
+        }
     }
 
     #[test]

@@ -347,18 +347,59 @@
   },
   "waystone": {
     "heading": "Модифікатори шляхового каменя",
-    "avoidCount_one": "{{count}} небажаний",
-    "avoidCount_few": "{{count}} небажані",
-    "avoidCount_many": "{{count}} небажаних",
-    "avoidCount_other": "{{count}} небажаного",
-    "wantCount_one": "{{count}} бажаний",
-    "wantCount_few": "{{count}} бажані",
-    "wantCount_many": "{{count}} бажаних",
-    "wantCount_other": "{{count}} бажаного",
-    "help": "Модифікатори шляхового каменя, що містять одну з цих фраз, виділяються на панелі. Одна фраза на рядок; регістр не має значення.",
-    "avoidLabel": "Уникати",
-    "wantLabel": "Бажані",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Виберіть, як позначати кожен модифікатор під час перевірки ціни шляхового каменя.",
+    "editFlags": "Змінити позначки",
+    "markAs": "Позначити «{{mod}}»: {{flag}}",
+    "flagFor": "Позначка для {{mod}}",
+    "flag": {
+      "danger": "Небезпечно",
+      "warn": "Увага",
+      "good": "Добре",
+      "ignore": "Ігнорувати"
+    },
+    "verdict": {
+      "danger_one": "Не проходити: {{count}} небезпечний модифікатор",
+      "danger_few": "Не проходити: {{count}} небезпечні модифікатори",
+      "danger_many": "Не проходити: {{count}} небезпечних модифікаторів",
+      "danger_other": "Не проходити: {{count}} небезпечного модифікатора",
+      "warn_one": "Обережно: {{count}} попередження",
+      "warn_few": "Обережно: {{count}} попередження",
+      "warn_many": "Обережно: {{count}} попереджень",
+      "warn_other": "Обережно: {{count}} попередження",
+      "good_one": "Варто пройти: {{count}} бажаний модифікатор",
+      "good_few": "Варто пройти: {{count}} бажані модифікатори",
+      "good_many": "Варто пройти: {{count}} бажаних модифікаторів",
+      "good_other": "Варто пройти: {{count}} бажаного модифікатора",
+      "clear": "Немає позначених модифікаторів"
+    },
+    "summary": "Небезпечно: {{danger}} · Увага: {{warn}} · Добре: {{good}}",
+    "count": {
+      "danger_one": "Небезпечно: {{count}}",
+      "danger_few": "Небезпечно: {{count}}",
+      "danger_many": "Небезпечно: {{count}}",
+      "danger_other": "Небезпечно: {{count}}",
+      "warn_one": "Увага: {{count}}",
+      "warn_few": "Увага: {{count}}",
+      "warn_many": "Увага: {{count}}",
+      "warn_other": "Увага: {{count}}",
+      "good_one": "Добре: {{count}}",
+      "good_few": "Добре: {{count}}",
+      "good_many": "Добре: {{count}}",
+      "good_other": "Добре: {{count}}"
+    },
+    "preset": "Набір",
+    "presets": {
+      "dangers": "Часті небезпеки",
+      "clear": "Зняти всі позначки"
+    },
+    "search": "Пошук модифікаторів шляхового каменя",
+    "searchPlaceholder": "Пошук серед {{count}} модифікаторів шляхового каменя",
+    "group": {
+      "player": "Штрафи гравця",
+      "monster": "Монстри",
+      "area": "Область і нагороди",
+      "other": "Інші позначені модифікатори"
+    },
+    "footnote": "Модифікатори взято з ігрових даних RKL; # позначає випадкове значення. Модифікатори, позначені на панелі, теж з’являються тут."
   }
 }

@@ -338,12 +338,41 @@
   },
   "waystone": {
     "heading": "경로석 속성",
-    "avoidCount_other": "피할 속성 {{count}}개",
-    "wantCount_other": "원하는 속성 {{count}}개",
-    "help": "이 문구 중 하나를 포함하는 경로석 속성이 패널에서 강조 표시됩니다. 한 줄에 한 문구씩 입력하며 대소문자는 구분하지 않습니다.",
-    "avoidLabel": "피하기",
-    "wantLabel": "원함",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "경로석 시세를 확인할 때 각 속성을 어떻게 표시할지 선택합니다.",
+    "editFlags": "표시 편집",
+    "markAs": "“{{mod}}”을(를) {{flag}}(으)로 표시",
+    "flagFor": "{{mod}} 표시",
+    "flag": {
+      "danger": "위험",
+      "warn": "주의",
+      "good": "좋음",
+      "ignore": "무시"
+    },
+    "verdict": {
+      "danger_other": "돌지 마세요: 위험 속성 {{count}}개",
+      "warn_other": "주의해서 도세요: 경고 {{count}}개",
+      "good_other": "돌 만합니다: 원하는 속성 {{count}}개",
+      "clear": "표시된 속성 없음"
+    },
+    "summary": "위험 {{danger}} · 주의 {{warn}} · 좋음 {{good}}",
+    "count": {
+      "danger_other": "위험 {{count}}",
+      "warn_other": "주의 {{count}}",
+      "good_other": "좋음 {{count}}"
+    },
+    "preset": "프리셋",
+    "presets": {
+      "dangers": "흔한 위험 속성",
+      "clear": "모든 표시 지우기"
+    },
+    "search": "경로석 속성 검색",
+    "searchPlaceholder": "경로석 속성 {{count}}개 검색",
+    "group": {
+      "player": "플레이어 페널티",
+      "monster": "몬스터",
+      "area": "지역 및 보상",
+      "other": "기타 표시된 속성"
+    },
+    "footnote": "속성은 RKL의 게임 데이터에서 가져옵니다. #은 굴림 값을 나타냅니다. 패널에서 표시한 속성도 여기에 나타납니다."
   }
 }

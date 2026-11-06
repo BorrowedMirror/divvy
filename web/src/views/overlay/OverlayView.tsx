@@ -174,7 +174,7 @@ export function OverlayView() {
         ) : (
           <>
             <div className="flex flex-col gap-3">
-              {item.category === "waystone" && settings && <WaystoneMods item={item} lists={settings.waystone} />}
+              {item.category === "waystone" && <WaystoneMods item={item} />}
               {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
               <Toolbar filters={filters} />
               <StatFilters filters={filters} />

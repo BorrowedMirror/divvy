@@ -338,12 +338,41 @@
   },
   "waystone": {
     "heading": "換界石詞綴",
-    "avoidCount_other": "{{count}} 條需避開",
-    "wantCount_other": "{{count}} 條想要",
-    "help": "換界石上包含以下任一詞句的詞綴會在面板中醒目顯示。每行一個詞句，不分大小寫。",
-    "avoidLabel": "避開",
-    "wantLabel": "想要",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "選擇查價換界石時每條詞綴的標記方式。",
+    "editFlags": "編輯標記",
+    "markAs": "將「{{mod}}」標記為{{flag}}",
+    "flagFor": "{{mod}} 的標記",
+    "flag": {
+      "danger": "危險",
+      "warn": "警告",
+      "good": "良好",
+      "ignore": "忽略"
+    },
+    "verdict": {
+      "danger_other": "別刷：{{count}} 條危險詞綴",
+      "warn_other": "小心刷：{{count}} 條警告",
+      "good_other": "值得刷：{{count}} 條想要的詞綴",
+      "clear": "沒有已標記的詞綴"
+    },
+    "summary": "危險 {{danger}} · 警告 {{warn}} · 良好 {{good}}",
+    "count": {
+      "danger_other": "危險 {{count}}",
+      "warn_other": "警告 {{count}}",
+      "good_other": "良好 {{count}}"
+    },
+    "preset": "預設組合",
+    "presets": {
+      "dangers": "常見危險詞綴",
+      "clear": "清除所有標記"
+    },
+    "search": "搜尋換界石詞綴",
+    "searchPlaceholder": "搜尋 {{count}} 條換界石詞綴",
+    "group": {
+      "player": "玩家懲罰",
+      "monster": "怪物",
+      "area": "區域與獎勵",
+      "other": "其他已標記詞綴"
+    },
+    "footnote": "詞綴來自 RKL 的遊戲資料；# 代表隨機數值。在面板中標記的詞綴也會顯示在這裡。"
   }
 }

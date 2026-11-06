@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
 import type { Settings_Serialize } from "../../bindings";
@@ -165,15 +165,41 @@ describe("SettingsView", () => {
     expect(draft().ui.autostart).toBe(true);
   });
 
-  test("waystones tab edits the avoid and want phrases", async () => {
+  test("a ?tab= hash opens that tab, also while already open", async () => {
+    await mount({ waystone_mods: () => [] });
+    expect(screen.getByRole("tab", { name: "General" })).toHaveAttribute("aria-selected", "true");
+    await act(async () => {
+      window.location.hash = "#/settings?tab=waystones";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(screen.getByRole("tab", { name: "Waystones" })).toHaveAttribute("aria-selected", "true");
+    window.location.hash = "";
+  });
+
+  test("waystones tab flags mods from the catalogue, searches and applies presets", async () => {
     const user = userEvent.setup();
-    await mount();
+    await mount({
+      waystone_mods: () => [
+        { text: "Players have -#% to all maximum Resistances", group: "player" },
+        { text: "Monsters fire # additional Projectiles", group: "monster" },
+        { text: "#% increased Pack Size in Map", group: "area" },
+      ],
+    });
     await user.click(screen.getByRole("tab", { name: "Waystones" }));
-    const want = screen.getByRole("textbox", { name: "Want" });
-    await user.clear(want);
-    await user.type(want, "Pack Size{enter}{enter}  Rarity  ");
-    fireEvent.blur(want);
-    expect(draft().waystone.want).toEqual(["Pack Size", "Rarity"]);
+    expect(await screen.findAllByTestId("waystone-catalog-row")).toHaveLength(3);
+    const projectiles = screen.getByRole("radiogroup", { name: "Flag for Monsters fire # additional Projectiles" });
+    expect(within(projectiles).getByRole("radio", { name: "Ignore" })).toHaveAttribute("aria-checked", "true");
+    const res = screen.getByRole("radiogroup", { name: "Flag for Players have -#% to all maximum Resistances" });
+    expect(within(res).getByRole("radio", { name: "Danger" })).toHaveAttribute("aria-checked", "true");
+    await user.click(within(projectiles).getByRole("radio", { name: "Warn" }));
+    expect(draft().waystone.flags["Monsters fire # additional Projectiles"]).toBe("warn");
+    await user.click(within(screen.getByRole("radiogroup", { name: "Flag for #% increased Pack Size in Map" })).getByRole("radio", { name: "Ignore" }));
+    expect(draft().waystone.flags["#% increased Pack Size in Map"]).toBeUndefined();
+    await user.type(screen.getByRole("searchbox", { name: "Search waystone mods" }), "pack");
+    await waitFor(() => expect(screen.getAllByTestId("waystone-catalog-row")).toHaveLength(1));
+    await user.click(screen.getByRole("combobox", { name: "Preset" }));
+    await user.click(await screen.findByRole("option", { name: "Clear all flags" }));
+    expect(draft().waystone.flags).toEqual({});
   });
 
   test("item link tickboxes", async () => {

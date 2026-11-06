@@ -341,14 +341,47 @@
   },
   "waystone": {
     "heading": "Waystone mods",
-    "avoidCount_one": "{{count}} to avoid",
-    "avoidCount_other": "{{count}} to avoid",
-    "wantCount_one": "{{count}} wanted",
-    "wantCount_other": "{{count}} wanted",
-    "help": "Mods on a waystone that contain one of these phrases are highlighted in the panel. One phrase per line; capitals don't matter.",
-    "avoidLabel": "Avoid",
-    "wantLabel": "Want",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Choose how each mod is flagged when you price-check a waystone.",
+    "editFlags": "Edit flags",
+    "markAs": "Flag “{{mod}}” as {{flag}}",
+    "flagFor": "Flag for {{mod}}",
+    "flag": {
+      "danger": "Danger",
+      "warn": "Warn",
+      "good": "Good",
+      "ignore": "Ignore"
+    },
+    "verdict": {
+      "danger_one": "Don't run: {{count}} dangerous mod",
+      "danger_other": "Don't run: {{count}} dangerous mods",
+      "warn_one": "Run with care: {{count}} warning",
+      "warn_other": "Run with care: {{count}} warnings",
+      "good_one": "Worth running: {{count}} wanted mod",
+      "good_other": "Worth running: {{count}} wanted mods",
+      "clear": "No flagged mods"
+    },
+    "summary": "{{danger}} danger · {{warn}} warn · {{good}} good",
+    "count": {
+      "danger_one": "{{count}} danger",
+      "danger_other": "{{count}} danger",
+      "warn_one": "{{count}} warn",
+      "warn_other": "{{count}} warn",
+      "good_one": "{{count}} good",
+      "good_other": "{{count}} good"
+    },
+    "preset": "Preset",
+    "presets": {
+      "dangers": "Common dangers",
+      "clear": "Clear all flags"
+    },
+    "search": "Search waystone mods",
+    "searchPlaceholder": "Search {{count}} waystone mods",
+    "group": {
+      "player": "Player penalties",
+      "monster": "Monsters",
+      "area": "Area and rewards",
+      "other": "Other flagged mods"
+    },
+    "footnote": "Mods come from RKL's game data; # stands for the rolled value. Mods you flag from the panel appear here too."
   }
 }

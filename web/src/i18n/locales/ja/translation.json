@@ -338,12 +338,41 @@
   },
   "waystone": {
     "heading": "ウェイストーンのMod",
-    "avoidCount_other": "回避 {{count}} 件",
-    "wantCount_other": "希望 {{count}} 件",
-    "help": "これらのフレーズのいずれかを含むウェイストーンのModがパネルで強調表示されます。1行に1フレーズ。大文字と小文字は区別しません。",
-    "avoidLabel": "回避",
-    "wantLabel": "希望",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "ウェイストーンの価格チェック時に、各Modをどう判定するかを選びます。",
+    "editFlags": "判定を編集",
+    "markAs": "「{{mod}}」を{{flag}}に設定",
+    "flagFor": "{{mod}} の判定",
+    "flag": {
+      "danger": "危険",
+      "warn": "注意",
+      "good": "良好",
+      "ignore": "無視"
+    },
+    "verdict": {
+      "danger_other": "非推奨：危険なMod {{count}} 件",
+      "warn_other": "注意して周回：警告 {{count}} 件",
+      "good_other": "周回推奨：希望Mod {{count}} 件",
+      "clear": "判定されたModはありません"
+    },
+    "summary": "危険 {{danger}} · 注意 {{warn}} · 良好 {{good}}",
+    "count": {
+      "danger_other": "危険 {{count}}",
+      "warn_other": "注意 {{count}}",
+      "good_other": "良好 {{count}}"
+    },
+    "preset": "プリセット",
+    "presets": {
+      "dangers": "よくある危険Mod",
+      "clear": "すべての判定をクリア"
+    },
+    "search": "ウェイストーンのModを検索",
+    "searchPlaceholder": "{{count}} 件のウェイストーンのModを検索",
+    "group": {
+      "player": "プレイヤーへのペナルティ",
+      "monster": "モンスター",
+      "area": "エリアと報酬",
+      "other": "その他の判定済みMod"
+    },
+    "footnote": "ModはRKLのゲームデータに基づきます。# はロールされた値を表します。パネルから判定したModもここに表示されます。"
   }
 }

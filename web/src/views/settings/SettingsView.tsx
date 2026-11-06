@@ -1,6 +1,6 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { Toast } from "@base-ui/react/toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ import type {
   PriceSourceKind,
   Settings_Serialize,
   Theme,
+  ModFlag,
 } from "../../bindings";
 import { commands, events } from "../../bindings";
 import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
@@ -23,16 +24,30 @@ import { toIpcError } from "../../lib/ipc";
 import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "../../lib/validate";
 import { isDirty, useSettingsStore } from "../../stores/settings";
 import { HotkeyRecorder } from "./HotkeyRecorder";
-import { parsePhrases } from "../../lib/waystone";
+import { toggleFlag } from "../../lib/waystone";
+import { unwrap } from "../../lib/ipc";
 
 type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };
 
 const TABS = ["general", "hotkeys", "trade", "overlay", "waystones", "platform"] as const;
 
+/** `#/settings?tab=waystones` opens that tab (the panel's "Edit flags" link). */
+function initialTab(): (typeof TABS)[number] {
+  const tab = new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("tab");
+  return (TABS as readonly string[]).includes(tab ?? "") ? (tab as (typeof TABS)[number]) : "general";
+}
+
 const LISTING_COLUMNS: ListingColumn[] = ["seller", "item_level", "stock", "listed"];
 
 export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => void }) {
+  const [tab, setTab] = useState(initialTab);
+  // The panel's "Edit flags" link re-opens settings on a tab via the hash.
+  useEffect(() => {
+    const onHash = () => setTab(initialTab());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   const { t } = useTranslation();
   const query = useSettingsQuery();
   const { draft, base, externalChange, load, external, update, discard } = useSettingsStore();
@@ -95,7 +110,7 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
           <Button onClick={discard}>{t("settings.reload")}</Button>
         </div>
       )}
-      <Tabs.Root defaultValue="general" className="flex flex-col gap-4">
+      <Tabs.Root value={tab} onValueChange={(v) => setTab(v as (typeof TABS)[number])} className="flex flex-col gap-4">
         <Tabs.List className="flex gap-1 border-b border-line" aria-label={t("settings.title")}>
           {TABS.map((tab) => (
             <Tabs.Tab
@@ -370,28 +385,114 @@ function TradeTab({ s, update, errors }: TabProps) {
   );
 }
 
-function WaystonesTab({ s, update, errors }: TabProps) {
+const DEFAULT_DANGERS = [
+  "Players have -#% to all maximum Resistances",
+  "Players have #% less Recovery Rate of Life and Energy Shield",
+  "Monsters fire # additional Projectiles",
+];
+const GROUPS = ["player", "monster", "area"] as const;
+const CHOICES = ["danger", "warn", "good", null] as const;
+
+function WaystonesTab({ s, update }: TabProps) {
   const { t } = useTranslation();
-  const field = (key: "avoid" | "want") => (
-    <Row label={t(`waystone.${key}Label`)} htmlFor={`waystone-${key}`} error={errors[`waystone.${key}`]}>
-      <textarea
-        id={`waystone-${key}`}
-        rows={5}
-        className="w-full rounded-md border border-line bg-surface-2 px-2 py-1.5 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        defaultValue={s.waystone[key].join("\n")}
-        placeholder={t(`waystone.${key}Placeholder`)}
-        onBlur={(e) => {
-          const phrases = parsePhrases(e.currentTarget.value);
-          update((d) => ({ ...d, waystone: { ...d.waystone, [key]: phrases } }));
-        }}
-      />
-    </Row>
+  const catalog = useQuery({ queryKey: ["waystoneMods"], queryFn: async () => unwrap(await commands.waystoneMods()), staleTime: Infinity });
+  const [query, setQuery] = useState("");
+  const flags = s.waystone.flags;
+  const setFlags = (next: Record<string, ModFlag>) => update((d) => ({ ...d, waystone: { flags: next } }));
+  const known = new Set((catalog.data ?? []).map((m) => m.text));
+  const q = query.trim().toLowerCase();
+  const matches = (text: string) => q === "" || text.toLowerCase().includes(q);
+  const others = Object.keys(flags).filter((k) => !known.has(k) && matches(k));
+  const count = (f: ModFlag) => Object.values(flags).filter((v) => v === f).length;
+  const preset = (name: string) => {
+    if (name === "choose") return;
+    if (name === "dangers") setFlags({ ...Object.fromEntries(Object.entries(flags).filter(([, v]) => v)), ...Object.fromEntries(DEFAULT_DANGERS.map((m) => [m, "danger" as const])) });
+    if (name === "clear") setFlags({});
+  };
+  const row = (text: string) => (
+    <li key={text} className="grid grid-cols-[minmax(0,1fr)_17rem] items-center gap-3 border-t border-line/60 px-3 py-1.5" data-testid="waystone-catalog-row">
+      <span className="text-sm">{text}</span>
+      <div role="radiogroup" aria-label={t("waystone.flagFor", { mod: text })} className="grid grid-cols-4 overflow-hidden rounded-md border border-line text-xs">
+        {CHOICES.map((c) => {
+          const on = (flags[text] ?? null) === c;
+          return (
+            <button
+              key={c ?? "off"}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => setFlags(toggleFlag(flags, text, c))}
+              className={cx(
+                "py-1 outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-inset",
+                !on && "text-muted hover:text-fg",
+                on && c === "danger" && "bg-bad/30 font-semibold text-bad",
+                on && c === "warn" && "bg-warn/30 font-semibold text-warn",
+                on && c === "good" && "bg-good/30 font-semibold text-good",
+                on && c === null && "bg-surface-3 font-semibold text-fg",
+              )}
+            >
+              {c ? t(`waystone.flag.${c}`) : t("waystone.flag.ignore")}
+            </button>
+          );
+        })}
+      </div>
+    </li>
   );
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted">{t("waystone.help")}</p>
-      {field("avoid")}
-      {field("want")}
+    <div className="flex flex-col gap-3" data-testid="waystones-tab">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted">{t("waystone.help")}</p>
+        <SelectField<string>
+          id="waystone-preset"
+          label={t("waystone.preset")}
+          value="choose"
+          options={[
+            { value: "choose", label: t("waystone.preset") },
+            { value: "dangers", label: t("waystone.presets.dangers") },
+            { value: "clear", label: t("waystone.presets.clear") },
+          ]}
+          onChange={preset}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          id="waystone-search"
+          type="search"
+          aria-label={t("waystone.search")}
+          placeholder={t("waystone.searchPlaceholder", { count: catalog.data?.length ?? 0 })}
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          className="min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        />
+        <span className="flex gap-1.5 text-xs" data-testid="waystone-counts">
+          <span className="rounded-full bg-bad/15 px-2 py-1 text-bad">{t("waystone.count.danger", { count: count("danger") })}</span>
+          <span className="rounded-full bg-warn/15 px-2 py-1 text-warn">{t("waystone.count.warn", { count: count("warn") })}</span>
+          <span className="rounded-full bg-good/15 px-2 py-1 text-good">{t("waystone.count.good", { count: count("good") })}</span>
+        </span>
+      </div>
+      <div className="max-h-[26rem] overflow-y-auto rounded-lg border border-line bg-surface">
+        {GROUPS.map((g) => {
+          const items = (catalog.data ?? []).filter((m) => m.group === g && matches(m.text));
+          if (items.length === 0) return null;
+          return (
+            <section key={g} aria-labelledby={`waystone-group-${g}`}>
+              <h3 id={`waystone-group-${g}`} className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase">
+                {t(`waystone.group.${g}`)}
+              </h3>
+              <ul>{items.map((m) => row(m.text))}</ul>
+            </section>
+          );
+        })}
+        {others.length > 0 && (
+          <section aria-labelledby="waystone-group-other">
+            <h3 id="waystone-group-other" className="bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-gold uppercase">
+              {t("waystone.group.other")}
+            </h3>
+            <ul>{others.map(row)}</ul>
+          </section>
+        )}
+      </div>
+      <p className="text-xs text-muted">{t("waystone.footnote")}</p>
     </div>
   );
 }

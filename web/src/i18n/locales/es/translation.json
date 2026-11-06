@@ -344,16 +344,53 @@
   },
   "waystone": {
     "heading": "Modificadores de piedra guía",
-    "avoidCount_one": "{{count}} a evitar",
-    "avoidCount_many": "{{count}} a evitar",
-    "avoidCount_other": "{{count}} a evitar",
-    "wantCount_one": "{{count}} deseado",
-    "wantCount_many": "{{count}} deseados",
-    "wantCount_other": "{{count}} deseados",
-    "help": "Los modificadores de una piedra guía que contengan alguna de estas frases se resaltan en el panel. Una frase por línea; no importan las mayúsculas.",
-    "avoidLabel": "Evitar",
-    "wantLabel": "Deseados",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Elige cómo se marca cada modificador al consultar el precio de una piedra guía.",
+    "editFlags": "Editar marcas",
+    "markAs": "Marcar «{{mod}}» como {{flag}}",
+    "flagFor": "Marca para {{mod}}",
+    "flag": {
+      "danger": "Peligro",
+      "warn": "Aviso",
+      "good": "Bueno",
+      "ignore": "Ignorar"
+    },
+    "verdict": {
+      "danger_one": "No la hagas: {{count}} modificador peligroso",
+      "danger_many": "No la hagas: {{count}} modificadores peligrosos",
+      "danger_other": "No la hagas: {{count}} modificadores peligrosos",
+      "warn_one": "Hazla con cuidado: {{count}} aviso",
+      "warn_many": "Hazla con cuidado: {{count}} avisos",
+      "warn_other": "Hazla con cuidado: {{count}} avisos",
+      "good_one": "Vale la pena: {{count}} modificador deseado",
+      "good_many": "Vale la pena: {{count}} modificadores deseados",
+      "good_other": "Vale la pena: {{count}} modificadores deseados",
+      "clear": "No hay modificadores marcados"
+    },
+    "summary": "{{danger}} peligro · {{warn}} aviso · {{good}} bueno",
+    "count": {
+      "danger_one": "{{count}} peligro",
+      "danger_many": "{{count}} peligro",
+      "danger_other": "{{count}} peligro",
+      "warn_one": "{{count}} aviso",
+      "warn_many": "{{count}} avisos",
+      "warn_other": "{{count}} avisos",
+      "good_one": "{{count}} bueno",
+      "good_many": "{{count}} buenos",
+      "good_other": "{{count}} buenos"
+    },
+    "preset": "Preajuste",
+    "presets": {
+      "dangers": "Peligros comunes",
+      "clear": "Quitar todas las marcas"
+    },
+    "search": "Buscar modificadores de piedra guía",
+    "searchPlaceholder": "Buscar entre {{count}} modificadores de piedra guía",
+    "group": {
+      "player": "Penalizaciones al jugador",
+      "monster": "Monstruos",
+      "area": "Zona y recompensas",
+      "other": "Otros modificadores marcados"
+    },
+    "footnote": "Los modificadores provienen de los datos del juego de RKL; # representa el valor obtenido. Los modificadores que marques desde el panel también aparecen aquí."
   }
 }

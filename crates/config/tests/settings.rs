@@ -604,13 +604,16 @@ fn panel_scale_and_backdrop_dim_are_validated() {
 }
 
 #[test]
-fn waystone_lists_default_and_validate() {
+fn waystone_flags_default_and_validate() {
+    use rkl_config::ModFlag;
     let mut s = Settings::default();
-    assert!(s.waystone.avoid.iter().any(|p| p.contains("maximum Resistances")) && s.waystone.want.is_empty());
-    s.waystone.want = vec!["Pack Size".into()];
+    assert_eq!(s.waystone.flags.get("Monsters fire # additional Projectiles"), Some(&ModFlag::Danger));
+    assert_eq!(s.waystone.flags.len(), rkl_config::DEFAULT_DANGEROUS_WAYSTONE_MODS.len());
+    s.waystone.flags.insert("#% increased Pack Size in Map".into(), ModFlag::Good);
     validate(&s).unwrap();
-    s.waystone.want = vec!["  ".into()];
-    assert!(validate(&s).is_err());
-    s.waystone.want = vec!["x".repeat(201)];
+    let toml = toml::to_string(&s).unwrap();
+    let back: Settings = toml::from_str(&toml).unwrap();
+    assert_eq!(back.waystone, s.waystone, "round-trips through TOML");
+    s.waystone.flags.insert("  ".into(), ModFlag::Warn);
     assert!(validate(&s).is_err());
 }

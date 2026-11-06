@@ -50,6 +50,10 @@ export const commands = {
 	 *  gets the game's copied item text in its URL and imports it with every affix.
 	 */
 	openLookup: (site: LookupSite, name: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_lookup", { site, name })),
+	/**  Open settings on one tab (`waystones`, `hotkeys`, ...). */
+	openSettingsTab: (tab: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("open_settings_tab", { tab })),
+	/**  Every waystone mod RKL knows, grouped, for the Waystones settings tab. */
+	waystoneMods: () => typedError<WaystoneMod[], IpcError_Serialize>(__TAURI_INVOKE("waystone_mods")),
 	/**  Forget every remembered stat choice. */
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
@@ -428,6 +432,9 @@ export type MiscFilters_Serialize = {
 	corrupted: boolean | null,
 	identified: boolean | null,
 };
+
+/**  How a waystone mod is flagged in the panel. */
+export type ModFlag = "danger" | "warn" | "good";
 
 /**  Which block of the item the modifier came from. */
 export type ModKind = "implicit" | "explicit" | "enchant" | "rune" | "crafted" | "fractured" | "desecrated" | "sanctified" | "skill";
@@ -983,23 +990,35 @@ export type ValueRange = {
 	max: number | null,
 };
 
-/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
-export type WaystoneSettings = WaystoneSettings_Serialize | WaystoneSettings_Deserialize;
-
-/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
-export type WaystoneSettings_Deserialize = {
-	/**  Mods to avoid, shown in red. */
-	avoid?: string[],
-	/**  Mods wanted, shown in green. */
-	want?: string[],
+/**  One entry of the waystone mod catalogue (`text` is the mod template, `#` for numbers). */
+export type WaystoneMod = {
+	text: string,
+	group: WaystoneModGroup,
 };
 
-/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
+/**  What a waystone mod affects, for grouping the catalogue. */
+export type WaystoneModGroup = "player" | "monster" | "area";
+
+/**
+ *  Waystone mod check: flags per mod, keyed by the mod's template as the game copies it
+ *  (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
+ */
+export type WaystoneSettings = WaystoneSettings_Serialize | WaystoneSettings_Deserialize;
+
+/**
+ *  Waystone mod check: flags per mod, keyed by the mod's template as the game copies it
+ *  (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
+ */
+export type WaystoneSettings_Deserialize = {
+	flags?: { [key in string]: ModFlag },
+};
+
+/**
+ *  Waystone mod check: flags per mod, keyed by the mod's template as the game copies it
+ *  (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
+ */
 export type WaystoneSettings_Serialize = {
-	/**  Mods to avoid, shown in red. */
-	avoid: string[],
-	/**  Mods wanted, shown in green. */
-	want: string[],
+	flags: { [key in string]: ModFlag },
 };
 
 /* Tauri Specta runtime */

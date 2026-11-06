@@ -140,3 +140,20 @@ fn stat_filters_carry_mod_tiers_from_advanced_copies() {
     assert_eq!(tier("Allies in your Presence Regenerate 2.2 Life per second"), Some(Some(9)));
     assert_eq!(tier("68% increased Spirit"), Some(None), "summed prefix + desecrated row");
 }
+
+/// The waystone mod check keys flags by template: the templates the parser produces for real
+/// waystones must be exactly the strings flagged by default.
+#[test]
+fn waystone_templates_match_the_default_danger_flags() {
+    let templates: Vec<String> = ["waystone/corrupted-tier-16-advanced", "waystone/rare-tier-15"]
+        .iter()
+        .flat_map(|id| matched(id).modifiers.into_iter().map(|m| m.template))
+        .collect();
+    for danger in [
+        "Players have -#% to all maximum Resistances",
+        "Players have #% less Recovery Rate of Life and Energy Shield",
+        "Monsters fire # additional Projectiles",
+    ] {
+        assert!(templates.iter().any(|t| t == danger), "{danger:?} not among {templates:#?}");
+    }
+}

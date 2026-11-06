@@ -341,14 +341,47 @@
   },
   "waystone": {
     "heading": "Wegstein-Mods",
-    "avoidCount_one": "{{count}} zu meiden",
-    "avoidCount_other": "{{count}} zu meiden",
-    "wantCount_one": "{{count}} gewünscht",
-    "wantCount_other": "{{count}} gewünscht",
-    "help": "Mods auf einem Wegstein, die einen dieser Ausdrücke enthalten, werden im Panel hervorgehoben. Ein Ausdruck pro Zeile; Groß- und Kleinschreibung spielt keine Rolle.",
-    "avoidLabel": "Meiden",
-    "wantLabel": "Gewünscht",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Festlegen, wie jede Mod bei der Preisprüfung eines Wegsteins markiert wird.",
+    "editFlags": "Markierungen bearbeiten",
+    "markAs": "„{{mod}}“ als {{flag}} markieren",
+    "flagFor": "Markierung für {{mod}}",
+    "flag": {
+      "danger": "Gefahr",
+      "warn": "Warnung",
+      "good": "Gut",
+      "ignore": "Ignorieren"
+    },
+    "verdict": {
+      "danger_one": "Nicht laufen: {{count}} gefährliche Mod",
+      "danger_other": "Nicht laufen: {{count}} gefährliche Mods",
+      "warn_one": "Mit Vorsicht laufen: {{count}} Warnung",
+      "warn_other": "Mit Vorsicht laufen: {{count}} Warnungen",
+      "good_one": "Lohnt sich: {{count}} gewünschte Mod",
+      "good_other": "Lohnt sich: {{count}} gewünschte Mods",
+      "clear": "Keine markierten Mods"
+    },
+    "summary": "{{danger}} Gefahr · {{warn}} Warnung · {{good}} Gut",
+    "count": {
+      "danger_one": "{{count}} Gefahr",
+      "danger_other": "{{count}} Gefahr",
+      "warn_one": "{{count}} Warnung",
+      "warn_other": "{{count}} Warnungen",
+      "good_one": "{{count}} gut",
+      "good_other": "{{count}} gut"
+    },
+    "preset": "Vorlage",
+    "presets": {
+      "dangers": "Häufige Gefahren",
+      "clear": "Alle Markierungen entfernen"
+    },
+    "search": "Wegstein-Mods durchsuchen",
+    "searchPlaceholder": "{{count}} Wegstein-Mods durchsuchen",
+    "group": {
+      "player": "Nachteile für Spieler",
+      "monster": "Monster",
+      "area": "Gebiet und Belohnungen",
+      "other": "Weitere markierte Mods"
+    },
+    "footnote": "Die Mods stammen aus den Spieldaten von RKL; # steht für den gewürfelten Wert. Im Panel markierte Mods erscheinen ebenfalls hier."
   }
 }

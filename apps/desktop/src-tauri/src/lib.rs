@@ -45,6 +45,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::copy_text,
             ipc::drag_card,
             ipc::open_lookup,
+            ipc::open_settings_tab,
+            ipc::waystone_mods,
             ipc::clear_filter_memory,
             ipc::get_overlay_layout,
             ipc::rebind_hotkey,

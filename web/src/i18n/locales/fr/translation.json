@@ -344,16 +344,53 @@
   },
   "waystone": {
     "heading": "Modificateurs de la pierre",
-    "avoidCount_one": "{{count}} à éviter",
-    "avoidCount_many": "{{count}} à éviter",
-    "avoidCount_other": "{{count}} à éviter",
-    "wantCount_one": "{{count}} souhaité",
-    "wantCount_many": "{{count}} souhaités",
-    "wantCount_other": "{{count}} souhaités",
-    "help": "Les modificateurs d'une pierre contenant l'une de ces expressions sont mis en évidence dans le panneau. Une expression par ligne ; la casse n'a pas d'importance.",
-    "avoidLabel": "À éviter",
-    "wantLabel": "Souhaités",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Choisissez comment chaque modificateur est signalé lorsque vous vérifiez le prix d'une pierre.",
+    "editFlags": "Modifier les marquages",
+    "markAs": "Marquer « {{mod}} » comme {{flag}}",
+    "flagFor": "Marquage de {{mod}}",
+    "flag": {
+      "danger": "Danger",
+      "warn": "Attention",
+      "good": "Bon",
+      "ignore": "Ignorer"
+    },
+    "verdict": {
+      "danger_one": "Ne pas lancer : {{count}} modificateur dangereux",
+      "danger_many": "Ne pas lancer : {{count}} de modificateurs dangereux",
+      "danger_other": "Ne pas lancer : {{count}} modificateurs dangereux",
+      "warn_one": "Prudence : {{count}} avertissement",
+      "warn_many": "Prudence : {{count}} d'avertissements",
+      "warn_other": "Prudence : {{count}} avertissements",
+      "good_one": "À lancer : {{count}} modificateur recherché",
+      "good_many": "À lancer : {{count}} de modificateurs recherchés",
+      "good_other": "À lancer : {{count}} modificateurs recherchés",
+      "clear": "Aucun modificateur marqué"
+    },
+    "summary": "{{danger}} danger · {{warn}} attention · {{good}} bon",
+    "count": {
+      "danger_one": "{{count}} danger",
+      "danger_many": "{{count}} danger",
+      "danger_other": "{{count}} danger",
+      "warn_one": "{{count}} attention",
+      "warn_many": "{{count}} attention",
+      "warn_other": "{{count}} attention",
+      "good_one": "{{count}} bon",
+      "good_many": "{{count}} bons",
+      "good_other": "{{count}} bons"
+    },
+    "preset": "Préréglage",
+    "presets": {
+      "dangers": "Dangers courants",
+      "clear": "Effacer tous les marquages"
+    },
+    "search": "Rechercher des modificateurs de pierre",
+    "searchPlaceholder": "Rechercher parmi {{count}} modificateurs de pierre",
+    "group": {
+      "player": "Malus du joueur",
+      "monster": "Monstres",
+      "area": "Zone et récompenses",
+      "other": "Autres modificateurs marqués"
+    },
+    "footnote": "Les modificateurs proviennent des données de jeu de RKL ; # représente la valeur obtenue. Les modificateurs marqués depuis le panneau apparaissent aussi ici."
   }
 }

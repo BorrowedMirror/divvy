@@ -411,6 +411,34 @@ pub fn open_settings(app: AppHandle) -> Result<(), IpcError> {
     flow::show_settings(&app, "settings")
 }
 
+/// Open settings on one tab (`waystones`, `hotkeys`, ...).
+#[tauri::command]
+#[specta::specta]
+pub fn open_settings_tab(app: AppHandle, tab: String) -> Result<(), IpcError> {
+    if !tab.chars().all(|c| c.is_ascii_lowercase()) || tab.is_empty() || tab.len() > 20 {
+        return Err(IpcError::new("internal", "unknown settings tab"));
+    }
+    flow::show_settings(&app, &format!("settings?tab={tab}"))
+}
+
+/// Every waystone mod RKL knows, grouped, for the Waystones settings tab.
+#[tauri::command]
+#[specta::specta]
+pub async fn waystone_mods(state: State<'_, Arc<AppState>>) -> Result<Vec<crate::logic::WaystoneMod>, IpcError> {
+    let state = Arc::clone(&state);
+    tauri::async_runtime::spawn_blocking(move || {
+        let data = state.wait_data();
+        let texts: Vec<String> = data
+            .map(|d| {
+                d.bundle().stats.iter().filter(|s| s.id.starts_with("explicit.")).map(|s| s.text.clone()).collect()
+            })
+            .unwrap_or_default();
+        crate::logic::waystone_catalog(texts.iter().map(String::as_str))
+    })
+    .await
+    .map_err(|e| IpcError::new("internal", e.to_string()))
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn rebind_hotkey(

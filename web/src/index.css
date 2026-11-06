@@ -13,6 +13,7 @@
   --k-gold: #c8a45a;
   --k-gold-bright: #e2c27a;
   --k-good: #6fbf73;
+  --k-warn: #e0a34a;
   --k-bad: #e0604f;
 }
 
@@ -28,6 +29,7 @@
   --k-gold: #8a6620;
   --k-gold-bright: #a57c2c;
   --k-good: #2f7d34;
+  --k-warn: #9a6a0c;
   --k-bad: #b23a2a;
 }
 
@@ -44,6 +46,7 @@
     --k-gold: #8a6620;
     --k-gold-bright: #a57c2c;
     --k-good: #2f7d34;
+    --k-warn: #9a6a0c;
     --k-bad: #b23a2a;
   }
 }
@@ -59,6 +62,7 @@
   --color-gold: var(--k-gold);
   --color-gold-bright: var(--k-gold-bright);
   --color-good: var(--k-good);
+  --color-warn: var(--k-warn);
   --color-bad: var(--k-bad);
   /* In-game rarity colours. */
   --color-rarity-normal: #c8c8c8;

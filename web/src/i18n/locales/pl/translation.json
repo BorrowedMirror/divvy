@@ -347,18 +347,59 @@
   },
   "waystone": {
     "heading": "Modyfikatory Waystone'a",
-    "avoidCount_one": "{{count}} do unikania",
-    "avoidCount_few": "{{count}} do unikania",
-    "avoidCount_many": "{{count}} do unikania",
-    "avoidCount_other": "{{count}} do unikania",
-    "wantCount_one": "{{count}} pożądany",
-    "wantCount_few": "{{count}} pożądane",
-    "wantCount_many": "{{count}} pożądanych",
-    "wantCount_other": "{{count}} pożądanego",
-    "help": "Modyfikatory Waystone'a zawierające jedną z tych fraz są wyróżniane w panelu. Jedna fraza na linię; wielkość liter nie ma znaczenia.",
-    "avoidLabel": "Unikaj",
-    "wantLabel": "Pożądane",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Wybierz, jak oznaczać każdy modyfikator podczas sprawdzania ceny Waystone'a.",
+    "editFlags": "Edytuj oznaczenia",
+    "markAs": "Oznacz „{{mod}}” jako {{flag}}",
+    "flagFor": "Oznaczenie dla {{mod}}",
+    "flag": {
+      "danger": "Niebezpieczny",
+      "warn": "Ostrzeżenie",
+      "good": "Dobry",
+      "ignore": "Ignoruj"
+    },
+    "verdict": {
+      "danger_one": "Nie odpalaj: {{count}} niebezpieczny modyfikator",
+      "danger_few": "Nie odpalaj: {{count}} niebezpieczne modyfikatory",
+      "danger_many": "Nie odpalaj: {{count}} niebezpiecznych modyfikatorów",
+      "danger_other": "Nie odpalaj: {{count}} niebezpiecznego modyfikatora",
+      "warn_one": "Ostrożnie: {{count}} ostrzeżenie",
+      "warn_few": "Ostrożnie: {{count}} ostrzeżenia",
+      "warn_many": "Ostrożnie: {{count}} ostrzeżeń",
+      "warn_other": "Ostrożnie: {{count}} ostrzeżenia",
+      "good_one": "Warto: {{count}} pożądany modyfikator",
+      "good_few": "Warto: {{count}} pożądane modyfikatory",
+      "good_many": "Warto: {{count}} pożądanych modyfikatorów",
+      "good_other": "Warto: {{count}} pożądanego modyfikatora",
+      "clear": "Brak oznaczonych modyfikatorów"
+    },
+    "summary": "Niebezpieczne: {{danger}} · Ostrzeżenia: {{warn}} · Dobre: {{good}}",
+    "count": {
+      "danger_one": "Niebezpieczne: {{count}}",
+      "danger_few": "Niebezpieczne: {{count}}",
+      "danger_many": "Niebezpieczne: {{count}}",
+      "danger_other": "Niebezpieczne: {{count}}",
+      "warn_one": "Ostrzeżenia: {{count}}",
+      "warn_few": "Ostrzeżenia: {{count}}",
+      "warn_many": "Ostrzeżenia: {{count}}",
+      "warn_other": "Ostrzeżenia: {{count}}",
+      "good_one": "Dobre: {{count}}",
+      "good_few": "Dobre: {{count}}",
+      "good_many": "Dobre: {{count}}",
+      "good_other": "Dobre: {{count}}"
+    },
+    "preset": "Zestaw",
+    "presets": {
+      "dangers": "Typowe zagrożenia",
+      "clear": "Wyczyść wszystkie oznaczenia"
+    },
+    "search": "Szukaj modyfikatorów Waystone'a",
+    "searchPlaceholder": "Szukaj wśród {{count}} modyfikatorów Waystone'a",
+    "group": {
+      "player": "Kary dla gracza",
+      "monster": "Potwory",
+      "area": "Obszar i nagrody",
+      "other": "Inne oznaczone modyfikatory"
+    },
+    "footnote": "Modyfikatory pochodzą z danych gry RKL; # oznacza wylosowaną wartość. Modyfikatory oznaczone w panelu również pojawiają się tutaj."
   }
 }

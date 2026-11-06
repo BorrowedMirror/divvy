@@ -344,16 +344,53 @@
   },
   "waystone": {
     "heading": "Modificadores da pedra-guia",
-    "avoidCount_one": "{{count}} a evitar",
-    "avoidCount_many": "{{count}} a evitar",
-    "avoidCount_other": "{{count}} a evitar",
-    "wantCount_one": "{{count}} desejado",
-    "wantCount_many": "{{count}} desejados",
-    "wantCount_other": "{{count}} desejados",
-    "help": "Os modificadores de uma pedra-guia que contêm uma destas frases são destacados no painel. Uma frase por linha; maiúsculas não importam.",
-    "avoidLabel": "Evitar",
-    "wantLabel": "Desejados",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Escolha como cada modificador é marcado ao consultar o preço de uma pedra-guia.",
+    "editFlags": "Editar marcações",
+    "markAs": "Marcar “{{mod}}” como {{flag}}",
+    "flagFor": "Marcação de {{mod}}",
+    "flag": {
+      "danger": "Perigo",
+      "warn": "Alerta",
+      "good": "Bom",
+      "ignore": "Ignorar"
+    },
+    "verdict": {
+      "danger_one": "Não faça: {{count}} modificador perigoso",
+      "danger_many": "Não faça: {{count}} modificadores perigosos",
+      "danger_other": "Não faça: {{count}} modificadores perigosos",
+      "warn_one": "Faça com cuidado: {{count}} alerta",
+      "warn_many": "Faça com cuidado: {{count}} alertas",
+      "warn_other": "Faça com cuidado: {{count}} alertas",
+      "good_one": "Vale a pena: {{count}} modificador desejado",
+      "good_many": "Vale a pena: {{count}} modificadores desejados",
+      "good_other": "Vale a pena: {{count}} modificadores desejados",
+      "clear": "Nenhum modificador marcado"
+    },
+    "summary": "{{danger}} perigo · {{warn}} alerta · {{good}} bom",
+    "count": {
+      "danger_one": "{{count}} perigo",
+      "danger_many": "{{count}} perigo",
+      "danger_other": "{{count}} perigo",
+      "warn_one": "{{count}} alerta",
+      "warn_many": "{{count}} alertas",
+      "warn_other": "{{count}} alertas",
+      "good_one": "{{count}} bom",
+      "good_many": "{{count}} bons",
+      "good_other": "{{count}} bons"
+    },
+    "preset": "Predefinição",
+    "presets": {
+      "dangers": "Perigos comuns",
+      "clear": "Limpar todas as marcações"
+    },
+    "search": "Buscar modificadores da pedra-guia",
+    "searchPlaceholder": "Buscar entre {{count}} modificadores da pedra-guia",
+    "group": {
+      "player": "Penalidades do jogador",
+      "monster": "Monstros",
+      "area": "Área e recompensas",
+      "other": "Outros modificadores marcados"
+    },
+    "footnote": "Os modificadores vêm dos dados do jogo do RKL; # representa o valor rolado. Os modificadores que você marcar no painel também aparecem aqui."
   }
 }

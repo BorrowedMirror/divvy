@@ -344,16 +344,53 @@
   },
   "waystone": {
     "heading": "Modificatori Waystone",
-    "avoidCount_one": "{{count}} da evitare",
-    "avoidCount_many": "{{count}} da evitare",
-    "avoidCount_other": "{{count}} da evitare",
-    "wantCount_one": "{{count}} desiderato",
-    "wantCount_many": "{{count}} desiderati",
-    "wantCount_other": "{{count}} desiderati",
-    "help": "I modificatori di una Waystone che contengono una di queste frasi vengono evidenziati nel pannello. Una frase per riga; maiuscole e minuscole non contano.",
-    "avoidLabel": "Da evitare",
-    "wantLabel": "Desiderati",
-    "avoidPlaceholder": "to all maximum Resistances",
-    "wantPlaceholder": "increased Quantity of Items"
+    "help": "Scegli come viene contrassegnato ogni modificatore quando controlli il prezzo di una Waystone.",
+    "editFlags": "Modifica contrassegni",
+    "markAs": "Contrassegna “{{mod}}” come {{flag}}",
+    "flagFor": "Contrassegno per {{mod}}",
+    "flag": {
+      "danger": "Pericolo",
+      "warn": "Attenzione",
+      "good": "Buono",
+      "ignore": "Ignora"
+    },
+    "verdict": {
+      "danger_one": "Da evitare: {{count}} modificatore pericoloso",
+      "danger_many": "Da evitare: {{count}} di modificatori pericolosi",
+      "danger_other": "Da evitare: {{count}} modificatori pericolosi",
+      "warn_one": "Con cautela: {{count}} avviso",
+      "warn_many": "Con cautela: {{count}} di avvisi",
+      "warn_other": "Con cautela: {{count}} avvisi",
+      "good_one": "Da fare: {{count}} modificatore desiderato",
+      "good_many": "Da fare: {{count}} di modificatori desiderati",
+      "good_other": "Da fare: {{count}} modificatori desiderati",
+      "clear": "Nessun modificatore contrassegnato"
+    },
+    "summary": "{{danger}} pericolo · {{warn}} attenzione · {{good}} buoni",
+    "count": {
+      "danger_one": "{{count}} pericolo",
+      "danger_many": "{{count}} pericolo",
+      "danger_other": "{{count}} pericolo",
+      "warn_one": "{{count}} attenzione",
+      "warn_many": "{{count}} attenzione",
+      "warn_other": "{{count}} attenzione",
+      "good_one": "{{count}} buono",
+      "good_many": "{{count}} di buoni",
+      "good_other": "{{count}} buoni"
+    },
+    "preset": "Preimpostazione",
+    "presets": {
+      "dangers": "Pericoli comuni",
+      "clear": "Rimuovi tutti i contrassegni"
+    },
+    "search": "Cerca modificatori Waystone",
+    "searchPlaceholder": "Cerca tra {{count}} modificatori Waystone",
+    "group": {
+      "player": "Penalità del giocatore",
+      "monster": "Mostri",
+      "area": "Area e ricompense",
+      "other": "Altri modificatori contrassegnati"
+    },
+    "footnote": "I modificatori provengono dai dati di gioco di RKL; # indica il valore ottenuto. Anche i modificatori che contrassegni dal pannello compaiono qui."
   }
 }

@@ -37,25 +37,32 @@ describe("OverlayView", () => {
     await waitFor(() => expect(within(links).getAllByRole("button").map((b) => b.textContent)).toEqual(["Wiki"]));
   });
 
-  test("waystones list their mods with avoid and want highlighted", async () => {
+  test("waystones show a verdict and flag mods from the panel", async () => {
+    const user = userEvent.setup();
     const [mod] = parsedItem().modifiers;
     if (!mod) throw new Error("fixture has mods");
+    const m = (text: string, template: string) => ({ ...mod, text, template });
     const item = parsedItem({
       class: { type: "waystone" },
       category: "waystone",
       modifiers: [
-        { ...mod, text: "Players have -20% to all maximum Resistances" },
-        { ...mod, text: "+12% Pack Size" },
-        { ...mod, text: "Monsters have 41% increased Life" },
+        m("Players have -20% to all maximum Resistances", "Players have -#% to all maximum Resistances"),
+        m("+12% increased Pack Size in Map", "#% increased Pack Size in Map"),
+        m("Monsters have 41% increased Life", "Monsters have #% increased Life"),
       ],
     });
-    setupIpc({ get_overlay_snapshot: () => itemCopied({ item }) });
+    const calls = setupIpc({ get_overlay_snapshot: () => itemCopied({ item }), open_settings_tab: () => null });
     renderWithProviders(<OverlayView />);
     const section = await screen.findByTestId("waystone-mods");
-    const rows = within(section).getAllByRole("listitem");
-    expect(rows.map((r) => r.dataset.verdict)).toEqual(["avoid", "want", "none"]);
-    expect(within(section).getByText("1 to avoid")).toBeInTheDocument();
-    expect(within(section).getByText("1 wanted")).toBeInTheDocument();
+    expect(within(section).getByTestId("waystone-verdict")).toHaveAttribute("data-kind", "danger");
+    expect(within(section).getByText("Don't run: 1 dangerous mod")).toBeInTheDocument();
+    expect(within(section).getAllByRole("listitem").map((r) => r.dataset.flag)).toEqual(["danger", "good", "none"]);
+    await user.click(within(section).getByRole("button", { name: "Flag “Monsters have 41% increased Life” as Warn" }));
+    await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
+    const saved = callsOf(calls, "save_settings")[0]?.args as { settings: { waystone: { flags: Record<string, string> } } };
+    expect(saved.settings.waystone.flags["Monsters have #% increased Life"]).toBe("warn");
+    await user.click(within(section).getByRole("button", { name: "Edit flags" }));
+    expect(callsOf(calls, "open_settings_tab")[0]?.args).toEqual({ tab: "waystones" });
   });
 
   test("dragging the header reports start, moves and end; Rust moves the card", async () => {

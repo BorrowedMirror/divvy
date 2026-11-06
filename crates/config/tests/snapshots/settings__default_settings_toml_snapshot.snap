@@ -56,13 +56,10 @@ poe2db = true
 wiki = true
 craft_of_exile = true
 
-[waystone]
-avoid = [
-    "to all maximum Resistances",
-    "less Recovery Rate of Life and Energy Shield",
-    "additional Projectiles",
-]
-want = []
+[waystone.flags]
+"Monsters fire # additional Projectiles" = "danger"
+"Players have #% less Recovery Rate of Life and Energy Shield" = "danger"
+"Players have -#% to all maximum Resistances" = "danger"
 
 [ui]
 language = "en"

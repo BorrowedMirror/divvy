@@ -120,26 +120,33 @@ pub enum OverlaySide {
     Last,
 }
 
-/// Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod).
+/// How a waystone mod is flagged in the panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum ModFlag {
+    Danger,
+    Warn,
+    Good,
+}
+
+/// Waystone mod check: flags per mod, keyed by the mod's template as the game copies it
+/// (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(default)]
 pub struct WaystoneSettings {
-    /// Mods to avoid, shown in red.
-    pub avoid: Vec<String>,
-    /// Mods wanted, shown in green.
-    pub want: Vec<String>,
+    pub flags: std::collections::BTreeMap<String, ModFlag>,
 }
+
+/// Mods flagged dangerous out of the box (and by the "Common dangers" preset).
+pub const DEFAULT_DANGEROUS_WAYSTONE_MODS: &[&str] = &[
+    "Players have -#% to all maximum Resistances",
+    "Players have #% less Recovery Rate of Life and Energy Shield",
+    "Monsters fire # additional Projectiles",
+];
 
 impl Default for WaystoneSettings {
     fn default() -> Self {
-        Self {
-            avoid: vec![
-                "to all maximum Resistances".into(),
-                "less Recovery Rate of Life and Energy Shield".into(),
-                "additional Projectiles".into(),
-            ],
-            want: Vec::new(),
-        }
+        Self { flags: DEFAULT_DANGEROUS_WAYSTONE_MODS.iter().map(|m| ((*m).to_owned(), ModFlag::Danger)).collect() }
     }
 }
 
@@ -500,10 +507,8 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         }
     }
 
-    for (field, list) in [("waystone.avoid", &s.waystone.avoid), ("waystone.want", &s.waystone.want)] {
-        if list.len() > 200 || list.iter().any(|p| p.trim().is_empty() || p.len() > 200) {
-            return Err(invalid(field, "phrases must be 1-200 characters, at most 200 of them"));
-        }
+    if s.waystone.flags.len() > 500 || s.waystone.flags.keys().any(|k| k.trim().is_empty() || k.len() > 300) {
+        return Err(invalid("waystone.flags", "at most 500 flagged mods of 1-300 characters"));
     }
     if !(0.75..=1.5).contains(&s.overlay.scale) {
         return Err(invalid("overlay.scale", format!("{} is not within 0.75..=1.5", s.overlay.scale)));
