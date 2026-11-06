@@ -139,6 +139,13 @@ html[data-overlay="1"] .k-overlay-close:hover {
   color: var(--k-fg);
   background: var(--k-surface-2);
 }
+/* Same gold ring as the other controls (Tailwind ring-2 ring-gold), not the browser's outline. */
+html[data-overlay="1"] .k-overlay-close:focus {
+  outline: none;
+}
+html[data-overlay="1"] .k-overlay-close:focus-visible {
+  box-shadow: 0 0 0 2px var(--k-gold);
+}
 
 /* The overlay window is transparent; only the panel card is opaque. */
 html[data-route="overlay"],
