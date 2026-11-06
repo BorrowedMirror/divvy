@@ -27,6 +27,7 @@ const defaults: Record<string, Handler> = {
   get_overlay_snapshot: () => null,
   open_trade: () => null,
   open_settings: () => null,
+  find_game_log: () => null,
 };
 
 /** Install `mockIPC` with event mocking; returns the recorded command calls. */

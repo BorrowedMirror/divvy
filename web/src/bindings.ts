@@ -9,6 +9,11 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 /** Commands */
 export const commands = {
 	getSettings: () => __TAURI_INVOKE<Settings_Serialize>("get_settings"),
+	/**
+	 *  The game log the chat placeholders would read for this `chat.game_log` value (empty: found
+	 *  automatically), or `None` when there is none.
+	 */
+	findGameLog: (configured: string) => __TAURI_INVOKE<string | null>("find_game_log", { configured }),
 	saveSettings: (settings: Settings_Deserialize) => typedError<Settings_Serialize, IpcError_Serialize>(__TAURI_INVOKE("save_settings", { settings })),
 	getDiagnostics: () => __TAURI_INVOKE<Diagnostics_Serialize>("get_diagnostics"),
 	listLeagues: () => typedError<League_Serialize[], IpcError_Serialize>(__TAURI_INVOKE("list_leagues")),
@@ -129,8 +134,9 @@ export type Capabilities = {
 };
 
 /**
- *  A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. One
- *  key press sends one command, like Sidekick and Exiled Exchange 2.
+ *  A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. `&&`
+ *  chains several lines in one key press; `@last` and `@area` are filled from the game log, as
+ *  in Exiled Exchange 2.
  */
 export type ChatCommand = {
 	chord: Chord,
@@ -143,10 +149,14 @@ export type ChatSettings = ChatSettings_Serialize | ChatSettings_Deserialize;
 
 export type ChatSettings_Deserialize = {
 	commands?: ChatCommand[],
+	/**  The game's `Client.txt`, read for `@last` and `@area`. Empty: found automatically. */
+	game_log?: string,
 };
 
 export type ChatSettings_Serialize = {
 	commands: ChatCommand[],
+	/**  The game's `Client.txt`, read for `@last` and `@area`. Empty: found automatically. */
+	game_log: string,
 };
 
 /**  A key chord such as `Ctrl+Alt+D`. `key` uses W3C `KeyboardEvent.code` names (`KeyD`, `F5`). */

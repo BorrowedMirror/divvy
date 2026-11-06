@@ -62,6 +62,9 @@ craft_of_exile = true
 "Players have #% less Recovery Rate of Life and Energy Shield" = "danger"
 "Players have -#% to all maximum Resistances" = "danger"
 
+[chat]
+game_log = ""
+
 [[chat.commands]]
 text = "/hideout"
 send = true
@@ -80,6 +83,38 @@ key = ""
 
 [[chat.commands]]
 text = "/exit"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "@last ty&&/kick @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/invite @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/tradewith @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/hideout @last"
 send = true
 
 [chat.commands.chord]

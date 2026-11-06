@@ -141,8 +141,9 @@ pub enum OverlaySide {
 /// Most chat commands / stash searches that can be configured.
 pub const MAX_MACROS: usize = 20;
 
-/// A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. One
-/// key press sends one command, like Sidekick and Exiled Exchange 2.
+/// A chat command sent with one hotkey: Enter, the text, and (with `send`) Enter again. `&&`
+/// chains several lines in one key press; `@last` and `@area` are filled from the game log, as
+/// in Exiled Exchange 2.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 pub struct ChatCommand {
     pub chord: Chord,
@@ -155,6 +156,8 @@ pub struct ChatCommand {
 #[serde(default)]
 pub struct ChatSettings {
     pub commands: Vec<ChatCommand>,
+    /// The game's `Client.txt`, read for `@last` and `@area`. Empty: found automatically.
+    pub game_log: String,
 }
 
 impl Default for ChatSettings {
@@ -165,7 +168,12 @@ impl Default for ChatSettings {
                 cmd(Chord::new(&[], "F5"), "/hideout"),
                 cmd(Chord::unbound(), "/kingsmarch"),
                 cmd(Chord::unbound(), "/exit"),
+                cmd(Chord::unbound(), "@last ty&&/kick @last"),
+                cmd(Chord::unbound(), "/invite @last"),
+                cmd(Chord::unbound(), "/tradewith @last"),
+                cmd(Chord::unbound(), "/hideout @last"),
             ],
+            game_log: String::new(),
         }
     }
 }
@@ -573,6 +581,9 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         if text.len() > 200 || text.contains('\n') {
             return Err(invalid(field, "text must be one line of at most 200 characters"));
         }
+    }
+    if s.chat.game_log.len() > 1024 || s.chat.game_log.contains('\n') {
+        return Err(invalid("chat.game_log", "the game log path must be one line of at most 1024 characters"));
     }
     let mut hotkeys: Vec<(String, &Chord)> = vec![
         ("hotkeys.price_check".into(), &s.hotkeys.price_check),

@@ -4,6 +4,7 @@ pub mod cli;
 pub mod events;
 pub mod filter_memory;
 pub mod flow;
+pub mod gamelog;
 pub mod ipc;
 pub mod logic;
 pub mod overlay;
@@ -29,6 +30,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
     Builder::<tauri::Wry>::new()
         .commands(collect_commands![
             ipc::get_settings,
+            ipc::find_game_log,
             ipc::save_settings,
             ipc::get_diagnostics,
             ipc::list_leagues,

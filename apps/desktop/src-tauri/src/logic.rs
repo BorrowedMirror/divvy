@@ -404,13 +404,86 @@ fn press(mods: &[rkl_platform::KeyModifier], key: &str) -> MacroStep {
     MacroStep::Press(rkl_platform::Chord::new(mods, key))
 }
 
-/// Enter opens the chat box, the text is pasted, and Enter sends it (unless `send` is off).
-pub fn chat_steps(text: &str, send: bool) -> Vec<MacroStep> {
-    let mut steps = vec![press(&[], "Enter"), MacroStep::Paste(text.to_owned())];
-    if send {
-        steps.push(press(&[], "Enter"));
+/// Chained chat commands: `@last ty&&/kick @last` sends two lines.
+pub const CHAT_CHAIN: &str = "&&";
+/// The last player you whispered or who whispered you (from the game log).
+pub const CHAT_LAST: &str = "@last";
+/// The current area (from the game log).
+pub const CHAT_AREA: &str = "@area";
+
+/// The lines a chat command sends, in order.
+pub fn chat_lines(text: &str) -> Vec<&str> {
+    text.split(CHAT_CHAIN).map(str::trim).filter(|l| !l.is_empty()).collect()
+}
+
+/// Which placeholders a command uses: (`@last`, `@area`).
+pub fn chat_placeholders(text: &str) -> (bool, bool) {
+    (text.contains(CHAT_LAST), text.contains(CHAT_AREA))
+}
+
+/// What the placeholders stand for right now; `None` when the game log is missing or has no
+/// whisper / area yet.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ChatContext {
+    pub last: Option<String>,
+    pub area: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum ChatError {
+    #[error("@area needs the game log (Client.txt), and no area was found in it")]
+    NoArea,
+    #[error("@last more than once needs the game log (Client.txt), and no whisper was found in it")]
+    NoWhisper,
+}
+
+/// The macro for a chat command. Each line: Enter opens the chat box, Ctrl+A selects whatever
+/// is in it, the line is pasted over it and Enter sends it. Every line but the last is always
+/// sent; the last one only with `send`.
+///
+/// Placeholders are filled from `ctx`. Without a known last whisper, a line with one `@last`
+/// still works: Ctrl+Enter makes the game open the chat with `@Name ` (its reply-to-last-whisper
+/// key), the text after `@last` goes at the end, and for a line that does not start with `@last`
+/// (`/invite @last`) Home + Delete drop the `@` and the text before it goes at the start.
+pub fn chat_steps(text: &str, send: bool, ctx: &ChatContext) -> Result<Vec<MacroStep>, ChatError> {
+    use rkl_platform::KeyModifier::Ctrl;
+    let lines = chat_lines(text);
+    let mut steps = Vec::new();
+    for (i, line) in lines.iter().enumerate() {
+        let line = if line.contains(CHAT_AREA) {
+            line.replace(CHAT_AREA, ctx.area.as_deref().ok_or(ChatError::NoArea)?)
+        } else {
+            (*line).to_owned()
+        };
+        match (&ctx.last, line.matches(CHAT_LAST).count()) {
+            (Some(name), _) => {
+                // A line that starts with @last is a whisper (`@Name ty`); elsewhere it is a
+                // command argument (`/invite Name`), without the @.
+                let line = match line.strip_prefix(CHAT_LAST) {
+                    Some(rest) => format!("@{name}{}", rest.replace(CHAT_LAST, name)),
+                    None => line.replace(CHAT_LAST, name),
+                };
+                steps.extend([press(&[], "Enter"), press(&[Ctrl], "KeyA"), MacroStep::Paste(line)]);
+            }
+            (None, 0) => steps.extend([press(&[], "Enter"), press(&[Ctrl], "KeyA"), MacroStep::Paste(line)]),
+            (None, 1) => {
+                let (before, after) = line.split_once(CHAT_LAST).expect("one @last");
+                let after = after.trim_start();
+                steps.push(press(&[Ctrl], "Enter"));
+                if !before.is_empty() {
+                    steps.extend([press(&[], "Home"), press(&[], "Delete"), MacroStep::Paste(before.to_owned())]);
+                }
+                if !after.is_empty() {
+                    steps.extend([press(&[], "End"), MacroStep::Paste(after.to_owned())]);
+                }
+            }
+            (None, _) => return Err(ChatError::NoWhisper),
+        }
+        if send || i + 1 < lines.len() {
+            steps.push(press(&[], "Enter"));
+        }
     }
-    steps
+    Ok(steps)
 }
 
 /// Ctrl+F focuses the stash (or vendor) search box, Ctrl+A selects what is there, the text is
@@ -560,21 +633,66 @@ mod tests {
     }
 
     #[test]
+    fn chat_placeholders_and_chaining() {
+        use rkl_platform::{Chord, KeyModifier::Ctrl};
+        let key = |mods: &[rkl_platform::KeyModifier], k: &str| MacroStep::Press(Chord::new(mods, k));
+        let (enter, ctrl_a) = (key(&[], "Enter"), key(&[Ctrl], "KeyA"));
+        let paste = |s: &str| MacroStep::Paste(s.into());
+        let known = ChatContext { last: Some("Buyer".into()), area: Some("Felled Hideout".into()) };
+        assert_eq!(chat_lines(" @last ty&& /kick @last &&"), vec!["@last ty", "/kick @last"]);
+        assert_eq!(chat_placeholders("/hideout @last"), (true, false));
+        // Known whisper: a leading @last whispers, elsewhere it is the bare name. All but the
+        // last line are sent even without `send`.
+        assert_eq!(
+            chat_steps("@last ty @last&&/kick @last", false, &known).unwrap(),
+            vec![
+                enter.clone(),
+                ctrl_a.clone(),
+                paste("@Buyer ty Buyer"),
+                enter.clone(),
+                enter.clone(),
+                ctrl_a.clone(),
+                paste("/kick Buyer"),
+            ]
+        );
+        assert_eq!(
+            chat_steps("Now in @area", true, &known).unwrap(),
+            vec![enter.clone(), ctrl_a.clone(), paste("Now in Felled Hideout"), enter.clone()]
+        );
+        // No log: Ctrl+Enter makes the game type `@Name `.
+        let none = ChatContext::default();
+        assert_eq!(
+            chat_steps("@last ty", true, &none).unwrap(),
+            vec![key(&[Ctrl], "Enter"), key(&[], "End"), paste("ty"), enter.clone()]
+        );
+        assert_eq!(
+            chat_steps("/invite @last", true, &none).unwrap(),
+            vec![key(&[Ctrl], "Enter"), key(&[], "Home"), key(&[], "Delete"), paste("/invite "), enter.clone()]
+        );
+        assert_eq!(chat_steps("@last hi @last", true, &none), Err(ChatError::NoWhisper));
+        assert_eq!(chat_steps("in @area", true, &none), Err(ChatError::NoArea));
+    }
+
+    #[test]
     fn chat_stash_and_wheel_steps() {
         use rkl_platform::{Chord, KeyModifier::Ctrl};
         let enter = MacroStep::Press(Chord::new(&[], "Enter"));
+        let ctrl_a = MacroStep::Press(Chord::new(&[Ctrl], "KeyA"));
+        let paste = |s: &str| MacroStep::Paste(s.into());
+        let none = ChatContext::default();
         assert_eq!(
-            chat_steps("/hideout", true),
-            vec![enter.clone(), MacroStep::Paste("/hideout".into()), enter.clone()]
+            chat_steps("/hideout", true, &none).unwrap(),
+            vec![enter.clone(), ctrl_a.clone(), paste("/hideout"), enter.clone()]
         );
-        assert_eq!(chat_steps("@last ", false), vec![enter.clone(), MacroStep::Paste("@last ".into())]);
+        assert_eq!(chat_steps("hi", false, &none).unwrap(), vec![enter.clone(), ctrl_a.clone(), paste("hi")]);
+        assert_eq!(chat_steps(" && ", true, &none).unwrap(), vec![]);
         assert_eq!(
             stash_steps("\"Rarity: Rare\""),
             vec![
                 MacroStep::Press(Chord::new(&[Ctrl], "KeyF")),
                 MacroStep::Press(Chord::new(&[Ctrl], "KeyA")),
                 MacroStep::Paste("\"Rarity: Rare\"".into()),
-                enter
+                enter.clone()
             ]
         );
         assert_eq!(

@@ -234,6 +234,21 @@ describe("SettingsView", () => {
     expect(draft().chat.commands).toHaveLength(1);
   });
 
+  test("in game tab explains placeholders and finds the game log", async () => {
+    const user = userEvent.setup();
+    const found = "/games/Path of Exile 2/logs/Client.txt";
+    const { calls } = await mount({ find_game_log: (a) => (a?.configured === "" ? found : null) });
+    await user.click(screen.getByRole("tab", { name: "In game" }));
+    expect(screen.getByText("Your current area.")).toBeInTheDocument();
+    expect(screen.getByText(/@last ty&&\/kick @last/)).toBeInTheDocument();
+    expect(await screen.findByText(`Reading ${found}`)).toBeInTheDocument();
+    await user.type(screen.getByRole("textbox", { name: "Game log file (Client.txt)" }), "/nope");
+    expect(await screen.findByText(/No game log found/)).toBeInTheDocument();
+    expect(draft().chat).toEqual({ commands: draft().chat.commands, game_log: "/nope" });
+    expect(draft().chat.commands).toHaveLength(1);
+    expect(callsOf(calls, "find_game_log").at(-1)?.args).toEqual({ configured: "/nope" });
+  });
+
   test("in game hotkeys reject a chord another hotkey uses", async () => {
     const user = userEvent.setup();
     await mount();

@@ -72,6 +72,14 @@ pub struct PriceCheckResponse {
     pub filters: FilterSet,
 }
 
+/// The game log the chat placeholders would read for this `chat.game_log` value (empty: found
+/// automatically), or `None` when there is none.
+#[tauri::command]
+#[specta::specta]
+pub fn find_game_log(configured: String) -> Option<String> {
+    crate::gamelog::resolve(&configured).map(|p| p.display().to_string())
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn get_settings(state: State<'_, Arc<AppState>>) -> Settings {

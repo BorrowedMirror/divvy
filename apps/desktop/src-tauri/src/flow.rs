@@ -54,7 +54,12 @@ const MACRO_STEP_GAP: std::time::Duration = std::time::Duration::from_millis(40)
 
 /// Run a chat command / stash search in the game: only while the game has focus, one at a
 /// time, on a worker thread; the clipboard text it borrows for pasting is put back afterwards.
-pub fn run_macro(app: &AppHandle, steps: Vec<logic::MacroStep>) {
+/// `steps` runs on that thread too (it may read the game log); an error is recorded and nothing
+/// is pressed.
+pub fn run_macro<F>(app: &AppHandle, steps: F)
+where
+    F: FnOnce(&AppState) -> Result<Vec<logic::MacroStep>, String> + Send + 'static,
+{
     let app = app.clone();
     let _ = std::thread::Builder::new().name("rkl-macro".into()).spawn(move || {
         let state = app.state::<Arc<AppState>>();
@@ -62,6 +67,13 @@ pub fn run_macro(app: &AppHandle, steps: Vec<logic::MacroStep>) {
         if !logic::may_copy(platform.capabilities.window_tracking, || platform.window_tracker.is_game_focused()) {
             return;
         }
+        let steps = match steps(&state) {
+            Ok(steps) => steps,
+            Err(e) => {
+                state.record_error(format!("chat command: {e}"));
+                return;
+            }
+        };
         let Ok(_one_at_a_time) = state.macro_lock.lock() else { return };
         let previous = platform.clipboard.get_text().ok().flatten();
         let mut pasted = false;
@@ -96,6 +108,21 @@ pub fn run_macro(app: &AppHandle, steps: Vec<logic::MacroStep>) {
             }
         }
     });
+}
+
+/// A chat command's steps, with `@last` / `@area` read from the game log when it uses them.
+fn chat_macro(state: &AppState, text: &str, send: bool) -> Result<Vec<logic::MacroStep>, String> {
+    let (want_last, want_area) = logic::chat_placeholders(text);
+    let mut ctx = logic::ChatContext::default();
+    if (want_last || want_area)
+        && let Some(path) = crate::gamelog::resolve(&state.settings().chat.game_log)
+    {
+        match crate::gamelog::read_vars(&path, want_last, want_area) {
+            Ok(vars) => ctx = logic::ChatContext { last: vars.last_whisper, area: vars.area },
+            Err(e) => tracing::warn!("read {}: {e}", path.display()),
+        }
+    }
+    logic::chat_steps(text, send, &ctx).map_err(|e| e.to_string())
 }
 
 /// Full hotkey flow: copy from the game, then [`handle_item_text`].
@@ -693,13 +720,13 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
                 logic::HotkeyEffect::RunChat(i) => {
                     let cmd = state.settings().chat.commands.get(usize::from(i)).cloned();
                     if let Some(c) = cmd {
-                        run_macro(&app, logic::chat_steps(&c.text, c.send));
+                        run_macro(&app, move |state| chat_macro(state, &c.text, c.send));
                     }
                 }
                 logic::HotkeyEffect::RunStash(i) => {
                     let search = state.settings().stash.searches.get(usize::from(i)).cloned();
                     if let Some(s) = search {
-                        run_macro(&app, logic::stash_steps(&s.text));
+                        run_macro(&app, move |_| Ok(logic::stash_steps(&s.text)));
                     }
                 }
                 logic::HotkeyEffect::OpenTrade => {

@@ -281,7 +281,8 @@ function InGameTab({ s, update, errors }: TabProps) {
     const i = chords.indexOf(mine);
     return chords.filter((_, j) => j !== i);
   };
-  const setChat = (commands: Settings_Serialize["chat"]["commands"]) => update((d) => ({ ...d, chat: { commands } }));
+  const setChat = (commands: Settings_Serialize["chat"]["commands"]) => update((d) => ({ ...d, chat: { ...d.chat, commands } }));
+  const gameLog = useQuery({ queryKey: ["gameLog", s.chat.game_log], queryFn: () => commands.findGameLog(s.chat.game_log) });
   const setStash = (patch: Partial<Settings_Serialize["stash"]>) => update((d) => ({ ...d, stash: { ...d.stash, ...patch } }));
   const input = "min-w-0 flex-1 rounded-md border border-line bg-surface-2 px-2 py-1 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold";
   return (
@@ -289,6 +290,14 @@ function InGameTab({ s, update, errors }: TabProps) {
       <section aria-labelledby="chat-heading" className="flex flex-col gap-2">
         <h3 id="chat-heading" className="text-sm font-semibold">{t("ingame.chat")}</h3>
         <p className="text-xs text-muted">{t("ingame.chatHelp")}</p>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-md border border-line bg-surface-2 px-3 py-2 text-xs" aria-label={t("ingame.placeholders")}>
+          <dt className="font-mono text-gold">@last</dt>
+          <dd className="text-muted">{t("ingame.placeholderLast")}</dd>
+          <dt className="font-mono text-gold">@area</dt>
+          <dd className="text-muted">{t("ingame.placeholderArea")}</dd>
+          <dt className="font-mono text-gold">&amp;&amp;</dt>
+          <dd className="text-muted">{t("ingame.placeholderChain", { example: "@last ty&&/kick @last" })}</dd>
+        </dl>
         {s.chat.commands.map((c, i) => (
           <div key={i} className="flex flex-wrap items-center gap-2" data-testid="chat-command">
             <input
@@ -325,6 +334,22 @@ function InGameTab({ s, update, errors }: TabProps) {
             {t("ingame.addCommand")}
           </Button>
         </div>
+        <label className="flex flex-col gap-1 text-sm">
+          {t("ingame.gameLog")}
+          <input
+            className={input}
+            value={s.chat.game_log}
+            placeholder={t("ingame.gameLogAuto")}
+            spellCheck={false}
+            onChange={(e) => {
+              const game_log = e.currentTarget.value;
+              update((d) => ({ ...d, chat: { ...d.chat, game_log } }));
+            }}
+          />
+        </label>
+        <p className="text-xs text-muted" data-testid="game-log-status">
+          {gameLog.data ? t("ingame.gameLogFound", { path: gameLog.data }) : gameLog.isSuccess ? t("ingame.gameLogMissing") : null}
+        </p>
       </section>
       <section aria-labelledby="stash-heading" className="flex flex-col gap-2">
         <h3 id="stash-heading" className="text-sm font-semibold">{t("ingame.stash")}</h3>
