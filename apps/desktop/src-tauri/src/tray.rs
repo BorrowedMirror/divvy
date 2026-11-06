@@ -67,13 +67,16 @@ pub fn relabel(app: &AppHandle, language: &str) {
 pub fn build(app: &AppHandle, language: &str) -> tauri::Result<()> {
     let labels = tray_i18n::labels(language);
     let menu = menu(app, &labels)?;
-    let mut builder = TrayIconBuilder::with_id(TRAY_ID)
+    let builder = TrayIconBuilder::with_id(TRAY_ID)
         .tooltip(&labels.tooltip)
         .menu(&menu)
         .on_menu_event(|app, event| handle_menu(app, event.id().as_ref()));
-    if let Some(icon) = app.default_window_icon() {
-        builder = builder.icon(icon.clone());
-    }
+    // Dedicated small-size glyphs (assets/brand/build-icons.sh): the full app tile is too
+    // detailed at tray size. macOS gets a black template image that the menu bar recolours.
+    #[cfg(target_os = "macos")]
+    let builder = builder.icon(tauri::include_image!("icons/tray-template.png")).icon_as_template(true);
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.icon(tauri::include_image!("icons/tray.png"));
     builder.build(app)?;
     Ok(())
 }

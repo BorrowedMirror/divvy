@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "../../bindings";
+import { BrandMark } from "../../components/BrandMark";
 import { Button, cx } from "../../components/ui";
 import { keys, usePermissions, useRequestPermission, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
 import { toIpcError } from "../../lib/ipc";
@@ -25,9 +26,12 @@ export function OnboardingView({ onDone }: { onDone?: () => void }) {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl bg-bg p-6 text-fg">
-      <header className="mb-4">
-        <h1 className="text-lg font-semibold text-gold">{t("onboarding.title")}</h1>
-        <p className="mt-1 text-sm text-muted">{t("onboarding.intro")}</p>
+      <header className="mb-4 flex items-start gap-3">
+        <BrandMark size={40} />
+        <div>
+          <h1 className="text-lg font-semibold text-gold">{t("onboarding.title")}</h1>
+          <p className="mt-1 text-sm text-muted">{t("onboarding.intro")}</p>
+        </div>
       </header>
       {query.isPending && <p className="text-muted">{t("common.loading")}</p>}
       {query.isError && (

@@ -17,6 +17,7 @@ import type {
   ModFlag,
 } from "../../bindings";
 import { commands, events } from "../../bindings";
+import { BrandMark } from "../../components/BrandMark";
 import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
 import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
 import { useTauriEvent } from "../../hooks/useTauriEvent";
@@ -98,7 +99,10 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
   return (
     <Shell>
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gold">{t("settings.title")}</h1>
+        <div className="flex items-center gap-2">
+          <BrandMark size={24} />
+          <h1 className="text-lg font-semibold text-gold">{t("settings.title")}</h1>
+        </div>
         {onOpenDiagnostics && (
           <button type="button" className="text-sm text-muted underline hover:text-fg" onClick={onOpenDiagnostics}>
             {t("diagnostics.title")}

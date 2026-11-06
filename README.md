@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/rkl-mark.svg" width="128" height="128" alt="Rust King Ledger logo: a three-armed gold swirl ending in crab claws"></p>
+
 # Rust King Ledger (RKL)
 
 An open-source price-check overlay for **Path of Exile 2**. Rust + Tauri 2 + React.
