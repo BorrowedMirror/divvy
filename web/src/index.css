@@ -82,7 +82,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Settings window bound over the game: transparent window, dimmed backdrop, centred card. */
+/* Settings window bound over the game: transparent window, dimmed backdrop, top-anchored card. */
 html[data-overlay="1"],
 html[data-overlay="1"] body {
   background: transparent;
@@ -94,13 +94,14 @@ html[data-overlay="1"] .k-shell {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  /* Top-anchored: switching tabs never moves the header or tabs; only the bottom edge moves. */
+  align-items: flex-start;
   justify-content: center;
-  padding: 4vh 4vw;
+  padding: 6vh 4vw 4vh;
   background: rgb(0 0 0 / 0.6);
 }
-/* The card sizes to its content (up to the screen) and keeps its border on every side: only
-   the inner body scrolls, so a scrollbar never runs over the card's edge. */
+/* The card sizes to the current tab, so nothing scrolls while the screen has room; past the
+   screen height only the inner body scrolls, so a scrollbar never runs over the card's edge. */
 html[data-overlay="1"] .k-card {
   position: relative;
   display: flex;
@@ -114,12 +115,21 @@ html[data-overlay="1"] .k-card {
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.7);
 }
 html[data-overlay="1"] .k-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
-html[data-overlay="1"] main,
+html[data-overlay="1"] main {
+  min-height: 0;
+}
 html[data-overlay="1"] [data-testid="settings-root"] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
   min-height: 0;
 }
 html[data-overlay="1"] .k-overlay-close {

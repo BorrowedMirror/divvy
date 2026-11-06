@@ -104,7 +104,8 @@ export function isGameOverlay(): boolean {
 /**
  * Settings-window chrome. In overlay mode (`html[data-overlay="1"]`, set by Rust when the
  * window covers the game) the page is a transparent, dimmed backdrop with the content in a
- * centred card; Esc or a click on the backdrop closes it. Otherwise it is a plain page.
+ * top-anchored card that sizes to the current tab; Esc or a click on the backdrop closes it.
+ * Otherwise it is a plain page.
  */
 function SettingsShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
