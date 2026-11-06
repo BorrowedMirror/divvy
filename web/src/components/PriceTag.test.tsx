@@ -19,6 +19,7 @@ test("shows the amount with the currency icon, named for screen readers", async 
   renderWithProviders(<Harness currency="divine" />);
   const img = await screen.findByRole("img", { name: "Divine Orb" });
   expect(img).toHaveAttribute("src", divine.icon);
+  expect(img).toHaveAttribute("width", "22");
   expect(screen.getByTestId("tag")).toHaveTextContent("2");
   expect(screen.getByTitle("Divine Orb")).toBeInTheDocument();
 });

@@ -26,7 +26,16 @@ export function useCurrencyIcons(): Map<string, CurrencyIcon> {
  * site itself uses; nothing is bundled). Its name is the alt text and tooltip. Without an icon,
  * or if it fails to load, the short currency label is shown instead.
  */
-export function PriceTag({ price, icons }: { price: Price | null | undefined; icons: Map<string, CurrencyIcon> }) {
+export function PriceTag({
+  price,
+  icons,
+  size = 22,
+}: {
+  price: Price | null | undefined;
+  icons: Map<string, CurrencyIcon>;
+  /** Icon edge in px (the CDN images are larger, so they stay sharp). */
+  size?: number;
+}) {
   const { t, i18n } = useTranslation();
   const [broken, setBroken] = useState(false);
   if (!price) return <>—</>;
@@ -40,9 +49,10 @@ export function PriceTag({ price, icons }: { price: Price | null | undefined; ic
       <img
         src={icon.icon}
         alt={icon.name}
-        width={18}
-        height={18}
-        className="inline-block h-[18px] w-[18px] object-contain"
+        width={size}
+        height={size}
+        style={{ width: size, height: size }}
+        className="inline-block object-contain"
         loading="lazy"
         referrerPolicy="no-referrer"
         onError={() => setBroken(true)}
