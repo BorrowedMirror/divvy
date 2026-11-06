@@ -134,7 +134,7 @@ function SettingsShell({ children }: { children: ReactNode }) {
         >
           ×
         </button>
-        {children}
+        <div className="k-card-body">{children}</div>
       </div>
     </div>
   );

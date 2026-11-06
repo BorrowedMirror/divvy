@@ -99,22 +99,34 @@ html[data-overlay="1"] .k-shell {
   padding: 4vh 4vw;
   background: rgb(0 0 0 / 0.6);
 }
+/* The card sizes to its content (up to the screen) and keeps its border on every side: only
+   the inner body scrolls, so a scrollbar never runs over the card's edge. */
 html[data-overlay="1"] .k-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: min(960px, 100%);
   max-height: 100%;
-  overflow: auto;
+  overflow: hidden;
   background: var(--k-bg);
   border: 1px solid color-mix(in srgb, var(--k-gold) 35%, transparent);
   border-radius: 0.75rem;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.7);
 }
+html[data-overlay="1"] .k-card-body {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+html[data-overlay="1"] main,
+html[data-overlay="1"] [data-testid="settings-root"] {
+  min-height: 0;
+}
 html[data-overlay="1"] .k-overlay-close {
   display: block;
-  position: sticky;
+  position: absolute;
   top: 0.5rem;
-  float: right;
-  margin: 0.5rem 0.75rem 0 0;
+  right: 0.75rem;
   width: 2rem;
   height: 2rem;
   border-radius: 0.375rem;
