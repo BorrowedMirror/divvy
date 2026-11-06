@@ -127,6 +127,13 @@ pub fn apply_panel_scale(app: &AppHandle, scale: f64) {
     }
 }
 
+/// Round a card-sized panel window of `width` x `height` logical px.
+pub fn round_card(win: &tauri::WebviewWindow, width: f64, height: f64, zoom: f64) {
+    let scale = win.scale_factor().unwrap_or(1.0);
+    let px = |v: f64| (v * scale).round().max(0.0) as u32;
+    crate::overlay::round_window(win, (px(width), px(height)), px(crate::overlay::CARD_RADIUS * zoom));
+}
+
 /// Lay the price panel out with its card at `card` (screen, physical px).
 ///
 /// Unpinned over a tracked game window, the window covers the game (dimmed backdrop, the card
@@ -144,10 +151,12 @@ pub fn layout_overlay(app: &AppHandle, state: &AppState, win: &tauri::WebviewWin
     let layout = if let Some(g) = game {
         cover_game(win, g.rect);
         let (x, y) = logic::card_in_window(card, g.rect, scale, cfg!(target_os = "macos"));
+        crate::overlay::round_window(win, (0, 0), 0);
         // The web view is zoomed by the panel scale: its CSS pixels are `zoom` logical pixels.
         OverlayLayout { cover: true, x: x / zoom, y: y / zoom }
     } else {
         let _ = win.set_size(tauri::LogicalSize::new(crate::state::CARD_WIDTH * zoom, card_height));
+        round_card(win, crate::state::CARD_WIDTH * zoom, card_height, zoom);
         let _ = win.set_position(PhysicalPosition::new(card.0, card.1));
         OverlayLayout { cover: false, x: 0.0, y: 0.0 }
     };

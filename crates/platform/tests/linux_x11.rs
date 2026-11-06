@@ -294,6 +294,23 @@ fn child() {
     // Active window probe.
     assert!(rkl_platform::backend::x11::active_window().is_ok());
 
+    // Rounded window shape: corners are cut from the bounding region, and radius 0 clears it.
+    {
+        use x11rb::protocol::shape::{ConnectionExt as _, SK};
+        let shaped = create_window(&conn, root, Some("shaped"), 40, 40);
+        conn.flush().unwrap();
+        rkl_platform::backend::x11::set_rounded_shape(u64::from(shaped), 100, 100, 10).unwrap();
+        let rects = conn.shape_get_rectangles(shaped, SK::BOUNDING).unwrap().reply().unwrap().rectangles;
+        let covers = |x: i16, y: i16| {
+            rects.iter().any(|r| x >= r.x && x < r.x + r.width as i16 && y >= r.y && y < r.y + r.height as i16)
+        };
+        assert!(!covers(0, 0) && covers(50, 50) && covers(10, 0), "{rects:?}");
+        rkl_platform::backend::x11::set_rounded_shape(u64::from(shaped), 100, 100, 0).unwrap();
+        let extents = conn.shape_query_extents(shaped).unwrap().reply().unwrap();
+        assert!(!extents.bounding_shaped, "radius 0 removes the shape");
+        conn.destroy_window(shaped).unwrap();
+    }
+
     // Destroying the game window -> Lost.
     conn.destroy_window(game).unwrap();
     conn.flush().unwrap();

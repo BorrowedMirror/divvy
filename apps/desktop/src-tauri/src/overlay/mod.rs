@@ -62,3 +62,17 @@ pub fn refocus_game(owner: Option<u64>) {
     #[cfg(not(all(target_os = "linux", feature = "native")))]
     let _ = owner;
 }
+
+/// Corner radius of the price card (CSS px), matching `rounded-xl` in the web view.
+pub const CARD_RADIUS: f64 = 12.0;
+
+/// Shape a card-sized window as a rounded rectangle (`radius` 0 clears it), so compositor
+/// shadows follow the rounded card. X11 only; elsewhere the OS handles window shadows.
+pub fn round_window(window: &tauri::WebviewWindow, size: (u32, u32), radius: u32) {
+    #[cfg(target_os = "linux")]
+    if let Err(e) = linux::round_window(window, size, radius) {
+        tracing::debug!("round window: {e}");
+    }
+    #[cfg(not(target_os = "linux"))]
+    let _ = (window, size, radius);
+}

@@ -164,3 +164,80 @@ pub fn disable_compositor_shadow(window: u64) -> Result<(), PlatformError> {
         .check()
         .map_err(x_err)
 }
+
+/// Row spans `(x, y, width, height)` covering a `width` x `height` rectangle with corners
+/// rounded to `radius` (clamped to half the shorter side): one span per corner row plus the
+/// straight middle band.
+pub fn rounded_rect_spans(width: u32, height: u32, radius: u32) -> Vec<(i16, i16, u16, u16)> {
+    let (w, h) = (width.min(u32::from(u16::MAX)), height.min(u32::from(u16::MAX)));
+    let r = radius.min(w / 2).min(h / 2);
+    if w == 0 || h == 0 {
+        return Vec::new();
+    }
+    let span = |x: u32, y: u32, sw: u32, sh: u32| (x as i16, y as i16, sw as u16, sh as u16);
+    let mut out = Vec::with_capacity(2 * r as usize + 1);
+    let rf = f64::from(r);
+    for row in 0..r {
+        // Distance from the corner circle's centre to the middle of this row.
+        let dy = rf - f64::from(row) - 0.5;
+        let inset = (rf - (rf * rf - dy * dy).max(0.0).sqrt()).round() as u32;
+        let inset = inset.min(w / 2);
+        out.push(span(inset, row, w - 2 * inset, 1));
+        out.push(span(inset, h - 1 - row, w - 2 * inset, 1));
+    }
+    if h > 2 * r {
+        out.push(span(0, r, w, h - 2 * r));
+    }
+    out
+}
+
+/// Shape `window` as a rounded rectangle (bounding and input), so compositors draw their shadow
+/// around the rounded card instead of the window's square corners. `radius` 0 clears the shape.
+pub fn set_rounded_shape(window: u64, width: u32, height: u32, radius: u32) -> Result<(), PlatformError> {
+    use x11rb::protocol::shape::{ConnectionExt as _, SO};
+    use x11rb::protocol::xproto::{ClipOrdering, Rectangle};
+    let window = u32::try_from(window).map_err(|_| PlatformError::Backend("x11 window id out of range".into()))?;
+    let conn = XConn::connect(None)?;
+    let c = &conn.conn;
+    if radius == 0 {
+        return c.shape_mask(SO::SET, SK::BOUNDING, window, 0, 0, x11rb::NONE).map_err(x_err)?.check().map_err(x_err);
+    }
+    let rects: Vec<Rectangle> = rounded_rect_spans(width, height, radius)
+        .into_iter()
+        .map(|(x, y, width, height)| Rectangle { x, y, width, height })
+        .collect();
+    c.shape_rectangles(SO::SET, SK::BOUNDING, ClipOrdering::UNSORTED, window, 0, 0, &rects)
+        .map_err(x_err)?
+        .check()
+        .map_err(x_err)
+}
+
+#[cfg(test)]
+mod shape_tests {
+    use super::rounded_rect_spans;
+
+    fn covered(spans: &[(i16, i16, u16, u16)], x: i16, y: i16) -> bool {
+        spans.iter().any(|&(sx, sy, w, h)| x >= sx && x < sx + w as i16 && y >= sy && y < sy + h as i16)
+    }
+
+    #[test]
+    fn rounded_spans_cut_the_corners_only() {
+        let s = rounded_rect_spans(420, 600, 12);
+        assert!(!covered(&s, 0, 0) && !covered(&s, 419, 0) && !covered(&s, 0, 599) && !covered(&s, 419, 599));
+        assert!(covered(&s, 12, 0) && covered(&s, 0, 12) && covered(&s, 210, 300) && covered(&s, 407, 599));
+        assert!(covered(&s, 0, 300) && covered(&s, 419, 300), "straight edges are full");
+        // Every pixel row is covered exactly once.
+        for y in 0..600 {
+            let rows: usize = s.iter().filter(|&&(_, sy, _, h)| y >= sy && y < sy + h as i16).count();
+            assert_eq!(rows, 1, "row {y}");
+        }
+    }
+
+    #[test]
+    fn degenerate_sizes() {
+        assert!(rounded_rect_spans(0, 10, 4).is_empty());
+        assert_eq!(rounded_rect_spans(10, 10, 0), vec![(0, 0, 10, 10)]);
+        let tiny = rounded_rect_spans(6, 6, 50);
+        assert_eq!(tiny.len(), 6, "radius clamps to half the size: {tiny:?}");
+    }
+}

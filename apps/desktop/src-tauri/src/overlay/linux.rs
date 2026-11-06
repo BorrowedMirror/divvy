@@ -118,12 +118,7 @@ pub fn raise_above(window: &tauri::WebviewWindow, owner: Option<u64>, focus: boo
     let display = window.display_handle().map_err(|e| format!("display handle: {e}"))?.as_raw();
     let styler = rkl_platform::backend::x11::overlay(handle, display).map_err(|e| e.to_string())?;
     // No compositor drop shadow around the transparent window edge (picom draws one by default).
-    let id = match handle {
-        raw_window_handle::RawWindowHandle::Xlib(h) => Some(h.window),
-        raw_window_handle::RawWindowHandle::Xcb(h) => Some(u64::from(h.window.get())),
-        _ => None,
-    };
-    if let Some(id) = id
+    if let Some(id) = x11_id(handle)
         && let Err(e) = rkl_platform::backend::x11::disable_compositor_shadow(id)
     {
         tracing::debug!("disable compositor shadow: {e}");
@@ -133,6 +128,26 @@ pub fn raise_above(window: &tauri::WebviewWindow, owner: Option<u64>, focus: boo
         styler.activate().map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+fn x11_id(handle: raw_window_handle::RawWindowHandle) -> Option<u64> {
+    match handle {
+        raw_window_handle::RawWindowHandle::Xlib(h) => Some(h.window),
+        raw_window_handle::RawWindowHandle::Xcb(h) => Some(u64::from(h.window.get())),
+        _ => None,
+    }
+}
+
+/// X11: shape `window` as a rounded rectangle of `size` (physical px) with corner `radius`
+/// (physical px; 0 removes the shape). No-op on the Wayland-native backend.
+pub fn round_window(window: &tauri::WebviewWindow, size: (u32, u32), radius: u32) -> Result<(), String> {
+    use raw_window_handle::HasWindowHandle;
+    if backend() == BackendKind::Wayland {
+        return Ok(());
+    }
+    let handle = window.window_handle().map_err(|e| format!("window handle: {e}"))?.as_raw();
+    let Some(id) = x11_id(handle) else { return Ok(()) };
+    rkl_platform::backend::x11::set_rounded_shape(id, size.0, size.1, radius).map_err(|e| e.to_string())
 }
 
 #[cfg(test)]

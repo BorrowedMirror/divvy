@@ -121,8 +121,8 @@ export function OverlayView() {
     <div
       ref={fitRef}
       data-testid="overlay-card"
-      // As a card-sized window (pinned) the card fills the window exactly: transparent padding
-      // around it would show compositor drop shadows (picom) as a grey band.
+      // As a card-sized window (pinned) the card fills the window exactly and the window is
+      // shaped to its rounded corners, so compositor shadows (picom) follow the card.
       className={layout.cover ? "absolute w-[420px] p-1.5" : "flex w-full items-start"}
       style={layout.cover ? cardPosition(layout, cardHeight) : undefined}
     >
@@ -133,8 +133,9 @@ export function OverlayView() {
         onMouseEnter={layout.cover ? undefined : autoHide.onMouseEnter}
         onMouseLeave={layout.cover ? undefined : autoHide.onMouseLeave}
         className={cx(
-          "flex w-full max-w-[420px] flex-col gap-3 border border-gold/30 bg-surface p-3 text-fg",
-          layout.cover && "rounded-xl shadow-2xl",
+          "flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg",
+          // A card-sized window gets its rounded shape (and shadow) from the window itself.
+          layout.cover && "shadow-2xl",
         )}
       >
         <header className="flex items-start gap-2">

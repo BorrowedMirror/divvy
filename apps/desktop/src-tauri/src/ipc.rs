@@ -298,6 +298,7 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
         return Ok(());
     }
     win.set_size(tauri::LogicalSize::new(width, h)).map_err(internal)?;
+    flow::round_card(&win, width, h, zoom);
     if let Some(m) = monitor
         && let Ok(pos) = win.outer_position()
     {

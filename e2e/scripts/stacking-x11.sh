@@ -126,6 +126,20 @@ xdotool mousemove --window "$OW" 100 100; sleep 0.8
 echo "ok: hovering the pinned panel focuses it even while the game holds the pointer"
 xprop -id "$OW" _COMPTON_SHADOW | grep -q "= 0" || fail "the panel should ask compositors for no drop shadow ($(xprop -id "$OW" _COMPTON_SHADOW))"
 echo "ok: the panel opts out of compositor drop shadows"
+python3 -I - "$OW" <<'PY' || fail "the pinned panel window is not shaped with rounded corners"
+import ctypes, ctypes.util, sys
+x = ctypes.CDLL(ctypes.util.find_library("X11")); xe = ctypes.CDLL(ctypes.util.find_library("Xext"))
+x.XOpenDisplay.restype = ctypes.c_void_p; d = x.XOpenDisplay(None)
+class R(ctypes.Structure): _fields_ = [("x", ctypes.c_short), ("y", ctypes.c_short), ("w", ctypes.c_ushort), ("h", ctypes.c_ushort)]
+xe.XShapeGetRectangles.restype = ctypes.POINTER(R)
+xe.XShapeGetRectangles.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+n, o = ctypes.c_int(), ctypes.c_int()
+rects = xe.XShapeGetRectangles(d, int(sys.argv[1]), 0, ctypes.byref(n), ctypes.byref(o))
+spans = [(rects[i].x, rects[i].y, rects[i].w, rects[i].h) for i in range(n.value)]
+corner = any(x0 <= 0 < x0 + w and y0 <= 0 < y0 + h for x0, y0, w, h in spans)
+sys.exit(0 if n.value > 1 and not corner else 1)
+PY
+echo "ok: the pinned panel window has rounded corners"
 kill $GP 2>/dev/null || true
 hook hide >/dev/null
 
