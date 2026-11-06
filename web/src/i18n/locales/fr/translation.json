@@ -31,7 +31,8 @@
     "statMax": "Maximum pour {{stat}}",
     "search": "Rechercher",
     "loading": "Recherche…",
-    "mouseCaptured": "Path of Exile 2 capture la souris, ce panneau ne peut donc pas être cliqué. Ouvrez Diagnostics depuis le menu de RKL dans la zone de notification et désactivez la capture de la souris par Proton."
+    "mouseCaptured": "Path of Exile 2 capture la souris, ce panneau ne peut donc pas être cliqué. Ouvrez Diagnostics depuis le menu de RKL dans la zone de notification et désactivez la capture de la souris par Proton.",
+    "tierTitle": "Palier de mod {{tier}} (1 est la meilleure plage de valeurs)"
   },
   "item": {
     "rarityLabel": "Rareté :",
@@ -87,7 +88,20 @@
     "seller": "Vendeur",
     "age": "Publiée",
     "unknownSeller": "inconnu",
-    "openTrade": "Ouvrir l'échange"
+    "openTrade": "Ouvrir l'échange",
+    "column": {
+      "seller": "Vendeur",
+      "item_level": "Niveau de l'objet",
+      "stock": "Stock",
+      "listed": "Publiée"
+    },
+    "whisper": "Chuchoter",
+    "copyWhisper": "Copier le chuchotement pour {{seller}}",
+    "whisperCopied": "Chuchotement copié",
+    "whisperCopiedHelp": "Collez-le dans le chat du jeu avec Ctrl+V.",
+    "sellerCount_one": "{{count}} annonce de ce vendeur",
+    "sellerCount_many": "{{count}} d'annonces de ce vendeur",
+    "sellerCount_other": "{{count}} annonces de ce vendeur"
   },
   "age": {
     "now": "à l'instant"
@@ -147,7 +161,12 @@
     "loadFailed": "Impossible de charger les paramètres.",
     "fixErrors": "Corrigez les champs en surbrillance avant d'enregistrer.",
     "externalChange": "Les paramètres ont été modifiés ailleurs.",
-    "reload": "Charger la dernière version"
+    "reload": "Charger la dernière version",
+    "listingCount": "Annonces à récupérer",
+    "convertPrices": "Comparer les prix entre devises",
+    "convertPricesHelp": "Récupère les taux de change depuis poe2scout afin que les annonces en exalted, chaos et divine soient comptées ensemble et que chacune affiche sa valeur en divine ou en exalted.",
+    "groupBySeller": "Regrouper les annonces par vendeur",
+    "listingColumns": "Colonnes des annonces"
   },
   "theme": {
     "system": "Système",
@@ -179,7 +198,8 @@
     "needsModifier": "Ajoutez Ctrl, Alt, Maj ou Méta (seules les touches F fonctionnent seules).",
     "rebindFailed": "Impossible d'attribuer ce raccourci : {{message}}",
     "advancedCopy": "Copie avancée de l'objet",
-    "advancedCopyHelp": "Utilise Ctrl+Alt+C pour obtenir les paliers et plages des modificateurs."
+    "advancedCopyHelp": "Utilise Ctrl+Alt+C pour obtenir les paliers et plages des modificateurs.",
+    "open_trade": "Ouvrir sur le site d'échange"
   },
   "validation": {
     "widen": "Saisissez une valeur entre 0 et 100.",

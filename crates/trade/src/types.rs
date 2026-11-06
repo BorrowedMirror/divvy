@@ -36,6 +36,9 @@ pub struct FetchEntry {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FetchListing {
     pub indexed: Option<String>,
+    /// Ready-made whisper ("@Seller Hi, I would like to buy ...").
+    #[serde(default)]
+    pub whisper: Option<String>,
     pub price: Option<FetchPrice>,
     pub account: Option<FetchAccount>,
 }

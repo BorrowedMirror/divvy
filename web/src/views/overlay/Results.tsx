@@ -1,19 +1,32 @@
+import { Toast } from "@base-ui/react/toast";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { IpcError_Serialize, PriceSummary_Serialize } from "../../bindings";
+import type { IpcError_Serialize, ListingColumn, Listing_Serialize, PriceSummary_Serialize } from "../../bindings";
 import { commands } from "../../bindings";
 import { ExternalIcon } from "../../components/icons";
 import { PriceTag, useCurrencyIcons } from "../../components/PriceTag";
 import { useCommand } from "../../hooks/useCommand";
+import { cx } from "../../components/ui";
+import { useSettingsQuery } from "../../hooks/queries";
+import type { Age } from "../../lib/format";
 import { ageOf, formatAge, formatDateTime } from "../../lib/format";
+import { groupBySeller, ungrouped } from "../../lib/listings";
 
 export function Results({ summary, now: nowProp }: { summary: PriceSummary_Serialize; now?: number }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [mountedAt] = useState(() => Date.now());
   const now = nowProp ?? mountedAt;
   const icons = useCurrencyIcons();
   const tradeUrl = summary.trade_url;
   const command = useCommand();
+  const toast = Toast.useToastManager();
+  const settings = useSettingsQuery().data;
+  const columns = settings?.overlay.listing_columns ?? DEFAULT_COLUMNS;
+  const rows = (settings?.overlay.group_by_seller ?? true) ? groupBySeller(summary.listings) : ungrouped(summary.listings);
+  const copyWhisper = async (text: string) => {
+    const res = await command(commands.copyText(text));
+    if (res.status === "ok") toast.add({ title: t("results.whisperCopied"), description: t("results.whisperCopiedHelp"), timeout: 3000 });
+  };
 
   return (
     <section aria-labelledby="results-heading" className="flex flex-col gap-2">
@@ -66,30 +79,46 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
                   <th scope="col" className="px-2 py-1 text-left font-medium">
                     {t("results.price")}
                   </th>
-                  <th scope="col" className="px-2 py-1 text-left font-medium">
-                    {t("results.seller")}
-                  </th>
-                  <th scope="col" className="px-2 py-1 text-right font-medium">
-                    {t("results.age")}
+                  {columns.map((c) => (
+                    <th key={c} scope="col" className={cx("px-2 py-1 font-medium", c === "listed" ? "text-right" : "text-left")}>
+                      {t(`results.column.${c}`)}
+                    </th>
+                  ))}
+                  <th scope="col" className="w-7 px-1 py-1">
+                    <span className="sr-only">{t("results.whisper")}</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {summary.listings.map((l) => {
+                {rows.map(({ listing: l, count }) => {
                   const age = ageOf(l.indexed, now);
                   return (
-                    <tr key={l.id} className="border-t border-line/60">
+                    <tr key={l.id} className="border-t border-line/60" data-testid="listing">
                       <td className="px-2 py-1 tabular-nums">
-                        <PriceTag price={l.price} icons={icons} />
+                        <span className="flex flex-wrap items-center gap-x-1.5">
+                          <PriceTag price={l.price} icons={icons} />
+                          {l.equivalent && (
+                            <span className="text-[10px] text-muted" data-testid="equivalent">
+                              ≈ <PriceTag price={l.equivalent} icons={icons} size={16} />
+                            </span>
+                          )}
+                        </span>
                       </td>
-                      <td className="max-w-32 truncate px-2 py-1" title={l.seller ?? undefined}>
-                        {l.online && (
-                          <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+                      {columns.map((c) => (
+                        <ListingCell key={c} column={c} listing={l} count={count} age={age} />
+                      ))}
+                      <td className="px-1 py-1 text-right">
+                        {l.whisper && (
+                          <button
+                            type="button"
+                            className="rounded p-0.5 text-muted hover:bg-gold/10 hover:text-gold outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                            aria-label={t("results.copyWhisper", { seller: l.seller ?? t("results.unknownSeller") })}
+                            title={t("results.copyWhisper", { seller: l.seller ?? t("results.unknownSeller") })}
+                            onClick={() => void copyWhisper(l.whisper ?? "")}
+                          >
+                            <ChatIcon />
+                          </button>
                         )}
-                        {l.seller ?? t("results.unknownSeller")}
-                      </td>
-                      <td className="px-2 py-1 text-right text-muted" title={formatDateTime(l.indexed, i18n.language) ?? undefined}>
-                        {age ? (formatAge(age, i18n.language) ?? t("age.now")) : "—"}
                       </td>
                     </tr>
                   );
@@ -100,6 +129,44 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
         </>
       )}
     </section>
+  );
+}
+
+const DEFAULT_COLUMNS: ListingColumn[] = ["seller", "listed"];
+
+function ListingCell({ column, listing: l, count, age }: { column: ListingColumn; listing: Listing_Serialize; count: number; age: Age | null }) {
+  const { t, i18n } = useTranslation();
+  switch (column) {
+    case "seller":
+      return (
+        <td className="max-w-32 truncate px-2 py-1" title={l.seller ?? undefined}>
+          {l.online && <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />}
+          {l.seller ?? t("results.unknownSeller")}
+          {count > 1 && (
+            <span className="ml-1 rounded bg-surface-3 px-1 text-[10px] text-muted" title={t("results.sellerCount", { count })}>
+              ×{count}
+            </span>
+          )}
+        </td>
+      );
+    case "item_level":
+      return <td className="px-2 py-1 tabular-nums">{l.item_level ?? "—"}</td>;
+    case "stock":
+      return <td className="px-2 py-1 tabular-nums">{l.stack_size ?? "—"}</td>;
+    case "listed":
+      return (
+        <td className="px-2 py-1 text-right text-muted" title={formatDateTime(l.indexed, i18n.language) ?? undefined}>
+          {age ? (formatAge(age, i18n.language) ?? t("age.now")) : "—"}
+        </td>
+      );
+  }
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" strokeLinejoin="round" />
+    </svg>
   );
 }
 

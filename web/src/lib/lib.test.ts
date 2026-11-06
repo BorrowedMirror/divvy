@@ -53,18 +53,18 @@ describe("rewiden", () => {
   });
 
   test("rewidenStat leaves stats without values alone", () => {
-    const s = { stat_id: "x", text: "x", enabled: true, min: 3, max: null, item_values: [] };
+    const s = { stat_id: "x", text: "x", enabled: true, min: 3, max: null, item_values: [], tier: null };
     expect(rewidenStat(s, 10)).toBe(s);
   });
 
   test("reduced (negative) stats get an upper bound, mirroring Rust", () => {
-    const s = { stat_id: "x", text: "30% reduced Attribute Requirements", enabled: true, min: -33, max: null, item_values: [-30] };
+    const s = { stat_id: "x", text: "30% reduced Attribute Requirements", enabled: true, min: -33, max: null, item_values: [-30], tier: null };
     expect(rewidenStat(s, 10)).toMatchObject({ min: null, max: -27 });
     expect(rewidenStat(s, 0)).toMatchObject({ min: null, max: -30 });
   });
 
   test("rewidenStat clears an explicit max and never exceeds the value", () => {
-    const s = { stat_id: "x", text: "x", enabled: true, min: 1, max: 50, item_values: [5.5] };
+    const s = { stat_id: "x", text: "x", enabled: true, min: 1, max: 50, item_values: [5.5], tier: null };
     expect(rewidenStat(s, 10)).toMatchObject({ min: 4.95, max: null });
     expect(widenValue([3, 4], 0)).toBe(3.5);
   });

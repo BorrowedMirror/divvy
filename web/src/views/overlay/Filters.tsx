@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { FilterSet_Serialize, ParsedItem_Serialize } from "../../bindings";
-import { CheckboxField, NumberInput, SelectField } from "../../components/ui";
+import { CheckboxField, NumberInput, SelectField, cx } from "../../components/ui";
 import { type RangeKey, useOverlayStore } from "../../stores/overlay";
 
 function formatValues(values: (number | null)[]): string {
@@ -27,7 +27,23 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
             <CheckboxField
               checked={s.enabled}
               onChange={(enabled) => updateStat(i, { enabled })}
-              label={<span className={s.enabled ? "text-fg" : "text-muted"}>{s.text}</span>}
+              label={
+                <span className={s.enabled ? "text-fg" : "text-muted"}>
+                  {s.tier !== null && (
+                    <span
+                      className={cx(
+                        "mr-1.5 inline-block rounded px-1 py-px align-[1px] font-mono text-[10px] leading-none",
+                        s.tier <= 2 ? "bg-gold/20 text-gold" : "bg-surface-3 text-muted",
+                      )}
+                      title={t("overlay.tierTitle", { tier: s.tier })}
+                      data-testid="mod-tier"
+                    >
+                      T{s.tier}
+                    </span>
+                  )}
+                  {s.text}
+                </span>
+              }
             />
             {s.item_values.length > 0 && (
               <span className="ml-6 block text-[10px] text-muted">

@@ -127,3 +127,16 @@ fn global_spirit_on_amulets_stays_global() {
     StatMatcher::new(&data).match_item(&mut amulet);
     assert_eq!(stat_of(&amulet, "20% increased Spirit"), Some("explicit.stat_1416406066"));
 }
+
+#[test]
+fn stat_filters_carry_mod_tiers_from_advanced_copies() {
+    use rkl_core::query::{OnlineStatus, QueryOptions, build_filters};
+    let sceptre = matched("weapon/rare-sceptre-spirit-advanced");
+    let opts =
+        QueryOptions { league: "Standard".into(), status: OnlineStatus::Any, widen_pct: 10.0, enable_all_stats: false };
+    let f = build_filters(&sceptre, &opts);
+    let tier = |text: &str| f.stats.iter().find(|s| s.text == text).map(|s| s.tier);
+    assert_eq!(tier("30% reduced Attribute Requirements"), Some(Some(2)));
+    assert_eq!(tier("Allies in your Presence Regenerate 2.2 Life per second"), Some(Some(9)));
+    assert_eq!(tier("68% increased Spirit"), Some(None), "summed prefix + desecrated row");
+}

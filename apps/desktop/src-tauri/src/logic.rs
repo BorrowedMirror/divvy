@@ -250,6 +250,7 @@ pub enum HotkeyEffect {
     HideOverlay,
     ShowSettings,
     HideSettings,
+    OpenTrade,
 }
 
 pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, settings_open: bool) -> HotkeyEffect {
@@ -260,6 +261,7 @@ pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, set
         A::PriceCheckPinned => HotkeyEffect::PriceCheck { pinned: true },
         A::OpenSettings if settings_open => HotkeyEffect::HideSettings,
         A::OpenSettings => HotkeyEffect::ShowSettings,
+        A::OpenTrade => HotkeyEffect::OpenTrade,
     }
 }
 
@@ -309,6 +311,7 @@ mod tests {
         assert_eq!(hotkey_effect(A::PriceCheckPinned, true, false), HotkeyEffect::HideOverlay);
         assert_eq!(hotkey_effect(A::OpenSettings, true, false), HotkeyEffect::ShowSettings);
         assert_eq!(hotkey_effect(A::OpenSettings, false, true), HotkeyEffect::HideSettings);
+        assert_eq!(hotkey_effect(A::OpenTrade, true, true), HotkeyEffect::OpenTrade);
     }
 
     #[test]

@@ -363,6 +363,8 @@ pub fn fetch_listing(e: &FetchEntry) -> Option<Listing> {
         indexed: e.listing.indexed.clone(),
         item_level: as_u32("ilvl"),
         stack_size: as_u32("stackSize"),
+        whisper: e.listing.whisper.clone().filter(|w| !w.trim().is_empty()),
+        equivalent: None,
     })
 }
 
@@ -381,6 +383,8 @@ pub fn exchange_listing(e: &ExchangeEntry) -> Option<Listing> {
         indexed: e.listing.indexed.clone(),
         item_level: None,
         stack_size: offer.item.stock,
+        whisper: None,
+        equivalent: None,
     })
 }
 

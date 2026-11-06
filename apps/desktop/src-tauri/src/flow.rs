@@ -407,6 +407,7 @@ pub fn register_hotkeys(state: &AppState, settings: &Settings) -> Result<(), Ipc
         (HotkeyAction::PriceCheck, settings.hotkeys.price_check.clone()),
         (HotkeyAction::PriceCheckPinned, settings.hotkeys.price_check_pinned.clone()),
         (HotkeyAction::OpenSettings, settings.hotkeys.open_settings.clone()),
+        (HotkeyAction::OpenTrade, settings.hotkeys.open_trade.clone()),
     ]
     .into_iter()
     .filter(|(_, chord)| !chord.is_unbound())
@@ -474,6 +475,17 @@ pub fn spawn_hotkey_loop(app: &AppHandle, state: &AppState) {
                 }
                 logic::HotkeyEffect::HideSettings => {
                     let _ = hide_settings(&app);
+                }
+                logic::HotkeyEffect::OpenTrade => {
+                    let url = state.last_price.lock().ok().and_then(|p| p.as_ref().and_then(|s| s.trade_url.clone()));
+                    match url {
+                        Some(url) => {
+                            if let Err(e) = open_trade(&app, &url) {
+                                state.record_error(&e);
+                            }
+                        }
+                        None => state.record_error("open on trade site: no price check with a trade search yet"),
+                    }
                 }
             }
         }

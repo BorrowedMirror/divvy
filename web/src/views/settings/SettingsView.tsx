@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import type {
   BackendKind,
   HotkeyAction,
+  ListingColumn,
   OnlineStatus,
   OverlaySide,
   PriceSourceKind,
@@ -14,7 +15,7 @@ import type {
   Theme,
 } from "../../bindings";
 import { events } from "../../bindings";
-import { Button, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
+import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "../../components/ui";
 import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
 import { useTauriEvent } from "../../hooks/useTauriEvent";
 import { LANGUAGES } from "../../i18n";
@@ -27,6 +28,8 @@ type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };
 
 const TABS = ["general", "hotkeys", "trade", "overlay", "platform"] as const;
+
+const LISTING_COLUMNS: ListingColumn[] = ["seller", "item_level", "stock", "listed"];
 
 export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => void }) {
   const { t } = useTranslation();
@@ -301,6 +304,22 @@ function TradeTab({ s, update, errors }: TabProps) {
         checked={s.trade.enable_all_stats}
         onChange={(enable_all_stats) => setTrade({ enable_all_stats })}
       />
+      <Row label={t("settings.listingCount")} htmlFor="set-listing-count">
+        <SelectField<string>
+          id="set-listing-count"
+          label={t("settings.listingCount")}
+          hideLabel
+          value={String(s.trade.listing_count)}
+          options={["10", "20", "40", "60", "100"].map((v) => ({ value: v, label: v }))}
+          onChange={(v) => setTrade({ listing_count: Number(v) })}
+        />
+      </Row>
+      <SwitchField
+        label={t("settings.convertPrices")}
+        description={t("settings.convertPricesHelp")}
+        checked={s.trade.convert_prices}
+        onChange={(convert_prices) => setTrade({ convert_prices })}
+      />
       <Row label={t("settings.contact")} htmlFor="contact" error={errors["trade.contact"]}>
         <input
           id="contact"
@@ -356,6 +375,30 @@ function OverlayTab({ s, update, errors }: TabProps) {
           onChange={(side) => setOverlay({ side })}
         />
       </Row>
+      <SwitchField
+        label={t("settings.groupBySeller")}
+        checked={s.overlay.group_by_seller}
+        onChange={(group_by_seller) => setOverlay({ group_by_seller })}
+      />
+      <fieldset className="flex flex-col gap-1.5 py-1.5">
+        <legend className="text-sm">{t("settings.listingColumns")}</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+          {LISTING_COLUMNS.map((c) => (
+            <CheckboxField
+              key={c}
+              label={t(`results.column.${c}`)}
+              checked={s.overlay.listing_columns.includes(c)}
+              onChange={(on) =>
+                setOverlay({
+                  listing_columns: on
+                    ? LISTING_COLUMNS.filter((x) => x === c || s.overlay.listing_columns.includes(x))
+                    : s.overlay.listing_columns.filter((x) => x !== c),
+                })
+              }
+            />
+          ))}
+        </div>
+      </fieldset>
     </div>
   );
 }

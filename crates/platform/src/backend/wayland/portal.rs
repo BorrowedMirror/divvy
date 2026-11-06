@@ -29,11 +29,12 @@ pub(crate) fn action_id(a: HotkeyAction) -> &'static str {
         HotkeyAction::PriceCheck => "price_check",
         HotkeyAction::PriceCheckPinned => "price_check_pinned",
         HotkeyAction::OpenSettings => "open_settings",
+        HotkeyAction::OpenTrade => "open_trade",
     }
 }
 
 fn action_from_id(id: &str) -> Option<HotkeyAction> {
-    [HotkeyAction::PriceCheck, HotkeyAction::PriceCheckPinned, HotkeyAction::OpenSettings]
+    [HotkeyAction::PriceCheck, HotkeyAction::PriceCheckPinned, HotkeyAction::OpenSettings, HotkeyAction::OpenTrade]
         .into_iter()
         .find(|a| action_id(*a) == id)
 }
@@ -43,6 +44,7 @@ fn description(a: HotkeyAction) -> &'static str {
         HotkeyAction::PriceCheck => "Price check the hovered item",
         HotkeyAction::PriceCheckPinned => "Price check and pin the overlay",
         HotkeyAction::OpenSettings => "Open RKL settings",
+        HotkeyAction::OpenTrade => "Open the last price check on the trade site",
     }
 }
 
@@ -296,7 +298,12 @@ mod tests {
 
     #[test]
     fn ids_roundtrip() {
-        for a in [HotkeyAction::PriceCheck, HotkeyAction::PriceCheckPinned, HotkeyAction::OpenSettings] {
+        for a in [
+            HotkeyAction::PriceCheck,
+            HotkeyAction::PriceCheckPinned,
+            HotkeyAction::OpenSettings,
+            HotkeyAction::OpenTrade,
+        ] {
             assert_eq!(action_from_id(action_id(a)), Some(a));
             assert!(!description(a).is_empty());
         }

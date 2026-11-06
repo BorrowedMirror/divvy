@@ -16,6 +16,14 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test("stat rows show the mod tier when known", async () => {
+    setupIpc({ get_overlay_snapshot: () => itemCopied() });
+    renderWithProviders(<OverlayView />);
+    const tiers = await screen.findAllByTestId("mod-tier");
+    expect(tiers).toHaveLength(1);
+    expect(tiers[0]).toHaveTextContent("T1");
+  });
+
   test("covering the game: dimmed backdrop closes on click, the card does not", async () => {
     const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 300, y: 120 }) });
     renderWithProviders(<OverlayView />);
@@ -350,7 +358,7 @@ describe("overlay extras", () => {
     async function mountAutoHide(ms: number) {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const calls = setupIpc({
-        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor" } }),
+        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"] } }),
         query_price: () => priceSummary(),
       });
       renderWithProviders(<OverlayView />);

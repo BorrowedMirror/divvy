@@ -130,7 +130,22 @@ describe("SettingsView", () => {
     expect(await screen.findByText(/between 0 and 10000/)).toBeInTheDocument();
     await user.click(screen.getByRole("combobox", { name: "Position" }));
     await user.click(await screen.findByRole("option", { name: "Right edge" }));
-    expect(draft().overlay).toEqual({ auto_hide_ms: 10001, opacity: 0.05, side: "right" });
+    expect(draft().overlay).toMatchObject({ auto_hide_ms: 10001, opacity: 0.05, side: "right" });
+  });
+
+  test("overlay tab sets seller grouping and listing columns, trade tab the listing count", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    await user.click(screen.getByRole("switch", { name: "Group listings by seller" }));
+    await user.click(screen.getByRole("checkbox", { name: "Item level" }));
+    await user.click(screen.getByRole("checkbox", { name: "Seller" }));
+    expect(draft().overlay).toMatchObject({ group_by_seller: false, listing_columns: ["item_level", "listed"] });
+    await user.click(screen.getByRole("tab", { name: "Trade" }));
+    await user.click(screen.getByRole("combobox", { name: "Listings to fetch" }));
+    await user.click(await screen.findByRole("option", { name: "40" }));
+    await user.click(screen.getByRole("switch", { name: /Compare prices across currencies/ }));
+    expect(draft().trade).toMatchObject({ listing_count: 40, convert_prices: false });
   });
 
   test("clearing a numeric field keeps the last valid value instead of null", async () => {
@@ -183,7 +198,7 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor" } }) });
+    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"] } }) });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
     expect(draft().overlay.auto_hide_ms).toBe(2000);

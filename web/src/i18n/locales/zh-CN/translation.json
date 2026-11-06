@@ -31,7 +31,8 @@
     "statMax": "{{stat}} 的最大值",
     "search": "搜索",
     "loading": "搜索中…",
-    "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 RKL 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。"
+    "mouseCaptured": "《流放之路2》正在捕获鼠标，因此无法点击此面板。请从 RKL 托盘菜单打开“诊断”，并关闭 Proton 鼠标捕获。",
+    "tierTitle": "词缀阶级 {{tier}}（1 为最佳数值范围）"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -85,7 +86,18 @@
     "seller": "卖家",
     "age": "上架时间",
     "unknownSeller": "未知",
-    "openTrade": "打开交易网站"
+    "openTrade": "打开交易网站",
+    "column": {
+      "seller": "卖家",
+      "item_level": "物品等级",
+      "stock": "库存",
+      "listed": "上架时间"
+    },
+    "whisper": "私聊",
+    "copyWhisper": "复制发给 {{seller}} 的私聊",
+    "whisperCopied": "已复制私聊",
+    "whisperCopiedHelp": "在游戏聊天框中按 Ctrl+V 粘贴。",
+    "sellerCount_other": "该卖家的 {{count}} 条在售"
   },
   "age": {
     "now": "刚刚"
@@ -142,6 +154,11 @@
     "fixErrors": "保存前请修正标出的字段。",
     "externalChange": "设置已在其他地方被修改。",
     "reload": "加载最新",
+    "listingCount": "获取的在售数量",
+    "convertPrices": "跨通货比较价格",
+    "convertPricesHelp": "从 poe2scout 获取通货汇率，使 exalted、chaos 和 divine 标价的在售合并统计，并显示每条的 divine 或 exalted 价值。",
+    "groupBySeller": "按卖家分组在售",
+    "listingColumns": "在售列",
     "checkUpdates": "自动检查更新",
     "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。"
   },
@@ -175,7 +192,8 @@
     "needsModifier": "请加上 Ctrl、Alt、Shift 或 Meta（只有 F 键可单独使用）。",
     "rebindFailed": "无法绑定该快捷键：{{message}}",
     "advancedCopy": "高级物品复制",
-    "advancedCopyHelp": "使用 Ctrl+Alt+C，以获取词缀阶级和数值范围。"
+    "advancedCopyHelp": "使用 Ctrl+Alt+C，以获取词缀阶级和数值范围。",
+    "open_trade": "在交易网站打开"
   },
   "validation": {
     "widen": "请输入 0 到 100 之间的值。",

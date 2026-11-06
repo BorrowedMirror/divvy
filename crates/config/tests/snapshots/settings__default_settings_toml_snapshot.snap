@@ -25,16 +25,27 @@ key = "KeyD"
 modifiers = ["ctrl"]
 key = "Space"
 
+[hotkeys.open_trade]
+modifiers = []
+key = ""
+
 [trade]
 source = "trade"
 sellers = "any"
 widen_pct = 10.0
 enable_all_stats = false
+listing_count = 20
+convert_prices = true
 
 [overlay]
 auto_hide_ms = 400
 opacity = 0.95
 side = "cursor"
+group_by_seller = true
+listing_columns = [
+    "seller",
+    "listed",
+]
 
 [ui]
 language = "en"

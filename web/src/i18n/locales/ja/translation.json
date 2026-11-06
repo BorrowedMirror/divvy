@@ -31,7 +31,8 @@
     "statMax": "{{stat}} の最大値",
     "search": "検索",
     "loading": "検索中…",
-    "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。RKL のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。"
+    "mouseCaptured": "Path of Exile 2 がマウスをキャプチャしているため、このパネルをクリックできません。RKL のトレイメニューから「診断」を開き、Proton のマウスキャプチャをオフにしてください。",
+    "tierTitle": "Mod のティア {{tier}}（1 が最良の数値範囲）"
   },
   "item": {
     "rarityLabel": "レアリティ:",
@@ -85,7 +86,18 @@
     "seller": "出品者",
     "age": "出品日時",
     "unknownSeller": "不明",
-    "openTrade": "トレードを開く"
+    "openTrade": "トレードを開く",
+    "column": {
+      "seller": "出品者",
+      "item_level": "アイテムレベル",
+      "stock": "在庫",
+      "listed": "出品日時"
+    },
+    "whisper": "ウィスパー",
+    "copyWhisper": "{{seller}} へのウィスパーをコピー",
+    "whisperCopied": "ウィスパーをコピーしました",
+    "whisperCopiedHelp": "Ctrl+V でゲーム内チャットに貼り付けてください。",
+    "sellerCount_other": "この出品者の出品 {{count}} 件"
   },
   "age": {
     "now": "たった今"
@@ -142,6 +154,11 @@
     "fixErrors": "保存する前に、強調表示された項目を修正してください。",
     "externalChange": "設定が別の場所で変更されました。",
     "reload": "最新を読み込む",
+    "listingCount": "取得する出品数",
+    "convertPrices": "通貨をまたいで価格を比較する",
+    "convertPricesHelp": "poe2scout から通貨レートを取得し、exalted・chaos・divine の出品をまとめて集計して、それぞれの divine または exalted 換算額を表示します。",
+    "groupBySeller": "出品を出品者ごとにまとめる",
+    "listingColumns": "出品の列",
     "checkUpdates": "アップデートを自動的に確認",
     "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。"
   },
@@ -175,7 +192,8 @@
     "needsModifier": "Ctrl、Alt、Shift、Meta のいずれかを追加してください (単独で使えるのは F キーのみです)。",
     "rebindFailed": "ショートカットを割り当てられませんでした: {{message}}",
     "advancedCopy": "詳細アイテムコピー",
-    "advancedCopyHelp": "Ctrl+Alt+C を使い、Mod のティアと範囲を取得します。"
+    "advancedCopyHelp": "Ctrl+Alt+C を使い、Mod のティアと範囲を取得します。",
+    "open_trade": "トレードサイトで開く"
   },
   "validation": {
     "widen": "0〜100 の値を入力してください。",

@@ -31,7 +31,8 @@
     "statMax": "{{stat}} 的最大值",
     "search": "搜尋",
     "loading": "搜尋中…",
-    "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 RKL 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。"
+    "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 RKL 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。",
+    "tierTitle": "詞綴階級 {{tier}}（1 為最佳數值範圍）"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -85,7 +86,18 @@
     "seller": "賣家",
     "age": "刊登時間",
     "unknownSeller": "未知",
-    "openTrade": "開啟交易網站"
+    "openTrade": "開啟交易網站",
+    "column": {
+      "seller": "賣家",
+      "item_level": "物品等級",
+      "stock": "庫存",
+      "listed": "刊登時間"
+    },
+    "whisper": "密語",
+    "copyWhisper": "複製給 {{seller}} 的密語",
+    "whisperCopied": "已複製密語",
+    "whisperCopiedHelp": "在遊戲聊天框中按 Ctrl+V 貼上。",
+    "sellerCount_other": "此賣家的 {{count}} 筆刊登"
   },
   "age": {
     "now": "剛剛"
@@ -142,6 +154,11 @@
     "fixErrors": "儲存前請修正標示的欄位。",
     "externalChange": "設定已在其他地方變更。",
     "reload": "載入最新",
+    "listingCount": "取得的刊登數量",
+    "convertPrices": "跨通貨比較價格",
+    "convertPricesHelp": "從 poe2scout 取得通貨匯率，讓以 exalted、chaos 和 divine 標價的刊登合併計算，並顯示每筆的 divine 或 exalted 價值。",
+    "groupBySeller": "依賣家分組刊登",
+    "listingColumns": "刊登欄位",
     "checkUpdates": "自動檢查更新",
     "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。"
   },
@@ -175,7 +192,8 @@
     "needsModifier": "請加上 Ctrl、Alt、Shift 或 Meta（只有 F 鍵可單獨使用）。",
     "rebindFailed": "無法綁定該熱鍵：{{message}}",
     "advancedCopy": "進階物品複製",
-    "advancedCopyHelp": "使用 Ctrl+Alt+C，以取得詞綴階級與數值範圍。"
+    "advancedCopyHelp": "使用 Ctrl+Alt+C，以取得詞綴階級與數值範圍。",
+    "open_trade": "在交易網站開啟"
   },
   "validation": {
     "widen": "請輸入 0 到 100 之間的值。",

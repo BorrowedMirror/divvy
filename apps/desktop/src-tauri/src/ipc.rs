@@ -155,10 +155,13 @@ pub async fn query_price(state: State<'_, Arc<AppState>>, filters: FilterSet) ->
         .as_ref()
         .map(|(i, _)| i.clone())
         .ok_or_else(|| IpcError::new("no_item", "no item has been copied yet"))?;
-    let source = state.sources().pick(state.settings().trade.source, &item);
+    let settings = state.settings();
+    let source = state.sources().pick(settings.trade.source, &item);
+    let league = filters.league.clone();
     let req = PriceRequest { item, filters };
     match source.price(&req).await {
         Ok(summary) => {
+            let summary = with_rates_if_wanted(&state, &settings, &league, summary).await;
             *state.last_price.lock().expect("last price lock") = Some(summary.clone());
             Ok(summary)
         }
@@ -167,6 +170,36 @@ pub async fn query_price(state: State<'_, Arc<AppState>>, filters: FilterSet) ->
             Err(e.into())
         }
     }
+}
+
+/// Trade-site results in several currencies: convert them with poe2scout's currency rates so
+/// min/median/max include every listing and each one shows its divine/exalted equivalent.
+/// Best effort: without rates the summary is returned unchanged.
+async fn with_rates_if_wanted(
+    state: &AppState,
+    settings: &rkl_config::Settings,
+    league: &str,
+    summary: PriceSummary,
+) -> PriceSummary {
+    use rkl_core::pricing::PriceSourceKind;
+    if !settings.trade.convert_prices || summary.source != PriceSourceKind::Trade || summary.listings.is_empty() {
+        return summary;
+    }
+    match state.sources().scout.rates(league).await {
+        Ok(rates) => rkl_core::pricing::with_rates(summary, &rates),
+        Err(e) => {
+            tracing::debug!("currency rates unavailable: {e}");
+            summary
+        }
+    }
+}
+
+/// Put `text` on the system clipboard (e.g. a listing's whisper).
+#[tauri::command]
+#[specta::specta]
+pub fn copy_text(state: State<'_, Arc<AppState>>, text: String) -> Result<(), IpcError> {
+    let platform = state.platform.as_ref().ok_or_else(|| IpcError::new("platform", "no clipboard on this platform"))?;
+    platform.clipboard.set_text(&text).map_err(|e| IpcError::new("platform", e.to_string()))
 }
 
 #[tauri::command]
@@ -280,6 +313,7 @@ pub async fn rebind_hotkey(
         HotkeyAction::PriceCheck => settings.hotkeys.price_check = chord,
         HotkeyAction::PriceCheckPinned => settings.hotkeys.price_check_pinned = chord,
         HotkeyAction::OpenSettings => settings.hotkeys.open_settings = chord,
+        HotkeyAction::OpenTrade => settings.hotkeys.open_trade = chord,
     }
     apply_off_main(app, Arc::clone(&state), settings).await.map(|_| ())
 }

@@ -57,6 +57,7 @@ fn trade_config(settings: &Settings) -> TradeConfig {
         base_url: env_url("RKL_TRADE_BASE_URL", "https://www.pathofexile.com"),
         user_agent: logic::user_agent(settings),
         poesessid: settings.trade.poesessid.clone().filter(|s| !s.is_empty()),
+        fetch_count: settings.trade.listing_count.clamp(10, 100) as usize,
         ..TradeConfig::default()
     }
 }

@@ -31,7 +31,8 @@
     "statMax": "Maximum for {{stat}}",
     "search": "Search",
     "loading": "Searching…",
-    "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the RKL tray menu and turn off Proton mouse capture."
+    "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the RKL tray menu and turn off Proton mouse capture.",
+    "tierTitle": "Mod tier {{tier}} (1 is the best roll range)"
   },
   "item": {
     "rarityLabel": "Rarity:",
@@ -86,7 +87,19 @@
     "seller": "Seller",
     "age": "Listed",
     "unknownSeller": "unknown",
-    "openTrade": "Open trade"
+    "openTrade": "Open trade",
+    "column": {
+      "seller": "Seller",
+      "item_level": "Item level",
+      "stock": "Stock",
+      "listed": "Listed"
+    },
+    "whisper": "Whisper",
+    "copyWhisper": "Copy whisper to {{seller}}",
+    "whisperCopied": "Whisper copied",
+    "whisperCopiedHelp": "Paste it into the game chat with Ctrl+V.",
+    "sellerCount_one": "{{count}} listing from this seller",
+    "sellerCount_other": "{{count}} listings from this seller"
   },
   "age": {
     "now": "just now"
@@ -145,7 +158,12 @@
     "loadFailed": "Couldn't load settings.",
     "fixErrors": "Fix the highlighted fields before saving.",
     "externalChange": "Settings were changed elsewhere.",
-    "reload": "Load latest"
+    "reload": "Load latest",
+    "listingCount": "Listings to fetch",
+    "convertPrices": "Compare prices across currencies",
+    "convertPricesHelp": "Fetches currency rates from poe2scout so listings in exalted, chaos and divine count together and each shows its divine or exalted value.",
+    "groupBySeller": "Group listings by seller",
+    "listingColumns": "Listing columns"
   },
   "theme": {
     "system": "System",
@@ -177,7 +195,8 @@
     "needsModifier": "Add Ctrl, Alt, Shift or Meta (only F-keys work alone).",
     "rebindFailed": "Couldn't bind that shortcut: {{message}}",
     "advancedCopy": "Advanced item copy",
-    "advancedCopyHelp": "Uses Ctrl+Alt+C so mod tiers and ranges are available."
+    "advancedCopyHelp": "Uses Ctrl+Alt+C so mod tiers and ranges are available.",
+    "open_trade": "Open on trade site"
   },
   "validation": {
     "widen": "Enter a value between 0 and 100.",

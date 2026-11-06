@@ -563,3 +563,23 @@ fn sellers_default_to_any() {
     let s: Settings = table("version = 1\n[trade]\nsellers = \"securable\"\n").try_into().unwrap();
     assert_eq!(s.trade.sellers, OnlineStatus::Securable);
 }
+
+#[test]
+fn listing_count_and_columns_are_validated() {
+    let mut s = Settings::default();
+    assert_eq!((s.trade.listing_count, s.trade.convert_prices, s.overlay.group_by_seller), (20, true, true));
+    assert!(s.hotkeys.open_trade.is_unbound());
+    for ok in [10, 40, 100] {
+        s.trade.listing_count = ok;
+        validate(&s).unwrap();
+    }
+    for bad in [0, 5, 25, 110] {
+        s.trade.listing_count = bad;
+        assert!(validate(&s).is_err(), "{bad}");
+    }
+    s.trade.listing_count = 20;
+    s.overlay.listing_columns = vec![rkl_config::ListingColumn::Seller, rkl_config::ListingColumn::Seller];
+    assert!(validate(&s).is_err());
+    s.overlay.listing_columns = vec![];
+    validate(&s).unwrap();
+}

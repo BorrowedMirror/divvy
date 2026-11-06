@@ -31,7 +31,8 @@
     "statMax": "{{stat}} için en çok",
     "search": "Ara",
     "loading": "Aranıyor…",
-    "mouseCaptured": "Path of Exile 2 fareyi yakalıyor, bu yüzden bu panele tıklanamıyor. Sistem tepsisindeki RKL menüsünden Tanılama'yı açın ve Proton fare yakalamayı kapatın."
+    "mouseCaptured": "Path of Exile 2 fareyi yakalıyor, bu yüzden bu panele tıklanamıyor. Sistem tepsisindeki RKL menüsünden Tanılama'yı açın ve Proton fare yakalamayı kapatın.",
+    "tierTitle": "Mod kademesi {{tier}} (1 en iyi değer aralığıdır)"
   },
   "item": {
     "rarityLabel": "Nadirlik:",
@@ -86,7 +87,19 @@
     "seller": "Satıcı",
     "age": "İlan tarihi",
     "unknownSeller": "bilinmiyor",
-    "openTrade": "Ticareti aç"
+    "openTrade": "Ticareti aç",
+    "column": {
+      "seller": "Satıcı",
+      "item_level": "Eşya seviyesi",
+      "stock": "Stok",
+      "listed": "İlan tarihi"
+    },
+    "whisper": "Fısılda",
+    "copyWhisper": "{{seller}} için fısıltıyı kopyala",
+    "whisperCopied": "Fısıltı kopyalandı",
+    "whisperCopiedHelp": "Ctrl+V ile oyun sohbetine yapıştırın.",
+    "sellerCount_one": "Bu satıcıdan {{count}} ilan",
+    "sellerCount_other": "Bu satıcıdan {{count}} ilan"
   },
   "age": {
     "now": "az önce"
@@ -145,7 +158,12 @@
     "loadFailed": "Ayarlar yüklenemedi.",
     "fixErrors": "Kaydetmeden önce işaretli alanları düzeltin.",
     "externalChange": "Ayarlar başka bir yerde değiştirildi.",
-    "reload": "Son hâlini yükle"
+    "reload": "Son hâlini yükle",
+    "listingCount": "Getirilecek ilan sayısı",
+    "convertPrices": "Fiyatları para birimleri arasında karşılaştır",
+    "convertPricesHelp": "poe2scout'tan döviz kurlarını alır; böylece exalted, chaos ve divine ilanları birlikte sayılır ve her biri divine veya exalted değerini gösterir.",
+    "groupBySeller": "İlanları satıcıya göre grupla",
+    "listingColumns": "İlan sütunları"
   },
   "theme": {
     "system": "Sistem",
@@ -177,7 +195,8 @@
     "needsModifier": "Ctrl, Alt, Shift veya Meta ekleyin (yalnızca F tuşları tek başına çalışır).",
     "rebindFailed": "Kısayol atanamadı: {{message}}",
     "advancedCopy": "Gelişmiş eşya kopyalama",
-    "advancedCopyHelp": "Mod kademeleri ve aralıkları için Ctrl+Alt+C kullanır."
+    "advancedCopyHelp": "Mod kademeleri ve aralıkları için Ctrl+Alt+C kullanır.",
+    "open_trade": "Ticaret sitesinde aç"
   },
   "validation": {
     "widen": "0 ile 100 arasında bir değer girin.",

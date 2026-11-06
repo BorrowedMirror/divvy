@@ -111,6 +111,7 @@ pub enum HotkeyAction {
     PriceCheck,
     PriceCheckPinned,
     OpenSettings,
+    OpenTrade,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]

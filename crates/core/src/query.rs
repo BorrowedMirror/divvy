@@ -38,6 +38,9 @@ pub struct StatFilter {
     pub max: Option<f64>,
     /// Value(s) on the item, for showing beside the inputs and re-widening.
     pub item_values: Vec<f64>,
+    /// Mod tier from advanced item text (1 = best), when known; `None` for summed rows.
+    #[serde(default)]
+    pub tier: Option<u8>,
 }
 
 /// Numeric range filter for misc properties (ilvl, quality, gem level, ...).
@@ -172,6 +175,7 @@ fn merge_same_stats(rows: Vec<(StatFilter, String)>, pct: f64) -> Vec<StatFilter
                 *a += b;
             }
             acc.enabled |= row.enabled;
+            acc.tier = None;
             *count += 1;
         } else {
             out.push((row, template, 1));
@@ -251,6 +255,7 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
                     min,
                     max,
                     item_values: m.values.clone(),
+                    tier: m.advanced.as_ref().and_then(|a| a.tier),
                 },
                 m.template.clone(),
             ))
@@ -583,6 +588,7 @@ mod tests {
                     min: None,
                     max: None,
                     item_values: vec![v],
+                    tier: Some(2),
                 },
                 "#% increased Spirit".to_owned(),
             )
@@ -600,6 +606,7 @@ mod tests {
         assert_eq!(merged[0].item_values, vec![68.0]);
         assert_eq!(merged[0].min, Some(61.0));
         assert!(merged[0].enabled);
+        assert_eq!((merged[0].tier, merged[1].tier), (None, Some(2)), "summed rows have no single tier");
         assert_eq!(render_template("Adds # to # Damage", &[1.5, 3.0]), "Adds 1.5 to 3 Damage");
         assert_eq!(render_template("# and #", &[1.0]), "1 and #");
     }

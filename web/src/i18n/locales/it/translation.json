@@ -31,7 +31,8 @@
     "statMax": "Massimo per {{stat}}",
     "search": "Cerca",
     "loading": "Ricerca…",
-    "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di RKL nell'area di notifica e disattiva la cattura del mouse di Proton."
+    "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di RKL nell'area di notifica e disattiva la cattura del mouse di Proton.",
+    "tierTitle": "Tier del modificatore {{tier}} (1 è l'intervallo di valori migliore)"
   },
   "item": {
     "rarityLabel": "Rarità:",
@@ -87,7 +88,20 @@
     "seller": "Venditore",
     "age": "Pubblicata",
     "unknownSeller": "sconosciuto",
-    "openTrade": "Apri scambio"
+    "openTrade": "Apri scambio",
+    "column": {
+      "seller": "Venditore",
+      "item_level": "Livello oggetto",
+      "stock": "Disponibilità",
+      "listed": "Pubblicata"
+    },
+    "whisper": "Sussurra",
+    "copyWhisper": "Copia il sussurro per {{seller}}",
+    "whisperCopied": "Sussurro copiato",
+    "whisperCopiedHelp": "Incollalo nella chat di gioco con Ctrl+V.",
+    "sellerCount_one": "{{count}} inserzione di questo venditore",
+    "sellerCount_many": "{{count}} di inserzioni di questo venditore",
+    "sellerCount_other": "{{count}} inserzioni di questo venditore"
   },
   "age": {
     "now": "proprio ora"
@@ -147,7 +161,12 @@
     "loadFailed": "Impossibile caricare le impostazioni.",
     "fixErrors": "Correggi i campi evidenziati prima di salvare.",
     "externalChange": "Le impostazioni sono state modificate altrove.",
-    "reload": "Carica le più recenti"
+    "reload": "Carica le più recenti",
+    "listingCount": "Inserzioni da recuperare",
+    "convertPrices": "Confronta i prezzi tra valute",
+    "convertPricesHelp": "Recupera i tassi di cambio da poe2scout così le inserzioni in exalted, chaos e divine vengono contate insieme e ognuna mostra il suo valore in divine o exalted.",
+    "groupBySeller": "Raggruppa le inserzioni per venditore",
+    "listingColumns": "Colonne delle inserzioni"
   },
   "theme": {
     "system": "Sistema",
@@ -179,7 +198,8 @@
     "needsModifier": "Aggiungi Ctrl, Alt, Maiusc o Meta (solo i tasti F funzionano da soli).",
     "rebindFailed": "Impossibile assegnare la scorciatoia: {{message}}",
     "advancedCopy": "Copia avanzata dell'oggetto",
-    "advancedCopyHelp": "Usa Ctrl+Alt+C per rendere disponibili tier e intervalli dei modificatori."
+    "advancedCopyHelp": "Usa Ctrl+Alt+C per rendere disponibili tier e intervalli dei modificatori.",
+    "open_trade": "Apri sul sito di scambio"
   },
   "validation": {
     "widen": "Inserisci un valore tra 0 e 100.",

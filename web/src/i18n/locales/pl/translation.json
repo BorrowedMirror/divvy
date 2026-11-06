@@ -31,7 +31,8 @@
     "statMax": "Maksimum dla {{stat}}",
     "search": "Szukaj",
     "loading": "Wyszukiwanie…",
-    "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu RKL w zasobniku i wyłącz przechwytywanie myszy przez Proton."
+    "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu RKL w zasobniku i wyłącz przechwytywanie myszy przez Proton.",
+    "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)"
   },
   "item": {
     "rarityLabel": "Rzadkość:",
@@ -88,7 +89,21 @@
     "seller": "Sprzedający",
     "age": "Wystawiono",
     "unknownSeller": "nieznany",
-    "openTrade": "Otwórz handel"
+    "openTrade": "Otwórz handel",
+    "column": {
+      "seller": "Sprzedający",
+      "item_level": "Poziom przedmiotu",
+      "stock": "Ilość",
+      "listed": "Wystawiono"
+    },
+    "whisper": "Szept",
+    "copyWhisper": "Kopiuj szept do {{seller}}",
+    "whisperCopied": "Skopiowano szept",
+    "whisperCopiedHelp": "Wklej go na czacie gry za pomocą Ctrl+V.",
+    "sellerCount_one": "{{count}} oferta od tego sprzedającego",
+    "sellerCount_few": "{{count}} oferty od tego sprzedającego",
+    "sellerCount_many": "{{count}} ofert od tego sprzedającego",
+    "sellerCount_other": "{{count}} oferty od tego sprzedającego"
   },
   "age": {
     "now": "przed chwilą"
@@ -149,7 +164,12 @@
     "loadFailed": "Nie udało się wczytać ustawień.",
     "fixErrors": "Popraw wyróżnione pola przed zapisaniem.",
     "externalChange": "Ustawienia zostały zmienione gdzie indziej.",
-    "reload": "Wczytaj najnowsze"
+    "reload": "Wczytaj najnowsze",
+    "listingCount": "Liczba ofert do pobrania",
+    "convertPrices": "Porównuj ceny między walutami",
+    "convertPricesHelp": "Pobiera kursy walut z poe2scout, aby oferty w exalted, chaos i divine liczyły się razem, a każda pokazywała swoją wartość w divine lub exalted.",
+    "groupBySeller": "Grupuj oferty według sprzedającego",
+    "listingColumns": "Kolumny ofert"
   },
   "theme": {
     "system": "Systemowy",
@@ -181,7 +201,8 @@
     "needsModifier": "Dodaj Ctrl, Alt, Shift lub Meta (same działają tylko klawisze F).",
     "rebindFailed": "Nie udało się przypisać skrótu: {{message}}",
     "advancedCopy": "Zaawansowane kopiowanie przedmiotu",
-    "advancedCopyHelp": "Używa Ctrl+Alt+C, aby udostępnić tiery i zakresy modów."
+    "advancedCopyHelp": "Używa Ctrl+Alt+C, aby udostępnić tiery i zakresy modów.",
+    "open_trade": "Otwórz na stronie handlu"
   },
   "validation": {
     "widen": "Wpisz wartość od 0 do 100.",

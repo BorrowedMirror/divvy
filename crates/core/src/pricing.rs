@@ -19,6 +19,13 @@ pub struct Listing {
     pub indexed: Option<String>,
     pub item_level: Option<u32>,
     pub stack_size: Option<u32>,
+    /// Trade whisper to paste into chat (trade site listings only; none for instant buyout).
+    #[serde(default)]
+    pub whisper: Option<String>,
+    /// The price in divine (worth one or more) or exalted, when it is in another currency and
+    /// exchange rates are known.
+    #[serde(default)]
+    pub equivalent: Option<Price>,
 }
 
 /// Where a price came from.
@@ -148,7 +155,37 @@ pub fn summarise(
         }
     };
 
+    let mut listings = listings;
+    if let Some(rates) = rates {
+        for l in &mut listings {
+            l.equivalent = equivalent(&l.price, rates);
+        }
+    }
     PriceSummary { source, total, listings, min, median, max, trade_url: None }
+}
+
+/// Recompute a summary's figures with exchange rates (listings in other currencies then count
+/// towards min/median/max, and each listing gets its [`Listing::equivalent`]).
+pub fn with_rates(summary: PriceSummary, rates: &ExchangeRates) -> PriceSummary {
+    let trade_url = summary.trade_url.clone();
+    let mut out = summarise(summary.source, summary.total, summary.listings, Some(rates));
+    out.trade_url = trade_url;
+    out
+}
+
+/// `price` in divine when worth at least one divine, otherwise in exalted; `None` when the
+/// price is already in that currency or a rate is unknown.
+pub fn equivalent(price: &Price, rates: &ExchangeRates) -> Option<Price> {
+    if !price.amount.is_finite() || price.amount <= 0.0 {
+        return None;
+    }
+    let div = rates.convert(price.amount, &price.currency, "divine")?;
+    let target = if div >= 1.0 || rates.rate("exalted").is_none() { "divine" } else { "exalted" };
+    if target == price.currency {
+        return None;
+    }
+    let amount = if target == "divine" { div } else { rates.convert(price.amount, &price.currency, "exalted")? };
+    Some(Price { amount: round2(amount), currency: target.to_owned() })
 }
 
 #[cfg(test)]
@@ -167,6 +204,8 @@ mod tests {
             indexed: None,
             item_level: None,
             stack_size: None,
+            whisper: None,
+            equivalent: None,
         }
     }
 
@@ -247,5 +286,33 @@ mod tests {
             let (min, med, max) = (s.min.unwrap().amount, s.median.unwrap().amount, s.max.unwrap().amount);
             prop_assert!(min <= med && med <= max);
         }
+    }
+
+    #[test]
+    fn equivalents_and_rates_in_summaries() {
+        let rates = ExchangeRates {
+            base: "exalted".into(),
+            rates: [("divine".to_owned(), 200.0), ("chaos".to_owned(), 10.0)].into_iter().collect(),
+        };
+        let p = |a: f64, c: &str| Price { amount: a, currency: c.into() };
+        assert_eq!(equivalent(&p(40.0, "chaos"), &rates), Some(p(2.0, "divine")));
+        assert_eq!(equivalent(&p(5.0, "chaos"), &rates), Some(p(50.0, "exalted")));
+        assert_eq!(equivalent(&p(30.0, "exalted"), &rates), None, "already exalted");
+        assert_eq!(equivalent(&p(2.0, "divine"), &rates), None, "already divine");
+        assert_eq!(equivalent(&p(1.0, "mirror"), &rates), None, "unknown rate");
+        let s = summarise(
+            PriceSourceKind::Trade,
+            3,
+            vec![listing(1.0, "chaos"), listing(2.0, "chaos"), listing(20.0, "exalted")],
+            None,
+        );
+        assert_eq!(s.max, Some(p(2.0, "chaos")), "without rates the exalted listing is left out");
+        let mut s = s;
+        s.trade_url = Some("u".into());
+        let s = with_rates(s, &rates);
+        assert_eq!(s.max, Some(p(2.0, "chaos")));
+        assert_eq!(s.listings[2].equivalent, None, "20 ex is under a divine and already exalted");
+        assert_eq!(s.listings[0].equivalent, Some(p(10.0, "exalted")));
+        assert_eq!(s.trade_url.as_deref(), Some("u"));
     }
 }

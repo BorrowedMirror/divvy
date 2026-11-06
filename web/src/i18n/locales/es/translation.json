@@ -31,7 +31,8 @@
     "statMax": "Máximo de {{stat}}",
     "search": "Buscar",
     "loading": "Buscando…",
-    "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de RKL en la bandeja y desactiva la captura del ratón de Proton."
+    "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de RKL en la bandeja y desactiva la captura del ratón de Proton.",
+    "tierTitle": "Grado de modificador {{tier}} (1 es el mejor rango de valores)"
   },
   "item": {
     "rarityLabel": "Rareza:",
@@ -87,7 +88,20 @@
     "seller": "Vendedor",
     "age": "Publicado",
     "unknownSeller": "desconocido",
-    "openTrade": "Abrir comercio"
+    "openTrade": "Abrir comercio",
+    "column": {
+      "seller": "Vendedor",
+      "item_level": "Nivel de objeto",
+      "stock": "Existencias",
+      "listed": "Publicado"
+    },
+    "whisper": "Susurrar",
+    "copyWhisper": "Copiar susurro para {{seller}}",
+    "whisperCopied": "Susurro copiado",
+    "whisperCopiedHelp": "Pégalo en el chat del juego con Ctrl+V.",
+    "sellerCount_one": "{{count}} anuncio de este vendedor",
+    "sellerCount_many": "{{count}} anuncios de este vendedor",
+    "sellerCount_other": "{{count}} anuncios de este vendedor"
   },
   "age": {
     "now": "ahora mismo"
@@ -147,7 +161,12 @@
     "loadFailed": "No se pudieron cargar los ajustes.",
     "fixErrors": "Corrige los campos resaltados antes de guardar.",
     "externalChange": "Los ajustes se han modificado en otro lugar.",
-    "reload": "Cargar lo último"
+    "reload": "Cargar lo último",
+    "listingCount": "Anuncios a obtener",
+    "convertPrices": "Comparar precios entre monedas",
+    "convertPricesHelp": "Obtiene los tipos de cambio de poe2scout para que los anuncios en exalted, chaos y divine cuenten juntos y cada uno muestre su valor en divine o exalted.",
+    "groupBySeller": "Agrupar anuncios por vendedor",
+    "listingColumns": "Columnas de anuncios"
   },
   "theme": {
     "system": "Sistema",
@@ -179,7 +198,8 @@
     "needsModifier": "Añade Ctrl, Alt, Shift o Meta (solo las teclas F funcionan solas).",
     "rebindFailed": "No se pudo asignar el atajo: {{message}}",
     "advancedCopy": "Copia avanzada de objetos",
-    "advancedCopyHelp": "Usa Ctrl+Alt+C para obtener los grados y rangos de los modificadores."
+    "advancedCopyHelp": "Usa Ctrl+Alt+C para obtener los grados y rangos de los modificadores.",
+    "open_trade": "Abrir en el sitio de comercio"
   },
   "validation": {
     "widen": "Introduce un valor entre 0 y 100.",

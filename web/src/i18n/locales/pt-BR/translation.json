@@ -31,7 +31,8 @@
     "statMax": "Máximo de {{stat}}",
     "search": "Buscar",
     "loading": "Buscando…",
-    "mouseCaptured": "O Path of Exile 2 está capturando o mouse, então não dá para clicar neste painel. Abra o Diagnóstico pelo menu do RKL na bandeja e desative a captura do mouse do Proton."
+    "mouseCaptured": "O Path of Exile 2 está capturando o mouse, então não dá para clicar neste painel. Abra o Diagnóstico pelo menu do RKL na bandeja e desative a captura do mouse do Proton.",
+    "tierTitle": "Nível do modificador {{tier}} (1 é a melhor faixa de valores)"
   },
   "item": {
     "rarityLabel": "Raridade:",
@@ -87,7 +88,20 @@
     "seller": "Vendedor",
     "age": "Anunciado",
     "unknownSeller": "desconhecido",
-    "openTrade": "Abrir trocas"
+    "openTrade": "Abrir trocas",
+    "column": {
+      "seller": "Vendedor",
+      "item_level": "Nível do item",
+      "stock": "Estoque",
+      "listed": "Anunciado"
+    },
+    "whisper": "Sussurrar",
+    "copyWhisper": "Copiar sussurro para {{seller}}",
+    "whisperCopied": "Sussurro copiado",
+    "whisperCopiedHelp": "Cole no chat do jogo com Ctrl+V.",
+    "sellerCount_one": "{{count}} anúncio deste vendedor",
+    "sellerCount_many": "{{count}} anúncios deste vendedor",
+    "sellerCount_other": "{{count}} anúncios deste vendedor"
   },
   "age": {
     "now": "agora mesmo"
@@ -147,7 +161,12 @@
     "loadFailed": "Não foi possível carregar as configurações.",
     "fixErrors": "Corrija os campos destacados antes de salvar.",
     "externalChange": "As configurações foram alteradas em outro lugar.",
-    "reload": "Carregar a mais recente"
+    "reload": "Carregar a mais recente",
+    "listingCount": "Anúncios a buscar",
+    "convertPrices": "Comparar preços entre moedas",
+    "convertPricesHelp": "Busca as cotações de moedas no poe2scout para que anúncios em exalted, chaos e divine sejam contados juntos e cada um mostre seu valor em divine ou exalted.",
+    "groupBySeller": "Agrupar anúncios por vendedor",
+    "listingColumns": "Colunas dos anúncios"
   },
   "theme": {
     "system": "Sistema",
@@ -179,7 +198,8 @@
     "needsModifier": "Adicione Ctrl, Alt, Shift ou Meta (só as teclas F funcionam sozinhas).",
     "rebindFailed": "Não foi possível definir o atalho: {{message}}",
     "advancedCopy": "Cópia avançada de itens",
-    "advancedCopyHelp": "Usa Ctrl+Alt+C para incluir os níveis e intervalos dos modificadores."
+    "advancedCopyHelp": "Usa Ctrl+Alt+C para incluir os níveis e intervalos dos modificadores.",
+    "open_trade": "Abrir no site de trocas"
   },
   "validation": {
     "widen": "Insira um valor entre 0 e 100.",

@@ -4,7 +4,7 @@ import { sameChord } from "./chord";
 /** Field path -> i18n key of the validation message. */
 export type ValidationErrors = Partial<Record<string, string>>;
 
-export const HOTKEY_ACTIONS: HotkeyAction[] = ["price_check", "price_check_pinned", "open_settings"];
+export const HOTKEY_ACTIONS: HotkeyAction[] = ["price_check", "price_check_pinned", "open_settings", "open_trade"];
 
 /** Mirror of `looks_like_email` in crates/config: visible ASCII, no `;(),<>`, dotted domain. */
 export function looksLikeEmail(s: string): boolean {

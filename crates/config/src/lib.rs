@@ -35,6 +35,8 @@ pub struct HotkeySettings {
     pub price_check: Chord,
     pub price_check_pinned: Chord,
     pub open_settings: Chord,
+    /// Open the last price check's search on the trade site (unset by default).
+    pub open_trade: Chord,
     /// Use Ctrl+Alt+C (advanced item text with tiers) instead of Ctrl+C.
     pub advanced_copy: bool,
 }
@@ -47,6 +49,11 @@ pub struct TradeSettings {
     pub sellers: rkl_core::query::OnlineStatus,
     pub widen_pct: f64,
     pub enable_all_stats: bool,
+    /// Listings fetched per trade-site search (10 to 100, in steps of 10).
+    pub listing_count: u32,
+    /// Fetch currency rates (from poe2scout) to compare listings in other currencies and show
+    /// each price's divine or exalted equivalent.
+    pub convert_prices: bool,
     /// Optional e-mail appended to the User-Agent, as GGG requests.
     pub contact: Option<String>,
     /// Optional POESESSID; stored in plain text, so off by default.
@@ -60,6 +67,20 @@ pub struct OverlaySettings {
     pub auto_hide_ms: u32,
     pub opacity: f64,
     pub side: OverlaySide,
+    /// Show one row per seller (their cheapest listing, with a count).
+    pub group_by_seller: bool,
+    /// Listing table columns after the price, in order.
+    pub listing_columns: Vec<ListingColumn>,
+}
+
+/// Optional columns of the listing table (the price column is always shown).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum ListingColumn {
+    Seller,
+    ItemLevel,
+    Stock,
+    Listed,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -125,6 +146,7 @@ impl Default for HotkeySettings {
             price_check: Chord::new(&[Ctrl], "KeyD"),
             price_check_pinned: Chord::new(&[Ctrl, Alt], "KeyD"),
             open_settings: Chord::new(&[Ctrl], "Space"),
+            open_trade: Chord::unbound(),
             advanced_copy: true,
         }
     }
@@ -137,6 +159,8 @@ impl Default for TradeSettings {
             sellers: rkl_core::query::OnlineStatus::Any,
             widen_pct: 10.0,
             enable_all_stats: false,
+            listing_count: 20,
+            convert_prices: true,
             contact: None,
             poesessid: None,
         }
@@ -145,7 +169,13 @@ impl Default for TradeSettings {
 
 impl Default for OverlaySettings {
     fn default() -> Self {
-        Self { auto_hide_ms: 400, opacity: 0.95, side: OverlaySide::Cursor }
+        Self {
+            auto_hide_ms: 400,
+            opacity: 0.95,
+            side: OverlaySide::Cursor,
+            group_by_seller: true,
+            listing_columns: vec![ListingColumn::Seller, ListingColumn::Listed],
+        }
     }
 }
 
@@ -399,6 +429,7 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         ("hotkeys.price_check", &s.hotkeys.price_check),
         ("hotkeys.price_check_pinned", &s.hotkeys.price_check_pinned),
         ("hotkeys.open_settings", &s.hotkeys.open_settings),
+        ("hotkeys.open_trade", &s.hotkeys.open_trade),
     ];
     for (i, (field, chord)) in hotkeys.iter().enumerate() {
         validate_chord(field, chord)?;
@@ -409,6 +440,14 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         }
     }
 
+    if !(10..=100).contains(&s.trade.listing_count) || !s.trade.listing_count.is_multiple_of(10) {
+        return Err(invalid("trade.listing_count", format!("{} is not 10, 20, ... 100", s.trade.listing_count)));
+    }
+    if (1..s.overlay.listing_columns.len())
+        .any(|i| s.overlay.listing_columns[..i].contains(&s.overlay.listing_columns[i]))
+    {
+        return Err(invalid("overlay.listing_columns", "a column is listed twice"));
+    }
     if !(0.0..=100.0).contains(&s.trade.widen_pct) {
         return Err(invalid("trade.widen_pct", format!("{} is not within 0..=100", s.trade.widen_pct)));
     }

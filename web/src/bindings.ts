@@ -36,6 +36,8 @@ export const commands = {
 	 *  Served from the trade site's `data/static`, cached by the trade client.
 	 */
 	currencyIcons: () => typedError<CurrencyIcon[], IpcError_Serialize>(__TAURI_INVOKE("currency_icons")),
+	/**  Put `text` on the system clipboard (e.g. a listing's whisper). */
+	copyText: (text: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("copy_text", { text })),
 	/**  Current price panel layout, for the web view to catch up on mount. */
 	getOverlayLayout: () => __TAURI_INVOKE<OverlayLayout>("get_overlay_layout"),
 	/**  Current state of Wine's mouse capture for PoE2 (Linux only; `supported = false` elsewhere). */
@@ -195,7 +197,7 @@ export type FilterSet_Serialize = {
 	route: QueryRoute,
 };
 
-export type HotkeyAction = "price_check" | "price_check_pinned" | "open_settings";
+export type HotkeyAction = "price_check" | "price_check_pinned" | "open_settings" | "open_trade";
 
 export type HotkeySettings = HotkeySettings_Serialize | HotkeySettings_Deserialize;
 
@@ -203,6 +205,8 @@ export type HotkeySettings_Deserialize = {
 	price_check?: Chord,
 	price_check_pinned?: Chord,
 	open_settings?: Chord,
+	/**  Open the last price check's search on the trade site (unset by default). */
+	open_trade?: Chord,
 	/**  Use Ctrl+Alt+C (advanced item text with tiers) instead of Ctrl+C. */
 	advanced_copy?: boolean,
 };
@@ -211,6 +215,8 @@ export type HotkeySettings_Serialize = {
 	price_check: Chord,
 	price_check_pinned: Chord,
 	open_settings: Chord,
+	/**  Open the last price check's search on the trade site (unset by default). */
+	open_trade: Chord,
 	/**  Use Ctrl+Alt+C (advanced item text with tiers) instead of Ctrl+C. */
 	advanced_copy: boolean,
 };
@@ -327,6 +333,9 @@ export type League_Serialize = {
 /**  One listing from a price source. */
 export type Listing = Listing_Serialize | Listing_Deserialize;
 
+/**  Optional columns of the listing table (the price column is always shown). */
+export type ListingColumn = "seller" | "item_level" | "stock" | "listed";
+
 /**  One listing from a price source. */
 export type Listing_Deserialize = {
 	id: string,
@@ -337,6 +346,13 @@ export type Listing_Deserialize = {
 	indexed?: string | null,
 	item_level?: number | null,
 	stack_size?: number | null,
+	/**  Trade whisper to paste into chat (trade site listings only; none for instant buyout). */
+	whisper?: string | null,
+	/**
+	 *  The price in divine (worth one or more) or exalted, when it is in another currency and
+	 *  exchange rates are known.
+	 */
+	equivalent?: Price | null,
 };
 
 /**  One listing from a price source. */
@@ -349,6 +365,13 @@ export type Listing_Serialize = {
 	indexed: string | null,
 	item_level: number | null,
 	stack_size: number | null,
+	/**  Trade whisper to paste into chat (trade site listings only; none for instant buyout). */
+	whisper: string | null,
+	/**
+	 *  The price in divine (worth one or more) or exalted, when it is in another currency and
+	 *  exchange rates are known.
+	 */
+	equivalent: Price | null,
 };
 
 export type MiscFilters = MiscFilters_Serialize | MiscFilters_Deserialize;
@@ -438,6 +461,10 @@ export type OverlaySettings_Deserialize = {
 	auto_hide_ms?: number,
 	opacity?: number | null,
 	side?: OverlaySide,
+	/**  Show one row per seller (their cheapest listing, with a count). */
+	group_by_seller?: boolean,
+	/**  Listing table columns after the price, in order. */
+	listing_columns?: ListingColumn[],
 };
 
 export type OverlaySettings_Serialize = {
@@ -445,6 +472,10 @@ export type OverlaySettings_Serialize = {
 	auto_hide_ms: number,
 	opacity: number | null,
 	side: OverlaySide,
+	/**  Show one row per seller (their cheapest listing, with a count). */
+	group_by_seller: boolean,
+	/**  Listing table columns after the price, in order. */
+	listing_columns: ListingColumn[],
 };
 
 export type OverlaySide = 
@@ -822,6 +853,8 @@ export type StatFilter_Deserialize = {
 	max?: number | null,
 	/**  Value(s) on the item, for showing beside the inputs and re-widening. */
 	item_values: (number | null)[],
+	/**  Mod tier from advanced item text (1 = best), when known; `None` for summed rows. */
+	tier?: number | null,
 };
 
 /**  One editable stat row in the price panel. */
@@ -834,6 +867,8 @@ export type StatFilter_Serialize = {
 	max: number | null,
 	/**  Value(s) on the item, for showing beside the inputs and re-widening. */
 	item_values: (number | null)[],
+	/**  Mod tier from advanced item text (1 = best), when known; `None` for summed rows. */
+	tier: number | null,
 };
 
 export type Theme = "system" | "dark" | "light";
@@ -846,6 +881,13 @@ export type TradeSettings_Deserialize = {
 	sellers?: OnlineStatus,
 	widen_pct?: number | null,
 	enable_all_stats?: boolean,
+	/**  Listings fetched per trade-site search (10 to 100, in steps of 10). */
+	listing_count?: number,
+	/**
+	 *  Fetch currency rates (from poe2scout) to compare listings in other currencies and show
+	 *  each price's divine or exalted equivalent.
+	 */
+	convert_prices?: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */
 	contact?: string | null,
 	/**  Optional POESESSID; stored in plain text, so off by default. */
@@ -858,6 +900,13 @@ export type TradeSettings_Serialize = {
 	sellers: OnlineStatus,
 	widen_pct: number | null,
 	enable_all_stats: boolean,
+	/**  Listings fetched per trade-site search (10 to 100, in steps of 10). */
+	listing_count: number,
+	/**
+	 *  Fetch currency rates (from poe2scout) to compare listings in other currencies and show
+	 *  each price's divine or exalted equivalent.
+	 */
+	convert_prices: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */
 	contact: string | null,
 	/**  Optional POESESSID; stored in plain text, so off by default. */

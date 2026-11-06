@@ -31,7 +31,8 @@
     "statMax": "Maximum für {{stat}}",
     "search": "Suchen",
     "loading": "Suche läuft…",
-    "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im rkl-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten."
+    "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im rkl-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten.",
+    "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)"
   },
   "item": {
     "rarityLabel": "Seltenheit:",
@@ -86,7 +87,19 @@
     "seller": "Verkäufer",
     "age": "Eingestellt",
     "unknownSeller": "unbekannt",
-    "openTrade": "Handel öffnen"
+    "openTrade": "Handel öffnen",
+    "column": {
+      "seller": "Verkäufer",
+      "item_level": "Gegenstandsstufe",
+      "stock": "Bestand",
+      "listed": "Eingestellt"
+    },
+    "whisper": "Flüstern",
+    "copyWhisper": "Flüsternachricht an {{seller}} kopieren",
+    "whisperCopied": "Flüsternachricht kopiert",
+    "whisperCopiedHelp": "Füge sie mit Strg+V in den Spielchat ein.",
+    "sellerCount_one": "{{count}} Angebot von diesem Verkäufer",
+    "sellerCount_other": "{{count}} Angebote von diesem Verkäufer"
   },
   "age": {
     "now": "gerade eben"
@@ -145,7 +158,12 @@
     "loadFailed": "Einstellungen konnten nicht geladen werden.",
     "fixErrors": "Vor dem Speichern die markierten Felder korrigieren.",
     "externalChange": "Die Einstellungen wurden an anderer Stelle geändert.",
-    "reload": "Neueste laden"
+    "reload": "Neueste laden",
+    "listingCount": "Abzurufende Angebote",
+    "convertPrices": "Preise über Währungen hinweg vergleichen",
+    "convertPricesHelp": "Ruft Währungskurse von poe2scout ab, damit Angebote in Exalted, Chaos und Divine gemeinsam zählen und jedes seinen Divine- oder Exalted-Wert zeigt.",
+    "groupBySeller": "Angebote nach Verkäufer gruppieren",
+    "listingColumns": "Angebotsspalten"
   },
   "theme": {
     "system": "System",
@@ -177,7 +195,8 @@
     "needsModifier": "Strg, Alt, Umschalt oder Meta hinzufügen (nur F-Tasten funktionieren allein).",
     "rebindFailed": "Tastenkürzel konnte nicht belegt werden: {{message}}",
     "advancedCopy": "Erweitertes Kopieren",
-    "advancedCopyHelp": "Verwendet Strg+Alt+C, damit Modifikatorstufen und Wertebereiche verfügbar sind."
+    "advancedCopyHelp": "Verwendet Strg+Alt+C, damit Modifikatorstufen und Wertebereiche verfügbar sind.",
+    "open_trade": "Auf der Handelsseite öffnen"
   },
   "validation": {
     "widen": "Einen Wert zwischen 0 und 100 eingeben.",
