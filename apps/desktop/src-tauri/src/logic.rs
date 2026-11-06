@@ -131,10 +131,14 @@ pub fn user_agent(settings: &Settings) -> String {
 
 /// Tracing filter: `RKL_LOG` (or `info`), with the HTTP/TLS stack capped at `info` so
 /// debug logs never contain request headers (POESESSID cookie).
+///
+/// enigo is built with Wayland support and tries a Wayland connection before X11, warning
+/// every start on an X11 session that it found none; RKL reports real input failures itself,
+/// so enigo is kept to errors unless `RKL_LOG` names it.
 pub fn log_filter(env: Option<&str>) -> String {
     let base = env.map(str::trim).filter(|s| !s.is_empty()).unwrap_or("info");
     let caps = ["reqwest", "hyper", "hyper_util", "h2", "rustls"].map(|t| format!("{t}=info")).join(",");
-    format!("{base},{caps}")
+    if base.contains("enigo") { format!("{base},{caps}") } else { format!("{base},{caps},enigo=error") }
 }
 
 /// Whether an env URL override is acceptable: https anywhere, or http on loopback only.
@@ -778,7 +782,8 @@ mod tests {
 
     #[test]
     fn log_filter_caps_http_stack() {
-        assert_eq!(log_filter(None), "info,reqwest=info,hyper=info,hyper_util=info,h2=info,rustls=info");
+        assert_eq!(log_filter(None), "info,reqwest=info,hyper=info,hyper_util=info,h2=info,rustls=info,enigo=error");
+        assert!(!log_filter(Some("debug,enigo=debug")).contains("enigo=error"));
         let f = log_filter(Some("debug"));
         assert!(f.starts_with("debug,") && f.contains("hyper=info") && f.contains("reqwest=info"));
         assert!(tracing_subscriber::EnvFilter::try_new(&f).is_ok());
