@@ -149,7 +149,7 @@ pub async fn run_price_check(
     .map_err(|e| IpcError::new("internal", e.to_string()))?
     .map_err(|e| {
         state.record_error(&e);
-        IpcError::from(e)
+        copy_error(e)
     })?;
     handle_item_text(&app, &state, &text, pinned)
 }
@@ -159,9 +159,26 @@ pub const BUSY: &str = "busy";
 /// Message of the `no_item` error when the hotkey fired outside the game.
 pub const NOT_FOCUSED: &str = "game window is not focused";
 
-/// Failures the overlay should not pop up for: dropped presses and presses outside the game.
+/// Message of the `no_item` error when the copy produced no item text (the cursor was over
+/// nothing, or over something that copies as plain text).
+pub const NOTHING_COPIED: &str = "no item under the cursor";
+
+/// A failed copy. Nothing arriving, or text that is not an item, means there was no item under
+/// the cursor: like Exiled Exchange 2, the panel stays closed for that. Real backend failures
+/// still show.
+pub fn copy_error(e: rkl_platform::PlatformError) -> IpcError {
+    match e {
+        rkl_platform::PlatformError::Timeout(_) | rkl_platform::PlatformError::NoItemText => {
+            IpcError::new("no_item", NOTHING_COPIED)
+        }
+        e => IpcError::from(e),
+    }
+}
+
+/// Failures the overlay should not pop up for: dropped presses, presses outside the game and
+/// presses with no item under the cursor.
 pub fn is_silent_failure(e: &IpcError) -> bool {
-    e.kind == BUSY || (e.kind == "no_item" && e.message == NOT_FOCUSED)
+    e.kind == BUSY || (e.kind == "no_item" && (e.message == NOT_FOCUSED || e.message == NOTHING_COPIED))
 }
 
 /// Spawn [`run_price_check`] without awaiting (hotkey, signal, tray, test hook).
@@ -817,6 +834,18 @@ pub fn copy_chord(advanced: bool) -> Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn nothing_copied_stays_quiet() {
+        use rkl_platform::PlatformError as E;
+        for e in [E::Timeout(std::time::Duration::from_millis(500)), E::NoItemText] {
+            assert!(is_silent_failure(&copy_error(e)));
+        }
+        let backend = copy_error(E::Backend("xdo failed".into()));
+        assert_eq!(backend.kind, "platform");
+        assert!(!is_silent_failure(&backend));
+        assert!(!is_silent_failure(&IpcError::new("parse", "unknown item class")));
+    }
 
     #[test]
     fn close_keys() {
