@@ -27,22 +27,22 @@ import { WaystoneMods } from "@views/overlay/WaystoneMods";
  */
 function usePriceRunner() {
   const mutation = useQueryPrice();
-  const seq = useRef(0);
+  const seqRef = useRef(0);
   const { mutateAsync } = mutation;
   const invalidate = useCallback(() => {
-    seq.current += 1;
+    seqRef.current += 1;
   }, []);
   const run = useCallback(
     (filters: FilterSet_Serialize) => {
-      const id = ++seq.current;
+      const id = ++seqRef.current;
       const store = useOverlayStore.getState();
       store.queryStarted();
       mutateAsync(filters).then(
         (summary) => {
-          if (id === seq.current) useOverlayStore.getState().priceReady(summary);
+          if (id === seqRef.current) useOverlayStore.getState().priceReady(summary);
         },
         (err: unknown) => {
-          if (id === seq.current) useOverlayStore.getState().priceFailed(toIpcError(err));
+          if (id === seqRef.current) useOverlayStore.getState().priceFailed(toIpcError(err));
         },
       );
     },
@@ -300,22 +300,22 @@ function useOverlayLayout(): OverlayLayout {
  * spot on release for `Position: Last`. Buttons and fields in the header keep working.
  */
 export function useCardDrag() {
-  const dragging = useRef<number | null>(null);
+  const draggingRef = useRef<number | null>(null);
   const send = (phase: "start" | "move" | "end") => void commands.dragCard(phase);
   return {
     onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
       if (e.button !== 0 || (e.target as HTMLElement).closest("button, input, select, a, [role=combobox]")) return;
-      dragging.current = e.pointerId;
+      draggingRef.current = e.pointerId;
       e.currentTarget.setPointerCapture?.(e.pointerId);
       e.preventDefault();
       send("start");
     },
     onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
-      if (dragging.current === e.pointerId) send("move");
+      if (draggingRef.current === e.pointerId) send("move");
     },
     onPointerUp: (e: React.PointerEvent<HTMLElement>) => {
-      if (dragging.current !== e.pointerId) return;
-      dragging.current = null;
+      if (draggingRef.current !== e.pointerId) return;
+      draggingRef.current = null;
       e.currentTarget.releasePointerCapture?.(e.pointerId);
       send("end");
     },

@@ -13,9 +13,9 @@ export function useFitWindowHeight<T extends HTMLElement>(
   extraHeight: () => number = () => 0,
 ) {
   const ref = useRef<T | null>(null);
-  const extra = useRef(extraHeight);
+  const extraRef = useRef(extraHeight);
   useEffect(() => {
-    extra.current = extraHeight;
+    extraRef.current = extraHeight;
   });
   useEffect(() => {
     const el = ref.current;
@@ -29,7 +29,7 @@ export function useFitWindowHeight<T extends HTMLElement>(
       const rect = el.getBoundingClientRect();
       // With `content`, report the content's full height (the card may be capped and scroll).
       const inner = content?.current;
-      const height = Math.ceil(inner ? inner.getBoundingClientRect().height + extra.current() : rect.height);
+      const height = Math.ceil(inner ? inner.getBoundingClientRect().height + extraRef.current() : rect.height);
       const width = Math.ceil(rect.width);
       if (height > 0 && (Math.abs(height - last) >= 1 || Math.abs(width - lastWidth) >= 1)) {
         last = height;

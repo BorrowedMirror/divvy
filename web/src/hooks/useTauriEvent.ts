@@ -7,10 +7,10 @@ type Listenable<T> = {
 /** Subscribe to a tauri-specta event for the lifetime of the component; `onReady` runs once listening. */
 export function useTauriEvent<T>(event: Listenable<T>, handler: (payload: T) => void, onReady?: () => void): void {
   const ref = useRef(handler);
-  const ready = useRef(onReady);
+  const readyRef = useRef(onReady);
   useEffect(() => {
     ref.current = handler;
-    ready.current = onReady;
+    readyRef.current = onReady;
   });
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -21,7 +21,7 @@ export function useTauriEvent<T>(event: Listenable<T>, handler: (payload: T) => 
         if (disposed) fn();
         else {
           unlisten = fn;
-          ready.current?.();
+          readyRef.current?.();
         }
       })
       .catch(() => {
