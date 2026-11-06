@@ -137,7 +137,8 @@
       "hotkeys": "Skróty",
       "trade": "Handel",
       "overlay": "Nakładka",
-      "platform": "Platforma"
+      "platform": "Platforma",
+      "waystones": "Waystone'y"
     },
     "language": "Język",
     "theme": "Motyw",
@@ -336,5 +337,29 @@
     "light": "Lekkie",
     "medium": "Średnie",
     "strong": "Mocne"
+  },
+  "links": {
+    "label": "Wyszukaj ten przedmiot",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Skopiowano przedmiot dla Craft of Exile",
+    "craftCopiedHelp": "Na stronie kliknij Import item i wklej go za pomocą Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Modyfikatory Waystone'a",
+    "avoidCount_one": "{{count}} do unikania",
+    "avoidCount_few": "{{count}} do unikania",
+    "avoidCount_many": "{{count}} do unikania",
+    "avoidCount_other": "{{count}} do unikania",
+    "wantCount_one": "{{count}} pożądany",
+    "wantCount_few": "{{count}} pożądane",
+    "wantCount_many": "{{count}} pożądanych",
+    "wantCount_other": "{{count}} pożądanego",
+    "help": "Modyfikatory Waystone'a zawierające jedną z tych fraz są wyróżniane w panelu. Jedna fraza na linię; wielkość liter nie ma znaczenia.",
+    "avoidLabel": "Unikaj",
+    "wantLabel": "Pożądane",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

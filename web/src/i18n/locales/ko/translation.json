@@ -128,7 +128,8 @@
       "hotkeys": "단축키",
       "trade": "거래",
       "overlay": "오버레이",
-      "platform": "플랫폼"
+      "platform": "플랫폼",
+      "waystones": "경로석"
     },
     "language": "언어",
     "theme": "테마",
@@ -327,5 +328,23 @@
     "light": "약함",
     "medium": "보통",
     "strong": "강함"
+  },
+  "links": {
+    "label": "이 아이템 찾아보기",
+    "poe2db": "poe2db",
+    "wiki": "위키",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Craft of Exile용으로 아이템을 복사했습니다",
+    "craftCopiedHelp": "페이지에서 Import item을 클릭한 다음 Ctrl+V로 붙여 넣으세요."
+  },
+  "waystone": {
+    "heading": "경로석 속성",
+    "avoidCount_other": "피할 속성 {{count}}개",
+    "wantCount_other": "원하는 속성 {{count}}개",
+    "help": "이 문구 중 하나를 포함하는 경로석 속성이 패널에서 강조 표시됩니다. 한 줄에 한 문구씩 입력하며 대소문자는 구분하지 않습니다.",
+    "avoidLabel": "피하기",
+    "wantLabel": "원함",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

@@ -147,6 +147,8 @@ pub struct AppState {
     pub platform: Option<Arc<Platform>>,
     pub backend: BackendKind,
     pub last_item: Mutex<Option<(ParsedItem, FilterSet)>>,
+    /// The last item's text exactly as the game copied it (handed to Craft of Exile's import).
+    pub last_item_text: Mutex<Option<String>>,
     pub last_price: Mutex<Option<PriceSummary>>,
     pub leagues: Mutex<Option<Vec<League>>>,
     pub errors: Mutex<VecDeque<String>>,
@@ -198,6 +200,7 @@ impl AppState {
             platform,
             backend,
             last_item: Mutex::new(None),
+            last_item_text: Mutex::new(None),
             last_price: Mutex::new(None),
             leagues: Mutex::new(None),
             errors: Mutex::new(VecDeque::new()),

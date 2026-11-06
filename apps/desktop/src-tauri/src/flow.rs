@@ -38,6 +38,9 @@ pub fn handle_item_text(
         memory.apply(&mut filters);
     }
     *state.last_item.lock().expect("last item lock") = Some((item.clone(), filters.clone()));
+    if let Ok(mut t) = state.last_item_text.lock() {
+        *t = Some(text.to_owned());
+    }
     set_pinned(app, state, pinned);
     show_overlay(app, state);
     if let Err(e) = (ItemCopied { item: item.clone(), filters: filters.clone(), pinned }).emit(app) {

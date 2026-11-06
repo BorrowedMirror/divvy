@@ -602,3 +602,15 @@ fn panel_scale_and_backdrop_dim_are_validated() {
         assert_eq!(validate(&s).is_ok(), ok, "scale {scale} dim {dim}");
     }
 }
+
+#[test]
+fn waystone_lists_default_and_validate() {
+    let mut s = Settings::default();
+    assert!(s.waystone.avoid.iter().any(|p| p.contains("maximum Resistances")) && s.waystone.want.is_empty());
+    s.waystone.want = vec!["Pack Size".into()];
+    validate(&s).unwrap();
+    s.waystone.want = vec!["  ".into()];
+    assert!(validate(&s).is_err());
+    s.waystone.want = vec!["x".repeat(201)];
+    assert!(validate(&s).is_err());
+}

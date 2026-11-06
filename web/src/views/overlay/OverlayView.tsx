@@ -17,6 +17,8 @@ import { MiscFilters, StatFilters } from "./Filters";
 import { ItemHeader } from "./ItemHeader";
 import { ErrorNotice, Results } from "./Results";
 import { useFitWindowHeight } from "../../hooks/useFitWindowHeight";
+import { ItemLinks } from "./ItemLinks";
+import { WaystoneMods } from "./WaystoneMods";
 
 /**
  * Runs `query_price`, discarding responses that a newer query (or a `price-failed` event, via
@@ -158,6 +160,7 @@ export function OverlayView() {
             <CloseIcon />
           </IconButton>
         </header>
+        {item && <ItemLinks item={item} />}
 
         {!item || !filters ? (
           <div className="flex flex-col gap-3 py-4" aria-live="polite">
@@ -171,6 +174,7 @@ export function OverlayView() {
         ) : (
           <>
             <div className="flex flex-col gap-3">
+              {item.category === "waystone" && settings && <WaystoneMods item={item} lists={settings.waystone} />}
               {filters.unique_candidates.length > 0 && <UniquePicker filters={filters} onPick={run} />}
               <Toolbar filters={filters} />
               <StatFilters filters={filters} />

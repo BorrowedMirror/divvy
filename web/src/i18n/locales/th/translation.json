@@ -128,7 +128,8 @@
       "hotkeys": "ปุ่มลัด",
       "trade": "เทรด",
       "overlay": "โอเวอร์เลย์",
-      "platform": "แพลตฟอร์ม"
+      "platform": "แพลตฟอร์ม",
+      "waystones": "ศิลานำทาง"
     },
     "language": "ภาษา",
     "theme": "ธีม",
@@ -327,5 +328,23 @@
     "light": "อ่อน",
     "medium": "ปานกลาง",
     "strong": "เข้ม"
+  },
+  "links": {
+    "label": "ค้นหาไอเท็มนี้",
+    "poe2db": "poe2db",
+    "wiki": "วิกิ",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "คัดลอกไอเท็มสำหรับ Craft of Exile แล้ว",
+    "craftCopiedHelp": "ในหน้าเว็บ คลิก Import item แล้ววางด้วย Ctrl+V"
+  },
+  "waystone": {
+    "heading": "ม็อดของศิลานำทาง",
+    "avoidCount_other": "หลีกเลี่ยง {{count}} รายการ",
+    "wantCount_other": "ต้องการ {{count}} รายการ",
+    "help": "ม็อดบนศิลานำทางที่มีวลีใดวลีหนึ่งต่อไปนี้จะถูกไฮไลต์ในแผง หนึ่งวลีต่อบรรทัด ไม่สนใจตัวพิมพ์เล็กใหญ่",
+    "avoidLabel": "หลีกเลี่ยง",
+    "wantLabel": "ต้องการ",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

@@ -128,7 +128,8 @@
       "hotkeys": "熱鍵",
       "trade": "交易",
       "overlay": "浮動視窗",
-      "platform": "平台"
+      "platform": "平台",
+      "waystones": "換界石"
     },
     "language": "語言",
     "theme": "主題",
@@ -327,5 +328,23 @@
     "light": "弱",
     "medium": "中",
     "strong": "強"
+  },
+  "links": {
+    "label": "查詢此物品",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "已為 Craft of Exile 複製物品",
+    "craftCopiedHelp": "在頁面上點選 Import item，然後按 Ctrl+V 貼上。"
+  },
+  "waystone": {
+    "heading": "換界石詞綴",
+    "avoidCount_other": "{{count}} 條需避開",
+    "wantCount_other": "{{count}} 條想要",
+    "help": "換界石上包含以下任一詞句的詞綴會在面板中醒目顯示。每行一個詞句，不分大小寫。",
+    "avoidLabel": "避開",
+    "wantLabel": "想要",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

@@ -128,7 +128,8 @@
       "hotkeys": "快捷键",
       "trade": "交易",
       "overlay": "浮窗",
-      "platform": "平台"
+      "platform": "平台",
+      "waystones": "引路石"
     },
     "language": "语言",
     "theme": "主题",
@@ -327,5 +328,23 @@
     "light": "弱",
     "medium": "中",
     "strong": "强"
+  },
+  "links": {
+    "label": "查询此物品",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "已为 Craft of Exile 复制物品",
+    "craftCopiedHelp": "在页面上点击 Import item，然后按 Ctrl+V 粘贴。"
+  },
+  "waystone": {
+    "heading": "引路石词缀",
+    "avoidCount_other": "{{count}} 条需避开",
+    "wantCount_other": "{{count}} 条想要",
+    "help": "引路石上包含以下任一短语的词缀会在面板中高亮显示。每行一个短语，不区分大小写。",
+    "avoidLabel": "避开",
+    "wantLabel": "想要",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

@@ -128,7 +128,8 @@
       "hotkeys": "ホットキー",
       "trade": "トレード",
       "overlay": "オーバーレイ",
-      "platform": "プラットフォーム"
+      "platform": "プラットフォーム",
+      "waystones": "ウェイストーン"
     },
     "language": "言語",
     "theme": "テーマ",
@@ -327,5 +328,23 @@
     "light": "弱",
     "medium": "中",
     "strong": "強"
+  },
+  "links": {
+    "label": "このアイテムを調べる",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Craft of Exile 用にアイテムをコピーしました",
+    "craftCopiedHelp": "ページで Import item をクリックし、Ctrl+V で貼り付けてください。"
+  },
+  "waystone": {
+    "heading": "ウェイストーンのMod",
+    "avoidCount_other": "回避 {{count}} 件",
+    "wantCount_other": "希望 {{count}} 件",
+    "help": "これらのフレーズのいずれかを含むウェイストーンのModがパネルで強調表示されます。1行に1フレーズ。大文字と小文字は区別しません。",
+    "avoidLabel": "回避",
+    "wantLabel": "希望",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

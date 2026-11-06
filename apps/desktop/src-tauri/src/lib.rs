@@ -44,6 +44,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::currency_icons,
             ipc::copy_text,
             ipc::drag_card,
+            ipc::open_lookup,
             ipc::clear_filter_memory,
             ipc::get_overlay_layout,
             ipc::rebind_hotkey,

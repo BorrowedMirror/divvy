@@ -131,7 +131,8 @@
       "hotkeys": "Kısayollar",
       "trade": "Ticaret",
       "overlay": "Arayüz",
-      "platform": "Platform"
+      "platform": "Platform",
+      "waystones": "Waystone'lar"
     },
     "language": "Dil",
     "theme": "Tema",
@@ -330,5 +331,25 @@
     "light": "Hafif",
     "medium": "Orta",
     "strong": "Güçlü"
+  },
+  "links": {
+    "label": "Bu eşyayı ara",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Eşya Craft of Exile için kopyalandı",
+    "craftCopiedHelp": "Sayfada Import item'a tıklayın ve Ctrl+V ile yapıştırın."
+  },
+  "waystone": {
+    "heading": "Waystone modları",
+    "avoidCount_one": "{{count}} kaçınılacak",
+    "avoidCount_other": "{{count}} kaçınılacak",
+    "wantCount_one": "{{count}} istenen",
+    "wantCount_other": "{{count}} istenen",
+    "help": "Bir waystone üzerinde bu ifadelerden birini içeren modlar panelde vurgulanır. Her satıra bir ifade; büyük/küçük harf fark etmez.",
+    "avoidLabel": "Kaçın",
+    "wantLabel": "İstenen",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

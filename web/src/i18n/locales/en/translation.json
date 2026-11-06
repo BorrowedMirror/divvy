@@ -131,7 +131,8 @@
       "hotkeys": "Hotkeys",
       "trade": "Trade",
       "overlay": "Overlay",
-      "platform": "Platform"
+      "platform": "Platform",
+      "waystones": "Waystones"
     },
     "language": "Language",
     "theme": "Theme",
@@ -330,5 +331,25 @@
     "light": "Light",
     "medium": "Medium",
     "strong": "Strong"
+  },
+  "links": {
+    "label": "Look up this item",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Item copied for Craft of Exile",
+    "craftCopiedHelp": "On the page, click Import item and paste it with Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Waystone mods",
+    "avoidCount_one": "{{count}} to avoid",
+    "avoidCount_other": "{{count}} to avoid",
+    "wantCount_one": "{{count}} wanted",
+    "wantCount_other": "{{count}} wanted",
+    "help": "Mods on a waystone that contain one of these phrases are highlighted in the panel. One phrase per line; capitals don't matter.",
+    "avoidLabel": "Avoid",
+    "wantLabel": "Want",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

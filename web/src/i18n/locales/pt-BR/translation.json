@@ -134,7 +134,8 @@
       "hotkeys": "Atalhos",
       "trade": "Trocas",
       "overlay": "Overlay",
-      "platform": "Plataforma"
+      "platform": "Plataforma",
+      "waystones": "Pedras-guia"
     },
     "language": "Idioma",
     "theme": "Tema",
@@ -333,5 +334,27 @@
     "light": "Leve",
     "medium": "Médio",
     "strong": "Forte"
+  },
+  "links": {
+    "label": "Pesquisar este item",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Item copiado para o Craft of Exile",
+    "craftCopiedHelp": "Na página, clique em Import item e cole com Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Modificadores da pedra-guia",
+    "avoidCount_one": "{{count}} a evitar",
+    "avoidCount_many": "{{count}} a evitar",
+    "avoidCount_other": "{{count}} a evitar",
+    "wantCount_one": "{{count}} desejado",
+    "wantCount_many": "{{count}} desejados",
+    "wantCount_other": "{{count}} desejados",
+    "help": "Os modificadores de uma pedra-guia que contêm uma destas frases são destacados no painel. Uma frase por linha; maiúsculas não importam.",
+    "avoidLabel": "Evitar",
+    "wantLabel": "Desejados",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

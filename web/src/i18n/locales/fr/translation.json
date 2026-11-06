@@ -134,7 +134,8 @@
       "hotkeys": "Raccourcis",
       "trade": "Échange",
       "overlay": "Overlay",
-      "platform": "Plateforme"
+      "platform": "Plateforme",
+      "waystones": "Pierres"
     },
     "language": "Langue",
     "theme": "Thème",
@@ -333,5 +334,27 @@
     "light": "Léger",
     "medium": "Moyen",
     "strong": "Fort"
+  },
+  "links": {
+    "label": "Rechercher cet objet",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Objet copié pour Craft of Exile",
+    "craftCopiedHelp": "Sur la page, cliquez sur Import item et collez-le avec Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Modificateurs de la pierre",
+    "avoidCount_one": "{{count}} à éviter",
+    "avoidCount_many": "{{count}} à éviter",
+    "avoidCount_other": "{{count}} à éviter",
+    "wantCount_one": "{{count}} souhaité",
+    "wantCount_many": "{{count}} souhaités",
+    "wantCount_other": "{{count}} souhaités",
+    "help": "Les modificateurs d'une pierre contenant l'une de ces expressions sont mis en évidence dans le panneau. Une expression par ligne ; la casse n'a pas d'importance.",
+    "avoidLabel": "À éviter",
+    "wantLabel": "Souhaités",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

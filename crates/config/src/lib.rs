@@ -16,6 +16,7 @@ pub struct Settings {
     pub hotkeys: HotkeySettings,
     pub trade: TradeSettings,
     pub overlay: OverlaySettings,
+    pub waystone: WaystoneSettings,
     pub ui: UiSettings,
     pub platform: PlatformSettings,
 }
@@ -102,6 +103,29 @@ pub enum OverlaySide {
     Last,
 }
 
+/// Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(default)]
+pub struct WaystoneSettings {
+    /// Mods to avoid, shown in red.
+    pub avoid: Vec<String>,
+    /// Mods wanted, shown in green.
+    pub want: Vec<String>,
+}
+
+impl Default for WaystoneSettings {
+    fn default() -> Self {
+        Self {
+            avoid: vec![
+                "to all maximum Resistances".into(),
+                "less Recovery Rate of Life and Energy Shield".into(),
+                "additional Projectiles".into(),
+            ],
+            want: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(default)]
 pub struct UiSettings {
@@ -139,6 +163,7 @@ impl Default for Settings {
             hotkeys: HotkeySettings::default(),
             trade: TradeSettings::default(),
             overlay: OverlaySettings::default(),
+            waystone: WaystoneSettings::default(),
             ui: UiSettings::default(),
             platform: PlatformSettings::default(),
         }
@@ -457,6 +482,11 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         }
     }
 
+    for (field, list) in [("waystone.avoid", &s.waystone.avoid), ("waystone.want", &s.waystone.want)] {
+        if list.len() > 200 || list.iter().any(|p| p.trim().is_empty() || p.len() > 200) {
+            return Err(invalid(field, "phrases must be 1-200 characters, at most 200 of them"));
+        }
+    }
     if !(0.75..=1.5).contains(&s.overlay.scale) {
         return Err(invalid("overlay.scale", format!("{} is not within 0.75..=1.5", s.overlay.scale)));
     }

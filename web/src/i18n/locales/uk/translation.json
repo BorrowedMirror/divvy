@@ -137,7 +137,8 @@
       "hotkeys": "Гарячі клавіші",
       "trade": "Торгівля",
       "overlay": "Оверлей",
-      "platform": "Платформа"
+      "platform": "Платформа",
+      "waystones": "Шляхові камені"
     },
     "language": "Мова",
     "theme": "Тема",
@@ -336,5 +337,29 @@
     "light": "Слабке",
     "medium": "Середнє",
     "strong": "Сильне"
+  },
+  "links": {
+    "label": "Знайти цей предмет",
+    "poe2db": "poe2db",
+    "wiki": "Вікі",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Предмет скопійовано для Craft of Exile",
+    "craftCopiedHelp": "На сторінці натисніть Import item і вставте його за допомогою Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Модифікатори шляхового каменя",
+    "avoidCount_one": "{{count}} небажаний",
+    "avoidCount_few": "{{count}} небажані",
+    "avoidCount_many": "{{count}} небажаних",
+    "avoidCount_other": "{{count}} небажаного",
+    "wantCount_one": "{{count}} бажаний",
+    "wantCount_few": "{{count}} бажані",
+    "wantCount_many": "{{count}} бажаних",
+    "wantCount_other": "{{count}} бажаного",
+    "help": "Модифікатори шляхового каменя, що містять одну з цих фраз, виділяються на панелі. Одна фраза на рядок; регістр не має значення.",
+    "avoidLabel": "Уникати",
+    "wantLabel": "Бажані",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

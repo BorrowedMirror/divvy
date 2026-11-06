@@ -134,7 +134,8 @@
       "hotkeys": "Scorciatoie",
       "trade": "Scambi",
       "overlay": "Overlay",
-      "platform": "Piattaforma"
+      "platform": "Piattaforma",
+      "waystones": "Waystone"
     },
     "language": "Lingua",
     "theme": "Tema",
@@ -333,5 +334,27 @@
     "light": "Leggero",
     "medium": "Medio",
     "strong": "Forte"
+  },
+  "links": {
+    "label": "Cerca questo oggetto",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Oggetto copiato per Craft of Exile",
+    "craftCopiedHelp": "Nella pagina, fai clic su Import item e incollalo con Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Modificatori Waystone",
+    "avoidCount_one": "{{count}} da evitare",
+    "avoidCount_many": "{{count}} da evitare",
+    "avoidCount_other": "{{count}} da evitare",
+    "wantCount_one": "{{count}} desiderato",
+    "wantCount_many": "{{count}} desiderati",
+    "wantCount_other": "{{count}} desiderati",
+    "help": "I modificatori di una Waystone che contengono una di queste frasi vengono evidenziati nel pannello. Una frase per riga; maiuscole e minuscole non contano.",
+    "avoidLabel": "Da evitare",
+    "wantLabel": "Desiderati",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

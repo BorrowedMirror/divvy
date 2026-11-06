@@ -16,6 +16,39 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test("lookup links open the unique by name and a rare by its base", async () => {
+    const user = userEvent.setup();
+    const calls = setupIpc({ get_overlay_snapshot: () => itemCopied(), open_lookup: (a) => a?.site === "craft_of_exile" });
+    renderWithProviders(<OverlayView />);
+    const links = await screen.findByTestId("item-links");
+    await user.click(within(links).getByRole("button", { name: "poe2db" }));
+    expect(callsOf(calls, "open_lookup")[0]?.args).toEqual({ site: "poe2db", name: parsedItem().base_type });
+    await user.click(within(links).getByRole("button", { name: "Craft of Exile" }));
+    expect(callsOf(calls, "open_lookup")[1]?.args).toMatchObject({ site: "craft_of_exile" });
+    expect(await screen.findByText("Item copied for Craft of Exile")).toBeInTheDocument();
+  });
+
+  test("waystones list their mods with avoid and want highlighted", async () => {
+    const [mod] = parsedItem().modifiers;
+    if (!mod) throw new Error("fixture has mods");
+    const item = parsedItem({
+      class: { type: "waystone" },
+      category: "waystone",
+      modifiers: [
+        { ...mod, text: "Players have -20% to all maximum Resistances" },
+        { ...mod, text: "+12% Pack Size" },
+        { ...mod, text: "Monsters have 41% increased Life" },
+      ],
+    });
+    setupIpc({ get_overlay_snapshot: () => itemCopied({ item }) });
+    renderWithProviders(<OverlayView />);
+    const section = await screen.findByTestId("waystone-mods");
+    const rows = within(section).getAllByRole("listitem");
+    expect(rows.map((r) => r.dataset.verdict)).toEqual(["avoid", "want", "none"]);
+    expect(within(section).getByText("1 to avoid")).toBeInTheDocument();
+    expect(within(section).getByText("1 wanted")).toBeInTheDocument();
+  });
+
   test("dragging the header reports start, moves and end; Rust moves the card", async () => {
     const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 100, y: 50 }), drag_card: () => null });
     renderWithProviders(<OverlayView />);

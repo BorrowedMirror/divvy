@@ -23,11 +23,12 @@ import { toIpcError } from "../../lib/ipc";
 import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "../../lib/validate";
 import { isDirty, useSettingsStore } from "../../stores/settings";
 import { HotkeyRecorder } from "./HotkeyRecorder";
+import { parsePhrases } from "../../lib/waystone";
 
 type Update = (fn: (s: Settings_Serialize) => Settings_Serialize) => void;
 type TabProps = { s: Settings_Serialize; update: Update; errors: ValidationErrors };
 
-const TABS = ["general", "hotkeys", "trade", "overlay", "platform"] as const;
+const TABS = ["general", "hotkeys", "trade", "overlay", "waystones", "platform"] as const;
 
 const LISTING_COLUMNS: ListingColumn[] = ["seller", "item_level", "stock", "listed"];
 
@@ -121,6 +122,9 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
         </Tabs.Panel>
         <Tabs.Panel value="overlay">
           <OverlayTab s={draft} update={update} errors={errors} />
+        </Tabs.Panel>
+        <Tabs.Panel value="waystones">
+          <WaystonesTab s={draft} update={update} errors={errors} />
         </Tabs.Panel>
         <Tabs.Panel value="platform">
           <PlatformTab s={draft} update={update} errors={errors} />
@@ -362,6 +366,32 @@ function TradeTab({ s, update, errors }: TabProps) {
         />
       </Row>
       <p className="text-xs text-muted">{t("settings.contactHelp")}</p>
+    </div>
+  );
+}
+
+function WaystonesTab({ s, update, errors }: TabProps) {
+  const { t } = useTranslation();
+  const field = (key: "avoid" | "want") => (
+    <Row label={t(`waystone.${key}Label`)} htmlFor={`waystone-${key}`} error={errors[`waystone.${key}`]}>
+      <textarea
+        id={`waystone-${key}`}
+        rows={5}
+        className="w-full rounded-md border border-line bg-surface-2 px-2 py-1.5 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        defaultValue={s.waystone[key].join("\n")}
+        placeholder={t(`waystone.${key}Placeholder`)}
+        onBlur={(e) => {
+          const phrases = parsePhrases(e.currentTarget.value);
+          update((d) => ({ ...d, waystone: { ...d.waystone, [key]: phrases } }));
+        }}
+      />
+    </Row>
+  );
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm text-muted">{t("waystone.help")}</p>
+      {field("avoid")}
+      {field("want")}
     </div>
   );
 }

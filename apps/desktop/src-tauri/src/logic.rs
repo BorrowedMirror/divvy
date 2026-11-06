@@ -297,6 +297,33 @@ pub fn clamp_into(p: (i32, i32), size: (i32, i32), area: Area) -> (i32, i32) {
     (x, y)
 }
 
+/// Sites an item can be looked up on from the panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum LookupSite {
+    Poe2db,
+    Wiki,
+    CraftOfExile,
+}
+
+/// Page for `name` (a unique's name or a base type) on `site`. The hosts are fixed here, so the
+/// web view can only open these three sites. Craft of Exile has no per-item URL; it opens the
+/// PoE2 crafting page.
+pub fn lookup_url(site: LookupSite, name: &str) -> Option<url::Url> {
+    let page = name.trim().replace(' ', "_");
+    let (base, needs_name) = match site {
+        LookupSite::Poe2db => ("https://poe2db.tw/us/", true),
+        LookupSite::Wiki => ("https://www.poe2wiki.net/wiki/", true),
+        LookupSite::CraftOfExile => return url::Url::parse("https://www.craftofexile.com/?game=poe2").ok(),
+    };
+    if needs_name && page.is_empty() {
+        return None;
+    }
+    let mut url = url::Url::parse(base).ok()?;
+    url.path_segments_mut().ok()?.pop_if_empty().push(&page);
+    Some(url)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -357,6 +384,24 @@ mod tests {
         assert_eq!(clamp_into((1800, 900), (420, 600), area), (1500, 480));
         assert_eq!(clamp_into((-50, -10), (420, 600), area), (0, 0));
         assert_eq!(clamp_into((10, 10), (3000, 600), area), (0, 10), "too wide: pin to the left edge");
+    }
+
+    #[test]
+    fn lookup_urls_use_fixed_hosts_and_encode_names() {
+        assert_eq!(lookup_url(LookupSite::Poe2db, "Gold Ring").unwrap().as_str(), "https://poe2db.tw/us/Gold_Ring");
+        assert_eq!(
+            lookup_url(LookupSite::Wiki, "Ventor's Gamble").unwrap().as_str(),
+            "https://www.poe2wiki.net/wiki/Ventor's_Gamble"
+        );
+        assert_eq!(
+            lookup_url(LookupSite::Wiki, "a/b?c#d").unwrap().as_str(),
+            "https://www.poe2wiki.net/wiki/a%2Fb%3Fc%23d"
+        );
+        assert_eq!(lookup_url(LookupSite::Poe2db, "  "), None);
+        assert_eq!(
+            lookup_url(LookupSite::CraftOfExile, "").unwrap().as_str(),
+            "https://www.craftofexile.com/?game=poe2"
+        );
     }
 
     #[test]

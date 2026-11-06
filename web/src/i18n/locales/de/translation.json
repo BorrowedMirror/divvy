@@ -131,7 +131,8 @@
       "hotkeys": "Tastenkürzel",
       "trade": "Handel",
       "overlay": "Overlay",
-      "platform": "Plattform"
+      "platform": "Plattform",
+      "waystones": "Wegsteine"
     },
     "language": "Sprache",
     "theme": "Design",
@@ -330,5 +331,25 @@
     "light": "Leicht",
     "medium": "Mittel",
     "strong": "Stark"
+  },
+  "links": {
+    "label": "Dieses Item nachschlagen",
+    "poe2db": "poe2db",
+    "wiki": "Wiki",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Item für Craft of Exile kopiert",
+    "craftCopiedHelp": "Klicke auf der Seite auf Import item und füge es mit Strg+V ein."
+  },
+  "waystone": {
+    "heading": "Wegstein-Mods",
+    "avoidCount_one": "{{count}} zu meiden",
+    "avoidCount_other": "{{count}} zu meiden",
+    "wantCount_one": "{{count}} gewünscht",
+    "wantCount_other": "{{count}} gewünscht",
+    "help": "Mods auf einem Wegstein, die einen dieser Ausdrücke enthalten, werden im Panel hervorgehoben. Ein Ausdruck pro Zeile; Groß- und Kleinschreibung spielt keine Rolle.",
+    "avoidLabel": "Meiden",
+    "wantLabel": "Gewünscht",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

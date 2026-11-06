@@ -137,7 +137,8 @@
       "hotkeys": "Горячие клавиши",
       "trade": "Торговля",
       "overlay": "Оверлей",
-      "platform": "Платформа"
+      "platform": "Платформа",
+      "waystones": "Путевые камни"
     },
     "language": "Язык",
     "theme": "Тема",
@@ -336,5 +337,29 @@
     "light": "Слабое",
     "medium": "Среднее",
     "strong": "Сильное"
+  },
+  "links": {
+    "label": "Найти этот предмет",
+    "poe2db": "poe2db",
+    "wiki": "Вики",
+    "craft_of_exile": "Craft of Exile",
+    "craftCopied": "Предмет скопирован для Craft of Exile",
+    "craftCopiedHelp": "На странице нажмите Import item и вставьте его с помощью Ctrl+V."
+  },
+  "waystone": {
+    "heading": "Модификаторы путевого камня",
+    "avoidCount_one": "{{count}} нежелательный",
+    "avoidCount_few": "{{count}} нежелательных",
+    "avoidCount_many": "{{count}} нежелательных",
+    "avoidCount_other": "{{count}} нежелательного",
+    "wantCount_one": "{{count}} желательный",
+    "wantCount_few": "{{count}} желательных",
+    "wantCount_many": "{{count}} желательных",
+    "wantCount_other": "{{count}} желательного",
+    "help": "Модификаторы путевого камня, содержащие одну из этих фраз, выделяются на панели. Одна фраза на строку; регистр не важен.",
+    "avoidLabel": "Избегать",
+    "wantLabel": "Желательные",
+    "avoidPlaceholder": "to all maximum Resistances",
+    "wantPlaceholder": "increased Quantity of Items"
   }
 }

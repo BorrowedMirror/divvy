@@ -165,6 +165,17 @@ describe("SettingsView", () => {
     expect(draft().ui.autostart).toBe(true);
   });
 
+  test("waystones tab edits the avoid and want phrases", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Waystones" }));
+    const want = screen.getByRole("textbox", { name: "Want" });
+    await user.clear(want);
+    await user.type(want, "Pack Size{enter}{enter}  Rarity  ");
+    fireEvent.blur(want);
+    expect(draft().waystone.want).toEqual(["Pack Size", "Rarity"]);
+  });
+
   test("forget remembered stat choices", async () => {
     const user = userEvent.setup();
     const { calls } = await mount({ clear_filter_memory: () => null });

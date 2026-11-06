@@ -45,6 +45,12 @@ export const commands = {
 	 *  window. `End` remembers the spot for `Position: Last`.
 	 */
 	dragCard: (phase: DragPhase) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("drag_card", { phase })),
+	/**
+	 *  Open the current item on poe2db, the wiki or Craft of Exile in the browser. Craft of Exile
+	 *  has no way to pass an item in a link, but its "Import item" box takes the game's copied item
+	 *  text, so that text is put on the clipboard first. Returns whether it was.
+	 */
+	openLookup: (site: LookupSite, name: string) => typedError<boolean, IpcError_Serialize>(__TAURI_INVOKE("open_lookup", { site, name })),
 	/**  Forget every remembered stat choice. */
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
@@ -381,6 +387,9 @@ export type Listing_Serialize = {
 	 */
 	equivalent: Price | null,
 };
+
+/**  Sites an item can be looked up on from the panel. */
+export type LookupSite = "poe2db" | "wiki" | "craft_of_exile";
 
 export type MiscFilters = MiscFilters_Serialize | MiscFilters_Deserialize;
 
@@ -802,6 +811,7 @@ export type Settings_Deserialize = {
 	hotkeys?: HotkeySettings_Deserialize,
 	trade?: TradeSettings_Deserialize,
 	overlay?: OverlaySettings_Deserialize,
+	waystone?: WaystoneSettings_Deserialize,
 	ui?: UiSettings_Deserialize,
 	platform?: PlatformSettings_Deserialize,
 };
@@ -812,6 +822,7 @@ export type Settings_Serialize = {
 	hotkeys: HotkeySettings_Serialize,
 	trade: TradeSettings_Serialize,
 	overlay: OverlaySettings_Serialize,
+	waystone: WaystoneSettings_Serialize,
 	ui: UiSettings_Serialize,
 	platform: PlatformSettings_Serialize,
 };
@@ -950,6 +961,25 @@ export type UpdateAvailable_Serialize = {
 export type ValueRange = {
 	min: number | null,
 	max: number | null,
+};
+
+/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
+export type WaystoneSettings = WaystoneSettings_Serialize | WaystoneSettings_Deserialize;
+
+/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
+export type WaystoneSettings_Deserialize = {
+	/**  Mods to avoid, shown in red. */
+	avoid?: string[],
+	/**  Mods wanted, shown in green. */
+	want?: string[],
+};
+
+/**  Waystone mod check: mod text phrases to flag (case-insensitive, matched anywhere in a mod). */
+export type WaystoneSettings_Serialize = {
+	/**  Mods to avoid, shown in red. */
+	avoid: string[],
+	/**  Mods wanted, shown in green. */
+	want: string[],
 };
 
 /* Tauri Specta runtime */
