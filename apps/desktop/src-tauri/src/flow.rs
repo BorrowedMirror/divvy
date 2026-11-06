@@ -151,13 +151,21 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
         let monitor =
             app.monitor_from_point(cursor.x, cursor.y).ok().flatten().or_else(|| app.primary_monitor().ok().flatten());
         if let Some(m) = monitor {
-            let area = logic::Area {
+            let screen = logic::Area {
                 x: m.position().x,
                 y: m.position().y,
                 width: m.size().width as i32,
                 height: m.size().height as i32,
             };
-            let (x, y) = logic::overlay_position((cursor.x as i32, cursor.y as i32), size, area);
+            // Edges are the game window's when it is tracked (physical px, not macOS points).
+            let area = game_window(state).filter(|_| !cfg!(target_os = "macos")).map_or(screen, |g| logic::Area {
+                x: g.rect.x,
+                y: g.rect.y,
+                width: g.rect.width as i32,
+                height: g.rect.height as i32,
+            });
+            let side = state.settings().overlay.side;
+            let (x, y) = logic::panel_position(side, (cursor.x as i32, cursor.y as i32), size, area);
             // Layer-shell surfaces ignore set_position; anchor them to the output edge instead.
             // gtk-layer-shell calls GTK directly, which panics off the main thread (and
             // `show_overlay` runs on tokio workers from the hotkey/test-hook flows), so hop to

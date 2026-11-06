@@ -129,7 +129,7 @@
     "leagueAuto": "Détecter la ligue automatiquement",
     "league": "Ligue",
     "leaguesFailed": "Impossible de charger les ligues : {{message}}",
-    "onlineOnly": "Vendeurs en ligne uniquement",
+    "sellers": "Vendeurs par défaut",
     "widenPct": "Élargir les plages de stats (%)",
     "enableAllStats": "Activer toutes les stats par défaut",
     "contact": "E-mail de contact",

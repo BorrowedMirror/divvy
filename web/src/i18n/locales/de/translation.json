@@ -127,7 +127,7 @@
     "leagueAuto": "Liga automatisch erkennen",
     "league": "Liga",
     "leaguesFailed": "Ligen konnten nicht geladen werden: {{message}}",
-    "onlineOnly": "Nur Verkäufer, die online sind",
+    "sellers": "Standard-Verkäufer",
     "widenPct": "Wertebereiche erweitern (%)",
     "enableAllStats": "Standardmäßig alle Werte aktivieren",
     "contact": "Kontakt-E-Mail",

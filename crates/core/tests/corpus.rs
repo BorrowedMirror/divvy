@@ -149,7 +149,12 @@ fn trade_queries_for_representative_items() {
     let parsed: Vec<ParsedItem> = all.iter().map(|(_, t)| parse_item(t).unwrap()).collect();
     let catalog = CorpusCatalog::from_items(&parsed);
     let matcher = StatMatcher::new(&catalog);
-    let opts = QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false };
+    let opts = QueryOptions {
+        league: "Standard".into(),
+        status: rkl_core::query::OnlineStatus::Online,
+        widen_pct: 10.0,
+        enable_all_stats: false,
+    };
     for id in ids {
         let idx = all.iter().position(|(e, _)| e.id == id).unwrap_or_else(|| panic!("missing {id}"));
         let mut item = parsed[idx].clone();

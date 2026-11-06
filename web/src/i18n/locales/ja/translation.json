@@ -123,7 +123,7 @@
     "leagueAuto": "リーグを自動検出",
     "league": "リーグ",
     "leaguesFailed": "リーグを読み込めませんでした: {{message}}",
-    "onlineOnly": "オンラインの出品者のみ",
+    "sellers": "既定の出品者",
     "widenPct": "ステータス範囲の拡大 (%)",
     "enableAllStats": "すべてのステータスを既定で有効にする",
     "contact": "連絡先メールアドレス",

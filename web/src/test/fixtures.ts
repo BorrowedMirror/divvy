@@ -149,7 +149,7 @@ export function settings(overrides: Partial<Settings_Serialize> = {}): Settings_
     },
     trade: {
       source: "trade",
-      online_only: true,
+      sellers: "any",
       widen_pct: 10,
       enable_all_stats: false,
       contact: null,

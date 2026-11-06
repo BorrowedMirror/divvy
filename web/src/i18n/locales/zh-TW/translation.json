@@ -123,7 +123,7 @@
     "leagueAuto": "自動偵測聯盟",
     "league": "聯盟",
     "leaguesFailed": "無法載入聯盟：{{message}}",
-    "onlineOnly": "僅限線上賣家",
+    "sellers": "預設賣家",
     "widenPct": "放寬屬性範圍（%）",
     "enableAllStats": "預設啟用所有屬性",
     "contact": "聯絡電子郵件",

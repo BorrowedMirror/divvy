@@ -123,7 +123,7 @@
     "leagueAuto": "自动检测赛季",
     "league": "赛季",
     "leaguesFailed": "无法加载赛季：{{message}}",
-    "onlineOnly": "仅限在线卖家",
+    "sellers": "默认卖家",
     "widenPct": "放宽属性范围（%）",
     "enableAllStats": "默认启用所有属性",
     "contact": "联系邮箱",

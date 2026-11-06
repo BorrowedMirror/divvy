@@ -42,7 +42,12 @@ fn corpus() -> Vec<(String, String)> {
 }
 
 fn opts() -> QueryOptions {
-    QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false }
+    QueryOptions {
+        league: "Standard".into(),
+        status: rkl_core::query::OnlineStatus::Online,
+        widen_pct: 10.0,
+        enable_all_stats: false,
+    }
 }
 
 fn pipeline(data: &rkl_data::GameData, text: &str, opts: &QueryOptions) {

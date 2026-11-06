@@ -131,7 +131,7 @@
     "leagueAuto": "Wykrywaj ligę automatycznie",
     "league": "Liga",
     "leaguesFailed": "Nie udało się wczytać lig: {{message}}",
-    "onlineOnly": "Tylko sprzedający online",
+    "sellers": "Domyślni sprzedający",
     "widenPct": "Poszerz zakresy statystyk (%)",
     "enableAllStats": "Domyślnie włączaj wszystkie statystyki",
     "contact": "E-mail kontaktowy",

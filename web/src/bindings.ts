@@ -827,7 +827,8 @@ export type TradeSettings = TradeSettings_Serialize | TradeSettings_Deserialize;
 
 export type TradeSettings_Deserialize = {
 	source?: PriceSourceKind,
-	online_only?: boolean,
+	/**  Default seller filter for new searches: instant buyout, online, or any (default). */
+	sellers?: OnlineStatus,
 	widen_pct?: number | null,
 	enable_all_stats?: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */
@@ -838,7 +839,8 @@ export type TradeSettings_Deserialize = {
 
 export type TradeSettings_Serialize = {
 	source: PriceSourceKind,
-	online_only: boolean,
+	/**  Default seller filter for new searches: instant buyout, online, or any (default). */
+	sellers: OnlineStatus,
 	widen_pct: number | null,
 	enable_all_stats: boolean,
 	/**  Optional e-mail appended to the User-Agent, as GGG requests. */

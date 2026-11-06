@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import type {
   BackendKind,
   HotkeyAction,
+  OnlineStatus,
   OverlaySide,
   PriceSourceKind,
   Settings_Serialize,
@@ -275,7 +276,16 @@ function TradeTab({ s, update, errors }: TabProps) {
           />
         )}
       </Row>
-      <SwitchField label={t("settings.onlineOnly")} checked={s.trade.online_only} onChange={(online_only) => setTrade({ online_only })} />
+      <Row label={t("settings.sellers")} htmlFor="set-sellers">
+        <SelectField<OnlineStatus>
+          id="set-sellers"
+          label={t("settings.sellers")}
+          hideLabel
+          value={s.trade.sellers}
+          options={(["securable", "online", "any"] as const).map((v) => ({ value: v, label: t(`status.${v}`) }))}
+          onChange={(sellers) => setTrade({ sellers })}
+        />
+      </Row>
       <Row label={t("settings.widenPct")} htmlFor="set-widen" error={errors["trade.widen_pct"]}>
         <NumberInput
           id="set-widen"

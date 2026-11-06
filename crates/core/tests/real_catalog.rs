@@ -94,7 +94,12 @@ fn sceptre_spirit_search_matches_trade_listings() {
     let sceptre = matched("weapon/rare-sceptre-spirit-advanced");
     assert_eq!(stat_of(&sceptre, "55% increased Spirit"), Some("explicit.stat_3984865854"));
     assert_eq!(stat_of(&sceptre, "13% increased Spirit"), Some("desecrated.stat_3984865854"));
-    let opts = QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false };
+    let opts = QueryOptions {
+        league: "Standard".into(),
+        status: rkl_core::query::OnlineStatus::Online,
+        widen_pct: 10.0,
+        enable_all_stats: false,
+    };
     let f = build_filters(&sceptre, &opts);
     let spirit: Vec<_> = f.stats.iter().filter(|s| s.stat_id.ends_with("stat_3984865854")).collect();
     assert_eq!(spirit.len(), 1, "one summed Spirit filter: {:?}", f.stats);

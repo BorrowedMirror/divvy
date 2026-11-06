@@ -123,7 +123,7 @@
     "leagueAuto": "리그 자동 감지",
     "league": "리그",
     "leaguesFailed": "리그를 불러올 수 없습니다: {{message}}",
-    "onlineOnly": "온라인 판매자만",
+    "sellers": "기본 판매자",
     "widenPct": "능력치 범위 확장 (%)",
     "enableAllStats": "기본적으로 모든 능력치 사용",
     "contact": "연락처 이메일",

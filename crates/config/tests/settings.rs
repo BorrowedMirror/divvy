@@ -6,7 +6,7 @@ use proptest::prelude::*;
 use rkl_config::{
     CONFIG_DIR_ENV, ConfigError, OverlaySide, Paths, SETTINGS_VERSION, Settings, Theme, load, migrate, save, validate,
 };
-use rkl_core::pricing::PriceSourceKind;
+use rkl_core::{pricing::PriceSourceKind, query::OnlineStatus};
 use rkl_platform::{BackendKind, Chord, KeyModifier};
 
 fn fixture(name: &str) -> String {
@@ -133,7 +133,7 @@ fn migrate_v0_full_fixture() {
         modifiers = ["ctrl", "shift"]
         key = "KeyD"
         [trade]
-        online_only = false
+        sellers = "any"
         [ui]
         theme = "dark"
         "#,
@@ -152,7 +152,7 @@ fn migrate_v0_empty_league_means_auto_detect() {
     assert!(s.league.auto_detect);
     assert_eq!(s.league.league, None);
     assert_eq!(s.hotkeys.price_check, Chord::new(&[KeyModifier::Alt], "f5"));
-    assert!(s.trade.online_only, "absent online_only keeps the default");
+    assert_eq!(s.trade.sellers, OnlineStatus::Any, "absent online_only keeps the default");
 }
 
 #[test]
@@ -392,7 +392,7 @@ fn load_migrates_legacy_file() {
     let s = load(&paths).unwrap();
     assert_eq!(s.version, SETTINGS_VERSION);
     assert_eq!(s.league.league.as_deref(), Some("Rise of the Abyssal"));
-    assert!(!s.trade.online_only);
+    assert_eq!(s.trade.sellers, OnlineStatus::Any);
 }
 
 // ---------------------------------------------------------------- proptest
@@ -409,7 +409,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
     let hotkeys = (chord_strategy(), chord_strategy(), chord_strategy(), any::<bool>());
     let trade = (
         prop_oneof![Just(PriceSourceKind::Trade), Just(PriceSourceKind::PoeNinja), Just(PriceSourceKind::Poe2Scout)],
-        any::<bool>(),
+        prop_oneof![Just(OnlineStatus::Securable), Just(OnlineStatus::Online), Just(OnlineStatus::Any)],
         0.0..=100.0f64,
         any::<bool>(),
         prop::option::of("[a-z0-9.+]{1,8}@[a-z]{1,8}\\.[a-z]{2,4}"),
@@ -442,7 +442,7 @@ fn settings_strategy() -> impl Strategy<Value = Settings> {
                 hotkeys;
             (
                 s.trade.source,
-                s.trade.online_only,
+                s.trade.sellers,
                 s.trade.widen_pct,
                 s.trade.enable_all_stats,
                 s.trade.contact,
@@ -555,4 +555,11 @@ fn legacy_kalandra_settings_are_adopted_once() {
     assert!((load(&paths).unwrap().trade.widen_pct - 17.0).abs() < f64::EPSILON);
     assert!(!rkl_config::adopt_legacy_settings(&paths, None).unwrap());
     assert!(rkl_config::legacy_settings_file().is_none_or(|p| p.ends_with("settings.toml")));
+}
+
+#[test]
+fn sellers_default_to_any() {
+    assert_eq!(Settings::default().trade.sellers, OnlineStatus::Any);
+    let s: Settings = table("version = 1\n[trade]\nsellers = \"securable\"\n").try_into().unwrap();
+    assert_eq!(s.trade.sellers, OnlineStatus::Securable);
 }

@@ -127,7 +127,7 @@
     "leagueAuto": "Detect league automatically",
     "league": "League",
     "leaguesFailed": "Couldn't load leagues: {{message}}",
-    "onlineOnly": "Online sellers only",
+    "sellers": "Default sellers",
     "widenPct": "Widen stat ranges (%)",
     "enableAllStats": "Enable all stats by default",
     "contact": "Contact e-mail",

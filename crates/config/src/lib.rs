@@ -43,7 +43,8 @@ pub struct HotkeySettings {
 #[serde(default)]
 pub struct TradeSettings {
     pub source: PriceSourceKind,
-    pub online_only: bool,
+    /// Default seller filter for new searches: instant buyout, online, or any (default).
+    pub sellers: rkl_core::query::OnlineStatus,
     pub widen_pct: f64,
     pub enable_all_stats: bool,
     /// Optional e-mail appended to the User-Agent, as GGG requests.
@@ -133,7 +134,7 @@ impl Default for TradeSettings {
     fn default() -> Self {
         Self {
             source: PriceSourceKind::Trade,
-            online_only: true,
+            sellers: rkl_core::query::OnlineStatus::Any,
             widen_pct: 10.0,
             enable_all_stats: false,
             contact: None,
@@ -284,7 +285,7 @@ fn section<'a>(doc: &'a mut toml::Table, name: &str) -> Result<&'a mut toml::Tab
 /// online_only = false
 /// ```
 ///
-/// v1 moves them into `[league]`, `[hotkeys]` and `[trade]`. An explicit v0 league meant
+/// v1 moves them into `[league]`, `[hotkeys]` and `[trade]` (`online_only` becomes `sellers`). An explicit v0 league meant
 /// "always use this league", i.e. auto-detect off; an empty one meant auto-detect.
 fn migrate_v0_to_v1(mut doc: toml::Table) -> Result<toml::Table, ConfigError> {
     if let Some(value) = doc.remove("league") {
@@ -313,7 +314,7 @@ fn migrate_v0_to_v1(mut doc: toml::Table) -> Result<toml::Table, ConfigError> {
     }
     if let Some(value) = doc.remove("online_only") {
         let online = value.as_bool().ok_or_else(|| invalid("online_only", "expected a boolean"))?;
-        section(&mut doc, "trade")?.insert("online_only".into(), online.into());
+        section(&mut doc, "trade")?.insert("sellers".into(), (if online { "online" } else { "any" }).into());
     }
     doc.insert("version".into(), 1.into());
     Ok(doc)

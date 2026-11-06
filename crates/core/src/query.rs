@@ -9,7 +9,8 @@ use crate::item::{ItemCategory, ItemClass, ModKind, ParsedItem, Rarity};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, specta::Type)]
 pub struct QueryOptions {
     pub league: String,
-    pub online_only: bool,
+    /// Initial seller filter (`OnlineStatus::Any` by default in settings).
+    pub status: OnlineStatus,
     /// Default widening applied to stat values, in percent (e.g. 10 => min = value * 0.9).
     pub widen_pct: f64,
     /// Enable all matched explicit stats by default (otherwise only the top few).
@@ -282,7 +283,7 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
 
     FilterSet {
         league: opts.league.clone(),
-        status: if opts.online_only { OnlineStatus::Online } else { OnlineStatus::Any },
+        status: opts.status,
         name,
         base_type,
         category: item.class.trade_category().map(str::to_owned),
@@ -425,7 +426,12 @@ mod tests {
     use crate::{matcher::StatMatcher, parser::parse_item};
 
     fn opts() -> QueryOptions {
-        QueryOptions { league: "Standard".into(), online_only: true, widen_pct: 10.0, enable_all_stats: false }
+        QueryOptions {
+            league: "Standard".into(),
+            status: OnlineStatus::Online,
+            widen_pct: 10.0,
+            enable_all_stats: false,
+        }
     }
 
     fn rare_bow() -> ParsedItem {
@@ -453,7 +459,8 @@ mod tests {
         assert_eq!(f.misc.corrupted, Some(true));
         assert!(!f.misc.item_level.enabled);
 
-        let all = build_filters(&rare_bow(), &QueryOptions { enable_all_stats: true, online_only: false, ..opts() });
+        let all =
+            build_filters(&rare_bow(), &QueryOptions { enable_all_stats: true, status: OnlineStatus::Any, ..opts() });
         assert_eq!(all.stats.iter().filter(|s| s.enabled).count(), 5);
         assert_eq!(all.status, OnlineStatus::Any);
     }

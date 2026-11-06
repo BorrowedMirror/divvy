@@ -27,7 +27,7 @@ key = "Space"
 
 [trade]
 source = "trade"
-online_only = true
+sellers = "any"
 widen_pct = 10.0
 enable_all_stats = false
 

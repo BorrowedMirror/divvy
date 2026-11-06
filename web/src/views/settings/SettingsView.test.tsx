@@ -86,9 +86,11 @@ describe("SettingsView", () => {
     await user.click(await screen.findByRole("option", { name: "Dawn of the Hunt" }));
     expect(draft().league).toEqual({ auto_detect: false, league: "Dawn of the Hunt" });
 
-    await user.click(screen.getByRole("switch", { name: "Online sellers only" }));
+    expect(screen.getByRole("combobox", { name: "Default sellers" })).toHaveTextContent("Any");
+    await user.click(screen.getByRole("combobox", { name: "Default sellers" }));
+    await user.click(await screen.findByRole("option", { name: "Online" }));
     await user.click(screen.getByRole("switch", { name: "Enable all stats by default" }));
-    expect(draft().trade).toMatchObject({ online_only: false, enable_all_stats: true });
+    expect(draft().trade).toMatchObject({ sellers: "online", enable_all_stats: true });
 
     const widen = screen.getByRole("textbox", { name: "Widen stat ranges (%)" });
     fireEvent.change(widen, { target: { value: "150" } });

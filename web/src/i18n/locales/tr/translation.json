@@ -127,7 +127,7 @@
     "leagueAuto": "Ligi otomatik algıla",
     "league": "Lig",
     "leaguesFailed": "Ligler yüklenemedi: {{message}}",
-    "onlineOnly": "Yalnızca çevrimiçi satıcılar",
+    "sellers": "Varsayılan satıcılar",
     "widenPct": "Özellik aralıklarını genişlet (%)",
     "enableAllStats": "Tüm özellikleri varsayılan olarak etkinleştir",
     "contact": "İletişim e-postası",

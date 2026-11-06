@@ -43,7 +43,7 @@ pub fn process_item_text(
 pub fn query_options(settings: &Settings, league: &str) -> QueryOptions {
     QueryOptions {
         league: league.to_owned(),
-        online_only: settings.trade.online_only,
+        status: settings.trade.sellers,
         widen_pct: settings.trade.widen_pct,
         enable_all_stats: settings.trade.enable_all_stats,
     }
@@ -98,6 +98,19 @@ pub fn overlay_position(cursor: (i32, i32), size: (i32, i32), screen: Area) -> (
     let x = if cx + GAP + w <= right { cx + GAP } else { (cx - GAP - w).max(screen.x) };
     let y = (cy - h / 2).clamp(screen.y, (bottom - h).max(screen.y));
     (x, y)
+}
+
+/// Card position for the `overlay.side` setting: beside the cursor, or against the left/right
+/// edge of `area` (the game window when tracked, else the monitor), vertically centred on the
+/// cursor and clamped like the cursor placement.
+pub fn panel_position(side: rkl_config::OverlaySide, cursor: (i32, i32), size: (i32, i32), area: Area) -> (i32, i32) {
+    const EDGE: i32 = 8;
+    let (x, y) = overlay_position(cursor, size, area);
+    match side {
+        rkl_config::OverlaySide::Cursor => (x, y),
+        rkl_config::OverlaySide::Left => (area.x + EDGE, y),
+        rkl_config::OverlaySide::Right => ((area.x + area.width - size.0 - EDGE).max(area.x), y),
+    }
 }
 
 /// User-Agent including the optional contact from settings.
@@ -278,6 +291,16 @@ mod tests {
     }
 
     #[test]
+    fn panel_side_setting_places_the_card() {
+        use rkl_config::OverlaySide as S;
+        let area = Area { x: 2560, y: 0, width: 3440, height: 1440 };
+        assert_eq!(panel_position(S::Cursor, (3000, 700), (420, 600), area), (3024, 400));
+        assert_eq!(panel_position(S::Left, (3000, 700), (420, 600), area), (2568, 400));
+        assert_eq!(panel_position(S::Right, (3000, 700), (420, 600), area), (5572, 400));
+        assert_eq!(panel_position(S::Right, (3000, 700), (5000, 600), area).0, 2560);
+    }
+
+    #[test]
     fn hotkeys_toggle_their_window() {
         use rkl_platform::HotkeyAction as A;
         assert_eq!(hotkey_effect(A::PriceCheck, false, false), HotkeyEffect::PriceCheck { pinned: false });
@@ -443,6 +466,6 @@ mod tests {
         let s = Settings::default();
         let o = query_options(&s, "Dawn");
         assert_eq!(o.league, "Dawn");
-        assert!(o.online_only);
+        assert_eq!(o.status, rkl_core::query::OnlineStatus::Any);
     }
 }
