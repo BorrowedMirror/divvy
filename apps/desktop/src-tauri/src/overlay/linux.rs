@@ -117,6 +117,17 @@ pub fn raise_above(window: &tauri::WebviewWindow, owner: Option<u64>, focus: boo
     let handle = window.window_handle().map_err(|e| format!("window handle: {e}"))?.as_raw();
     let display = window.display_handle().map_err(|e| format!("display handle: {e}"))?.as_raw();
     let styler = rkl_platform::backend::x11::overlay(handle, display).map_err(|e| e.to_string())?;
+    // No compositor drop shadow around the transparent window edge (picom draws one by default).
+    let id = match handle {
+        raw_window_handle::RawWindowHandle::Xlib(h) => Some(h.window),
+        raw_window_handle::RawWindowHandle::Xcb(h) => Some(u64::from(h.window.get())),
+        _ => None,
+    };
+    if let Some(id) = id
+        && let Err(e) = rkl_platform::backend::x11::disable_compositor_shadow(id)
+    {
+        tracing::debug!("disable compositor shadow: {e}");
+    }
     styler.raise_above(owner).map_err(|e| e.to_string())?;
     if focus {
         styler.activate().map_err(|e| e.to_string())?;

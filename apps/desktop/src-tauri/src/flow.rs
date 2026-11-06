@@ -204,6 +204,7 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     }
     state.overlay_visible.store(true, Ordering::SeqCst);
     spawn_focus_guard(app, state, game_id);
+    spawn_pinned_hover(app, state, game_id);
     emit_overlay_state(app, state);
 }
 
@@ -270,6 +271,67 @@ fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
     });
     if let Err(e) = spawned {
         state.record_error(format!("spawn focus guard: {e}"));
+    }
+}
+
+/// How long the cursor must rest on a pinned panel before it is focused.
+const HOVER_FOCUS_DELAY: std::time::Duration = std::time::Duration::from_millis(150);
+const HOVER_POLL: std::time::Duration = std::time::Duration::from_millis(50);
+
+/// A pinned panel does not cover the game, and while a Proton/Wine game is focused it holds an
+/// X pointer grab: the WM never sees the pointer enter the panel, so focus-follows-mouse
+/// cannot focus it and clicks go to the game. Poll the cursor (the query works under a grab)
+/// and activate the panel when the cursor rests on it; Wine then releases its grab.
+fn spawn_pinned_hover(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
+    if game_id.is_none() || !state.is_pinned() {
+        return;
+    }
+    let seq = state.show_seq.load(Ordering::SeqCst);
+    let app = app.clone();
+    let spawned = std::thread::Builder::new().name("rkl-pinned-hover".into()).spawn(move || {
+        let mut inside_since: Option<std::time::Instant> = None;
+        loop {
+            std::thread::sleep(HOVER_POLL);
+            let state = app.state::<Arc<AppState>>();
+            if state.show_seq.load(Ordering::SeqCst) != seq
+                || !state.overlay_visible.load(Ordering::SeqCst)
+                || !state.is_pinned()
+            {
+                return;
+            }
+            let Some(win) = app.get_webview_window(OVERLAY) else { return };
+            let (Ok(cursor), Ok(pos), Ok(size)) = (app.cursor_position(), win.outer_position(), win.outer_size())
+            else {
+                continue;
+            };
+            let inside = logic::point_in_rect(
+                (cursor.x, cursor.y),
+                (f64::from(pos.x), f64::from(pos.y), f64::from(size.width), f64::from(size.height)),
+            );
+            if !inside {
+                inside_since = None;
+                continue;
+            }
+            let since = *inside_since.get_or_insert_with(std::time::Instant::now);
+            if since.elapsed() >= HOVER_FOCUS_DELAY && !win.is_focused().unwrap_or(false) {
+                if let Err(e) = crate::overlay::bring_to_front(&win, game_id, true) {
+                    state.record_error(format!("focus pinned panel: {e}"));
+                }
+                // Wine drops its pointer grab once the game loses focus: clear the warning.
+                #[cfg(all(target_os = "linux", feature = "native"))]
+                {
+                    std::thread::sleep(std::time::Duration::from_millis(300));
+                    let captured = rkl_platform::backend::x11::pointer_grabbed_by_other().unwrap_or(false);
+                    state.mouse_captured.store(captured, Ordering::SeqCst);
+                    let _ = (crate::events::MouseCaptured { captured }).emit(&app);
+                }
+                // Once per hover: leave and come back to focus it again.
+                inside_since = Some(std::time::Instant::now() + std::time::Duration::from_secs(3600));
+            }
+        }
+    });
+    if let Err(e) = spawned {
+        state.record_error(format!("spawn pinned hover: {e}"));
     }
 }
 
@@ -368,6 +430,17 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
         use rkl_platform::WindowEvent;
         for ev in rx {
             let state = app.state::<Arc<AppState>>();
+            // Clicking back into a fullscreen game makes WMs such as openbox raise it above
+            // "always on top" windows; keep a pinned panel stacked above it (without taking
+            // keyboard focus back from the game).
+            if matches!(ev, WindowEvent::FocusChanged { focused: true })
+                && state.is_pinned()
+                && state.overlay_visible.load(Ordering::SeqCst)
+                && let Some(panel) = app.get_webview_window(OVERLAY)
+                && let Err(e) = crate::overlay::bring_to_front(&panel, game_window(&state).map(|g| g.native_id), false)
+            {
+                state.record_error(format!("keep pinned panel on top: {e}"));
+            }
             if !state.settings_overlay.load(Ordering::SeqCst) {
                 continue;
             }

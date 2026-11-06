@@ -178,3 +178,16 @@ pub fn pointer_grabbed_by_other() -> Result<bool, PlatformError> {
     }
     Ok(status == GrabStatus::ALREADY_GRABBED || status == GrabStatus::FROZEN)
 }
+
+/// Ask X11 compositors (picom, compton) not to draw a drop shadow around `window`: the
+/// overlay's transparent padding would otherwise show the shadow as a grey band around the
+/// card. Harmless without a compositor.
+pub fn disable_compositor_shadow(window: u64) -> Result<(), PlatformError> {
+    let window = u32::try_from(window).map_err(|_| PlatformError::Backend("x11 window id out of range".into()))?;
+    let conn = XConn::connect(None)?;
+    conn.conn
+        .change_property32(PropMode::REPLACE, window, conn.atoms._COMPTON_SHADOW, AtomEnum::CARDINAL, &[0])
+        .map_err(x_err)?
+        .check()
+        .map_err(x_err)
+}

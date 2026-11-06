@@ -285,6 +285,11 @@ pub fn card_in_window(card: (i32, i32), game: rkl_platform::Rect, scale: f64, po
     ((cx - gx).max(0.0), (cy - gy).max(0.0))
 }
 
+/// Whether `p` lies inside the rectangle `(x, y, width, height)` (edges included).
+pub fn point_in_rect(p: (f64, f64), r: (f64, f64, f64, f64)) -> bool {
+    p.0 >= r.0 && p.0 <= r.0 + r.2 && p.1 >= r.1 && p.1 <= r.1 + r.3
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -327,6 +332,15 @@ mod tests {
         )
         .unwrap();
         assert!(rare.unique_candidates.is_empty());
+    }
+
+    #[test]
+    fn point_in_rect_includes_edges() {
+        let r = (100.0, 50.0, 420.0, 600.0);
+        assert!(
+            point_in_rect((100.0, 50.0), r) && point_in_rect((520.0, 650.0), r) && point_in_rect((300.0, 300.0), r)
+        );
+        assert!(!point_in_rect((99.0, 300.0), r) && !point_in_rect((300.0, 651.0), r));
     }
 
     #[test]

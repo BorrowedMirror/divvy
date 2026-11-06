@@ -97,6 +97,36 @@ xdotool mousemove --window "$OW" 100 100; sleep 0.6
 xdotool mousemove 1700 900; sleep 0.8
 [ "$(active)" = "Path of Exile 2" ] || fail "hovering the game did not focus it with a pinned panel (active: $(active))"
 echo "ok: pinned panel is card-sized and the game can be hovered back into focus"
+xdotool click 1; sleep 1
+[ "$(xwininfo -id "$OW" | awk "/Map State/{print \$NF}")" = IsViewable ] || fail "clicking the game closed the pinned panel"
+[ "$(top)" = "RKL overlay" ] || fail "clicking the game hid the pinned panel behind it (top: $(top))"
+[ "$(active)" = "Path of Exile 2" ] || fail "the game lost focus after being clicked (active: $(active))"
+echo "ok: clicking the game keeps the pinned panel on top, and the game focused"
+# Proton/Wine holds an X pointer grab while the game is focused, so the WM never sees the
+# pointer enter the panel. Hold one the same way; resting the cursor on the card must still
+# focus it.
+GRAB=$(mktemp --suffix=.py); cat >"$GRAB" <<PY
+import ctypes, ctypes.util, sys, time
+x = ctypes.CDLL(ctypes.util.find_library("X11"))
+x.XOpenDisplay.restype = ctypes.c_void_p
+d = x.XOpenDisplay(None)
+x.XDefaultRootWindow.argtypes = [ctypes.c_void_p]; x.XDefaultRootWindow.restype = ctypes.c_ulong
+x.XGrabPointer.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.c_uint, ctypes.c_int, ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+x.XFlush.argtypes = [ctypes.c_void_p]
+print("grab", x.XGrabPointer(d, x.XDefaultRootWindow(d), 0, 4|8|64, 1, 1, 0, 0, 0), flush=True)
+x.XFlush(d)
+time.sleep(float(sys.argv[1]))
+PY
+xdotool windowactivate --sync "$GAME"; xdotool mousemove 1700 900; sleep 0.3
+python3 -I "$GRAB" 6 >"$LOG/grab" 2>&1 & GP=$!
+sleep 0.5; grep -q "grab 0" "$LOG/grab" || fail "test helper could not grab the pointer: $(cat "$LOG/grab")"
+[ "$(active)" = "Path of Exile 2" ] || fail "game should be focused before hovering (active: $(active))"
+xdotool mousemove --window "$OW" 100 100; sleep 0.8
+[ "$(active)" = "RKL overlay" ] || fail "resting the cursor on the pinned panel under a pointer grab did not focus it (active: $(active))"
+echo "ok: hovering the pinned panel focuses it even while the game holds the pointer"
+xprop -id "$OW" _COMPTON_SHADOW | grep -q "= 0" || fail "the panel should ask compositors for no drop shadow ($(xprop -id "$OW" _COMPTON_SHADOW))"
+echo "ok: the panel opts out of compositor drop shadows"
+kill $GP 2>/dev/null || true
 hook hide >/dev/null
 
 hook "tray open_settings" >/dev/null; sleep 0.8
