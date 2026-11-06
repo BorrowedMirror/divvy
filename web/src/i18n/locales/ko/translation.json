@@ -31,7 +31,6 @@
     "statMax": "{{stat}} 최댓값",
     "search": "검색",
     "loading": "검색 중…",
-    "mouseCaptured": "Path of Exile 2가 마우스를 점유하고 있어 이 패널을 클릭할 수 없습니다. RKL 트레이 메뉴에서 진단을 열고 Proton 마우스 캡처를 끄세요.",
     "tierTitle": "옵션 등급 {{tier}} (1이 가장 좋은 수치 범위)",
     "possibleUniques": "가능한 고유 아이템",
     "unidentifiedBase": "미확인"
@@ -320,16 +319,6 @@
         "kde": "KDE (사용자 지정 단축키 명령)"
       }
     }
-  },
-  "proton": {
-    "title": "Proton 마우스 캡처",
-    "body": "Proton에서는 전체 화면 Path of Exile 2가 마우스를 점유하기 때문에 클릭과 키 입력이 RKL 패널에 전달되지 않습니다. 이 게임에 대해 Wine의 마우스 캡처를 끄면 해결됩니다. 이후에는 커서가 게임 창에 고정되지 않습니다.",
-    "statusOn": "마우스 캡처: 켜짐 (Wine 기본값)",
-    "statusOff": "마우스 캡처: 꺼짐",
-    "fix": "마우스 캡처 끄기",
-    "undo": "이전 설정 복원",
-    "quitGame": "먼저 Path of Exile 2를 종료하세요. 게임이 종료될 때 Wine이 설정을 다시 기록합니다.",
-    "restartGame": "완료했습니다. 변경 사항을 적용하려면 Path of Exile 2를 다시 시작하세요."
   },
   "dim": {
     "none": "없음",

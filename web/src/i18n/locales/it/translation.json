@@ -31,7 +31,6 @@
     "statMax": "Massimo per {{stat}}",
     "search": "Cerca",
     "loading": "Ricerca…",
-    "mouseCaptured": "Path of Exile 2 sta catturando il mouse, quindi non è possibile cliccare su questo pannello. Apri Diagnostica dal menu di RKL nell'area di notifica e disattiva la cattura del mouse di Proton.",
     "tierTitle": "Tier del modificatore {{tier}} (1 è l'intervallo di valori migliore)",
     "possibleUniques": "Possibili unici",
     "unidentifiedBase": "Non identificato"
@@ -326,16 +325,6 @@
         "kde": "KDE (comando di scorciatoia personalizzata)"
       }
     }
-  },
-  "proton": {
-    "title": "Cattura del mouse di Proton",
-    "body": "Con Proton, Path of Exile 2 a schermo intero cattura il mouse, quindi clic e tasti non arrivano mai al pannello di RKL. Disattivare la cattura del mouse di Wine per il gioco risolve il problema; il cursore non resta più bloccato nella finestra del gioco.",
-    "statusOn": "Cattura del mouse: attiva (predefinita di Wine)",
-    "statusOff": "Cattura del mouse: disattivata",
-    "fix": "Disattiva la cattura del mouse",
-    "undo": "Ripristina l'impostazione precedente",
-    "quitGame": "Chiudi prima Path of Exile 2: Wine riscrive le sue impostazioni quando il gioco viene chiuso.",
-    "restartGame": "Fatto. Riavvia Path of Exile 2 per rendere effettiva la modifica."
   },
   "dim": {
     "none": "Nessuno",

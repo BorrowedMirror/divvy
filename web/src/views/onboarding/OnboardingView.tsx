@@ -5,7 +5,6 @@ import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "../..
 import { Button, cx } from "../../components/ui";
 import { keys, usePermissions, useRequestPermission, useSaveSettings, useSettingsQuery } from "../../hooks/queries";
 import { toIpcError } from "../../lib/ipc";
-import { ProtonMouseCard } from "../../components/ProtonMouseCard";
 
 /** Example compositor bindings for `rkl --trigger` (code, not translated). */
 export const TRIGGER_EXAMPLES = [
@@ -63,17 +62,10 @@ function Steps({ report }: { report: PermissionReport_Serialize }) {
       case "wayland":
         return <WaylandSteps gnome={report.gnome} />;
       default:
-        return (
-          <>
-            {report.gnome ? (
-              <Step title={t("onboarding.gnome.title")} body={t("onboarding.gnome.x11Body")} />
-            ) : (
-              <Step title={t("onboarding.x11.title")} body={t("onboarding.x11.body")} />
-            )}
-            <li className="list-none">
-              <ProtonMouseCard />
-            </li>
-          </>
+        return report.gnome ? (
+          <Step title={t("onboarding.gnome.title")} body={t("onboarding.gnome.x11Body")} />
+        ) : (
+          <Step title={t("onboarding.x11.title")} body={t("onboarding.x11.body")} />
         );
     }
   })();

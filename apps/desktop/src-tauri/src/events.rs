@@ -34,13 +34,6 @@ pub struct OverlayState {
     pub pinned: bool,
 }
 
-/// The game holds an X pointer grab (Wine fullscreen mouse capture) while the panel is open, so
-/// clicks cannot reach it. The panel shows how to fix it.
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type, tauri_specta::Event)]
-pub struct MouseCaptured {
-    pub captured: bool,
-}
-
 /// How the price panel window is laid out. `cover`: the window covers the game with a dimmed
 /// backdrop and the card is drawn at (`x`, `y`) (logical px inside the window); otherwise the
 /// window is the card itself (pinned, or no tracked game window).

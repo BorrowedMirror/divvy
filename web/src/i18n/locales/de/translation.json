@@ -31,7 +31,6 @@
     "statMax": "Maximum für {{stat}}",
     "search": "Suchen",
     "loading": "Suche läuft…",
-    "mouseCaptured": "Path of Exile 2 fängt die Maus ein, daher lässt sich dieses Panel nicht anklicken. Im rkl-Menü im Infobereich die Diagnose öffnen und die Proton-Mauserfassung ausschalten.",
     "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)",
     "possibleUniques": "Mögliche einzigartige Gegenstände",
     "unidentifiedBase": "Nicht identifiziert"
@@ -323,16 +322,6 @@
         "kde": "KDE (Befehl für eigenes Tastenkürzel)"
       }
     }
-  },
-  "proton": {
-    "title": "Proton-Mauserfassung",
-    "body": "Unter Proton fängt Path of Exile 2 im Vollbild die Maus ein, sodass Klicks und Tasten nie bei RKLs Panel ankommen. Das Ausschalten der Mauserfassung von Wine für das Spiel behebt das; der Mauszeiger ist dann nicht mehr an das Spielfenster gebunden.",
-    "statusOn": "Mauserfassung: an (Wine-Standard)",
-    "statusOff": "Mauserfassung: aus",
-    "fix": "Mauserfassung ausschalten",
-    "undo": "Vorherige Einstellung wiederherstellen",
-    "quitGame": "Zuerst Path of Exile 2 beenden: Wine schreibt seine Einstellungen beim Beenden des Spiels neu.",
-    "restartGame": "Erledigt. Path of Exile 2 neu starten, damit die Änderung wirkt."
   },
   "dim": {
     "none": "Keine",

@@ -31,7 +31,6 @@
     "statMax": "Máximo de {{stat}}",
     "search": "Buscar",
     "loading": "Buscando…",
-    "mouseCaptured": "Path of Exile 2 está capturando el ratón, así que no se puede hacer clic en este panel. Abre Diagnóstico desde el menú de RKL en la bandeja y desactiva la captura del ratón de Proton.",
     "tierTitle": "Grado de modificador {{tier}} (1 es el mejor rango de valores)",
     "possibleUniques": "Únicos posibles",
     "unidentifiedBase": "Sin identificar"
@@ -326,16 +325,6 @@
         "kde": "KDE (comando de atajo personalizado)"
       }
     }
-  },
-  "proton": {
-    "title": "Captura del ratón de Proton",
-    "body": "Con Proton, Path of Exile 2 en pantalla completa captura el ratón, así que los clics y las teclas nunca llegan al panel de RKL. Desactivar la captura del ratón de Wine para el juego lo soluciona; el cursor deja entonces de estar bloqueado en la ventana del juego.",
-    "statusOn": "Captura del ratón: activada (predeterminado de Wine)",
-    "statusOff": "Captura del ratón: desactivada",
-    "fix": "Desactivar la captura del ratón",
-    "undo": "Restaurar el ajuste anterior",
-    "quitGame": "Cierra primero Path of Exile 2: Wine reescribe sus ajustes al salir del juego.",
-    "restartGame": "Listo. Vuelve a iniciar Path of Exile 2 para que el cambio surta efecto."
   },
   "dim": {
     "none": "Ninguno",

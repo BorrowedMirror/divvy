@@ -8,7 +8,6 @@ pub mod ipc;
 pub mod logic;
 pub mod overlay;
 pub mod permissions;
-pub mod proton;
 pub mod state;
 #[cfg(any(debug_assertions, feature = "test-hook"))]
 pub mod testhook;
@@ -46,8 +45,6 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::copy_text,
             ipc::clear_filter_memory,
             ipc::get_overlay_layout,
-            proton::get_proton_mouse_status,
-            proton::set_proton_mouse_capture,
             ipc::rebind_hotkey,
             permissions::get_permissions,
             permissions::request_permission,
@@ -60,7 +57,6 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             events::PriceFailed,
             events::SettingsChanged,
             events::OverlayState,
-            events::MouseCaptured,
             events::OverlayLayout,
             permissions::PermissionsChanged,
             updater::UpdateAvailable,

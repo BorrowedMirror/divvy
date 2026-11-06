@@ -31,7 +31,6 @@
     "statMax": "Maksimum dla {{stat}}",
     "search": "Szukaj",
     "loading": "Wyszukiwanie…",
-    "mouseCaptured": "Path of Exile 2 przechwytuje mysz, więc nie można kliknąć tego panelu. Otwórz Diagnostykę z menu RKL w zasobniku i wyłącz przechwytywanie myszy przez Proton.",
     "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)",
     "possibleUniques": "Możliwe unikaty",
     "unidentifiedBase": "Niezidentyfikowany"
@@ -329,16 +328,6 @@
         "kde": "KDE (polecenie własnego skrótu)"
       }
     }
-  },
-  "proton": {
-    "title": "Przechwytywanie myszy przez Proton",
-    "body": "W Proton pełnoekranowe Path of Exile 2 przechwytuje mysz, więc kliknięcia i klawisze nigdy nie docierają do panelu RKL. Wyłączenie przechwytywania myszy przez Wine dla gry rozwiązuje problem; kursor nie jest już wtedy zablokowany w oknie gry.",
-    "statusOn": "Przechwytywanie myszy: włączone (domyślnie w Wine)",
-    "statusOff": "Przechwytywanie myszy: wyłączone",
-    "fix": "Wyłącz przechwytywanie myszy",
-    "undo": "Przywróć poprzednie ustawienie",
-    "quitGame": "Najpierw zamknij Path of Exile 2: Wine zapisuje swoje ustawienia od nowa przy zamykaniu gry.",
-    "restartGame": "Gotowe. Uruchom ponownie Path of Exile 2, aby zmiana zaczęła działać."
   },
   "dim": {
     "none": "Brak",

@@ -237,14 +237,11 @@ pub fn hide_overlay(app: &AppHandle, state: &AppState) -> Result<(), IpcError> {
 
 /// How long after showing the panel the focus guard watches for the game taking focus back.
 const FOCUS_GUARD: std::time::Duration = std::time::Duration::from_millis(1500);
-/// When to check whether the game still holds the mouse.
-const CAPTURE_PROBE_AFTER: std::time::Duration = std::time::Duration::from_millis(500);
 /// Re-focus attempts per show (avoid a focus tug-of-war with the game).
 const MAX_REFOCUS: u32 = 3;
 
 /// Linux/X11: Wine re-activates a fullscreen game shortly after it loses focus, and holds an X
-/// pointer grab while it is active. Keep focus on the panel for a moment (so Wine releases its
-/// grab), then check whether the game still holds the mouse and tell the panel if it does.
+/// pointer grab while it is active. Keep focus on the panel for a moment so Wine releases it.
 #[cfg(all(target_os = "linux", feature = "native"))]
 fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
     use rkl_platform::backend::x11;
@@ -254,7 +251,6 @@ fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
     let spawned = std::thread::Builder::new().name("rkl-focus-guard".into()).spawn(move || {
         let start = std::time::Instant::now();
         let mut refocused = 0;
-        let mut probed = false;
         while start.elapsed() < FOCUS_GUARD {
             std::thread::sleep(std::time::Duration::from_millis(100));
             let state = app.state::<Arc<AppState>>();
@@ -270,15 +266,6 @@ fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
                 if let Some(win) = app.get_webview_window(OVERLAY) {
                     let _ = crate::overlay::bring_to_front(&win, Some(game_id), true);
                 }
-            }
-            if !probed && start.elapsed() >= CAPTURE_PROBE_AFTER {
-                probed = true;
-                let captured = x11::pointer_grabbed_by_other().unwrap_or(false);
-                state.mouse_captured.store(captured, Ordering::SeqCst);
-                if captured {
-                    state.record_error("the game is capturing the mouse; clicks cannot reach the panel (see Diagnostics → Proton mouse capture)");
-                }
-                let _ = (crate::events::MouseCaptured { captured }).emit(&app);
             }
         }
     });
@@ -329,14 +316,6 @@ fn spawn_pinned_hover(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
             if since.elapsed() >= HOVER_FOCUS_DELAY && !win.is_focused().unwrap_or(false) {
                 if let Err(e) = crate::overlay::bring_to_front(&win, game_id, true) {
                     state.record_error(format!("focus pinned panel: {e}"));
-                }
-                // Wine drops its pointer grab once the game loses focus: clear the warning.
-                #[cfg(all(target_os = "linux", feature = "native"))]
-                {
-                    std::thread::sleep(std::time::Duration::from_millis(300));
-                    let captured = rkl_platform::backend::x11::pointer_grabbed_by_other().unwrap_or(false);
-                    state.mouse_captured.store(captured, Ordering::SeqCst);
-                    let _ = (crate::events::MouseCaptured { captured }).emit(&app);
                 }
                 // Once per hover: leave and come back to focus it again.
                 inside_since = Some(std::time::Instant::now() + std::time::Duration::from_secs(3600));

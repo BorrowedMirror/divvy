@@ -31,7 +31,6 @@
     "statMax": "Maximum for {{stat}}",
     "search": "Search",
     "loading": "Searching…",
-    "mouseCaptured": "Path of Exile 2 is capturing the mouse, so this panel can't be clicked. Open Diagnostics from the RKL tray menu and turn off Proton mouse capture.",
     "tierTitle": "Mod tier {{tier}} (1 is the best roll range)",
     "possibleUniques": "Possible uniques",
     "unidentifiedBase": "Unidentified"
@@ -323,16 +322,6 @@
         "kde": "KDE (custom shortcut command)"
       }
     }
-  },
-  "proton": {
-    "title": "Proton mouse capture",
-    "body": "Under Proton, fullscreen Path of Exile 2 captures the mouse, so clicks and keys never reach RKL's panel. Turning off Wine's mouse capture for the game fixes this; the cursor is then no longer locked to the game window.",
-    "statusOn": "Mouse capture: on (Wine default)",
-    "statusOff": "Mouse capture: off",
-    "fix": "Turn off mouse capture",
-    "undo": "Restore previous setting",
-    "quitGame": "Quit Path of Exile 2 first: Wine rewrites its settings when the game exits.",
-    "restartGame": "Done. Start Path of Exile 2 again for the change to take effect."
   },
   "dim": {
     "none": "None",

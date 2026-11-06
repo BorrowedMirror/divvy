@@ -98,17 +98,6 @@ describe("OverlayView", () => {
     expect(cardPosition({ cover: true, x: -5, y: null }, 500)).toEqual({ left: 0, top: 0 });
   });
 
-  test("warns when the game is capturing the mouse, and clears the warning", async () => {
-    setupIpc({ get_overlay_snapshot: () => null });
-    renderWithProviders(<OverlayView />);
-    await flush();
-    expect(screen.queryByTestId("mouse-captured")).not.toBeInTheDocument();
-    await emitEvent("mouse-captured", { captured: true });
-    expect(await screen.findByTestId("mouse-captured")).toHaveTextContent(/capturing the mouse/);
-    await emitEvent("mouse-captured", { captured: false });
-    await waitFor(() => expect(screen.queryByTestId("mouse-captured")).not.toBeInTheDocument());
-  });
-
   test("shows the empty hint with the configured hotkey", async () => {
     setupIpc();
     renderWithProviders(<OverlayView />);

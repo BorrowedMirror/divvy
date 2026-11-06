@@ -42,13 +42,6 @@ export const commands = {
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
 	getOverlayLayout: () => __TAURI_INVOKE<OverlayLayout>("get_overlay_layout"),
-	/**  Current state of Wine's mouse capture for PoE2 (Linux only; `supported = false` elsewhere). */
-	getProtonMouseStatus: () => __TAURI_INVOKE<ProtonMouseStatus_Serialize>("get_proton_mouse_status"),
-	/**
-	 *  Disable (`true`) or restore (`false`) Wine's mouse capture for PoE2. Takes effect the next
-	 *  time the game starts.
-	 */
-	setProtonMouseCapture: (disabled: boolean) => typedError<ProtonMouseStatus_Serialize, IpcError_Serialize>(__TAURI_INVOKE("set_proton_mouse_capture", { disabled })),
 	rebindHotkey: (action: HotkeyAction, chord: Chord) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("rebind_hotkey", { action, chord })),
 	getPermissions: () => __TAURI_INVOKE<PermissionReport_Serialize>("get_permissions"),
 	requestPermission: (kind: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("request_permission", { kind })),
@@ -63,7 +56,6 @@ export const commands = {
 /** Events */
 export const events = {
 	itemCopied: makeEvent<ItemCopied_Serialize, ItemCopied_Deserialize>("item-copied"),
-	mouseCaptured: makeEvent<MouseCaptured, MouseCaptured>("mouse-captured"),
 	overlayLayout: makeEvent<OverlayLayout, OverlayLayout>("overlay-layout"),
 	overlayState: makeEvent<OverlayState, OverlayState>("overlay-state"),
 	permissionsChanged: makeEvent<PermissionsChanged_Serialize, PermissionsChanged_Deserialize>("permissions-changed"),
@@ -436,14 +428,6 @@ export type Modifier_Serialize = {
 	advanced: AdvancedModInfo_Serialize | null,
 };
 
-/**
- *  The game holds an X pointer grab (Wine fullscreen mouse capture) while the panel is open, so
- *  clicks cannot reach it. The panel shows how to fix it.
- */
-export type MouseCaptured = {
-	captured: boolean,
-};
-
 /**  Trade "status" option. */
 export type OnlineStatus = 
 /**  `securable` (instant buyout) in trade2. */
@@ -742,39 +726,6 @@ export type Property = {
 	value: string,
 	/**  `(augmented)` marker present. */
 	augmented: boolean,
-};
-
-/**  What the diagnostics page shows and toggles. */
-export type ProtonMouseStatus = ProtonMouseStatus_Serialize | ProtonMouseStatus_Deserialize;
-
-/**  What the diagnostics page shows and toggles. */
-export type ProtonMouseStatus_Deserialize = {
-	/**  Linux build with a PoE2 Proton prefix found. */
-	supported: boolean,
-	prefix?: string | null,
-	grab_pointer?: string | null,
-	grab_fullscreen?: string | null,
-	/**  Mouse capture is turned off (both options `N`). */
-	capture_disabled: boolean,
-	/**  rkl changed the prefix and remembers the previous values. */
-	can_restore: boolean,
-	/**  The game (or its Wine server) is running; changes are refused until it quits. */
-	game_running: boolean,
-};
-
-/**  What the diagnostics page shows and toggles. */
-export type ProtonMouseStatus_Serialize = {
-	/**  Linux build with a PoE2 Proton prefix found. */
-	supported: boolean,
-	prefix: string | null,
-	grab_pointer: string | null,
-	grab_fullscreen: string | null,
-	/**  Mouse capture is turned off (both options `N`). */
-	capture_disabled: boolean,
-	/**  rkl changed the prefix and remembers the previous values. */
-	can_restore: boolean,
-	/**  The game (or its Wine server) is running; changes are refused until it quits. */
-	game_running: boolean,
 };
 
 export type QueryRoute = 

@@ -31,7 +31,6 @@
     "statMax": "{{stat}} 的最大值",
     "search": "搜尋",
     "loading": "搜尋中…",
-    "mouseCaptured": "《流亡黯道2》正在擷取滑鼠，因此無法點擊此面板。請從 RKL 系統匣選單開啟「診斷」，並關閉 Proton 滑鼠擷取。",
     "tierTitle": "詞綴階級 {{tier}}（1 為最佳數值範圍）",
     "possibleUniques": "可能的傳奇",
     "unidentifiedBase": "未鑑定"
@@ -320,16 +319,6 @@
         "kde": "KDE（自訂快捷鍵指令）"
       }
     }
-  },
-  "proton": {
-    "title": "Proton 滑鼠擷取",
-    "body": "在 Proton 下，全螢幕執行的《流亡黯道2》會擷取滑鼠，導致點擊和按鍵無法傳到 RKL 面板。為這款遊戲關閉 Wine 的滑鼠擷取即可解決；之後游標將不再被鎖定在遊戲視窗內。",
-    "statusOn": "滑鼠擷取：開啟（Wine 預設）",
-    "statusOff": "滑鼠擷取：關閉",
-    "fix": "關閉滑鼠擷取",
-    "undo": "還原先前的設定",
-    "quitGame": "請先結束《流亡黯道2》：遊戲結束時 Wine 會改寫其設定。",
-    "restartGame": "已完成。重新啟動《流亡黯道2》後變更即可生效。"
   },
   "dim": {
     "none": "無",

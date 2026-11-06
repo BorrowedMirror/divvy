@@ -3,7 +3,6 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type { Capabilities, Diagnostics_Serialize } from "../../bindings";
 import { Button, cx } from "../../components/ui";
-import { ProtonMouseCard } from "../../components/ProtonMouseCard";
 import { useDiagnostics } from "../../hooks/queries";
 
 export const CAPABILITY_KEYS = [
@@ -145,8 +144,6 @@ export function DiagnosticsView() {
           </ul>
         </section>
       )}
-
-      <ProtonMouseCard />
 
       <section className="mt-6" aria-labelledby="errors-heading">
         <h2 id="errors-heading" className="mb-2 text-sm font-semibold text-muted">

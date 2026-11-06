@@ -93,9 +93,6 @@ export function OverlayView() {
     useOverlayStore.getState().priceFailed(p.error);
   });
   useTauriEvent(events.overlayState, (p) => useOverlayStore.getState().setOverlayState(p));
-  // Linux/Proton: the game holds the mouse, so this panel cannot be clicked; say how to fix it.
-  const [mouseCaptured, setMouseCaptured] = useState(false);
-  useTauriEvent(events.mouseCaptured, (p) => setMouseCaptured(p.captured));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -124,7 +121,9 @@ export function OverlayView() {
     <div
       ref={fitRef}
       data-testid="overlay-card"
-      className={layout.cover ? "absolute w-[420px] p-1.5" : "flex w-full items-start justify-center p-1.5"}
+      // As a card-sized window (pinned) the card fills the window exactly: transparent padding
+      // around it would show compositor drop shadows (picom) as a grey band.
+      className={layout.cover ? "absolute w-[420px] p-1.5" : "flex w-full items-start"}
       style={layout.cover ? cardPosition(layout, cardHeight) : undefined}
     >
       <article
@@ -133,13 +132,11 @@ export function OverlayView() {
         // Covering the game, the panel closes only on a backdrop click, Esc or the hotkey.
         onMouseEnter={layout.cover ? undefined : autoHide.onMouseEnter}
         onMouseLeave={layout.cover ? undefined : autoHide.onMouseLeave}
-        className="flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
-      >
-        {mouseCaptured && (
-          <p role="alert" data-testid="mouse-captured" className="rounded-md border border-bad/40 bg-bad/10 p-2 text-xs text-bad">
-            {t("overlay.mouseCaptured")}
-          </p>
+        className={cx(
+          "flex w-full max-w-[420px] flex-col gap-3 border border-gold/30 bg-surface p-3 text-fg",
+          layout.cover && "rounded-xl shadow-2xl",
         )}
+      >
         <header className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">RKL</h1>}

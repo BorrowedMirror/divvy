@@ -130,8 +130,6 @@ pub struct AppState {
     pub overlay_visible: AtomicBool,
     /// The settings window is currently shown as an overlay covering the game window.
     pub settings_overlay: AtomicBool,
-    /// Last probe found the game holding the mouse while the panel was open (Wine capture).
-    pub mouse_captured: AtomicBool,
     /// Remembered stat choices per item category (see `filter_memory`).
     pub filter_memory: Mutex<crate::filter_memory::FilterMemory>,
     /// Current price panel layout (also served to the web view on mount).
@@ -177,7 +175,6 @@ impl AppState {
             pinned: AtomicBool::new(false),
             overlay_visible: AtomicBool::new(false),
             settings_overlay: AtomicBool::new(false),
-            mouse_captured: AtomicBool::new(false),
             filter_memory: Mutex::new(memory),
             overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
             overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
