@@ -22,6 +22,7 @@ reqwest = { workspace = true, features = ["blocking"] }
 time.workspace = true
 oozextract.workspace = true
 regex.workspace = true
+sha2.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

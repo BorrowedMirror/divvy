@@ -47,6 +47,16 @@ can lose these grants.
 Install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 with the "Desktop development with C++" workload. WebView2 ships with Windows 10/11.
 
+### Windows installer from Linux
+
+`cargo xtask windows-installer` builds the NSIS setup `.exe` without a Windows machine. It needs
+`clang`, `lld`, `llvm`, `unzip`, `makensis` (Arch: `nsis` from the AUR) and
+`cargo install cargo-xwin --locked`. It runs `cargo tauri build` with `cargo-xwin` and writes
+`target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe`. When the system NSIS lacks the
+32-bit stubs Tauri's installer needs, it adds them under `target/nsis-x86/` from the official NSIS
+zip (checked against a pinned SHA-256). The installer is not code-signed, and an MSI still needs
+Windows (WiX).
+
 ### First run
 
 ```sh
@@ -66,6 +76,7 @@ cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
 | `cargo xtask coverage [--check] [--no-run] [--profile <p>]` | nextest under llvm-cov; prints per-crate line coverage, writes `target/coverage/<crate>.lcov`, `--check` enforces the gates |
 | `cargo xtask gen [--no-bindings]` | regenerates `.commitlintrc.json`, `docs/contributing/commit-message.md` (from `.commit-config.toml`) and `web/src/bindings.ts` |
 | `cargo xtask data refresh [--offline]` | re-downloads and rebuilds the bundled game data in `crates/data/assets` |
+| `cargo xtask windows-installer [-- <tauri args>]` | cross-compiles the Windows NSIS installer on Linux; see [Windows installer from Linux](#windows-installer-from-linux) |
 | `cargo xtask fixtures record` | re-records trade fixtures from the live API (2 s between requests) |
 | `cargo nextest run` | tests (profiles in `.config/nextest.toml`) |
 | `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, eslint, tsc |

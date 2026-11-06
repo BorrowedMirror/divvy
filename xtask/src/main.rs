@@ -7,6 +7,7 @@ mod data;
 mod fixtures;
 mod lint;
 mod release;
+mod windows;
 
 #[derive(Debug, Parser)]
 #[command(name = "xtask")]
@@ -34,6 +35,8 @@ enum Cmd {
     Release(release::ReleaseArgs),
     /// fmt + clippy + deny + machete + web lint/typecheck.
     Lint(lint::LintArgs),
+    /// Cross-compile the Windows NSIS installer on Linux (cargo-xwin + makensis).
+    WindowsInstaller(windows::WindowsArgs),
     /// Trade API fixtures.
     Fixtures {
         #[command(subcommand)]
@@ -87,6 +90,7 @@ fn main() -> anyhow::Result<()> {
         Cmd::Release(args) => release::run(&args),
         Cmd::Lint(args) => lint::run(&args),
         Cmd::Fixtures { cmd } => fixtures::run(&cmd),
+        Cmd::WindowsInstaller(args) => windows::run(&args),
     }
 }
 
