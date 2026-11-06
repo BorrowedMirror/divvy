@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 import { useOverlayStore } from "../../stores/overlay";
 import { filterSet, ipcError, itemCopied, parsedItem, priceSummary, settings } from "../../test/fixtures";
 import { callsOf, emitEvent, fail, flush, renderWithProviders, setupIpc } from "../../test/ipc";
-import { OverlayView } from "./OverlayView";
+import { cardPosition, OverlayView } from "./OverlayView";
 import { Results } from "./Results";
 
 async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
@@ -16,6 +16,56 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test("covering the game: dimmed backdrop closes on click, the card does not", async () => {
+    const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 300, y: 120 }) });
+    renderWithProviders(<OverlayView />);
+    const backdrop = await screen.findByTestId("overlay-backdrop");
+    const card = screen.getByTestId("overlay-card");
+    expect(card.style.left).toBe("300px");
+    fireEvent.mouseDown(card);
+    expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+    fireEvent.mouseDown(backdrop);
+    expect(callsOf(calls, "hide_overlay")).toHaveLength(1);
+    expect(callsOf(calls, "resize_overlay").length).toBeLessThanOrEqual(1);
+  });
+
+  test("covering the game: leaving the card does not auto-hide", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 0, y: 0 }) });
+      renderWithProviders(<OverlayView />);
+      await screen.findByTestId("overlay-backdrop");
+      const article = screen.getByRole("article");
+      fireEvent.mouseEnter(article);
+      fireEvent.mouseLeave(article);
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test("pinned (card-sized window) has no backdrop and follows layout events", async () => {
+    setupIpc({ get_overlay_snapshot: () => null });
+    renderWithProviders(<OverlayView />);
+    await flush();
+    expect(screen.queryByTestId("overlay-backdrop")).not.toBeInTheDocument();
+    await emitEvent("overlay-layout", { cover: true, x: 10, y: 10 });
+    expect(await screen.findByTestId("overlay-backdrop")).toBeInTheDocument();
+    await emitEvent("overlay-layout", { cover: false, x: 0, y: 0 });
+    await waitFor(() => expect(screen.queryByTestId("overlay-backdrop")).not.toBeInTheDocument());
+  });
+
+  test("cardPosition keeps the card inside the window", () => {
+    Object.defineProperty(window, "innerWidth", { value: 1920, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 1080, configurable: true });
+    expect(cardPosition({ cover: true, x: 100, y: 200 }, 500)).toEqual({ left: 100, top: 200 });
+    expect(cardPosition({ cover: true, x: 1800, y: 900 }, 500)).toEqual({ left: 1492, top: 572 });
+    expect(cardPosition({ cover: true, x: -5, y: null }, 500)).toEqual({ left: 0, top: 0 });
+  });
+
   test("warns when the game is capturing the mouse, and clears the warning", async () => {
     setupIpc({ get_overlay_snapshot: () => null });
     renderWithProviders(<OverlayView />);

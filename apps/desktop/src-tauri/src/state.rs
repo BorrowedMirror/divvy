@@ -106,6 +106,11 @@ impl Sources {
     }
 }
 
+/// Width of the price card (logical px), matching the overlay window in `tauri.conf.json`.
+pub const CARD_WIDTH: f64 = 420.0;
+/// Card height before the web view has measured it (logical px).
+pub const CARD_HEIGHT: f64 = 560.0;
+
 /// Shared app state managed by Tauri.
 #[derive(Debug)]
 pub struct AppState {
@@ -126,6 +131,10 @@ pub struct AppState {
     pub settings_overlay: AtomicBool,
     /// Last probe found the game holding the mouse while the panel was open (Wine capture).
     pub mouse_captured: AtomicBool,
+    /// Current price panel layout (also served to the web view on mount).
+    pub overlay_layout: Mutex<crate::events::OverlayLayout>,
+    /// Card position on screen (physical px) and its last measured height (logical px).
+    pub overlay_card: Mutex<((i32, i32), f64)>,
     /// Incremented on every panel show, so a stale focus guard can tell it was superseded.
     pub show_seq: std::sync::atomic::AtomicU64,
     pub quitting: AtomicBool,
@@ -162,6 +171,8 @@ impl AppState {
             overlay_visible: AtomicBool::new(false),
             settings_overlay: AtomicBool::new(false),
             mouse_captured: AtomicBool::new(false),
+            overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
+            overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
             show_seq: std::sync::atomic::AtomicU64::new(0),
             quitting: AtomicBool::new(false),
             close_quits: AtomicBool::new(false),

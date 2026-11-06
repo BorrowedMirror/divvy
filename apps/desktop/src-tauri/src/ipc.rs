@@ -190,12 +190,15 @@ pub fn overlay_snapshot(state: &AppState) -> Option<ItemCopied> {
 #[specta::specta]
 pub fn set_overlay_pinned(app: AppHandle, state: State<'_, Arc<AppState>>, pinned: bool) -> Result<(), IpcError> {
     flow::set_pinned(&app, &state, pinned);
-    // Pinning from the panel means the user wants to edit filters: take keyboard focus.
-    if pinned
+    // Switch between covering the game (unpinned) and a card-sized window (pinned) in place.
+    if state.overlay_visible.load(std::sync::atomic::Ordering::SeqCst)
         && let Some(win) = tauri::Manager::get_webview_window(&app, flow::OVERLAY)
-        && let Err(e) = crate::overlay::bring_to_front(&win, flow::game_window(&state).map(|g| g.native_id), true)
     {
-        state.record_error(format!("overlay focus: {e}"));
+        let card = state.overlay_card.lock().map_or((0, 0), |c| c.0);
+        flow::layout_overlay(&app, &state, &win, card);
+        if let Err(e) = crate::overlay::bring_to_front(&win, flow::game_window(&state).map(|g| g.native_id), true) {
+            state.record_error(format!("overlay focus: {e}"));
+        }
     }
     flow::emit_overlay_state(&app, &state);
     Ok(())
@@ -215,6 +218,14 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
     let width = win.inner_size().map_err(internal)?.to_logical::<f64>(scale).width;
     let screen_h = monitor.as_ref().map_or(f64::INFINITY, |m| f64::from(m.size().height) / scale);
     let h = crate::logic::fit_overlay_height(height, screen_h);
+    let state = tauri::Manager::state::<Arc<AppState>>(&app);
+    if let Ok(mut c) = state.overlay_card.lock() {
+        c.1 = h;
+    }
+    // Covering the game: the window stays game-sized; the web view places the card itself.
+    if state.overlay_layout.lock().is_ok_and(|l| l.cover) {
+        return Ok(());
+    }
     win.set_size(tauri::LogicalSize::new(width, h)).map_err(internal)?;
     if let Some(m) = monitor
         && let Ok(pos) = win.outer_position()
@@ -226,6 +237,13 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
         }
     }
     Ok(())
+}
+
+/// Current price panel layout, for the web view to catch up on mount.
+#[tauri::command]
+#[specta::specta]
+pub fn get_overlay_layout(state: State<'_, Arc<AppState>>) -> crate::events::OverlayLayout {
+    state.overlay_layout.lock().map_or(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }, |l| *l)
 }
 
 /// Hide the settings window (overlay mode: Esc or a click on the backdrop).

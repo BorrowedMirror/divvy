@@ -250,9 +250,32 @@ pub fn hotkey_effect(action: rkl_platform::HotkeyAction, overlay_open: bool, set
     }
 }
 
+/// Card position inside a window covering `game` (logical px), from the card's screen position
+/// (physical px). `points`: the game rect is in logical points (macOS) rather than pixels.
+pub fn card_in_window(card: (i32, i32), game: rkl_platform::Rect, scale: f64, points: bool) -> (f64, f64) {
+    let scale = if scale > 0.0 { scale } else { 1.0 };
+    let (cx, cy) = (f64::from(card.0) / scale, f64::from(card.1) / scale);
+    let (gx, gy) = if points {
+        (f64::from(game.x), f64::from(game.y))
+    } else {
+        (f64::from(game.x) / scale, f64::from(game.y) / scale)
+    };
+    ((cx - gx).max(0.0), (cy - gy).max(0.0))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn card_position_inside_the_covering_window() {
+        let game = rkl_platform::Rect { x: 2560, y: 0, width: 3440, height: 1440 };
+        assert_eq!(card_in_window((3000, 300), game, 1.0, false), (440.0, 300.0));
+        assert_eq!(card_in_window((3000, 300), game, 2.0, false), (220.0, 150.0));
+        assert_eq!(card_in_window((100, 50), game, 1.0, false), (0.0, 50.0));
+        let points = rkl_platform::Rect { x: 100, y: 25, width: 800, height: 600 };
+        assert_eq!(card_in_window((400, 100), points, 2.0, true), (100.0, 25.0));
+    }
 
     #[test]
     fn hotkeys_toggle_their_window() {

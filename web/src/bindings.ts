@@ -31,6 +31,8 @@ export const commands = {
 	 *  on screen.
 	 */
 	resizeOverlay: (height: number | null) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("resize_overlay", { height })),
+	/**  Current price panel layout, for the web view to catch up on mount. */
+	getOverlayLayout: () => __TAURI_INVOKE<OverlayLayout>("get_overlay_layout"),
 	/**  Current state of Wine's mouse capture for PoE2 (Linux only; `supported = false` elsewhere). */
 	getProtonMouseStatus: () => __TAURI_INVOKE<ProtonMouseStatus_Serialize>("get_proton_mouse_status"),
 	/**
@@ -53,6 +55,7 @@ export const commands = {
 export const events = {
 	itemCopied: makeEvent<ItemCopied_Serialize, ItemCopied_Deserialize>("item-copied"),
 	mouseCaptured: makeEvent<MouseCaptured, MouseCaptured>("mouse-captured"),
+	overlayLayout: makeEvent<OverlayLayout, OverlayLayout>("overlay-layout"),
 	overlayState: makeEvent<OverlayState, OverlayState>("overlay-state"),
 	permissionsChanged: makeEvent<PermissionsChanged_Serialize, PermissionsChanged_Deserialize>("permissions-changed"),
 	priceFailed: makeEvent<PriceFailed_Serialize, PriceFailed_Deserialize>("price-failed"),
@@ -401,6 +404,17 @@ export type MouseCaptured = {
 export type OnlineStatus = 
 /**  `securable` (instant buyout) in trade2. */
 "securable" | "online" | "any";
+
+/**
+ *  How the price panel window is laid out. `cover`: the window covers the game with a dimmed
+ *  backdrop and the card is drawn at (`x`, `y`) (logical px inside the window); otherwise the
+ *  window is the card itself (pinned, or no tracked game window).
+ */
+export type OverlayLayout = {
+	cover: boolean,
+	x: number | null,
+	y: number | null,
+};
 
 export type OverlaySettings = OverlaySettings_Serialize | OverlaySettings_Deserialize;
 

@@ -11,7 +11,7 @@ use tauri::{AppHandle, Manager, PhysicalPosition};
 use tauri_specta::Event;
 
 use crate::{
-    events::{ItemCopied, OverlayState, SettingsChanged},
+    events::{ItemCopied, OverlayLayout, OverlayState, SettingsChanged},
     ipc::IpcError,
     logic,
     state::AppState,
@@ -112,11 +112,42 @@ pub fn emit_overlay_state(app: &AppHandle, state: &AppState) {
         (OverlayState { visible: state.overlay_visible.load(Ordering::SeqCst), pinned: state.is_pinned() }).emit(app);
 }
 
+/// Lay the price panel out with its card at `card` (screen, physical px).
+///
+/// Unpinned over a tracked game window, the window covers the game (dimmed backdrop, the card
+/// drawn inside), so the pointer never enters the game and focus-follows-mouse WMs (openbox)
+/// cannot hand focus back to it; a backdrop click closes the panel. Pinned (or without a tracked
+/// game), the window is just the card, so the game stays usable around it.
+pub fn layout_overlay(app: &AppHandle, state: &AppState, win: &tauri::WebviewWindow, card: (i32, i32)) {
+    let scale = win.scale_factor().unwrap_or(1.0);
+    let card_height = state.overlay_card.lock().map_or(crate::state::CARD_HEIGHT, |c| c.1);
+    if let Ok(mut c) = state.overlay_card.lock() {
+        c.0 = card;
+    }
+    let game = if state.is_pinned() { None } else { game_window(state) };
+    let layout = if let Some(g) = game {
+        cover_game(win, g.rect);
+        let (x, y) = logic::card_in_window(card, g.rect, scale, cfg!(target_os = "macos"));
+        OverlayLayout { cover: true, x, y }
+    } else {
+        let _ = win.set_size(tauri::LogicalSize::new(crate::state::CARD_WIDTH, card_height));
+        let _ = win.set_position(PhysicalPosition::new(card.0, card.1));
+        OverlayLayout { cover: false, x: 0.0, y: 0.0 }
+    };
+    if let Ok(mut l) = state.overlay_layout.lock() {
+        *l = layout;
+    }
+    let _ = layout.emit(app);
+}
+
 /// Position the overlay beside the cursor and show it without stealing focus.
 pub fn show_overlay(app: &AppHandle, state: &AppState) {
     let Some(win) = app.get_webview_window(OVERLAY) else { return };
+    let scale = win.scale_factor().unwrap_or(1.0);
+    let card_height = state.overlay_card.lock().map_or(crate::state::CARD_HEIGHT, |c| c.1);
+    let mut card = state.overlay_card.lock().map_or((0, 0), |c| c.0);
     if let Ok(cursor) = app.cursor_position() {
-        let size = win.outer_size().map(|s| (s.width as i32, s.height as i32)).unwrap_or((420, 560));
+        let size = ((crate::state::CARD_WIDTH * scale).round() as i32, (card_height * scale).round() as i32);
         let monitor =
             app.monitor_from_point(cursor.x, cursor.y).ok().flatten().or_else(|| app.primary_monitor().ok().flatten());
         if let Some(m) = monitor {
@@ -145,9 +176,10 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
                     state.record_error(format!("layer-shell anchor: {e}"));
                 }
             }
-            let _ = win.set_position(PhysicalPosition::new(x, y));
+            card = (x, y);
         }
     }
+    layout_overlay(app, state, &win, card);
     let _ = win.set_ignore_cursor_events(false);
     let _ = win.show();
     // A focused fullscreen game can sit above "always on top" windows (openbox and other X11
@@ -203,7 +235,9 @@ fn spawn_focus_guard(app: &AppHandle, state: &AppState, game_id: Option<u64>) {
                 return;
             }
             let game_active = x11::active_window().ok().flatten() == Some(game_id);
-            if game_active && refocused < MAX_REFOCUS {
+            // A pinned panel lets the game have focus (hover it, focus-follows-mouse); only the
+            // unpinned panel, which covers the game, is kept focused against Wine re-activating it.
+            if game_active && !state.is_pinned() && refocused < MAX_REFOCUS {
                 refocused += 1;
                 tracing::debug!("game took focus back; re-focusing the panel ({refocused})");
                 if let Some(win) = app.get_webview_window(OVERLAY) {

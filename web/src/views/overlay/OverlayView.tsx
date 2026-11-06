@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { useTranslation } from "react-i18next";
-import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus } from "../../bindings";
+import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "../../bindings";
 import { commands, events } from "../../bindings";
 import { CloseIcon, GearIcon, PinIcon } from "../../components/icons";
 import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "../../components/ui";
@@ -116,14 +117,22 @@ export function OverlayView() {
   const busy = phase === "loading";
   // The window grows with the number of stats instead of scrolling them.
   const fitRef = useFitWindowHeight<HTMLDivElement>();
+  const layout = useOverlayLayout();
+  const cardHeight = useElementHeight(fitRef);
 
-  return (
-    <div ref={fitRef} className="flex w-full items-start justify-center p-1.5">
+  const card = (
+    <div
+      ref={fitRef}
+      data-testid="overlay-card"
+      className={layout.cover ? "absolute w-[420px] p-1.5" : "flex w-full items-start justify-center p-1.5"}
+      style={layout.cover ? cardPosition(layout, cardHeight) : undefined}
+    >
       <article
         aria-label={t("overlay.title")}
         style={{ opacity }}
-        onMouseEnter={autoHide.onMouseEnter}
-        onMouseLeave={autoHide.onMouseLeave}
+        // Covering the game, the panel closes only on a backdrop click, Esc or the hotkey.
+        onMouseEnter={layout.cover ? undefined : autoHide.onMouseEnter}
+        onMouseLeave={layout.cover ? undefined : autoHide.onMouseLeave}
         className="flex w-full max-w-[420px] flex-col gap-3 rounded-xl border border-gold/30 bg-surface p-3 text-fg shadow-2xl"
       >
         {mouseCaptured && (
@@ -182,6 +191,59 @@ export function OverlayView() {
       </article>
     </div>
   );
+
+  if (!layout.cover) return card;
+  // Unpinned over the game: the window covers the game with a dimmed backdrop. The pointer
+  // never reaches the game (so focus-follows-mouse WMs cannot refocus it); a backdrop click
+  // closes the panel.
+  return (
+    <div
+      data-testid="overlay-backdrop"
+      className="fixed inset-0 bg-black/60"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) hide();
+      }}
+    >
+      {card}
+    </div>
+  );
+}
+
+const EDGE = 8;
+
+/** Keep the card inside the covering window: Rust places it beside the cursor, this clamps
+ * it with the card's measured height. */
+export function cardPosition(layout: OverlayLayout, height: number): { left: number; top: number } {
+  const maxLeft = Math.max(EDGE, window.innerWidth - 420 - EDGE);
+  const maxTop = Math.max(0, window.innerHeight - height - EDGE);
+  return { left: Math.min(Math.max(layout.x ?? 0, 0), maxLeft), top: Math.min(Math.max(layout.y ?? 0, 0), maxTop) };
+}
+
+function useOverlayLayout(): OverlayLayout {
+  const [layout, setLayout] = useState<OverlayLayout>({ cover: false, x: 0, y: 0 });
+  useEffect(() => {
+    let live = true;
+    void commands.getOverlayLayout().then((l) => {
+      if (live) setLayout(l);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  useTauriEvent(events.overlayLayout, setLayout);
+  return layout;
+}
+
+function useElementHeight(ref: RefObject<HTMLElement | null>): number {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => setHeight(el.getBoundingClientRect().height));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref]);
+  return height;
 }
 
 function Toolbar({ filters }: { filters: FilterSet_Serialize }) {

@@ -19,7 +19,14 @@ sleep 1
 export DISPLAY=$DISP APP GAMEBIN PORT
 exec dbus-run-session -- bash -euo pipefail -c '
 fail() { echo "FAIL: $*"; exit 1; }
-openbox >/dev/null 2>&1 & sleep 1
+# Focus follows mouse, like many openbox setups: the case the covering panel exists for.
+OBRC=$(mktemp); cat >"$OBRC" <<RC
+<?xml version="1.0"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <focus><focusNew>yes</focusNew><followMouse>yes</followMouse><underMouse>no</underMouse><focusDelay>0</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>
+</openbox_config>
+RC
+openbox --config-file "$OBRC" >/dev/null 2>&1 & sleep 1
 CFG=$(mktemp -d); mkdir -p "$CFG/config"
 printf "version = 1\n\n[ui]\nonboarding_done = true\n" > "$CFG/config/settings.toml"
 LOG=$(mktemp -d)
@@ -34,6 +41,7 @@ hook() { exec 3<>/dev/tcp/127.0.0.1/$PORT; echo "$1" >&3; head -1 <&3; exec 3>&-
 name() { xprop -id "$1" _NET_WM_NAME 2>/dev/null | sed "s/.*= //; s/\"//g"; }
 top() { name "$(xprop -root _NET_CLIENT_LIST_STACKING | sed "s/.*# //; s/.*, //")"; }
 active() { name "$(xprop -root _NET_ACTIVE_WINDOW | sed "s/.*# //")"; }
+geo() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}/Width/{w=\$NF}/Height/{h=\$NF}END{print x\",\"y\",\"w\",\"h}"; }
 xdotool windowactivate --sync "$GAME"; sleep 0.3
 
 hook "text $(python3 -c "import json;print(json.dumps(open(\"e2e/fixtures/rare-ring.txt\").read()))")" >/dev/null
@@ -67,10 +75,33 @@ for keys in ctrl+d ctrl+alt+d; do
   fi
 done
 
+# Unpinned panel covers the game; with focus-follows-mouse the pointer cannot hand focus back.
+hook hide >/dev/null; xdotool windowactivate --sync "$GAME"; xdotool mousemove 300 300; sleep 0.3
+xdotool key --clearmodifiers ctrl+d; sleep 1.5
+OW=$(xdotool search --name "^RKL overlay$" | head -1)
+[ "$(geo "$OW")" = "$(geo "$GAME")" ] || fail "unpinned panel $(geo "$OW") does not cover the game $(geo "$GAME")"
+xdotool mousemove 1700 900; sleep 0.6; xdotool mousemove 1750 950; sleep 0.6
+[ "$(active)" = "RKL overlay" ] || fail "moving the mouse handed focus away (active: $(active))"
+echo "ok: unpinned panel covers the game and keeps focus while the mouse moves"
+xdotool click 1; sleep 0.8
+[ "$(xwininfo -id "$OW" | awk "/Map State/{print \$NF}")" != IsViewable ] || fail "backdrop click did not close the panel"
+echo "ok: clicking the dimmed backdrop closes the panel"
+
+# Pinned panel stays card-sized, so hovering the game focuses it (focus-follows-mouse).
+xdotool windowactivate --sync "$GAME"; xdotool mousemove 300 300; sleep 0.3
+xdotool key --clearmodifiers ctrl+alt+d; sleep 1.5
+W=$(xwininfo -id "$OW" | awk "/Width:/{print \$NF}")
+[ "$W" -lt 1000 ] || fail "pinned panel should be card-sized, width $W"
+# Into the card, then back out over the game (openbox focuses on pointer enter).
+xdotool mousemove --window "$OW" 100 100; sleep 0.6
+xdotool mousemove 1700 900; sleep 0.8
+[ "$(active)" = "Path of Exile 2" ] || fail "hovering the game did not focus it with a pinned panel (active: $(active))"
+echo "ok: pinned panel is card-sized and the game can be hovered back into focus"
+hook hide >/dev/null
+
 hook "tray open_settings" >/dev/null; sleep 0.8
 [ "$(top)" = "RKL settings" ] || fail "settings not on top (top: $(top))"
 [ "$(active)" = "RKL settings" ] || fail "settings not focused (active: $(active))"
-geo() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}/Width/{w=\$NF}/Height/{h=\$NF}END{print x\",\"y\",\"w\",\"h}"; }
 SW=$(xdotool search --name "^RKL settings$" | head -1)
 [ "$(geo "$SW")" = "$(geo "$GAME")" ] || fail "settings $(geo "$SW") does not cover the game $(geo "$GAME")"
 echo "ok: settings overlay covers the game ($(geo "$SW")) and is focused"

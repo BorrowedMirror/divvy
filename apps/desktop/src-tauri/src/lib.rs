@@ -40,6 +40,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             ipc::open_settings,
             ipc::close_settings,
             ipc::resize_overlay,
+            ipc::get_overlay_layout,
             proton::get_proton_mouse_status,
             proton::set_proton_mouse_capture,
             ipc::rebind_hotkey,
@@ -55,6 +56,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             events::SettingsChanged,
             events::OverlayState,
             events::MouseCaptured,
+            events::OverlayLayout,
             permissions::PermissionsChanged,
             updater::UpdateAvailable,
         ])

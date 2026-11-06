@@ -40,3 +40,13 @@ pub struct OverlayState {
 pub struct MouseCaptured {
     pub captured: bool,
 }
+
+/// How the price panel window is laid out. `cover`: the window covers the game with a dimmed
+/// backdrop and the card is drawn at (`x`, `y`) (logical px inside the window); otherwise the
+/// window is the card itself (pinned, or no tracked game window).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, specta::Type, tauri_specta::Event)]
+pub struct OverlayLayout {
+    pub cover: bool,
+    pub x: f64,
+    pub y: f64,
+}
