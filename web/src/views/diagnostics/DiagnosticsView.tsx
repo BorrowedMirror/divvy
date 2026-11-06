@@ -154,6 +154,7 @@ export function DiagnosticsView() {
         ) : (
           <ul className="max-h-48 overflow-auto rounded-md border border-line bg-surface-2 p-2 font-mono text-xs">
             {d.recent_errors.map((e, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: the same error can be recorded twice.
               <li key={`${i}-${e}`}>{e}</li>
             ))}
           </ul>

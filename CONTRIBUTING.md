@@ -61,7 +61,7 @@ Windows (WiX).
 
 ```sh
 pnpm install                 # web + e2e deps, commitlint, lefthook
-pnpm exec lefthook install   # hooks from .lefthook.yml: rustfmt check + eslint on commit, commitlint on commit-msg
+pnpm exec lefthook install   # hooks from .lefthook.yml: rustfmt check + biome on commit, commitlint on commit-msg
 cargo test                   # default members (crates/*)
 pnpm --dir web dev           # web UI on http://localhost:5173 (keep running for the app)
 cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
@@ -72,14 +72,14 @@ cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
 
 | Command | What it does |
 | --- | --- |
-| `cargo xtask lint` | rustfmt check, clippy `-D warnings` (workspace and `e2e/macos-harness`), cargo-deny, cargo-machete, eslint, tsc for web and e2e (`--no-web`, `--no-tools` to skip groups) |
+| `cargo xtask lint` | rustfmt check, clippy `-D warnings` (workspace and `e2e/macos-harness`), cargo-deny, cargo-machete, biome, tsc for web and e2e (`--no-web`, `--no-tools` to skip groups) |
 | `cargo xtask coverage [--check] [--no-run] [--profile <p>]` | nextest under llvm-cov; prints per-crate line coverage, writes `target/coverage/<crate>.lcov`, `--check` enforces the gates |
 | `cargo xtask gen [--no-bindings]` | regenerates `.commitlintrc.json`, `docs/contributing/commit-message.md` (from `.commit-config.toml`) and `web/src/bindings.ts` |
 | `cargo xtask data refresh [--offline]` | re-downloads and rebuilds the bundled game data in `crates/data/assets` |
 | `cargo xtask windows-installer [-- <tauri args>]` | cross-compiles the Windows NSIS installer on Linux; see [Windows installer from Linux](#windows-installer-from-linux) |
 | `cargo xtask fixtures record` | re-records trade fixtures from the live API (2 s between requests) |
 | `cargo nextest run` | tests (profiles in `.config/nextest.toml`) |
-| `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, eslint, tsc |
+| `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, biome, tsc |
 
 Coverage gates (CI fails below them): core, trade, data, config >= 90% lines; platform >= 70%;
 web >= 80%; patch coverage >= 80%.

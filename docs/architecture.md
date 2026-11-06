@@ -41,7 +41,7 @@ web edits FilterSet -> ipc `query_price` -> trade::PriceSource::price -> event `
   `testkit::fakes`. A single global passive hook (`rdev`) is shared by the non-Wayland backends,
   and its callbacks only `try_send` into a channel.
 - **Typed IPC.** Commands and events are declared in Rust and exported to TypeScript with
-  tauri-specta. The web never calls `invoke()` directly (enforced by eslint), and CI fails if
+  tauri-specta. The web never calls `invoke()` directly (enforced by Biome), and CI fails if
   `web/src/bindings.ts` is stale.
 - **Respectful API use.** The trade client honours the server's rate-limit headers and
   `Retry-After`, caches responses, and sends a descriptive User-Agent.

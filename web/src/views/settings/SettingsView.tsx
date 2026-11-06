@@ -303,6 +303,7 @@ function InGameTab({ s, update, errors }: TabProps) {
           <dd className="text-muted">{t("ingame.placeholderChain", { example: "@last ty&&/kick @last" })}</dd>
         </dl>
         {s.chat.commands.map((c, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: editable rows have no id; the position is their identity.
           <div key={i} className="flex flex-wrap items-center gap-2" data-testid="chat-command">
             <input
               aria-label={t("ingame.commandText", { n: i + 1 })}
@@ -359,6 +360,7 @@ function InGameTab({ s, update, errors }: TabProps) {
         <h3 id="stash-heading" className="text-sm font-semibold">{t("ingame.stash")}</h3>
         <p className="text-xs text-muted">{t("ingame.stashHelp")}</p>
         {s.stash.searches.map((c, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: editable rows have no id; the position is their identity.
           <div key={i} className="flex flex-wrap items-center gap-2" data-testid="stash-search">
             <input
               aria-label={t("ingame.searchText", { n: i + 1 })}
@@ -555,6 +557,7 @@ function WaystonesTab({ s, update }: TabProps) {
         {CHOICES.map((c) => {
           const on = (flags[text] ?? null) === c;
           return (
+            // biome-ignore lint/a11y/useSemanticElements: a segmented control of buttons styled as one bar.
             <button
               key={c ?? "off"}
               type="button"

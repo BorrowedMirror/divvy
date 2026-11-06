@@ -85,6 +85,7 @@ export function CheckboxField({
   disabled?: boolean;
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: Base UI's Checkbox.Root inside is the control.
     <label className={cx("inline-flex min-w-0 cursor-pointer items-center gap-2 text-sm", disabled && "opacity-50")}>
       <Checkbox.Root
         checked={checked}
@@ -119,6 +120,7 @@ export function SwitchField({
   description?: string;
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: Base UI's Switch.Root inside is the control.
     <label className="flex cursor-pointer items-start justify-between gap-4 py-1">
       <span className="flex flex-col">
         <span className="text-sm">{label}</span>

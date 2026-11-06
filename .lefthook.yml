@@ -11,5 +11,5 @@ pre-commit:
       run: cargo fmt --all -- --check
     web-lint:
       root: web/
-      glob: "*.{ts,tsx}"
+      glob: "*.{ts,tsx,css,json}"
       run: pnpm lint

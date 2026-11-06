@@ -84,6 +84,7 @@ export function WaystoneMods({ item }: { item: ParsedItem_Serialize }) {
           const flag = flagFor(m.template, flags);
           return (
             <li
+              // biome-ignore lint/suspicious/noArrayIndexKey: a waystone can roll the same mod text twice.
               key={`${m.text}-${i}`}
               data-flag={flag ?? "none"}
               className={cx("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 py-1", flag && ROW[flag])}
@@ -107,7 +108,7 @@ export function WaystoneMods({ item }: { item: ParsedItem_Serialize }) {
                     onClick={() => setFlag(m.template, f)}
                     className={cx(
                       "grid h-6 w-6 place-items-center rounded border outline-none focus-visible:ring-2 focus-visible:ring-gold",
-                      flag === f ? TAG[f] + " border-transparent" : "border-line text-muted hover:text-fg",
+                      flag === f ? `${TAG[f]} border-transparent` : "border-line text-muted hover:text-fg",
                     )}
                   >
                     <FlagIcon flag={f} />

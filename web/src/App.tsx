@@ -119,6 +119,7 @@ function SettingsShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close; Esc is the keyboard path.
     <div
       className="k-shell"
       data-testid="settings-shell"

@@ -5,7 +5,7 @@ use crate::commit_config::root;
 
 #[derive(Debug, clap::Args)]
 pub struct LintArgs {
-    /// Skip the web (eslint + tsc) checks.
+    /// Skip the web (biome + tsc) checks.
     #[arg(long)]
     pub no_web: bool,
     /// Skip cargo-deny and cargo-machete (e.g. when they are not installed).
@@ -52,7 +52,7 @@ pub fn steps(args: &LintArgs) -> Vec<Step> {
         steps.push(Step { name: "cargo-machete", dir: ".", argv: &["cargo-machete", "--skip-target-dir"] });
     }
     if !args.no_web {
-        steps.push(Step { name: "eslint", dir: "web", argv: &["pnpm", "lint"] });
+        steps.push(Step { name: "biome", dir: "web", argv: &["pnpm", "lint"] });
         steps.push(Step { name: "tsc", dir: "web", argv: &["pnpm", "typecheck"] });
         steps.push(Step { name: "tsc (e2e)", dir: "e2e", argv: &["pnpm", "typecheck"] });
     }
@@ -98,7 +98,7 @@ mod tests {
                 "clippy (harness)",
                 "cargo-deny",
                 "cargo-machete",
-                "eslint",
+                "biome",
                 "tsc",
                 "tsc (e2e)"
             ]

@@ -40,7 +40,7 @@ describe("SettingsView", () => {
 
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
-    expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize).ui.theme).toBe("light");
+    expect((callsOf(calls, "save_settings")[0]?.args?.settings as Settings_Serialize | undefined)?.ui.theme).toBe("light");
     expect(await screen.findByText("Settings saved")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });

@@ -91,6 +91,7 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
       </legend>
       {filters.stats.map((s, i) => (
         <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: a stat id can appear on several rows (local and global mods).
           key={`${s.stat_id}-${i}`}
           className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-center gap-1.5"
           data-enabled={s.enabled}
@@ -108,6 +109,7 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
             <span className="mt-0.5 ml-6 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] leading-none text-muted">
               <SourceLabel statId={s.stat_id} />
               {s.tiers.map((tier, n) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: a summed row can carry the same tier twice.
                 <TierBadge key={n} tier={tier} />
               ))}
               {s.item_values.length > 0 && (

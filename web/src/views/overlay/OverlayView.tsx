@@ -185,7 +185,6 @@ export function OverlayView() {
             </p>
           </div>
         ) : (
-          <>
             <div className={side ? "grid grid-cols-2 items-start gap-4" : "flex flex-col gap-3"} data-testid="panel-body" data-results={resultsAt}>
             <div className={cx("flex min-w-0 flex-col gap-3", resultsAt === "left" && "order-2")}>
             <div className="flex flex-col gap-3">
@@ -212,7 +211,6 @@ export function OverlayView() {
               {summary && !busy && !error && <Results summary={summary} />}
             </div>
             </div>
-          </>
         )}
         </div>
       </article>
@@ -223,6 +221,7 @@ export function OverlayView() {
   // stays at the same place in the tree in both layouts (the wrapper is `display: contents`
   // otherwise), so it is never remounted and its size observers keep watching it.
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close; Esc is the keyboard path.
     <div
       data-testid={layout.cover ? "overlay-backdrop" : undefined}
       className={layout.cover ? "fixed inset-0" : "contents"}
@@ -325,6 +324,7 @@ function UniquePicker({ filters, onPick }: { filters: FilterSet_Serialize; onPic
     </button>
   );
   return (
+    // biome-ignore lint/a11y/useSemanticElements: a labelled row of chips; a fieldset needs a legend and resets.
     <div className="flex flex-col gap-1.5" role="group" aria-label={t("overlay.possibleUniques")}>
       <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">{t("overlay.possibleUniques")}</span>
       <div className="flex flex-wrap gap-1.5" data-testid="unique-candidates">

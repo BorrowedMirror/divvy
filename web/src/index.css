@@ -177,7 +177,9 @@ html[data-route="overlay"] body {
   *,
   *::before,
   *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat every component's own duration. */
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must beat every component's own duration. */
   }
 }
