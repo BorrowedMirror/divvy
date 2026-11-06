@@ -34,7 +34,19 @@
     "tierTitle": "Nível do modificador {{tier}} (1 é a melhor faixa de valores)",
     "possibleUniques": "Únicos possíveis",
     "unidentifiedBase": "Não identificado",
-    "dragHint": "Arraste para mover o painel"
+    "dragHint": "Arraste para mover o painel",
+    "source": {
+      "explicit": "explícito",
+      "implicit": "implícito",
+      "augment": "aprimoramento",
+      "enchant": "encantamento",
+      "fractured": "fraturado",
+      "crafted": "criado",
+      "pseudo": "pseudo",
+      "sanctified": "santificado",
+      "desecrated": "profanado",
+      "skill": "habilidade"
+    }
   },
   "item": {
     "rarityLabel": "Raridade:",

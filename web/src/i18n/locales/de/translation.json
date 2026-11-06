@@ -34,7 +34,19 @@
     "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)",
     "possibleUniques": "Mögliche einzigartige Gegenstände",
     "unidentifiedBase": "Nicht identifiziert",
-    "dragHint": "Ziehen, um das Panel zu verschieben"
+    "dragHint": "Ziehen, um das Panel zu verschieben",
+    "source": {
+      "explicit": "Explizit",
+      "implicit": "Implizit",
+      "augment": "Augment",
+      "enchant": "Verzauberung",
+      "fractured": "Gebrochen",
+      "crafted": "Hergestellt",
+      "pseudo": "Pseudo",
+      "sanctified": "Geheiligt",
+      "desecrated": "Entweiht",
+      "skill": "Fertigkeit"
+    }
   },
   "item": {
     "rarityLabel": "Seltenheit:",

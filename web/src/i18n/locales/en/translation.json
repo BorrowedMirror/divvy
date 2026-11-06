@@ -34,7 +34,19 @@
     "tierTitle": "Mod tier {{tier}} (1 is the best roll range)",
     "possibleUniques": "Possible uniques",
     "unidentifiedBase": "Unidentified",
-    "dragHint": "Drag to move the panel"
+    "dragHint": "Drag to move the panel",
+    "source": {
+      "explicit": "explicit",
+      "implicit": "implicit",
+      "augment": "augment",
+      "enchant": "enchant",
+      "fractured": "fractured",
+      "crafted": "crafted",
+      "pseudo": "pseudo",
+      "sanctified": "sanctified",
+      "desecrated": "desecrated",
+      "skill": "skill"
+    }
   },
   "item": {
     "rarityLabel": "Rarity:",

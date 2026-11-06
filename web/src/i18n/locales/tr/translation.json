@@ -34,7 +34,19 @@
     "tierTitle": "Mod kademesi {{tier}} (1 en iyi değer aralığıdır)",
     "possibleUniques": "Olası eşsizler",
     "unidentifiedBase": "Tanımlanmamış",
-    "dragHint": "Paneli taşımak için sürükleyin"
+    "dragHint": "Paneli taşımak için sürükleyin",
+    "source": {
+      "explicit": "açık",
+      "implicit": "örtük",
+      "augment": "güçlendirme",
+      "enchant": "efsun",
+      "fractured": "kırık",
+      "crafted": "üretilmiş",
+      "pseudo": "sözde",
+      "sanctified": "kutsanmış",
+      "desecrated": "kirletilmiş",
+      "skill": "yetenek"
+    }
   },
   "item": {
     "rarityLabel": "Nadirlik:",

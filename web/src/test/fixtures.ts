@@ -76,7 +76,7 @@ export function filterSet(overrides: Partial<FilterSet_Serialize> = {}): FilterS
         min: 76,
         max: null,
         item_values: [85],
-        tier: 1,
+        tiers: [1],
       },
       {
         stat_id: "explicit.stat_4220027924",
@@ -85,7 +85,7 @@ export function filterSet(overrides: Partial<FilterSet_Serialize> = {}): FilterS
         min: 28,
         max: null,
         item_values: [32],
-        tier: null,
+        tiers: [],
       },
     ],
     misc: {

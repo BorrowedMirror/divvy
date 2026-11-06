@@ -96,7 +96,7 @@ mod tests {
                 min: None,
                 max: None,
                 item_values: vec![],
-                tier: None,
+                tiers: vec![],
             })
             .collect();
         f

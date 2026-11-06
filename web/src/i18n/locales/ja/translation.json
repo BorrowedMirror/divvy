@@ -34,7 +34,19 @@
     "tierTitle": "Mod のティア {{tier}}（1 が最良の数値範囲）",
     "possibleUniques": "候補のユニーク",
     "unidentifiedBase": "未鑑定",
-    "dragHint": "ドラッグしてパネルを移動"
+    "dragHint": "ドラッグしてパネルを移動",
+    "source": {
+      "explicit": "固有外",
+      "implicit": "固有",
+      "augment": "オーグメント",
+      "enchant": "エンチャント",
+      "fractured": "フラクチャー",
+      "crafted": "クラフト",
+      "pseudo": "疑似",
+      "sanctified": "聖別",
+      "desecrated": "冒涜",
+      "skill": "スキル"
+    }
   },
   "item": {
     "rarityLabel": "レアリティ:",

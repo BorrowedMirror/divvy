@@ -15,6 +15,7 @@
   --k-good: #6fbf73;
   --k-warn: #e0a34a;
   --k-bad: #e0604f;
+  --k-augment: #6ea0f0;
 }
 
 :root[data-theme="light"] {
@@ -31,6 +32,7 @@
   --k-good: #2f7d34;
   --k-warn: #9a6a0c;
   --k-bad: #b23a2a;
+  --k-augment: #2f63b8;
 }
 
 @media (prefers-color-scheme: light) {
@@ -48,6 +50,7 @@
     --k-good: #2f7d34;
     --k-warn: #9a6a0c;
     --k-bad: #b23a2a;
+  --k-augment: #2f63b8;
   }
 }
 
@@ -64,6 +67,7 @@
   --color-good: var(--k-good);
   --color-warn: var(--k-warn);
   --color-bad: var(--k-bad);
+  --color-augment: var(--k-augment);
   /* In-game rarity colours. */
   --color-rarity-normal: #c8c8c8;
   --color-rarity-magic: #8888ff;

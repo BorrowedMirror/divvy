@@ -7,6 +7,67 @@ function formatValues(values: (number | null)[]): string {
   return values.filter((v): v is number => v !== null).join(" / ");
 }
 
+/** T1 is the best roll range: solid gold, T2 gold outline, T3 plain, T4 and lower fade out. */
+const TIER_STYLES = [
+  "bg-gold-bright text-bg font-bold ring-1 ring-gold-bright shadow-[0_0_6px_var(--k-gold)]",
+  "bg-gold/20 text-gold-bright font-semibold ring-1 ring-gold/70",
+  "bg-surface-3 text-fg font-semibold ring-1 ring-line",
+] as const;
+const TIER_LOW = "bg-surface-2 text-muted ring-1 ring-line/60";
+
+function TierBadge({ tier }: { tier: number }) {
+  const { t } = useTranslation();
+  return (
+    <span
+      className={cx(
+        "mr-1.5 inline-block rounded px-1.5 py-0.5 align-[1px] font-mono text-[11px] leading-none",
+        TIER_STYLES[tier - 1] ?? TIER_LOW,
+      )}
+      title={t("overlay.tierTitle", { tier })}
+      data-testid="mod-tier"
+      data-tier={tier}
+    >
+      T{tier}
+    </span>
+  );
+}
+
+/** Where a stat comes from, from its trade stat id prefix (`rune.` is an augment). */
+const SOURCES = {
+  explicit: "explicit",
+  implicit: "implicit",
+  rune: "augment",
+  enchant: "enchant",
+  fractured: "fractured",
+  crafted: "crafted",
+  pseudo: "pseudo",
+  sanctified: "sanctified",
+  desecrated: "desecrated",
+  skill: "skill",
+} as const;
+
+export function statSource(statId: string): (typeof SOURCES)[keyof typeof SOURCES] | null {
+  const prefix = statId.split(".", 1)[0] ?? "";
+  return Object.hasOwn(SOURCES, prefix) ? SOURCES[prefix as keyof typeof SOURCES] : null;
+}
+
+function SourceLabel({ statId }: { statId: string }) {
+  const { t } = useTranslation();
+  const source = statSource(statId);
+  if (source === null) return null;
+  return (
+    <span
+      className={cx(
+        "rounded px-1 py-px leading-none tracking-wide uppercase",
+        source === "augment" ? "bg-augment/20 font-semibold text-augment" : "text-muted",
+      )}
+      data-testid="stat-source"
+    >
+      {t(`overlay.source.${source}`)}
+    </span>
+  );
+}
+
 export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
   const { t } = useTranslation();
   const updateStat = useOverlayStore((s) => s.updateStat);
@@ -29,27 +90,19 @@ export function StatFilters({ filters }: { filters: FilterSet_Serialize }) {
               onChange={(enabled) => updateStat(i, { enabled })}
               label={
                 <span className={s.enabled ? "text-fg" : "text-muted"}>
-                  {s.tier !== null && (
-                    <span
-                      className={cx(
-                        "mr-1.5 inline-block rounded px-1 py-px align-[1px] font-mono text-[10px] leading-none",
-                        s.tier <= 2 ? "bg-gold/20 text-gold" : "bg-surface-3 text-muted",
-                      )}
-                      title={t("overlay.tierTitle", { tier: s.tier })}
-                      data-testid="mod-tier"
-                    >
-                      T{s.tier}
-                    </span>
-                  )}
+                  {s.tiers.map((tier, n) => (
+                    <TierBadge key={n} tier={tier} />
+                  ))}
                   {s.text}
                 </span>
               }
             />
-            {s.item_values.length > 0 && (
-              <span className="ml-6 block text-[10px] text-muted">
-                {t("overlay.itemValue", { value: formatValues(s.item_values) })}
-              </span>
-            )}
+            <span className="ml-6 flex items-center gap-1.5 text-[10px] text-muted">
+              <SourceLabel statId={s.stat_id} />
+              {s.item_values.length > 0 && (
+                <span>{t("overlay.itemValue", { value: formatValues(s.item_values) })}</span>
+              )}
+            </span>
           </div>
           <NumberInput
             label={t("overlay.statMin", { stat: s.text })}

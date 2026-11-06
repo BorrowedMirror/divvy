@@ -38,9 +38,9 @@ pub struct StatFilter {
     pub max: Option<f64>,
     /// Value(s) on the item, for showing beside the inputs and re-widening.
     pub item_values: Vec<f64>,
-    /// Mod tier from advanced item text (1 = best), when known; `None` for summed rows.
+    /// Mod tiers from advanced item text (1 = best), one per mod the row sums; empty when unknown.
     #[serde(default)]
-    pub tier: Option<u8>,
+    pub tiers: Vec<u8>,
 }
 
 /// Numeric range filter for misc properties (ilvl, quality, gem level, ...).
@@ -178,7 +178,7 @@ fn merge_same_stats(rows: Vec<(StatFilter, String)>, pct: f64) -> Vec<StatFilter
                 *a += b;
             }
             acc.enabled |= row.enabled;
-            acc.tier = None;
+            acc.tiers.extend(&row.tiers);
             *count += 1;
         } else {
             out.push((row, template, 1));
@@ -271,7 +271,7 @@ pub fn build_filters(item: &ParsedItem, opts: &QueryOptions) -> FilterSet {
                     min,
                     max,
                     item_values: m.values.clone(),
-                    tier: m.advanced.as_ref().and_then(|a| a.tier),
+                    tiers: m.advanced.as_ref().and_then(|a| a.tier).into_iter().collect(),
                 },
                 m.template.clone(),
             ))
@@ -626,7 +626,7 @@ mod tests {
 
     #[test]
     fn mods_with_the_same_stat_merge_into_one_summed_filter() {
-        let row = |id: &str, text: &str, v: f64, enabled: bool| {
+        let row = |id: &str, text: &str, v: f64, enabled: bool, tier: u8| {
             (
                 StatFilter {
                     stat_id: id.into(),
@@ -635,16 +635,16 @@ mod tests {
                     min: None,
                     max: None,
                     item_values: vec![v],
-                    tier: Some(2),
+                    tiers: vec![tier],
                 },
                 "#% increased Spirit".to_owned(),
             )
         };
         let merged = merge_same_stats(
             vec![
-                row("explicit.stat_1416406066", "55% increased Spirit", 55.0, false),
-                row("explicit.stat_9", "+20 to maximum Mana", 20.0, true),
-                row("explicit.stat_1416406066", "13% increased Spirit", 13.0, true),
+                row("explicit.stat_1416406066", "55% increased Spirit", 55.0, false, 3),
+                row("explicit.stat_9", "+20 to maximum Mana", 20.0, true, 2),
+                row("explicit.stat_1416406066", "13% increased Spirit", 13.0, true, 7),
             ],
             10.0,
         );
@@ -653,7 +653,7 @@ mod tests {
         assert_eq!(merged[0].item_values, vec![68.0]);
         assert_eq!(merged[0].min, Some(61.0));
         assert!(merged[0].enabled);
-        assert_eq!((merged[0].tier, merged[1].tier), (None, Some(2)), "summed rows have no single tier");
+        assert_eq!((&merged[0].tiers[..], &merged[1].tiers[..]), (&[3, 7][..], &[2][..]), "summed rows keep each tier");
         assert_eq!(render_template("Adds # to # Damage", &[1.5, 3.0]), "Adds 1.5 to 3 Damage");
         assert_eq!(render_template("# and #", &[1.0]), "1 and #");
     }

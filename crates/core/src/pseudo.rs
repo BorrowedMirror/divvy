@@ -104,7 +104,7 @@ pub fn pseudo_filters(mods: &[Modifier], class: &ItemClass, widen_pct: f64) -> (
             min,
             max,
             item_values: vec![total],
-            tier: None,
+            tiers: Vec::new(),
         });
     }
     covered.sort_unstable();

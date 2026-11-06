@@ -34,7 +34,19 @@
     "tierTitle": "詞綴階級 {{tier}}（1 為最佳數值範圍）",
     "possibleUniques": "可能的傳奇",
     "unidentifiedBase": "未鑑定",
-    "dragHint": "拖曳以移動面板"
+    "dragHint": "拖曳以移動面板",
+    "source": {
+      "explicit": "外延",
+      "implicit": "固有",
+      "augment": "增幅",
+      "enchant": "附魔",
+      "fractured": "破裂",
+      "crafted": "工藝",
+      "pseudo": "偽屬性",
+      "sanctified": "聖化",
+      "desecrated": "褻瀆",
+      "skill": "技能"
+    }
   },
   "item": {
     "rarityLabel": "稀有度：",

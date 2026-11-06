@@ -34,7 +34,19 @@
     "tierTitle": "옵션 등급 {{tier}} (1이 가장 좋은 수치 범위)",
     "possibleUniques": "가능한 고유 아이템",
     "unidentifiedBase": "미확인",
-    "dragHint": "드래그하여 패널 이동"
+    "dragHint": "드래그하여 패널 이동",
+    "source": {
+      "explicit": "명시",
+      "implicit": "고정",
+      "augment": "증강",
+      "enchant": "인챈트",
+      "fractured": "분열",
+      "crafted": "제작",
+      "pseudo": "유사",
+      "sanctified": "신성화",
+      "desecrated": "모독",
+      "skill": "스킬"
+    }
   },
   "item": {
     "rarityLabel": "희귀도:",

@@ -945,8 +945,8 @@ export type StatFilter_Deserialize = {
 	max?: number | null,
 	/**  Value(s) on the item, for showing beside the inputs and re-widening. */
 	item_values: (number | null)[],
-	/**  Mod tier from advanced item text (1 = best), when known; `None` for summed rows. */
-	tier?: number | null,
+	/**  Mod tiers from advanced item text (1 = best), one per mod the row sums; empty when unknown. */
+	tiers?: number[],
 };
 
 /**  One editable stat row in the price panel. */
@@ -959,8 +959,8 @@ export type StatFilter_Serialize = {
 	max: number | null,
 	/**  Value(s) on the item, for showing beside the inputs and re-widening. */
 	item_values: (number | null)[],
-	/**  Mod tier from advanced item text (1 = best), when known; `None` for summed rows. */
-	tier: number | null,
+	/**  Mod tiers from advanced item text (1 = best), one per mod the row sums; empty when unknown. */
+	tiers: number[],
 };
 
 export type Theme = "system" | "dark" | "light";

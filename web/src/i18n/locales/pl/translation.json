@@ -34,7 +34,19 @@
     "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)",
     "possibleUniques": "Możliwe unikaty",
     "unidentifiedBase": "Niezidentyfikowany",
-    "dragHint": "Przeciągnij, aby przesunąć panel"
+    "dragHint": "Przeciągnij, aby przesunąć panel",
+    "source": {
+      "explicit": "jawny",
+      "implicit": "wrodzony",
+      "augment": "wzmocnienie",
+      "enchant": "zaklęcie",
+      "fractured": "pęknięty",
+      "crafted": "wytworzony",
+      "pseudo": "pseudo",
+      "sanctified": "uświęcony",
+      "desecrated": "zbezczeszczony",
+      "skill": "umiejętność"
+    }
   },
   "item": {
     "rarityLabel": "Rzadkość:",

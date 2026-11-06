@@ -137,6 +137,24 @@ describe("OverlayView", () => {
     const tiers = await screen.findAllByTestId("mod-tier");
     expect(tiers).toHaveLength(1);
     expect(tiers[0]).toHaveTextContent("T1");
+    expect(tiers[0]).toHaveAttribute("data-tier", "1");
+  });
+
+  test("stat rows say where each stat comes from, with augments called out", async () => {
+    const snap = itemCopied();
+    snap.filters.stats.push({
+      stat_id: "rune.stat_1",
+      text: "Minions deal 40% increased Damage with Command Skills",
+      enabled: false,
+      min: 36,
+      max: null,
+      item_values: [40],
+      tiers: [],
+    });
+    setupIpc({ get_overlay_snapshot: () => snap });
+    renderWithProviders(<OverlayView />);
+    const sources = await screen.findAllByTestId("stat-source");
+    expect(sources.map((s) => s.textContent)).toEqual(["explicit", "explicit", "augment"]);
   });
 
   test("covering the game: dimmed backdrop closes on click, the card does not", async () => {

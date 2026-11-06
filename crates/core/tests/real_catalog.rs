@@ -146,10 +146,10 @@ fn stat_filters_carry_mod_tiers_from_advanced_copies() {
     let opts =
         QueryOptions { league: "Standard".into(), status: OnlineStatus::Any, widen_pct: 10.0, enable_all_stats: false };
     let f = build_filters(&sceptre, &opts);
-    let tier = |text: &str| f.stats.iter().find(|s| s.text == text).map(|s| s.tier);
-    assert_eq!(tier("30% reduced Attribute Requirements"), Some(Some(2)));
-    assert_eq!(tier("Allies in your Presence Regenerate 2.2 Life per second"), Some(Some(9)));
-    assert_eq!(tier("68% increased Spirit"), Some(None), "summed prefix + desecrated row");
+    let tier = |text: &str| f.stats.iter().find(|s| s.text == text).map(|s| s.tiers.clone());
+    assert_eq!(tier("30% reduced Attribute Requirements"), Some(vec![2]));
+    assert_eq!(tier("Allies in your Presence Regenerate 2.2 Life per second"), Some(vec![9]));
+    assert_eq!(tier("68% increased Spirit"), Some(vec![3, 7]), "summed prefix + desecrated row");
 }
 
 /// The waystone mod check keys flags by template: the templates the parser produces for real

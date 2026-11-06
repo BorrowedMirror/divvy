@@ -34,7 +34,19 @@
     "tierTitle": "Palier de mod {{tier}} (1 est la meilleure plage de valeurs)",
     "possibleUniques": "Uniques possibles",
     "unidentifiedBase": "Non identifié",
-    "dragHint": "Faites glisser pour déplacer le panneau"
+    "dragHint": "Faites glisser pour déplacer le panneau",
+    "source": {
+      "explicit": "explicite",
+      "implicit": "implicite",
+      "augment": "augment",
+      "enchant": "enchantement",
+      "fractured": "fracturé",
+      "crafted": "artisanal",
+      "pseudo": "pseudo",
+      "sanctified": "sanctifié",
+      "desecrated": "profané",
+      "skill": "compétence"
+    }
   },
   "item": {
     "rarityLabel": "Rareté :",

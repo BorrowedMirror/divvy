@@ -34,7 +34,19 @@
     "tierTitle": "เทียร์ม็อด {{tier}} (1 คือช่วงค่าที่ดีที่สุด)",
     "possibleUniques": "ยูนิคที่เป็นไปได้",
     "unidentifiedBase": "ยังไม่ได้ตรวจสอบ",
-    "dragHint": "ลากเพื่อย้ายแผง"
+    "dragHint": "ลากเพื่อย้ายแผง",
+    "source": {
+      "explicit": "ชัดแจ้ง",
+      "implicit": "ติดตัว",
+      "augment": "เสริม",
+      "enchant": "เอนแชนต์",
+      "fractured": "แตกร้าว",
+      "crafted": "คราฟต์",
+      "pseudo": "เทียม",
+      "sanctified": "ศักดิ์สิทธิ์",
+      "desecrated": "มลทิน",
+      "skill": "สกิล"
+    }
   },
   "item": {
     "rarityLabel": "ความหายาก:",
