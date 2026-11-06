@@ -38,6 +38,13 @@ export const commands = {
 	currencyIcons: () => typedError<CurrencyIcon[], IpcError_Serialize>(__TAURI_INVOKE("currency_icons")),
 	/**  Put `text` on the system clipboard (e.g. a listing's whisper). */
 	copyText: (text: string) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("copy_text", { text })),
+	/**
+	 *  The user drags the price card by its header. The web view only reports the phase: the
+	 *  cursor is read here (web view screen coordinates go stale while the window moves under the
+	 *  pointer). A card-sized window moves itself; over the game the card moves inside the covering
+	 *  window. `End` remembers the spot for `Position: Last`.
+	 */
+	dragCard: (phase: DragPhase) => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("drag_card", { phase })),
 	/**  Forget every remembered stat choice. */
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(__TAURI_INVOKE("clear_filter_memory")),
 	/**  Current price panel layout, for the web view to catch up on mount. */
@@ -153,6 +160,9 @@ export type Diagnostics_Serialize = {
 	log_path: string | null,
 	recent_errors: string[],
 };
+
+/**  Phase of a header drag of the price card. */
+export type DragPhase = "start" | "move" | "end";
 
 /**  Everything the user can edit before (re)querying. Round-trips through IPC. */
 export type FilterSet = FilterSet_Serialize | FilterSet_Deserialize;
@@ -482,7 +492,9 @@ export type OverlaySettings_Serialize = {
 
 export type OverlaySide = 
 /**  Beside the cursor, flipping when near the screen edge. */
-"cursor" | "left" | "right";
+"cursor" | "left" | "right" | 
+/**  Where the user last dragged the panel (beside the cursor until it has been moved). */
+"last";
 
 export type OverlayState = {
 	visible: boolean,

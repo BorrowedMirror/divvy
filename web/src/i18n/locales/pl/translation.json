@@ -33,7 +33,8 @@
     "loading": "Wyszukiwanie…",
     "tierTitle": "Tier modu {{tier}} (1 to najlepszy zakres wartości)",
     "possibleUniques": "Możliwe unikaty",
-    "unidentifiedBase": "Niezidentyfikowany"
+    "unidentifiedBase": "Niezidentyfikowany",
+    "dragHint": "Przeciągnij, aby przesunąć panel"
   },
   "item": {
     "rarityLabel": "Rzadkość:",
@@ -188,7 +189,8 @@
   "side": {
     "cursor": "Obok kursora",
     "left": "Lewa krawędź",
-    "right": "Prawa krawędź"
+    "right": "Prawa krawędź",
+    "last": "Ostatnia pozycja"
   },
   "backend": {
     "auto": "Automatyczny",

@@ -114,7 +114,7 @@ pub fn panel_position(side: rkl_config::OverlaySide, cursor: (i32, i32), size: (
     const EDGE: i32 = 8;
     let (x, y) = overlay_position(cursor, size, area);
     match side {
-        rkl_config::OverlaySide::Cursor => (x, y),
+        rkl_config::OverlaySide::Cursor | rkl_config::OverlaySide::Last => (x, y),
         rkl_config::OverlaySide::Left => (area.x + EDGE, y),
         rkl_config::OverlaySide::Right => ((area.x + area.width - size.0 - EDGE).max(area.x), y),
     }
@@ -290,6 +290,13 @@ pub fn point_in_rect(p: (f64, f64), r: (f64, f64, f64, f64)) -> bool {
     p.0 >= r.0 && p.0 <= r.0 + r.2 && p.1 >= r.1 && p.1 <= r.1 + r.3
 }
 
+/// Top-left `p` moved just enough that a panel of `size` lies inside `area`.
+pub fn clamp_into(p: (i32, i32), size: (i32, i32), area: Area) -> (i32, i32) {
+    let x = p.0.min(area.x + area.width - size.0).max(area.x);
+    let y = p.1.min(area.y + area.height - size.1).max(area.y);
+    (x, y)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -341,6 +348,15 @@ mod tests {
             point_in_rect((100.0, 50.0), r) && point_in_rect((520.0, 650.0), r) && point_in_rect((300.0, 300.0), r)
         );
         assert!(!point_in_rect((99.0, 300.0), r) && !point_in_rect((300.0, 651.0), r));
+    }
+
+    #[test]
+    fn clamp_into_keeps_panels_on_screen() {
+        let area = Area { x: 0, y: 0, width: 1920, height: 1080 };
+        assert_eq!(clamp_into((100, 100), (420, 600), area), (100, 100));
+        assert_eq!(clamp_into((1800, 900), (420, 600), area), (1500, 480));
+        assert_eq!(clamp_into((-50, -10), (420, 600), area), (0, 0));
+        assert_eq!(clamp_into((10, 10), (3000, 600), area), (0, 10), "too wide: pin to the left edge");
     }
 
     #[test]

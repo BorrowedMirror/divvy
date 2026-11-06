@@ -33,7 +33,8 @@
     "loading": "Buscando…",
     "tierTitle": "Nível do modificador {{tier}} (1 é a melhor faixa de valores)",
     "possibleUniques": "Únicos possíveis",
-    "unidentifiedBase": "Não identificado"
+    "unidentifiedBase": "Não identificado",
+    "dragHint": "Arraste para mover o painel"
   },
   "item": {
     "rarityLabel": "Raridade:",
@@ -185,7 +186,8 @@
   "side": {
     "cursor": "Ao lado do cursor",
     "left": "Borda esquerda",
-    "right": "Borda direita"
+    "right": "Borda direita",
+    "last": "Última posição"
   },
   "backend": {
     "auto": "Automático",

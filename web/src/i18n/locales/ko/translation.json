@@ -33,7 +33,8 @@
     "loading": "검색 중…",
     "tierTitle": "옵션 등급 {{tier}} (1이 가장 좋은 수치 범위)",
     "possibleUniques": "가능한 고유 아이템",
-    "unidentifiedBase": "미확인"
+    "unidentifiedBase": "미확인",
+    "dragHint": "드래그하여 패널 이동"
   },
   "item": {
     "rarityLabel": "희귀도:",
@@ -179,7 +180,8 @@
   "side": {
     "cursor": "커서 옆",
     "left": "왼쪽 가장자리",
-    "right": "오른쪽 가장자리"
+    "right": "오른쪽 가장자리",
+    "last": "마지막 위치"
   },
   "backend": {
     "auto": "자동",

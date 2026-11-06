@@ -112,6 +112,30 @@ pub const CARD_WIDTH: f64 = 420.0;
 /// Card height before the web view has measured it (logical px).
 pub const CARD_HEIGHT: f64 = 560.0;
 
+/// Cursor and card position (physical px) when a header drag started.
+pub type DragOrigin = ((f64, f64), (i32, i32));
+
+/// Cache file holding the last dragged panel position (`{"x":..,"y":..}`).
+pub const POSITION_FILE: &str = "panel-position.json";
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct SavedPosition {
+    x: i32,
+    y: i32,
+}
+
+pub fn load_position(path: &std::path::Path) -> Option<(i32, i32)> {
+    let p: SavedPosition = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
+    Some((p.x, p.y))
+}
+
+pub fn save_position(path: &std::path::Path, p: (i32, i32)) -> std::io::Result<()> {
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    std::fs::write(path, serde_json::to_vec(&SavedPosition { x: p.0, y: p.1 }).map_err(std::io::Error::other)?)
+}
+
 /// Shared app state managed by Tauri.
 #[derive(Debug)]
 pub struct AppState {
@@ -132,6 +156,10 @@ pub struct AppState {
     pub settings_overlay: AtomicBool,
     /// Remembered stat choices per item category (see `filter_memory`).
     pub filter_memory: Mutex<crate::filter_memory::FilterMemory>,
+    /// Where the user last dropped the price card (screen, physical px), for `Position: Last`.
+    pub last_position: Mutex<Option<(i32, i32)>>,
+    /// Header drag in progress: cursor and card position (physical px) when it started.
+    pub drag_origin: Mutex<Option<DragOrigin>>,
     /// Current price panel layout (also served to the web view on mount).
     pub overlay_layout: Mutex<crate::events::OverlayLayout>,
     /// Card position on screen (physical px) and its last measured height (logical px).
@@ -157,6 +185,7 @@ impl AppState {
         backend: BackendKind,
     ) -> Result<Self, String> {
         let sources = Sources::from_settings(&settings)?;
+        let last_position = paths.as_ref().and_then(|p| load_position(&p.cache_dir.join(POSITION_FILE)));
         let memory = paths
             .as_ref()
             .map(|p| crate::filter_memory::FilterMemory::load(&p.cache_dir.join(crate::filter_memory::FILE_NAME)))
@@ -176,6 +205,8 @@ impl AppState {
             overlay_visible: AtomicBool::new(false),
             settings_overlay: AtomicBool::new(false),
             filter_memory: Mutex::new(memory),
+            last_position: Mutex::new(last_position),
+            drag_origin: Mutex::new(None),
             overlay_layout: Mutex::new(crate::events::OverlayLayout { cover: false, x: 0.0, y: 0.0 }),
             overlay_card: Mutex::new(((0, 0), CARD_HEIGHT)),
             show_seq: std::sync::atomic::AtomicU64::new(0),
@@ -296,5 +327,19 @@ mod tests {
         let ua = next.updated(&s).unwrap().expect("user agent rebuilds all");
         assert!(!Arc::ptr_eq(&next.trade, &ua.trade) && !Arc::ptr_eq(&next.ninja, &ua.ninja));
         assert!(ua.updated(&s).unwrap().is_none());
+    }
+}
+
+#[cfg(test)]
+mod position_tests {
+    #[test]
+    fn panel_position_round_trips_and_tolerates_bad_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("sub").join(super::POSITION_FILE);
+        assert_eq!(super::load_position(&path), None);
+        super::save_position(&path, (2600, -40)).unwrap();
+        assert_eq!(super::load_position(&path), Some((2600, -40)));
+        std::fs::write(&path, b"{").unwrap();
+        assert_eq!(super::load_position(&path), None);
     }
 }

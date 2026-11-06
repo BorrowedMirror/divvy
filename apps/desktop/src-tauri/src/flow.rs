@@ -192,7 +192,11 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
                 height: g.rect.height as i32,
             });
             let side = state.settings().overlay.side;
-            let (x, y) = logic::panel_position(side, (cursor.x as i32, cursor.y as i32), size, area);
+            let last = state.last_position.lock().ok().and_then(|p| *p);
+            let (x, y) = match (side, last) {
+                (rkl_config::OverlaySide::Last, Some(p)) => logic::clamp_into(p, size, screen),
+                _ => logic::panel_position(side, (cursor.x as i32, cursor.y as i32), size, area),
+            };
             // Layer-shell surfaces ignore set_position; anchor them to the output edge instead.
             // gtk-layer-shell calls GTK directly, which panics off the main thread (and
             // `show_overlay` runs on tokio workers from the hotkey/test-hook flows), so hop to

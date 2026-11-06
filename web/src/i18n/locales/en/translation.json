@@ -33,7 +33,8 @@
     "loading": "Searching…",
     "tierTitle": "Mod tier {{tier}} (1 is the best roll range)",
     "possibleUniques": "Possible uniques",
-    "unidentifiedBase": "Unidentified"
+    "unidentifiedBase": "Unidentified",
+    "dragHint": "Drag to move the panel"
   },
   "item": {
     "rarityLabel": "Rarity:",
@@ -182,7 +183,8 @@
   "side": {
     "cursor": "Next to cursor",
     "left": "Left edge",
-    "right": "Right edge"
+    "right": "Right edge",
+    "last": "Last position"
   },
   "backend": {
     "auto": "Automatic",

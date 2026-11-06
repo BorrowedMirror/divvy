@@ -33,7 +33,8 @@
     "loading": "Suche läuft…",
     "tierTitle": "Modifikatorstufe {{tier}} (1 ist der beste Wertebereich)",
     "possibleUniques": "Mögliche einzigartige Gegenstände",
-    "unidentifiedBase": "Nicht identifiziert"
+    "unidentifiedBase": "Nicht identifiziert",
+    "dragHint": "Ziehen, um das Panel zu verschieben"
   },
   "item": {
     "rarityLabel": "Seltenheit:",
@@ -182,7 +183,8 @@
   "side": {
     "cursor": "Neben dem Mauszeiger",
     "left": "Linker Rand",
-    "right": "Rechter Rand"
+    "right": "Rechter Rand",
+    "last": "Letzte Position"
   },
   "backend": {
     "auto": "Automatisch",

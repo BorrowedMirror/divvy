@@ -311,6 +311,69 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
     Ok(())
 }
 
+/// Phase of a header drag of the price card.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum DragPhase {
+    Start,
+    Move,
+    End,
+}
+
+/// The user drags the price card by its header. The web view only reports the phase: the
+/// cursor is read here (web view screen coordinates go stale while the window moves under the
+/// pointer). A card-sized window moves itself; over the game the card moves inside the covering
+/// window. `End` remembers the spot for `Position: Last`.
+#[tauri::command]
+#[specta::specta]
+pub fn drag_card(app: AppHandle, state: State<'_, Arc<AppState>>, phase: DragPhase) -> Result<(), IpcError> {
+    let internal = |e: String| IpcError::new("internal", e);
+    let win = tauri::Manager::get_webview_window(&app, flow::OVERLAY)
+        .ok_or_else(|| internal("overlay window missing".into()))?;
+    let cursor = app.cursor_position().map_err(|e| internal(e.to_string()))?;
+    let card_now = state.overlay_card.lock().map(|c| c.0).map_err(|_| internal("card lock".into()))?;
+    let mut origin = state.drag_origin.lock().map_err(|_| internal("drag lock".into()))?;
+    if phase == DragPhase::Start {
+        *origin = Some(((cursor.x, cursor.y), card_now));
+        return Ok(());
+    }
+    let Some(((cx, cy), start)) = *origin else { return Ok(()) };
+    let card = (start.0 + (cursor.x - cx).round() as i32, start.1 + (cursor.y - cy).round() as i32);
+    if let Ok(mut c) = state.overlay_card.lock() {
+        c.0 = card;
+    }
+    if state.overlay_layout.lock().is_ok_and(|l| l.cover) {
+        if let Some(g) = flow::game_window(&state) {
+            let zoom = state.settings().overlay.scale;
+            let (x, y) = crate::logic::card_in_window(
+                card,
+                g.rect,
+                win.scale_factor().unwrap_or(1.0),
+                cfg!(target_os = "macos"),
+            );
+            let layout = crate::events::OverlayLayout { cover: true, x: x / zoom, y: y / zoom };
+            if let Ok(mut l) = state.overlay_layout.lock() {
+                *l = layout;
+            }
+            let _ = tauri_specta::Event::emit(&layout, &app);
+        }
+    } else {
+        win.set_position(tauri::PhysicalPosition::new(card.0, card.1)).map_err(|e| internal(e.to_string()))?;
+    }
+    if phase == DragPhase::End {
+        *origin = None;
+        if let Ok(mut last) = state.last_position.lock() {
+            *last = Some(card);
+        }
+        if let Some(paths) = state.paths.as_ref()
+            && let Err(e) = crate::state::save_position(&paths.cache_dir.join(crate::state::POSITION_FILE), card)
+        {
+            state.record_error(format!("save panel position: {e}"));
+        }
+    }
+    Ok(())
+}
+
 /// Current price panel layout, for the web view to catch up on mount.
 #[tauri::command]
 #[specta::specta]

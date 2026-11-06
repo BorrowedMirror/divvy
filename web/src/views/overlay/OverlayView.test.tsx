@@ -16,6 +16,28 @@ async function mountWithItem(handlers: Parameters<typeof setupIpc>[0] = {}) {
 }
 
 describe("OverlayView", () => {
+  test("dragging the header reports start, moves and end; Rust moves the card", async () => {
+    const calls = setupIpc({ get_overlay_snapshot: () => null, get_overlay_layout: () => ({ cover: true, x: 100, y: 50 }), drag_card: () => null });
+    renderWithProviders(<OverlayView />);
+    await screen.findByTestId("overlay-backdrop");
+    const handle = screen.getByTestId("drag-handle");
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { pointerId: 1 });
+    fireEvent.pointerUp(handle, { pointerId: 1 });
+    expect(callsOf(calls, "drag_card").map((c) => c.args)).toEqual([{ phase: "start" }, { phase: "move" }, { phase: "end" }]);
+    await emitEvent("overlay-layout", { cover: true, x: 140, y: 60 });
+    await waitFor(() => expect(screen.getByTestId("overlay-card").style.left).toBe("140px"));
+  });
+
+  test("pressing a header button does not start a drag", async () => {
+    const calls = setupIpc({ get_overlay_snapshot: () => null, drag_card: () => null });
+    renderWithProviders(<OverlayView />);
+    const close = await screen.findByRole("button", { name: "Close overlay" });
+    fireEvent.pointerDown(close, { button: 0, pointerId: 2, screenX: 1, screenY: 1 });
+    fireEvent.pointerMove(screen.getByTestId("drag-handle"), { pointerId: 2, screenX: 50, screenY: 50 });
+    expect(callsOf(calls, "drag_card")).toHaveLength(0);
+  });
+
   test("unidentified unique: pick a possible unique to search it by name", async () => {
     const user = userEvent.setup();
     const calls = setupIpc({
@@ -88,6 +110,16 @@ describe("OverlayView", () => {
     expect(await screen.findByTestId("overlay-backdrop")).toBeInTheDocument();
     await emitEvent("overlay-layout", { cover: false, x: 0, y: 0 });
     await waitFor(() => expect(screen.queryByTestId("overlay-backdrop")).not.toBeInTheDocument());
+  });
+
+  test("switching layouts keeps the same card element (its size observers stay attached)", async () => {
+    setupIpc({ get_overlay_snapshot: () => null });
+    renderWithProviders(<OverlayView />);
+    await flush();
+    const before = screen.getByTestId("overlay-card");
+    await emitEvent("overlay-layout", { cover: true, x: 10, y: 10 });
+    await screen.findByTestId("overlay-backdrop");
+    expect(screen.getByTestId("overlay-card")).toBe(before);
   });
 
   test("cardPosition keeps the card inside the window", () => {

@@ -34,6 +34,9 @@ LOG=$(mktemp -d)
 for _ in $(seq 50); do grep -q READY "$LOG/game" && break; sleep 0.1; done
 GAME=$(xdotool search --name "^Path of Exile 2$" | head -1)
 wmctrl -i -r "$GAME" -b add,fullscreen; xdotool windowactivate --sync "$GAME"; sleep 0.5
+# No real trade requests: these checks are about windows, not prices.
+NO_NET=http://127.0.0.1:9
+RKL_TRADE_BASE_URL=$NO_NET RKL_SCOUT_BASE_URL=$NO_NET RKL_NINJA_BASE_URL=$NO_NET \
 RKL_TEST_HOOK=$PORT RKL_CONFIG_DIR=$CFG RKL_LOG=warn "$APP" >"$LOG/app" 2>&1 & PID=$!
 trap "kill $FG $PID 2>/dev/null || true" EXIT
 for _ in $(seq 100); do (exec 3<>/dev/tcp/127.0.0.1/$PORT) 2>/dev/null && break; sleep 0.1; done
@@ -124,6 +127,7 @@ sleep 0.5; grep -q "grab 0" "$LOG/grab" || fail "test helper could not grab the 
 xdotool mousemove --window "$OW" 100 100; sleep 0.8
 [ "$(active)" = "RKL overlay" ] || fail "resting the cursor on the pinned panel under a pointer grab did not focus it (active: $(active))"
 echo "ok: hovering the pinned panel focuses it even while the game holds the pointer"
+kill $GP 2>/dev/null || true; wait $GP 2>/dev/null || true
 xprop -id "$OW" _COMPTON_SHADOW | grep -q "= 0" || fail "the panel should ask compositors for no drop shadow ($(xprop -id "$OW" _COMPTON_SHADOW))"
 echo "ok: the panel opts out of compositor drop shadows"
 python3 -I - "$OW" <<'PY' || fail "the pinned panel window is not shaped with rounded corners"
@@ -140,7 +144,24 @@ corner = any(x0 <= 0 < x0 + w and y0 <= 0 < y0 + h for x0, y0, w, h in spans)
 sys.exit(0 if n.value > 1 and not corner else 1)
 PY
 echo "ok: the pinned panel window has rounded corners"
-kill $GP 2>/dev/null || true
+pos() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}END{print x\" \"y}"; }
+drag() { xdotool mousemove "$1" "$2"; sleep 0.3; xdotool mousedown 1; sleep 0.1
+  for _ in 1 2 3 4 5; do xdotool mousemove_relative -- 40 20; sleep 0.03; done; xdotool mouseup 1; sleep 0.5; }
+read PX PY < <(pos "$OW")
+drag $((PX + 150)) $((PY + 20))
+read QX QY < <(pos "$OW")
+[ $((QX - PX)) -eq 200 ] && [ $((QY - PY)) -eq 100 ] || fail "dragging the pinned header moved it by ($((QX - PX)),$((QY - PY))), expected (200,100)"
+echo "ok: dragging the pinned panel header moves it"
+hook hide >/dev/null
+xdotool windowactivate --sync "$GAME"; xdotool mousemove 300 300; sleep 0.3
+xdotool key --clearmodifiers ctrl+d; sleep 1.5
+card() { hook state | python3 -c "import json,sys;c=json.load(sys.stdin)[\"overlay_card\"][0];print(c[0],c[1])"; }
+read CX CY < <(card)
+drag $((CX + 150)) $((CY + 20))
+read DX DY < <(card)
+[ $((DX - CX)) -eq 200 ] && [ $((DY - CY)) -eq 100 ] || fail "dragging the unpinned card moved it by ($((DX - CX)),$((DY - CY))), expected (200,100)"
+echo "ok: dragging the unpinned card moves it in both directions"
+hook hide >/dev/null
 hook hide >/dev/null
 
 hook "tray open_settings" >/dev/null; sleep 0.8

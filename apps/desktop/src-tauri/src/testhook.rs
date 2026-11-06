@@ -108,6 +108,8 @@ pub fn handle(app: &AppHandle, line: &str) -> String {
                 "tray_present": app.tray_by_id(tray::TRAY_ID).is_some(),
                 "last_item": last_item,
                 "last_price": last_price,
+                "overlay_layout": state.overlay_layout.lock().ok().map(|l| *l),
+                "overlay_card": state.overlay_card.lock().ok().map(|c| *c),
             })
             .to_string()
         }

@@ -398,7 +398,7 @@ function OverlayTab({ s, update, errors }: TabProps) {
           label={t("settings.side")}
           hideLabel
           value={s.overlay.side}
-          options={(["cursor", "left", "right"] as const).map((v) => ({ value: v, label: t(`side.${v}`) }))}
+          options={(["cursor", "left", "right", "last"] as const).map((v) => ({ value: v, label: t(`side.${v}`) }))}
           onChange={(side) => setOverlay({ side })}
         />
       </Row>

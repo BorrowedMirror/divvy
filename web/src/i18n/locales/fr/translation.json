@@ -33,7 +33,8 @@
     "loading": "Recherche…",
     "tierTitle": "Palier de mod {{tier}} (1 est la meilleure plage de valeurs)",
     "possibleUniques": "Uniques possibles",
-    "unidentifiedBase": "Non identifié"
+    "unidentifiedBase": "Non identifié",
+    "dragHint": "Faites glisser pour déplacer le panneau"
   },
   "item": {
     "rarityLabel": "Rareté :",
@@ -185,7 +186,8 @@
   "side": {
     "cursor": "À côté du curseur",
     "left": "Bord gauche",
-    "right": "Bord droit"
+    "right": "Bord droit",
+    "last": "Dernière position"
   },
   "backend": {
     "auto": "Automatique",

@@ -98,6 +98,8 @@ pub enum OverlaySide {
     Cursor,
     Left,
     Right,
+    /// Where the user last dragged the panel (beside the cursor until it has been moved).
+    Last,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]

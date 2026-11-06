@@ -115,6 +115,7 @@ export function OverlayView() {
   // The window grows with the number of stats instead of scrolling them.
   const fitRef = useFitWindowHeight<HTMLDivElement>();
   const layout = useOverlayLayout();
+  const dragHandlers = useCardDrag();
   const cardHeight = useElementHeight(fitRef);
 
   const card = (
@@ -138,7 +139,12 @@ export function OverlayView() {
           layout.cover && "shadow-2xl",
         )}
       >
-        <header className="flex items-start gap-2">
+        <header
+          className="flex cursor-grab items-start gap-2 select-none active:cursor-grabbing"
+          title={t("overlay.dragHint")}
+          data-testid="drag-handle"
+          {...dragHandlers}
+        >
           <div className="min-w-0 flex-1">
             {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">RKL</h1>}
           </div>
@@ -191,17 +197,16 @@ export function OverlayView() {
     </div>
   );
 
-  if (!layout.cover) return card;
-  // Unpinned over the game: the window covers the game with a dimmed backdrop. The pointer
-  // never reaches the game (so focus-follows-mouse WMs cannot refocus it); a backdrop click
-  // closes the panel.
+  // Over the game the window is a dimmed backdrop and a click on it closes the panel. The card
+  // stays at the same place in the tree in both layouts (the wrapper is `display: contents`
+  // otherwise), so it is never remounted and its size observers keep watching it.
   return (
     <div
-      data-testid="overlay-backdrop"
-      className="fixed inset-0"
-      style={{ background: `rgb(0 0 0 / ${settings?.overlay.backdrop_dim ?? 0.6})` }}
+      data-testid={layout.cover ? "overlay-backdrop" : undefined}
+      className={layout.cover ? "fixed inset-0" : "contents"}
+      style={layout.cover ? { background: `rgb(0 0 0 / ${settings?.overlay.backdrop_dim ?? 0.6})` } : undefined}
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) hide();
+        if (layout.cover && e.target === e.currentTarget) hide();
       }}
     >
       {card}
@@ -232,6 +237,34 @@ function useOverlayLayout(): OverlayLayout {
   }, []);
   useTauriEvent(events.overlayLayout, setLayout);
   return layout;
+}
+
+/**
+ * Drag the card by its header. Only the phase is sent: Rust reads the real cursor and moves the
+ * window (card-sized) or the card inside the covering window (layout events), and remembers the
+ * spot on release for `Position: Last`. Buttons and fields in the header keep working.
+ */
+export function useCardDrag() {
+  const dragging = useRef<number | null>(null);
+  const send = (phase: "start" | "move" | "end") => void commands.dragCard(phase);
+  return {
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.button !== 0 || (e.target as HTMLElement).closest("button, input, select, a, [role=combobox]")) return;
+      dragging.current = e.pointerId;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+      send("start");
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      if (dragging.current === e.pointerId) send("move");
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLElement>) => {
+      if (dragging.current !== e.pointerId) return;
+      dragging.current = null;
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+      send("end");
+    },
+  };
 }
 
 function useElementHeight(ref: RefObject<HTMLElement | null>): number {

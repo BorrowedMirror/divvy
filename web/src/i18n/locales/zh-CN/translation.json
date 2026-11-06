@@ -33,7 +33,8 @@
     "loading": "搜索中…",
     "tierTitle": "词缀阶级 {{tier}}（1 为最佳数值范围）",
     "possibleUniques": "可能的传奇",
-    "unidentifiedBase": "未鉴定"
+    "unidentifiedBase": "未鉴定",
+    "dragHint": "拖动以移动面板"
   },
   "item": {
     "rarityLabel": "稀有度：",
@@ -179,7 +180,8 @@
   "side": {
     "cursor": "光标旁",
     "left": "左边缘",
-    "right": "右边缘"
+    "right": "右边缘",
+    "last": "上次的位置"
   },
   "backend": {
     "auto": "自动",

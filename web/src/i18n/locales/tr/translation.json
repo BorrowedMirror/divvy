@@ -33,7 +33,8 @@
     "loading": "Aranıyor…",
     "tierTitle": "Mod kademesi {{tier}} (1 en iyi değer aralığıdır)",
     "possibleUniques": "Olası eşsizler",
-    "unidentifiedBase": "Tanımlanmamış"
+    "unidentifiedBase": "Tanımlanmamış",
+    "dragHint": "Paneli taşımak için sürükleyin"
   },
   "item": {
     "rarityLabel": "Nadirlik:",
@@ -182,7 +183,8 @@
   "side": {
     "cursor": "İmlecin yanında",
     "left": "Sol kenar",
-    "right": "Sağ kenar"
+    "right": "Sağ kenar",
+    "last": "Son konum"
   },
   "backend": {
     "auto": "Otomatik",
