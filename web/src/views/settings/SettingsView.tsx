@@ -196,6 +196,11 @@ function GeneralTab({ s, update }: TabProps) {
         />
       </Row>
       <SwitchField
+        label={t("settings.autostart")}
+        checked={s.ui.autostart}
+        onChange={(autostart) => update((d) => ({ ...d, ui: { ...d.ui, autostart } }))}
+      />
+      <SwitchField
         label={t("settings.startMinimised")}
         checked={s.ui.start_minimised}
         onChange={(start_minimised) => update((d) => ({ ...d, ui: { ...d.ui, start_minimised } }))}
@@ -397,6 +402,38 @@ function OverlayTab({ s, update, errors }: TabProps) {
           onChange={(side) => setOverlay({ side })}
         />
       </Row>
+      <Row label={t("settings.scale")} htmlFor="set-scale">
+        <SelectField<string>
+          id="set-scale"
+          label={t("settings.scale")}
+          hideLabel
+          value={String(s.overlay.scale)}
+          options={["0.75", "0.9", "1", "1.1", "1.25", "1.5"].map((v) => ({ value: v, label: `${Math.round(Number(v) * 100)}%` }))}
+          onChange={(v) => setOverlay({ scale: Number(v) })}
+        />
+      </Row>
+      <Row label={t("settings.backdropDim")} htmlFor="set-dim">
+        <SelectField<string>
+          id="set-dim"
+          label={t("settings.backdropDim")}
+          hideLabel
+          value={String(s.overlay.backdrop_dim)}
+          options={(
+            [
+              ["0", "none"],
+              ["0.3", "light"],
+              ["0.6", "medium"],
+              ["0.8", "strong"],
+            ] as const
+          ).map(([v, k]) => ({ value: v, label: t(`dim.${k}`) }))}
+          onChange={(v) => setOverlay({ backdrop_dim: Number(v) })}
+        />
+      </Row>
+      <SwitchField
+        label={t("settings.closePinnedOnGameFocus")}
+        checked={s.overlay.close_pinned_on_game_focus}
+        onChange={(close_pinned_on_game_focus) => setOverlay({ close_pinned_on_game_focus })}
+      />
       <SwitchField
         label={t("settings.groupBySeller")}
         checked={s.overlay.group_by_seller}

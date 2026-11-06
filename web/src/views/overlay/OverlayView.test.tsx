@@ -57,6 +57,7 @@ describe("OverlayView", () => {
     expect(callsOf(calls, "hide_overlay")).toHaveLength(0);
     fireEvent.mouseDown(backdrop);
     expect(callsOf(calls, "hide_overlay")).toHaveLength(1);
+    await waitFor(() => expect(backdrop.style.background).toContain("0.6"));
     expect(callsOf(calls, "resize_overlay").length).toBeLessThanOrEqual(1);
   });
 
@@ -381,7 +382,7 @@ describe("overlay extras", () => {
     async function mountAutoHide(ms: number) {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const calls = setupIpc({
-        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"] } }),
+        get_settings: () => settings({ overlay: { auto_hide_ms: ms, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false } }),
         query_price: () => priceSummary(),
       });
       renderWithProviders(<OverlayView />);

@@ -47,6 +47,9 @@ listing_columns = [
     "seller",
     "listed",
 ]
+scale = 1.0
+backdrop_dim = 0.6
+close_pinned_on_game_focus = false
 
 [ui]
 language = "en"
@@ -54,5 +57,6 @@ theme = "system"
 start_minimised = true
 check_updates = true
 onboarding_done = false
+autostart = false
 
 [platform]

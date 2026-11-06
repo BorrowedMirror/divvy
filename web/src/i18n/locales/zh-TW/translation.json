@@ -165,6 +165,10 @@
     "rememberFiltersHelp": "下次查詢戒指、弓等物品時，會沿用上次查詢同類物品時啟用或停用的屬性。",
     "forgetFilters": "清除記住的選擇",
     "forgotFilters": "已清除。",
+    "autostart": "登入時啟動 RKL",
+    "scale": "面板大小",
+    "backdropDim": "面板後方的背景",
+    "closePinnedOnGameFocus": "點擊回到遊戲時關閉已釘選的面板",
     "checkUpdates": "自動檢查更新",
     "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。"
   },
@@ -326,5 +330,11 @@
     "undo": "還原先前的設定",
     "quitGame": "請先結束《流亡黯道2》：遊戲結束時 Wine 會改寫其設定。",
     "restartGame": "已完成。重新啟動《流亡黯道2》後變更即可生效。"
+  },
+  "dim": {
+    "none": "無",
+    "light": "弱",
+    "medium": "中",
+    "strong": "強"
   }
 }

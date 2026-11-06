@@ -169,7 +169,11 @@
     "rememberFilters": "Özellik seçimlerini eşya türüne göre hatırla",
     "rememberFiltersHelp": "Bir sonraki yüzük, yay vb. o türü en son aradığınızda açık veya kapalı olan özelliklerle başlar.",
     "forgetFilters": "Hatırlanan seçimleri unut",
-    "forgotFilters": "Unutuldu."
+    "forgotFilters": "Unutuldu.",
+    "autostart": "Oturum açtığımda RKL'yi başlat",
+    "scale": "Panel boyutu",
+    "backdropDim": "Panelin arkasındaki arka plan",
+    "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat"
   },
   "theme": {
     "system": "Sistem",
@@ -329,5 +333,11 @@
     "undo": "Önceki ayarı geri yükle",
     "quitGame": "Önce Path of Exile 2'den çıkın: Wine, oyun kapanırken ayarlarını yeniden yazar.",
     "restartGame": "Tamam. Değişikliğin etkili olması için Path of Exile 2'yi yeniden başlatın."
+  },
+  "dim": {
+    "none": "Yok",
+    "light": "Hafif",
+    "medium": "Orta",
+    "strong": "Güçlü"
   }
 }

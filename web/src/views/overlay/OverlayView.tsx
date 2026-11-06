@@ -200,7 +200,8 @@ export function OverlayView() {
   return (
     <div
       data-testid="overlay-backdrop"
-      className="fixed inset-0 bg-black/60"
+      className="fixed inset-0"
+      style={{ background: `rgb(0 0 0 / ${settings?.overlay.backdrop_dim ?? 0.6})` }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) hide();
       }}

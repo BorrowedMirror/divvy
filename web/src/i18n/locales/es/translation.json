@@ -172,7 +172,11 @@
     "rememberFilters": "Recordar la selección de estadísticas por tipo de objeto",
     "rememberFiltersHelp": "El próximo anillo, arco, etc. empieza con las estadísticas que tenías activadas o desactivadas la última vez que buscaste uno.",
     "forgetFilters": "Olvidar la selección recordada",
-    "forgotFilters": "Olvidado."
+    "forgotFilters": "Olvidado.",
+    "autostart": "Iniciar RKL al iniciar sesión",
+    "scale": "Tamaño del panel",
+    "backdropDim": "Fondo detrás del panel",
+    "closePinnedOnGameFocus": "Cerrar un panel fijado al volver a hacer clic en el juego"
   },
   "theme": {
     "system": "Sistema",
@@ -332,5 +336,11 @@
     "undo": "Restaurar el ajuste anterior",
     "quitGame": "Cierra primero Path of Exile 2: Wine reescribe sus ajustes al salir del juego.",
     "restartGame": "Listo. Vuelve a iniciar Path of Exile 2 para que el cambio surta efecto."
+  },
+  "dim": {
+    "none": "Ninguno",
+    "light": "Ligero",
+    "medium": "Medio",
+    "strong": "Fuerte"
   }
 }

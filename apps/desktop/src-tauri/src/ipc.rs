@@ -287,7 +287,8 @@ pub fn resize_overlay(app: AppHandle, height: f64) -> Result<(), IpcError> {
     let monitor = win.current_monitor().map_err(internal)?;
     let width = win.inner_size().map_err(internal)?.to_logical::<f64>(scale).width;
     let screen_h = monitor.as_ref().map_or(f64::INFINITY, |m| f64::from(m.size().height) / scale);
-    let h = crate::logic::fit_overlay_height(height, screen_h);
+    let zoom = tauri::Manager::state::<Arc<AppState>>(&app).settings().overlay.scale;
+    let h = crate::logic::fit_overlay_height(height * zoom, screen_h);
     let state = tauri::Manager::state::<Arc<AppState>>(&app);
     if let Ok(mut c) = state.overlay_card.lock() {
         c.1 = h;

@@ -36,7 +36,7 @@ describe("SettingsView", () => {
     await user.click(screen.getByRole("combobox", { name: "Theme" }));
     await user.click(await screen.findByRole("option", { name: "Light" }));
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false });
+    expect(draft().ui).toEqual({ language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false });
 
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(callsOf(calls, "save_settings")).toHaveLength(1));
@@ -150,6 +150,21 @@ describe("SettingsView", () => {
     expect(draft().trade.remember_filters).toBe(false);
   });
 
+  test("batch 3 settings: panel size, backdrop, close on game focus, start on login", async () => {
+    const user = userEvent.setup();
+    await mount();
+    await user.click(screen.getByRole("tab", { name: "Overlay" }));
+    await user.click(screen.getByRole("combobox", { name: "Panel size" }));
+    await user.click(await screen.findByRole("option", { name: "125%" }));
+    await user.click(screen.getByRole("combobox", { name: "Backdrop behind the panel" }));
+    await user.click(await screen.findByRole("option", { name: "Strong" }));
+    await user.click(screen.getByRole("switch", { name: "Close a pinned panel when I click back into the game" }));
+    expect(draft().overlay).toMatchObject({ scale: 1.25, backdrop_dim: 0.8, close_pinned_on_game_focus: true });
+    await user.click(screen.getByRole("tab", { name: "General" }));
+    await user.click(screen.getByRole("switch", { name: "Start RKL when I log in" }));
+    expect(draft().ui.autostart).toBe(true);
+  });
+
   test("forget remembered stat choices", async () => {
     const user = userEvent.setup();
     const { calls } = await mount({ clear_filter_memory: () => null });
@@ -197,7 +212,7 @@ describe("SettingsView", () => {
   test("settings-changed adopts external settings when clean", async () => {
     await mount();
     await flush();
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false } }) });
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false } }) });
     expect(screen.getByRole("switch", { name: "Start minimised to tray" })).toBeChecked();
   });
 
@@ -209,7 +224,7 @@ describe("SettingsView", () => {
     const autoHide = screen.getByRole("textbox", { name: "Auto-hide delay (ms)" });
     fireEvent.change(autoHide, { target: { value: "3000" } });
     fireEvent.blur(autoHide);
-    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"] } }) });
+    await emitEvent("settings-changed", { settings: settings({ overlay: { auto_hide_ms: 2000, opacity: 1, side: "cursor", group_by_seller: true, listing_columns: ["seller", "listed"], scale: 1, backdrop_dim: 0.6, close_pinned_on_game_focus: false } }) });
     expect(screen.getByText("Settings were changed elsewhere.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Load latest" }));
     expect(draft().overlay.auto_hide_ms).toBe(2000);
@@ -220,9 +235,9 @@ describe("SettingsView", () => {
     await mount();
     await flush();
     await user.click(screen.getByRole("switch", { name: "Start minimised to tray" }));
-    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false, check_updates: true, onboarding_done: false } }) });
+    await emitEvent("settings-changed", { settings: settings({ ui: { language: "en", theme: "light", start_minimised: false, check_updates: true, onboarding_done: false, autostart: false } }) });
     expect(screen.queryByText("Settings were changed elsewhere.")).toBeNull();
-    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true, check_updates: true, onboarding_done: false });
+    expect(draft().ui).toMatchObject({ theme: "light", start_minimised: true, check_updates: true, onboarding_done: false, autostart: false });
   });
 });
 

@@ -169,7 +169,11 @@
     "rememberFilters": "Remember stat choices per item type",
     "rememberFiltersHelp": "The next ring, bow and so on starts with the stats you had on or off when you last searched one.",
     "forgetFilters": "Forget remembered choices",
-    "forgotFilters": "Forgotten."
+    "forgotFilters": "Forgotten.",
+    "autostart": "Start RKL when I log in",
+    "scale": "Panel size",
+    "backdropDim": "Backdrop behind the panel",
+    "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game"
   },
   "theme": {
     "system": "System",
@@ -329,5 +333,11 @@
     "undo": "Restore previous setting",
     "quitGame": "Quit Path of Exile 2 first: Wine rewrites its settings when the game exits.",
     "restartGame": "Done. Start Path of Exile 2 again for the change to take effect."
+  },
+  "dim": {
+    "none": "None",
+    "light": "Light",
+    "medium": "Medium",
+    "strong": "Strong"
   }
 }

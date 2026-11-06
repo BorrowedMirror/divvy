@@ -165,6 +165,10 @@
     "rememberFiltersHelp": "下次查询戒指、弓等物品时，将沿用上次查询同类物品时启用或停用的属性。",
     "forgetFilters": "清除记住的选择",
     "forgotFilters": "已清除。",
+    "autostart": "登录时启动 RKL",
+    "scale": "面板大小",
+    "backdropDim": "面板背后的背景",
+    "closePinnedOnGameFocus": "点击回到游戏时关闭已固定的面板",
     "checkUpdates": "自动检查更新",
     "checkUpdatesHelp": "启动后不久及每天检查一次新版本。在你选择安装之前不会下载任何内容。"
   },
@@ -326,5 +330,11 @@
     "undo": "恢复之前的设置",
     "quitGame": "请先退出《流放之路2》：游戏退出时 Wine 会重写其设置。",
     "restartGame": "已完成。重新启动《流放之路2》后更改即可生效。"
+  },
+  "dim": {
+    "none": "无",
+    "light": "弱",
+    "medium": "中",
+    "strong": "强"
   }
 }

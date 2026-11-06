@@ -169,7 +169,11 @@
     "rememberFilters": "Werteauswahl je Gegenstandsart merken",
     "rememberFiltersHelp": "Der nächste Ring, Bogen usw. startet mit den Werten, die bei der letzten Suche nach dieser Art an oder aus waren.",
     "forgetFilters": "Gemerkte Auswahl vergessen",
-    "forgotFilters": "Vergessen."
+    "forgotFilters": "Vergessen.",
+    "autostart": "RKL beim Anmelden starten",
+    "scale": "Panelgröße",
+    "backdropDim": "Hintergrund hinter dem Panel",
+    "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke"
   },
   "theme": {
     "system": "System",
@@ -329,5 +333,11 @@
     "undo": "Vorherige Einstellung wiederherstellen",
     "quitGame": "Zuerst Path of Exile 2 beenden: Wine schreibt seine Einstellungen beim Beenden des Spiels neu.",
     "restartGame": "Erledigt. Path of Exile 2 neu starten, damit die Änderung wirkt."
+  },
+  "dim": {
+    "none": "Keine",
+    "light": "Leicht",
+    "medium": "Mittel",
+    "strong": "Stark"
   }
 }

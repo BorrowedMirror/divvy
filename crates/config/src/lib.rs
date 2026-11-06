@@ -73,6 +73,12 @@ pub struct OverlaySettings {
     pub group_by_seller: bool,
     /// Listing table columns after the price, in order.
     pub listing_columns: Vec<ListingColumn>,
+    /// Size of the price panel (0.75 to 1.5; 1 = normal).
+    pub scale: f64,
+    /// How dark the backdrop behind the unpinned panel is (0 = none, 0.9 = nearly black).
+    pub backdrop_dim: f64,
+    /// Close a pinned panel as soon as the game window gets focus again.
+    pub close_pinned_on_game_focus: bool,
 }
 
 /// Optional columns of the listing table (the price column is always shown).
@@ -105,6 +111,8 @@ pub struct UiSettings {
     pub check_updates: bool,
     /// First-run onboarding (permissions / platform notes) was completed or dismissed.
     pub onboarding_done: bool,
+    /// Start RKL when the user logs in.
+    pub autostart: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -178,6 +186,9 @@ impl Default for OverlaySettings {
             side: OverlaySide::Cursor,
             group_by_seller: true,
             listing_columns: vec![ListingColumn::Seller, ListingColumn::Listed],
+            scale: 1.0,
+            backdrop_dim: 0.6,
+            close_pinned_on_game_focus: false,
         }
     }
 }
@@ -190,6 +201,7 @@ impl Default for UiSettings {
             start_minimised: true,
             check_updates: true,
             onboarding_done: false,
+            autostart: false,
         }
     }
 }
@@ -443,6 +455,12 @@ pub fn validate(s: &Settings) -> Result<(), ConfigError> {
         }
     }
 
+    if !(0.75..=1.5).contains(&s.overlay.scale) {
+        return Err(invalid("overlay.scale", format!("{} is not within 0.75..=1.5", s.overlay.scale)));
+    }
+    if !(0.0..=0.9).contains(&s.overlay.backdrop_dim) {
+        return Err(invalid("overlay.backdrop_dim", format!("{} is not within 0..=0.9", s.overlay.backdrop_dim)));
+    }
     if !(10..=100).contains(&s.trade.listing_count) || !s.trade.listing_count.is_multiple_of(10) {
         return Err(invalid("trade.listing_count", format!("{} is not 10, 20, ... 100", s.trade.listing_count)));
     }

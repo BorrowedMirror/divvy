@@ -583,3 +583,22 @@ fn listing_count_and_columns_are_validated() {
     s.overlay.listing_columns = vec![];
     validate(&s).unwrap();
 }
+
+#[test]
+fn panel_scale_and_backdrop_dim_are_validated() {
+    let mut s = Settings::default();
+    assert!((s.overlay.scale - 1.0).abs() < f64::EPSILON && (s.overlay.backdrop_dim - 0.6).abs() < f64::EPSILON);
+    assert!(!s.ui.autostart && !s.overlay.close_pinned_on_game_focus);
+    for (scale, dim, ok) in [
+        (0.75, 0.0, true),
+        (1.5, 0.9, true),
+        (0.5, 0.6, false),
+        (1.6, 0.6, false),
+        (1.0, 0.95, false),
+        (1.0, -0.1, false),
+    ] {
+        s.overlay.scale = scale;
+        s.overlay.backdrop_dim = dim;
+        assert_eq!(validate(&s).is_ok(), ok, "scale {scale} dim {dim}");
+    }
+}

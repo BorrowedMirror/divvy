@@ -165,6 +165,10 @@
     "rememberFiltersHelp": "次に指輪や弓などを検索すると、前回その種類を検索したときにオン/オフにしたステータスから始まります。",
     "forgetFilters": "記憶した選択を消去",
     "forgotFilters": "消去しました",
+    "autostart": "ログイン時に RKL を起動する",
+    "scale": "パネルのサイズ",
+    "backdropDim": "パネルの背後の背景",
+    "closePinnedOnGameFocus": "ゲームをクリックして戻ったら固定したパネルを閉じる",
     "checkUpdates": "アップデートを自動的に確認",
     "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。"
   },
@@ -326,5 +330,11 @@
     "undo": "以前の設定に戻す",
     "quitGame": "先に Path of Exile 2 を終了してください。ゲームの終了時に Wine が設定を書き換えます。",
     "restartGame": "完了しました。変更を反映するには Path of Exile 2 を再起動してください。"
+  },
+  "dim": {
+    "none": "なし",
+    "light": "弱",
+    "medium": "中",
+    "strong": "強"
   }
 }

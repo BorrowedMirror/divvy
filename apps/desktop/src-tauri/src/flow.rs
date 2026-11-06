@@ -117,6 +117,16 @@ pub fn emit_overlay_state(app: &AppHandle, state: &AppState) {
         (OverlayState { visible: state.overlay_visible.load(Ordering::SeqCst), pinned: state.is_pinned() }).emit(app);
 }
 
+/// Zoom the price panel's web view (the `overlay.scale` setting); window sizes follow it in
+/// [`layout_overlay`] and `resize_overlay`.
+pub fn apply_panel_scale(app: &AppHandle, scale: f64) {
+    if let Some(win) = app.get_webview_window(OVERLAY)
+        && let Err(e) = win.set_zoom(scale)
+    {
+        tracing::warn!("panel scale: {e}");
+    }
+}
+
 /// Lay the price panel out with its card at `card` (screen, physical px).
 ///
 /// Unpinned over a tracked game window, the window covers the game (dimmed backdrop, the card
@@ -125,6 +135,7 @@ pub fn emit_overlay_state(app: &AppHandle, state: &AppState) {
 /// game), the window is just the card, so the game stays usable around it.
 pub fn layout_overlay(app: &AppHandle, state: &AppState, win: &tauri::WebviewWindow, card: (i32, i32)) {
     let scale = win.scale_factor().unwrap_or(1.0);
+    let zoom = state.settings().overlay.scale;
     let card_height = state.overlay_card.lock().map_or(crate::state::CARD_HEIGHT, |c| c.1);
     if let Ok(mut c) = state.overlay_card.lock() {
         c.0 = card;
@@ -133,9 +144,10 @@ pub fn layout_overlay(app: &AppHandle, state: &AppState, win: &tauri::WebviewWin
     let layout = if let Some(g) = game {
         cover_game(win, g.rect);
         let (x, y) = logic::card_in_window(card, g.rect, scale, cfg!(target_os = "macos"));
-        OverlayLayout { cover: true, x, y }
+        // The web view is zoomed by the panel scale: its CSS pixels are `zoom` logical pixels.
+        OverlayLayout { cover: true, x: x / zoom, y: y / zoom }
     } else {
-        let _ = win.set_size(tauri::LogicalSize::new(crate::state::CARD_WIDTH, card_height));
+        let _ = win.set_size(tauri::LogicalSize::new(crate::state::CARD_WIDTH * zoom, card_height));
         let _ = win.set_position(PhysicalPosition::new(card.0, card.1));
         OverlayLayout { cover: false, x: 0.0, y: 0.0 }
     };
@@ -152,7 +164,8 @@ pub fn show_overlay(app: &AppHandle, state: &AppState) {
     let card_height = state.overlay_card.lock().map_or(crate::state::CARD_HEIGHT, |c| c.1);
     let mut card = state.overlay_card.lock().map_or((0, 0), |c| c.0);
     if let Ok(cursor) = app.cursor_position() {
-        let size = ((crate::state::CARD_WIDTH * scale).round() as i32, (card_height * scale).round() as i32);
+        let zoom = state.settings().overlay.scale;
+        let size = ((crate::state::CARD_WIDTH * zoom * scale).round() as i32, (card_height * scale).round() as i32);
         let monitor =
             app.monitor_from_point(cursor.x, cursor.y).ok().flatten().or_else(|| app.primary_monitor().ok().flatten());
         if let Some(m) = monitor {
@@ -436,6 +449,14 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
             if matches!(ev, WindowEvent::FocusChanged { focused: true })
                 && state.is_pinned()
                 && state.overlay_visible.load(Ordering::SeqCst)
+                && state.settings().overlay.close_pinned_on_game_focus
+            {
+                let _ = hide_overlay(&app, &state);
+                continue;
+            }
+            if matches!(ev, WindowEvent::FocusChanged { focused: true })
+                && state.is_pinned()
+                && state.overlay_visible.load(Ordering::SeqCst)
                 && let Some(panel) = app.get_webview_window(OVERLAY)
                 && let Err(e) = crate::overlay::bring_to_front(&panel, game_window(&state).map(|g| g.native_id), false)
             {
@@ -513,6 +534,10 @@ pub fn apply_settings(app: &AppHandle, state: &AppState, settings: Settings) -> 
         register_hotkeys(state, &settings).map_err(&rollback)?;
     }
     let sources = state.sources().updated(&settings).map_err(|e| rollback(IpcError::new("config", e)))?;
+    if previous.ui.autostart != settings.ui.autostart {
+        crate::autostart::set_enabled(settings.ui.autostart)
+            .map_err(|e| rollback(IpcError::new("platform", format!("start at login: {e}"))))?;
+    }
     if let Some(paths) = state.paths.as_ref() {
         rkl_config::save(paths, &settings).map_err(|e| rollback(e.into()))?;
     }
@@ -522,6 +547,9 @@ pub fn apply_settings(app: &AppHandle, state: &AppState, settings: Settings) -> 
     *state.settings.write().expect("settings lock") = settings.clone();
     if previous.ui.language != settings.ui.language {
         crate::tray::relabel(app, &settings.ui.language);
+    }
+    if (previous.overlay.scale - settings.overlay.scale).abs() > f64::EPSILON {
+        apply_panel_scale(app, settings.overlay.scale);
     }
     let _ = (SettingsChanged { settings: settings.clone() }).emit(app);
     Ok(settings)

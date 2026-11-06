@@ -165,6 +165,10 @@
     "rememberFiltersHelp": "다음에 반지, 활 등을 검색하면 마지막으로 같은 종류를 검색했을 때 켜거나 끈 능력치로 시작합니다.",
     "forgetFilters": "기억한 선택 지우기",
     "forgotFilters": "지웠습니다",
+    "autostart": "로그인할 때 RKL 시작",
+    "scale": "패널 크기",
+    "backdropDim": "패널 뒤 배경",
+    "closePinnedOnGameFocus": "게임을 다시 클릭하면 고정된 패널 닫기",
     "checkUpdates": "업데이트 자동 확인",
     "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다."
   },
@@ -326,5 +330,11 @@
     "undo": "이전 설정 복원",
     "quitGame": "먼저 Path of Exile 2를 종료하세요. 게임이 종료될 때 Wine이 설정을 다시 기록합니다.",
     "restartGame": "완료했습니다. 변경 사항을 적용하려면 Path of Exile 2를 다시 시작하세요."
+  },
+  "dim": {
+    "none": "없음",
+    "light": "약함",
+    "medium": "보통",
+    "strong": "강함"
   }
 }

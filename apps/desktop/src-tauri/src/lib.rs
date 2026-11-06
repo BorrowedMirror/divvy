@@ -1,4 +1,5 @@
 //! Tauri shell. Wiring only: business logic lives in the crates.
+pub mod autostart;
 pub mod cli;
 pub mod events;
 pub mod filter_memory;
@@ -333,6 +334,14 @@ pub fn run() {
             flow::spawn_hotkey_loop(&handle, &state);
             flow::spawn_input_loop(&handle, &state);
             flow::spawn_game_follower(&handle, &state);
+            let startup = state.settings();
+            flow::apply_panel_scale(&handle, startup.overlay.scale);
+            // Keep the login entry pointing at this executable (an AppImage can be moved).
+            if startup.ui.autostart
+                && let Err(e) = autostart::set_enabled(true)
+            {
+                state.record_error(format!("start at login: {e}"));
+            }
             updater::init(&handle, &state);
             #[cfg(unix)]
             if let Some(signals) = signals {

@@ -175,7 +175,11 @@
     "rememberFilters": "Zapamiętuj wybór statystyk dla typu przedmiotu",
     "rememberFiltersHelp": "Następny pierścień, łuk itd. zaczyna ze statystykami włączonymi lub wyłączonymi przy ostatnim wyszukiwaniu takiego przedmiotu.",
     "forgetFilters": "Zapomnij zapamiętane wybory",
-    "forgotFilters": "Zapomniano."
+    "forgotFilters": "Zapomniano.",
+    "autostart": "Uruchamiaj RKL po zalogowaniu",
+    "scale": "Rozmiar panelu",
+    "backdropDim": "Tło za panelem",
+    "closePinnedOnGameFocus": "Zamykaj przypięty panel, gdy kliknę z powrotem w grę"
   },
   "theme": {
     "system": "Systemowy",
@@ -335,5 +339,11 @@
     "undo": "Przywróć poprzednie ustawienie",
     "quitGame": "Najpierw zamknij Path of Exile 2: Wine zapisuje swoje ustawienia od nowa przy zamykaniu gry.",
     "restartGame": "Gotowe. Uruchom ponownie Path of Exile 2, aby zmiana zaczęła działać."
+  },
+  "dim": {
+    "none": "Brak",
+    "light": "Lekkie",
+    "medium": "Średnie",
+    "strong": "Mocne"
   }
 }

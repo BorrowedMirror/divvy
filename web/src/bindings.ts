@@ -471,6 +471,12 @@ export type OverlaySettings_Deserialize = {
 	group_by_seller?: boolean,
 	/**  Listing table columns after the price, in order. */
 	listing_columns?: ListingColumn[],
+	/**  Size of the price panel (0.75 to 1.5; 1 = normal). */
+	scale?: number | null,
+	/**  How dark the backdrop behind the unpinned panel is (0 = none, 0.9 = nearly black). */
+	backdrop_dim?: number | null,
+	/**  Close a pinned panel as soon as the game window gets focus again. */
+	close_pinned_on_game_focus?: boolean,
 };
 
 export type OverlaySettings_Serialize = {
@@ -482,6 +488,12 @@ export type OverlaySettings_Serialize = {
 	group_by_seller: boolean,
 	/**  Listing table columns after the price, in order. */
 	listing_columns: ListingColumn[],
+	/**  Size of the price panel (0.75 to 1.5; 1 = normal). */
+	scale: number | null,
+	/**  How dark the backdrop behind the unpinned panel is (0 = none, 0.9 = nearly black). */
+	backdrop_dim: number | null,
+	/**  Close a pinned panel as soon as the game window gets focus again. */
+	close_pinned_on_game_focus: boolean,
 };
 
 export type OverlaySide = 
@@ -934,6 +946,8 @@ export type UiSettings_Deserialize = {
 	check_updates?: boolean,
 	/**  First-run onboarding (permissions / platform notes) was completed or dismissed. */
 	onboarding_done?: boolean,
+	/**  Start RKL when the user logs in. */
+	autostart?: boolean,
 };
 
 export type UiSettings_Serialize = {
@@ -945,6 +959,8 @@ export type UiSettings_Serialize = {
 	check_updates: boolean,
 	/**  First-run onboarding (permissions / platform notes) was completed or dismissed. */
 	onboarding_done: boolean,
+	/**  Start RKL when the user logs in. */
+	autostart: boolean,
 };
 
 /**  A newer, signed release is available. `install_update` applies it. */
