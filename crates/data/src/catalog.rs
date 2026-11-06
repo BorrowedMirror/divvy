@@ -38,6 +38,7 @@ type StatIndex = HashMap<String, HashMap<String, Vec<(usize, bool)>>>;
 #[derive(Debug)]
 struct Indexed {
     bundle: Bundle,
+    translator: rkl_core::l10n::Translator,
     stats: StatIndex,
     bases: HashMap<String, usize>,
     uniques: HashMap<String, usize>,
@@ -80,6 +81,7 @@ impl Indexed {
             bases: first_index(bundle.bases.iter().map(|b| b.name.as_str())),
             uniques: first_index(bundle.uniques.iter().map(|u| u.name.as_str())),
             statics: first_index(bundle.statics.iter().map(|s| s.text.as_str())),
+            translator: rkl_core::l10n::Translator::new(&bundle.languages),
             bundle,
         }
     }
@@ -116,6 +118,11 @@ impl GameData {
 
     pub fn manifest(&self) -> &Manifest {
         &self.manifest
+    }
+
+    /// Item text from a non-English client, in English; `None` for English text.
+    pub fn translate(&self, text: &str) -> Option<rkl_core::l10n::Translated> {
+        self.inner.translator.translate(text)
     }
 }
 

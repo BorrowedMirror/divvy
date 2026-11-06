@@ -6,6 +6,7 @@
 use std::{path::Path, sync::OnceLock};
 
 use rkl_core::catalog::{BaseDef, StatDef, StaticDef, UniqueDef};
+use rkl_core::l10n::Language;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
@@ -45,6 +46,10 @@ pub struct Manifest {
     pub bases: AssetEntry,
     pub uniques: AssetEntry,
     pub statics: AssetEntry,
+    /// Item text translations for non-English game clients (`cargo xtask data l10n`), when
+    /// generated.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub l10n: Option<AssetEntry>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -69,6 +74,8 @@ pub struct Bundle {
     pub bases: Vec<BaseDef>,
     pub uniques: Vec<UniqueDef>,
     pub statics: Vec<StaticDef>,
+    #[serde(default)]
+    pub languages: Vec<Language>,
 }
 
 /// Lowercase hex sha256 of `bytes`.
@@ -120,17 +127,22 @@ fn load_with<'a>(
         bases: decode_asset(&manifest.bases, &read(&manifest.bases.file)?)?,
         uniques: decode_asset(&manifest.uniques, &read(&manifest.uniques.file)?)?,
         statics: decode_asset(&manifest.statics, &read(&manifest.statics.file)?)?,
+        languages: match &manifest.l10n {
+            Some(entry) => decode_asset(entry, &read(&entry.file)?)?,
+            None => Vec::new(),
+        },
     };
     Ok(GameData::from_bundle(manifest, bundle))
 }
 
 mod embedded {
     pub const MANIFEST: &[u8] = include_bytes!("../assets/manifest.json");
-    pub const FILES: [(&str, &[u8]); 4] = [
+    pub const FILES: [(&str, &[u8]); 5] = [
         ("stats.json.zst", include_bytes!("../assets/stats.json.zst")),
         ("bases.json.zst", include_bytes!("../assets/bases.json.zst")),
         ("uniques.json.zst", include_bytes!("../assets/uniques.json.zst")),
         ("statics.json.zst", include_bytes!("../assets/statics.json.zst")),
+        ("l10n.json.zst", include_bytes!("../assets/l10n.json.zst")),
     ];
 }
 
@@ -200,6 +212,11 @@ pub fn write_dir(
         bases: write("bases.json.zst", encode_asset("bases.json.zst", sources.bases.clone(), &bundle.bases))?,
         uniques: write("uniques.json.zst", encode_asset("uniques.json.zst", sources.uniques.clone(), &bundle.uniques))?,
         statics: write("statics.json.zst", encode_asset("statics.json.zst", sources.statics.clone(), &bundle.statics))?,
+        l10n: if bundle.languages.is_empty() {
+            None
+        } else {
+            Some(write("l10n.json.zst", encode_asset("l10n.json.zst", sources.l10n.clone(), &bundle.languages))?)
+        },
     };
     let mut json = serde_json::to_vec_pretty(&manifest).expect("manifest serialises");
     json.push(b'\n');
@@ -214,6 +231,7 @@ pub struct AssetSources {
     pub bases: Vec<String>,
     pub uniques: Vec<String>,
     pub statics: Vec<String>,
+    pub l10n: Vec<String>,
 }
 
 #[cfg(test)]

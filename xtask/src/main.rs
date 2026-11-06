@@ -49,6 +49,22 @@ enum DataCmd {
         #[arg(long)]
         offline: bool,
     },
+    /// Rebuild the translations for non-English game clients from an installed client.
+    L10n {
+        /// The game's install directory (the one holding `Bundles2/`).
+        #[arg(long)]
+        game_dir: std::path::PathBuf,
+    },
+    /// Copy one file (e.g. `data/balance/german/clientstrings.datc64`) out of an installed
+    /// client; `list:<text>` writes the paths containing `<text>` instead.
+    GameFile {
+        /// The game's install directory (the one holding `Bundles2/`).
+        #[arg(long)]
+        game_dir: std::path::PathBuf,
+        path: String,
+        #[arg(long)]
+        out: std::path::PathBuf,
+    },
 }
 
 fn gen_all(no_bindings: bool) -> anyhow::Result<()> {
@@ -65,6 +81,8 @@ fn main() -> anyhow::Result<()> {
     match Cli::parse().cmd {
         Cmd::Gen { no_bindings } => gen_all(no_bindings),
         Cmd::Data { cmd: DataCmd::Refresh { offline } } => data::refresh(offline),
+        Cmd::Data { cmd: DataCmd::L10n { game_dir } } => data::l10n(&game_dir),
+        Cmd::Data { cmd: DataCmd::GameFile { game_dir, path, out } } => data::game_file(&game_dir, &path, &out),
         Cmd::Coverage(args) => coverage::run(&args),
         Cmd::Release(args) => release::run(&args),
         Cmd::Lint(args) => lint::run(&args),

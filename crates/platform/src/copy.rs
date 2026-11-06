@@ -25,9 +25,16 @@ impl Default for CopyOptions {
 /// Header every PoE2 item copy starts with. Kept local so this crate never depends on core.
 const ITEM_HEADER: &str = "Item Class:";
 
-/// Cheap check equivalent to `rkl_core::parser::looks_like_item`.
+/// Cheap check whether the clipboard holds item text, from a client in any language.
 pub fn looks_like_item(text: &str) -> bool {
-    text.trim_start().starts_with(ITEM_HEADER)
+    let t = text.trim_start();
+    if t.starts_with(ITEM_HEADER) {
+        return true;
+    }
+    // Any client language: two `Key: value` lines (item class and rarity) and a separator.
+    let keyed = |l: Option<&str>| l.is_some_and(|l| l.contains(':') || l.contains('：'));
+    let mut lines = t.lines().map(str::trim).filter(|l| !l.is_empty());
+    keyed(lines.next()) && keyed(lines.next()) && t.contains("\n--------")
 }
 
 /// The chord PoE2 uses: `Ctrl+Alt+C` for the advanced (mod tiers) format, else `Ctrl+C`.
@@ -167,6 +174,9 @@ mod tests {
     #[test]
     fn looks_like_item_checks_header() {
         assert!(looks_like_item("\r\n  Item Class: Rings"));
+        assert!(looks_like_item("Gegenstandsklasse: Ringe\nSeltenheit: Selten\nX\nSaphirring\n--------\nY"));
+        assert!(looks_like_item("物品種類: 戒指\n稀有度： 稀有\nX\n--------\nY"));
+        assert!(!looks_like_item("Note: hi\nanother: line"));
         assert!(!looks_like_item("hello"));
         assert!(!looks_like_item(""));
     }

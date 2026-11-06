@@ -32,6 +32,17 @@ fn corpus() -> Vec<(String, ParsedItem)> {
         .collect()
 }
 
+/// Every corpus item's id and raw text.
+fn corpus_texts() -> Vec<(String, String)> {
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../testkit/corpus");
+    let index: Index = toml::from_str(&std::fs::read_to_string(dir.join("index.toml")).unwrap()).unwrap();
+    index
+        .item
+        .into_iter()
+        .map(|e| (e.id.clone(), std::fs::read_to_string(dir.join(format!("{}.txt", e.id))).unwrap()))
+        .collect()
+}
+
 fn matched(id: &str) -> ParsedItem {
     let data = rkl_data::bundled().expect("bundled data");
     let (_, mut item) = corpus().into_iter().find(|(i, _)| i == id).unwrap();
@@ -155,5 +166,107 @@ fn waystone_templates_match_the_default_danger_flags() {
         "Monsters fire # additional Projectiles",
     ] {
         assert!(templates.iter().any(|t| t == danger), "{danger:?} not among {templates:#?}");
+    }
+}
+
+/// Every corpus item written as each bundled client language would show it (its header and
+/// every stat line the tables cover, by running them backwards) translates back to text that
+/// matches exactly the same trade stats as the English copy.
+#[test]
+fn localized_corpus_matches_like_english() {
+    use std::collections::HashMap;
+
+    use regex::Regex;
+
+    let data = rkl_data::bundled().expect("bundled data");
+    let matcher = StatMatcher::new(&data);
+    let texts = corpus_texts();
+    let number = Regex::new(r"[+-]?\d+(?:\.\d+)?(?:\([+-]?\d+(?:\.\d+)?-[+-]?\d+(?:\.\d+)?\))?").unwrap();
+    let slot = Regex::new(r"[+-]?\{(\d+)(?::[^}]*)?\}|[+-]?\d+(?:\.\d+)?").unwrap();
+    let marker = Regex::new(r"(?: \([a-z]+\))+$").unwrap();
+    let stat_ids = |text: &str| {
+        let mut item = parse_item(text).unwrap();
+        matcher.match_item(&mut item);
+        item.modifiers.into_iter().map(|m| m.stat_id).collect::<Vec<_>>()
+    };
+    let languages = &data.bundle().languages;
+    assert!(!languages.is_empty());
+    for lang in languages {
+        let lookup = |pairs: &[(String, String)], en: &str| pairs.iter().find(|(e, _)| e == en).map(|(_, l)| l.clone());
+        let mut by_shape: HashMap<String, (&str, &str)> = HashMap::new();
+        for (en, local) in &lang.stats {
+            by_shape.entry(slot.replace_all(en, "#").into_owned()).or_insert((en, local));
+        }
+        let mut localized_lines = 0usize;
+        for (id, text) in &texts {
+            let mut out = Vec::new();
+            let mut in_names = false;
+            for line in text.lines().map(str::trim) {
+                if in_names {
+                    if line.starts_with("--------") {
+                        in_names = false;
+                    } else {
+                        let name = lookup(&lang.bases, line)
+                            .or_else(|| lookup(&lang.uniques, line))
+                            .unwrap_or_else(|| line.to_owned());
+                        out.push(name);
+                        continue;
+                    }
+                }
+                if let Some(v) = line.strip_prefix("Item Class: ") {
+                    let class = lookup(&lang.classes, v).unwrap_or_else(|| v.to_owned());
+                    out.push(format!("{}: {class}", lookup(&lang.keys, "Item Class").unwrap()));
+                    continue;
+                }
+                if let Some(v) = line.strip_prefix("Rarity: ") {
+                    let rarity = lookup(&lang.rarities, v).unwrap_or_else(|| v.to_owned());
+                    out.push(format!("{}: {rarity}", lookup(&lang.keys, "Rarity").unwrap()));
+                    in_names = true;
+                    continue;
+                }
+                let (body, tail) = marker.find(line).map_or((line, ""), |m| (&line[..m.start()], m.as_str()));
+                let tokens: Vec<&str> = number.find_iter(body).map(|m| m.as_str()).collect();
+                if let Some((en, local)) = by_shape.get(number.replace_all(body, "#").as_ref()) {
+                    let slots: Vec<Option<usize>> =
+                        slot.captures_iter(en).map(|c| c.get(1).and_then(|i| i.as_str().parse().ok())).collect();
+                    if slots.len() == tokens.len() {
+                        let values: HashMap<usize, &str> =
+                            slots.iter().zip(&tokens).filter_map(|(s, t)| s.map(|i| (i, *t))).collect();
+                        let written = slot.replace_all(local, |c: &regex::Captures<'_>| {
+                            c.get(1)
+                                .and_then(|i| i.as_str().parse::<usize>().ok())
+                                .and_then(|i| values.get(&i).copied())
+                                .unwrap_or(&c[0])
+                                .to_owned()
+                        });
+                        out.push(format!("{written}{tail}"));
+                        localized_lines += 1;
+                        continue;
+                    }
+                }
+                out.push(line.to_owned());
+            }
+            let translated =
+                data.translate(&out.join("\n")).unwrap_or_else(|| panic!("{}: {id} not detected", lang.name));
+            // A magic item's name wraps its base; compare the base the catalog resolves.
+            let base = |item: &ParsedItem| {
+                use rkl_core::catalog::Catalog as _;
+                data.base(&item.base_type)
+                    .or_else(|| data.base_in_magic_name(&item.base_type))
+                    .map_or_else(|| item.base_type.clone(), |b| b.name.clone())
+            };
+            let (back, original) = (parse_item(&translated.text).unwrap(), parse_item(text).unwrap());
+            assert_eq!((base(&back), &back.name), (base(&original), &original.name), "{} {id}", lang.name);
+            assert_eq!(
+                stat_ids(&translated.text),
+                stat_ids(text),
+                "{} {id}:\n{}\n--- translated back:\n{}",
+                lang.name,
+                out.join("\n"),
+                translated.text
+            );
+        }
+        eprintln!("{}: {localized_lines} stat lines localized and matched", lang.name);
+        assert!(localized_lines >= 150, "{}: only {localized_lines} corpus stat lines localized", lang.name);
     }
 }

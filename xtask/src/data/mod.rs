@@ -11,6 +11,8 @@ use std::{
 use anyhow::Context as _;
 use rkl_data::{AssetSources, Bundle};
 
+pub mod bundle;
+pub mod l10n;
 pub mod normalise;
 
 /// Descriptive UA as GGG asks for API consumers.
@@ -86,6 +88,7 @@ fn build_bundle(raw: &HashMap<&'static str, String>) -> anyhow::Result<Bundle> {
         bases: normalise::bases(&raw[TRADE_ITEMS.cache], &repoe_bases, &repoe_classes)?,
         uniques: normalise::uniques(&raw[TRADE_ITEMS.cache])?,
         statics: normalise::statics(&raw[TRADE_STATIC.cache])?,
+        languages: Vec::new(),
     })
 }
 
@@ -95,17 +98,24 @@ fn sources() -> AssetSources {
         bases: vec![TRADE_ITEMS.url(), REPOE_BASES.url(), REPOE_CLASSES.url()],
         uniques: vec![TRADE_ITEMS.url()],
         statics: vec![TRADE_STATIC.url()],
+        l10n: Vec::new(),
     }
 }
 
 pub fn refresh(offline: bool) -> anyhow::Result<()> {
     let root = root();
     let raw = fetch_all(&root.join("target/data-cache"), offline)?;
-    let bundle = build_bundle(&raw)?;
+    let mut bundle = build_bundle(&raw)?;
+    let mut sources = sources();
+    // Translations come from an installed client (`data l10n`), not from the network: keep them.
+    let assets = root.join("crates/data/assets");
+    if let Ok(previous) = rkl_data::load_dir(&assets) {
+        bundle.languages.clone_from(&previous.bundle().languages);
+        sources.l10n = previous.manifest().l10n.as_ref().map(|e| e.sources.clone()).unwrap_or_default();
+    }
     let generated_at = time::OffsetDateTime::now_utc().format(&time::format_description::well_known::Rfc3339)?;
     let game_version = normalise::game_version(&raw[REPOE_INDEX.cache]);
-    let assets = root.join("crates/data/assets");
-    let manifest = rkl_data::write_dir(&assets, &bundle, &sources(), generated_at, game_version)?;
+    let manifest = rkl_data::write_dir(&assets, &bundle, &sources, generated_at, game_version)?;
     // Round-trip what we wrote so a broken asset never gets committed.
     rkl_data::load_dir(&assets).context("re-loading freshly written assets")?;
     eprintln!(
@@ -143,6 +153,55 @@ fn corpus_check(root: &Path) {
              otherwise inspect the failures before committing the new assets."
         ),
     }
+}
+
+/// `cargo xtask data game-file`: copy one file out of an installed client's bundles.
+pub fn game_file(game_dir: &Path, path: &str, out: &Path) -> anyhow::Result<()> {
+    let files = bundle::GameFiles::open(game_dir)?;
+    if let Some(pattern) = path.strip_prefix("list:") {
+        let mut found: Vec<&String> = files.paths().iter().filter(|p| p.contains(pattern)).collect();
+        found.sort();
+        let text = found.iter().fold(String::new(), |mut acc, p| {
+            acc.push_str(p);
+            acc.push('\n');
+            acc
+        });
+        std::fs::write(out, text)?;
+        eprintln!("wrote {} matching paths to {}", found.len(), out.display());
+        return Ok(());
+    }
+    let data = files.read(path)?;
+    std::fs::write(out, &data)?;
+    eprintln!("wrote {} ({} bytes)", out.display(), data.len());
+    Ok(())
+}
+
+/// `cargo xtask data l10n`: rebuild the translations for non-English clients from an installed
+/// client, keeping the other assets as they are.
+pub fn l10n(game_dir: &Path) -> anyhow::Result<()> {
+    let root = root();
+    let assets = root.join("crates/data/assets");
+    let data = rkl_data::load_dir(&assets).context("load the current assets (run `data refresh` first)")?;
+    let mut bundle = data.bundle().clone();
+    bundle.languages = l10n::build(game_dir, &bundle)?;
+    let m = data.manifest();
+    let sources = AssetSources {
+        stats: m.stats.sources.clone(),
+        bases: m.bases.sources.clone(),
+        uniques: m.uniques.sources.clone(),
+        statics: m.statics.sources.clone(),
+        l10n: vec![
+            "PoE2 client: ClientStrings, ItemClasses, BaseItemTypes, Words and stat descriptions per language".into(),
+        ],
+    };
+    let manifest = rkl_data::write_dir(&assets, &bundle, &sources, m.generated_at.clone(), m.game_version.clone())?;
+    rkl_data::load_dir(&assets).context("re-loading freshly written assets")?;
+    eprintln!(
+        "wrote {} ({} languages)",
+        assets.join("l10n.json.zst").display(),
+        manifest.l10n.as_ref().map_or(0, |e| e.records)
+    );
+    Ok(())
 }
 
 #[cfg(test)]

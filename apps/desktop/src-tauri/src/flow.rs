@@ -30,6 +30,13 @@ pub fn handle_item_text(
     let settings = state.settings();
     let opts = logic::query_options(&settings, &state.league());
     let data = state.wait_data();
+    // A non-English client's item text is translated to English first; everything after
+    // (parsing, matching, trade search, exports) works on the English text.
+    let translated = data.as_deref().and_then(|d| d.translate(text));
+    if let Some(t) = &translated {
+        tracing::info!("item text translated from {}", t.language);
+    }
+    let text = translated.as_ref().map_or(text, |t| t.text.as_str());
     let catalog = data.as_deref().map(|d| d as &dyn Catalog);
     let (item, mut filters) = logic::process_item_text(text, catalog, &opts).inspect_err(|e| state.record_error(e))?;
     if settings.trade.remember_filters

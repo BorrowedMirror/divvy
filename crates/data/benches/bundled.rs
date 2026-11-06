@@ -23,6 +23,7 @@ fn decode() -> (rkl_data::Manifest, Bundle) {
         bases: decode_asset::<Vec<BaseDef>>(&m.bases, BASES).expect("bases"),
         uniques: decode_asset::<Vec<UniqueDef>>(&m.uniques, UNIQUES).expect("uniques"),
         statics: decode_asset::<Vec<StaticDef>>(&m.statics, STATICS).expect("statics"),
+        languages: Vec::new(),
     };
     (m, bundle)
 }

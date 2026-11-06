@@ -35,5 +35,13 @@
     ],
     "sha256": "26ca673e260ddce431113211ab42c4c08459a0918cf66671d8311665c37fb9a4",
     "records": 771
+  },
+  "l10n": {
+    "file": "l10n.json.zst",
+    "sources": [
+      "PoE2 client: ClientStrings, ItemClasses, BaseItemTypes, Words and stat descriptions per language"
+    ],
+    "sha256": "3a77392eb0f86068366118252868a667be93cdd3ca2b42b20be591673a4a5b97",
+    "records": 8
   }
 }

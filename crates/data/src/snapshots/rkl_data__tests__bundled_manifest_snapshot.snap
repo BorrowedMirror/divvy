@@ -39,5 +39,13 @@ expression: bundled_static().manifest
     ],
     "sha256": "[sha256]",
     "records": 771
+  },
+  "l10n": {
+    "file": "l10n.json.zst",
+    "sources": [
+      "PoE2 client: ClientStrings, ItemClasses, BaseItemTypes, Words and stat descriptions per language"
+    ],
+    "sha256": "[sha256]",
+    "records": 8
   }
 }

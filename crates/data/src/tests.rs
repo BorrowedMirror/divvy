@@ -56,6 +56,7 @@ fn sample() -> Bundle {
             group: "Currency".into(),
             image: None,
         }],
+        languages: Vec::new(),
     }
 }
 
@@ -65,6 +66,7 @@ fn sources() -> AssetSources {
         bases: vec!["https://example.invalid/items".into()],
         uniques: vec!["https://example.invalid/items".into()],
         statics: vec!["https://example.invalid/static".into()],
+        l10n: Vec::new(),
     }
 }
 
@@ -359,4 +361,42 @@ fn uniques_by_base_lists_every_unique_for_a_base() {
     assert!(names.len() >= 2, "{names:?}");
     assert!(names.windows(2).all(|w| w[0] < w[1]), "sorted, no duplicates: {names:?}");
     assert!(data.uniques_by_base("Not A Base").is_empty());
+}
+
+/// The e2e ring fixture written the way each client language would show it, from the bundled
+/// tables, translates back to the English fixture.
+#[test]
+fn every_language_translates_the_ring_fixture_back_to_english() {
+    let english = include_str!("../../../e2e/fixtures/rare-ring.txt").trim_end().to_owned();
+    let data = bundled().unwrap();
+    let languages = &data.bundle().languages;
+    assert_eq!(languages.len(), 8, "German, French, Spanish, Portuguese, Russian, Thai, Japanese, Korean");
+    for lang in languages {
+        let get = |pairs: &[(String, String)], en: &str| {
+            pairs.iter().find(|(e, _)| e == en).map_or_else(|| panic!("{}: no {en:?}", lang.name), |(_, l)| l.clone())
+        };
+        let stat = |template: &str, value: &str| get(&lang.stats, template).replace("{0:+d}", value);
+        let localized = [
+            format!("{}: {}", get(&lang.keys, "Item Class"), get(&lang.classes, "Rings")),
+            format!("{}: {}", get(&lang.keys, "Rarity"), get(&lang.rarities, "Rare")),
+            "Gale Loop".to_owned(),
+            get(&lang.bases, "Sapphire Ring"),
+            "--------".to_owned(),
+            format!("{}:", get(&lang.keys, "Requirements")),
+            format!("{}: 40", get(&lang.keys, "Level")),
+            "--------".to_owned(),
+            format!("{}: 75", get(&lang.keys, "Item Level")),
+            "--------".to_owned(),
+            format!("{} (implicit)", stat("{0:+d}% to Cold Resistance", "+20")),
+            "--------".to_owned(),
+            stat("{0:+d} to maximum Life", "+52"),
+            stat("{0:+d}% to Fire Resistance", "+31"),
+            stat("{0:+d}% to Lightning Resistance", "+12"),
+        ]
+        .join("\n");
+        let out = data.translate(&localized).unwrap_or_else(|| panic!("{}: not detected", lang.name));
+        assert_eq!(out.language, lang.name);
+        assert_eq!(out.text, english, "{}", lang.name);
+    }
+    assert!(data.translate(&english).is_none(), "English text is left alone");
 }

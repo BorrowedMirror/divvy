@@ -11,6 +11,7 @@ Research for `cargo xtask data refresh` (workstream C). Checked live on 2026-11-
 | `bases.json.zst` | trade2 `data/items` (non-unique) | RePoE `base_items` + `item_classes` | 3129 |
 | `uniques.json.zst` | trade2 `data/items` (unique flag) | - | 765 |
 | `statics.json.zst` | trade2 `data/static` | - | 771 |
+| `l10n.json.zst` | an installed PoE2 client (`cargo xtask data l10n`) | - | 8 languages |
 
 The trade site is authoritative for anything we send back to it (stat ids, category ids,
 exchange ids), so it is always the primary source. Exports are only used to fill fields the
@@ -138,3 +139,27 @@ verification only; **not** used by the pipeline.
    a warning (expected while the parser is being implemented).
 
 Total compressed assets: ~150 KB.
+
+## Non-English game clients (`l10n.json.zst`)
+
+`cargo xtask data l10n --game-dir <install dir>` reads the client's own data from
+`Bundles2/` (Oodle-compressed bundles, indexed by the MurmurHash64A of each lower-cased path)
+and writes, for each language whose client searches the main trade site (German, French,
+Spanish, Portuguese, Russian, Thai, Japanese, Korean):
+
+| Table | From | Used for |
+| --- | --- | --- |
+| keys, rarities, flags, words, patterns | `data/balance/<lang>/clientstrings.datc64` by id | header lines, flags, `Requires:`, advanced mod headers, `Superior` |
+| classes | `itemclasses.datc64`, row by row | `Item Class:` values |
+| bases | `baseitemtypes.datc64`, row by row | base type lines (also inside magic names) |
+| uniques | `words.datc64` (English text, localized text) | unique names |
+| stats | `data/statdescriptions/*.csd`, which list every wording per language in the same order as English | stat lines, including `reduced` / negated wordings and reordered numbers |
+
+Only names and stat wordings that match the other bundled assets are kept, so run it after
+`data refresh` (which keeps the existing translations). At runtime, item text whose first
+line uses one of these languages' `Item Class` (or `Rarity`) key is translated to English
+before parsing; everything after that is unchanged.
+
+Not covered yet: stats that carry a name instead of a number (`Allocates <passive>`,
+`+# to Level of all <skill> Skills`), the `Passive Skills in Radius also grant` jewel lines,
+and the Traditional and Simplified Chinese clients, which use their own trade sites.

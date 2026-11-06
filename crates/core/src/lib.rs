@@ -9,6 +9,7 @@
 pub mod catalog;
 pub mod error;
 pub mod item;
+pub mod l10n;
 pub mod matcher;
 pub mod parser;
 pub mod pricing;
