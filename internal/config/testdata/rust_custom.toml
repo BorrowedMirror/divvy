@@ -1,0 +1,102 @@
+version = 1
+
+[league]
+auto_detect = false
+league = "Hardcore \"Quoted\""
+
+[hotkeys]
+advanced_copy = false
+
+[hotkeys.price_check]
+modifiers = ["alt"]
+key = "KeyD"
+
+[hotkeys.price_check_pinned]
+modifiers = [
+    "ctrl",
+    "shift",
+]
+key = "KeyD"
+
+[hotkeys.open_settings]
+modifiers = ["meta"]
+key = "F5"
+
+[hotkeys.open_trade]
+modifiers = ["ctrl"]
+key = "KeyT"
+
+[trade]
+source = "poe2_scout"
+sellers = "securable"
+widen_pct = 25.5
+enable_all_stats = true
+listing_count = 40
+convert_prices = false
+remember_filters = false
+contact = "exile@example.com"
+poesessid = "abc123"
+
+[overlay]
+auto_hide_ms = 1500
+opacity = 0.8
+side = "last"
+group_by_seller = false
+listing_columns = [
+    "item_level",
+    "stock",
+    "seller",
+]
+scale = 1.25
+backdrop_dim = 0.0
+close_pinned_on_game_focus = true
+results = "auto"
+
+[overlay.links]
+poe2db = false
+wiki = true
+craft_of_exile = false
+
+[waystone.flags]
+"#% increased Pack Size in Map" = "good"
+"Monsters fire # additional Projectiles" = "warn"
+
+[chat]
+game_log = "C:\\Games\\Path of Exile 2\\logs\\Client.txt"
+
+[[chat.commands]]
+text = "/hideout"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = "F6"
+
+[[chat.commands]]
+text = "@last "
+send = false
+
+[chat.commands.chord]
+modifiers = ["ctrl"]
+key = "Enter"
+
+[stash]
+ctrl_scroll_tabs = true
+
+[[stash.searches]]
+text = "\"Rarity: Rare\""
+
+[stash.searches.chord]
+modifiers = ["alt"]
+key = "Digit1"
+
+[ui]
+language = "de"
+theme = "light"
+start_minimised = false
+check_updates = false
+onboarding_done = true
+autostart = true
+
+[platform]
+backend_override = "wayland"

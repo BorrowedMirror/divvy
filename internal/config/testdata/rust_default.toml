@@ -1,0 +1,132 @@
+version = 1
+
+[league]
+auto_detect = true
+
+[hotkeys]
+advanced_copy = true
+
+[hotkeys.price_check]
+modifiers = ["ctrl"]
+key = "KeyD"
+
+[hotkeys.price_check_pinned]
+modifiers = [
+    "ctrl",
+    "alt",
+]
+key = "KeyD"
+
+[hotkeys.open_settings]
+modifiers = ["ctrl"]
+key = "Space"
+
+[hotkeys.open_trade]
+modifiers = []
+key = ""
+
+[trade]
+source = "trade"
+sellers = "any"
+widen_pct = 10.0
+enable_all_stats = false
+listing_count = 20
+convert_prices = true
+remember_filters = true
+
+[overlay]
+auto_hide_ms = 400
+opacity = 0.95
+side = "cursor"
+group_by_seller = true
+listing_columns = [
+    "seller",
+    "listed",
+]
+scale = 1.0
+backdrop_dim = 0.6
+close_pinned_on_game_focus = false
+results = "below"
+
+[overlay.links]
+poe2db = true
+wiki = true
+craft_of_exile = true
+
+[waystone.flags]
+"Monsters fire # additional Projectiles" = "danger"
+"Players have #% less Recovery Rate of Life and Energy Shield" = "danger"
+"Players have -#% to all maximum Resistances" = "danger"
+
+[chat]
+game_log = ""
+
+[[chat.commands]]
+text = "/hideout"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = "F5"
+
+[[chat.commands]]
+text = "/kingsmarch"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/exit"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "@last ty&&/kick @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/invite @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/tradewith @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[[chat.commands]]
+text = "/hideout @last"
+send = true
+
+[chat.commands.chord]
+modifiers = []
+key = ""
+
+[stash]
+searches = []
+ctrl_scroll_tabs = false
+
+[ui]
+language = "en"
+theme = "system"
+start_minimised = true
+check_updates = true
+onboarding_done = false
+autostart = false
+
+[platform]
