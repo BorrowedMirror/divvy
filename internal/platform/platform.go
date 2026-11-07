@@ -6,6 +6,8 @@
 //   - Backends live in sub-packages; [Detect] chooses one at runtime.
 package platform
 
+import "unsafe"
+
 // WindowTracker tracks the PoE2 game window.
 type WindowTracker interface {
 	// GameWindow is the current game window if found (title "Path of Exile 2").
@@ -97,4 +99,19 @@ type Platform struct {
 	InputListener  InputListener
 	InputSimulator InputSimulator
 	Clipboard      Clipboard
+}
+
+// Parts is what an OS backend package provides. The shell builds the [Platform] from it and
+// adds what Wails already does on every OS: global hotkeys (Win32 RegisterHotKey, Carbon, X11
+// grabs, the XDG GlobalShortcuts portal on Wayland) and the clipboard. So Parts sets every
+// capability except GlobalHotkeys and Clipboard, which the shell fills in.
+type Parts struct {
+	Kind           BackendKind
+	Capabilities   Capabilities
+	WindowTracker  WindowTracker
+	InputListener  InputListener
+	InputSimulator InputSimulator
+	// Overlay styles a Wails window given its NativeWindow() pointer: an HWND on Windows, an
+	// NSWindow* on macOS, a GtkWindow* on Linux.
+	Overlay func(native unsafe.Pointer) (OverlayWindow, error)
 }
