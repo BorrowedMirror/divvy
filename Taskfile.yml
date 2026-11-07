@@ -111,6 +111,11 @@ tasks:
     cmds:
       - go run ./cmd/bindgen -check
 
+  commitconfig:check:
+    desc: Fail when .commitlintrc.json or the commit docs are out of date with .commit-config.toml.
+    cmds:
+      - go run ./cmd/commitconfig -check
+
   check:
     desc: Everything CI checks on the Go side.
     cmds:
@@ -118,6 +123,7 @@ tasks:
       - task: vet
       - task: test
       - task: bindings:check
+      - task: commitconfig:check
       - task: lint
 
   coverage:

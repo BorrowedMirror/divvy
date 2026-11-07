@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   check:
-    name: gofmt + vet (linux, windows, darwin) + golangci-lint + bindings
+    name: gofmt + vet (linux, windows, darwin) + golangci-lint + generated files
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -35,9 +35,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
       # gofmt; go vet for the host (gtk3), GOOS=windows and GOOS=darwin (purego, since cgo needs
-      # the macOS SDK); bindgen -check; golangci-lint (pinned in tools/go.mod) for the same three
-      # targets. The tests run in the matrix below.
-      - run: go tool -modfile=tools/go.mod wails3 task fmt vet bindings:check lint
+      # the macOS SDK); bindgen and commitconfig -check; golangci-lint (pinned in tools/go.mod) for
+      # the same three targets. The tests run in the matrix below.
+      - run: go tool -modfile=tools/go.mod wails3 task fmt vet bindings:check commitconfig:check lint
 
   test:
     name: test + coverage + build (${{ matrix.os }})

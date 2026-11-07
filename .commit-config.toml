@@ -1,5 +1,6 @@
 # Single source of truth for conventional-commit types and scopes.
-# `cargo xtask gen` regenerates .commitlintrc.json and docs/contributing/commit-message.md.
+# `go generate ./...` (cmd/commitconfig) regenerates .commitlintrc.json and
+# docs/contributing/commit-message.md.
 
 header_max_length = 72
 
@@ -17,17 +18,18 @@ release = "Release commits"
 test = "Adding or fixing tests"
 
 [scopes]
-# crates and apps
-core = "crates/core"
-data = "crates/data (also build(data) for data refreshes)"
-trade = "crates/trade"
-platform = "crates/platform"
-config = "crates/config"
-testkit = "crates/testkit"
-desktop = "apps/desktop"
+# packages and apps
+core = "internal/core"
+data = "internal/data and the data assets (also build(data) for data refreshes)"
+trade = "internal/trade"
+platform = "internal/platform"
+config = "internal/config"
+testkit = "internal/testkit"
+desktop = "the desktop app: cmd/rkl, internal/app, internal/shell, internal/ipc"
+e2e = "e2e/"
 xtask = "xtask"
 web = "web/"
-fake-game = "tools/fake-game"
+fake-game = "e2e/cmd/fake-game"
 # build-only scopes
 deps = "dependency updates (build)"
 cargo = "Cargo configuration (build)"
