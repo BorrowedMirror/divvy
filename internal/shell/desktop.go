@@ -95,16 +95,28 @@ func (d *Desktop) Settings() app.Window { return window{d.shell.Settings} }
 // Styler is the backend's native styling for w, created on first use.
 func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, error) {
 	d.mu.Lock()
-	defer d.mu.Unlock()
-	if s, ok := d.stylers[w]; ok {
-		return s, nil
+	cached, ok := d.stylers[w]
+	d.mu.Unlock()
+	if ok {
+		return cached, nil
 	}
 	if d.parts.Overlay == nil {
 		return nil, platform.Unsupported("overlay styling")
 	}
-	s, err := d.parts.Overlay(w.NativeWindow())
+	// Linux backends read the GtkWindow, which GTK only allows on its main thread. The lock is
+	// not held across the hop: the main thread may be asking for a styler too.
+	var (
+		s   platform.OverlayWindow
+		err error
+	)
+	application.InvokeSync(func() { s, err = d.parts.Overlay(w.NativeWindow()) })
 	if err != nil {
 		return nil, err
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if prev, ok := d.stylers[w]; ok {
+		return prev, nil // created concurrently; keep the first
 	}
 	d.stylers[w] = s
 	return s, nil
