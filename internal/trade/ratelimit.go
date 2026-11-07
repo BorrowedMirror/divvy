@@ -101,7 +101,7 @@ func parseTriples(header string) ([]triple, error) {
 			}
 			v, err := parseU64(strings.TrimSpace(fields[i]))
 			if err != nil {
-				return nil, fmt.Errorf("bad %s in `%s`: %v", what, part, err)
+				return nil, fmt.Errorf("bad %s in `%s`: %w", what, part, err)
 			}
 			if i > 0 && v > maxSecs {
 				// Rust's Duration holds any u64 seconds; time.Duration does not.

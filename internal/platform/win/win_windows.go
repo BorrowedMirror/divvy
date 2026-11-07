@@ -34,7 +34,6 @@ var (
 	procSetLayeredWindowAttributes = user32.NewProc("SetLayeredWindowAttributes")
 	procGetPhysicalCursorPos       = user32.NewProc("GetPhysicalCursorPos")
 	procGetCursorPos               = user32.NewProc("GetCursorPos")
-	procSetForegroundWindow        = user32.NewProc("SetForegroundWindow")
 	// GetWindowLongPtrW/SetWindowLongPtrW are macros for the 32-bit variants on 32-bit Windows,
 	// where user32 does not export the Ptr names.
 	procGetWindowLongPtrW = ptrProc("GetWindowLongPtrW", "GetWindowLongW")
@@ -94,7 +93,7 @@ func New(opts ...Option) (platform.Parts, error) {
 		Cursor:         cursor,
 		// Nil, as in the Rust build: Windows gives focus back to the previous window when the
 		// panel hides, and a forced SetForegroundWindow can be refused by the foreground lock
-		// and only flash the game's taskbar button. activateWindow stays for a later opt-in.
+		// and only flash the game's taskbar button.
 		ActivateWindow: nil,
 	}, nil
 }
@@ -113,27 +112,6 @@ func cursor() (x, y float64, ok bool) {
 		}
 	}
 	return float64(pt.x), float64(pt.y), true
-}
-
-// activateWindow puts another top-level window (the game) in the foreground. The Rust app never
-// did this on Windows: when the overlay hides, Windows itself reactivates the previously active
-// window, and the card is WS_EX_NOACTIVATE so it never took focus. This is a plain
-// SetForegroundWindow with no AttachThreadInput / AllowSetForegroundWindow / synthetic-Alt
-// tricks to get around the foreground lock, so it only succeeds while we are allowed to set
-// the foreground (we, or the target, are foreground), and otherwise fails harmlessly.
-func activateWindow(nativeID uint64) error {
-	hwnd := windows.HWND(nativeID)
-	if !windows.IsWindow(hwnd) {
-		return platform.Backend("window %#x is not a window", nativeID)
-	}
-	if windows.GetForegroundWindow() == hwnd {
-		return nil
-	}
-	// SAFETY: hwnd was validated; SetForegroundWindow takes any top-level HWND.
-	if r, _, err := procSetForegroundWindow.Call(uintptr(hwnd)); r == 0 {
-		return platform.Backend("SetForegroundWindow refused (foreground lock): %v", err)
-	}
-	return nil
 }
 
 func newOverlay(native unsafe.Pointer) (platform.OverlayWindow, error) {

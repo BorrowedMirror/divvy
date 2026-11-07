@@ -124,12 +124,12 @@ func (s *Poe2ScoutSource) getJSON(ctx context.Context, u *url.URL, dst any) erro
 		return TransportError(err)
 	}
 	req.Header.Set("User-Agent", s.UserAgent)
-	resp, body, err := getBody(ctx, s.http, req)
+	status, body, err := getBody(ctx, s.http, req)
 	if err != nil {
 		return err
 	}
-	if !isSuccess(resp.StatusCode) {
-		return HTTPError(uint16(resp.StatusCode), firstChars(lossy(body), 200))
+	if !isSuccess(status) {
+		return HTTPError(uint16(status), firstChars(lossy(body), 200))
 	}
 	if isNull(body) {
 		// serde rejects null for a Vec; encoding/json would decode it as nil.

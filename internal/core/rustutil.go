@@ -3,6 +3,7 @@ package core
 // Small helpers reproducing Rust std semantics the port depends on.
 
 import (
+	"errors"
 	"math"
 	"strconv"
 	"strings"
@@ -19,8 +20,6 @@ const (
 )
 
 //go:fix inline
-func ptr[T any](v T) *T { return new(v) }
-
 func clonePtr[T any](p *T) *T {
 	if p == nil {
 		return nil
@@ -121,7 +120,7 @@ func parseF64(s string) (float64, bool) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		// Rust saturates out-of-range values to infinity / zero rather than failing.
-		if ne, ok := err.(*strconv.NumError); ok && ne.Err == strconv.ErrRange {
+		if errors.Is(err, strconv.ErrRange) {
 			return f, true
 		}
 		return 0, false

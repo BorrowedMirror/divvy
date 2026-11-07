@@ -94,11 +94,16 @@ tasks:
   lint:
     desc: golangci-lint for this OS, Windows and macOS (purego).
     deps: [web]
+    vars:
+      # The host binary of the pinned tool: `go tool` with GOOS=windows would build golangci-lint
+      # itself for Windows. `go tool -n` prints its path without running it.
+      LINT:
+        sh: go tool -modfile=tools/go.mod -n golangci-lint
     cmds:
-      - '{{.TOOL}} golangci-lint run'
-      - cmd: '{{.TOOL}} golangci-lint run'
+      - '{{.LINT}} run'
+      - cmd: '{{.LINT}} run'
         env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
-      - cmd: '{{.TOOL}} golangci-lint run --build-tags purego'
+      - cmd: '{{.LINT}} run --build-tags purego'
         env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
 
   bindings:check:

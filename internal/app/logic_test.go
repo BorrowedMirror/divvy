@@ -316,7 +316,7 @@ func TestLogicChatPlaceholdersAndChaining(t *testing.T) {
 	steps, err = ChatSteps("/invite @last", true, none)
 	checkSteps(t, "invite", steps, err,
 		key("Enter", platform.Ctrl), key("Home"), key("Delete"), paste("/invite "), enter)
-	if _, err := ChatSteps("@last hi @last", true, none); err != ChatNoWhisper {
+	if _, err := ChatSteps("@last hi @last", true, none); !errors.Is(err, ChatNoWhisper) {
 		t.Errorf("two @last without a whisper: %v", err)
 	}
 	_, err = ChatSteps("in @area", true, none)

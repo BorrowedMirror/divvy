@@ -123,8 +123,11 @@ func AdoptLegacySettings(paths Paths, legacy string) (bool, error) {
 	if legacy == "" {
 		return false, nil
 	}
-	info, err := os.Stat(legacy)
-	if err != nil || !info.Mode().IsRegular() {
+	// Like Rust's `is_file()`: a legacy file that is missing or unreadable means there is
+	// nothing to adopt, not an error.
+	info, statErr := os.Stat(legacy)
+	isFile := statErr == nil && info.Mode().IsRegular()
+	if !isFile {
 		return false, nil
 	}
 	if _, err := os.Stat(paths.SettingsFile); err == nil {

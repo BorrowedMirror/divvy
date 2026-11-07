@@ -61,8 +61,6 @@ func TestUnboundChord(t *testing.T) {
 func linux() EnvProbe { return EnvProbe{OS: "linux"} }
 
 //go:fix inline
-func ptr[T any](v T) *T { return new(v) }
-
 func TestSettingsOverrideWinsOverEverything(t *testing.T) {
 	probe := linux()
 	probe.OverrideBackend, probe.Display = "wayland", ":0"

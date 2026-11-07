@@ -1,6 +1,7 @@
 package wayland
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -42,7 +43,7 @@ func (y *ydotool) SendChord(chord platform.Chord) error {
 	}
 	cmd := exec.Command(y.binary, args...)
 	if err := cmd.Run(); err != nil {
-		if exit, ok := err.(*exec.ExitError); ok {
+		if exit, ok := errors.AsType[*exec.ExitError](err); ok {
 			return platform.Backend("ydotool exited with %s", exit.ProcessState)
 		}
 		return platform.Backend("ydotool: %v", err)

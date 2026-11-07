@@ -51,8 +51,6 @@ func peek(c *FakeClipboard) *string {
 }
 
 //go:fix inline
-func strp(s string) *string { return new(s) }
-
 func TestClipboardSharesStateAndRecordsHistory(t *testing.T) {
 	a := NewFakeClipboard()
 	b := a // a handle: the same pointer

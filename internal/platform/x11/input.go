@@ -13,6 +13,7 @@ package x11
 // chord goes through the fallback instead.
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -33,6 +34,10 @@ type Simulator struct {
 }
 
 // NewSimulator never fails: the connection is opened on first use (see [Simulator.EnsureReady]).
+// releaseWait is how long the simulator waits for the hotkey key to come up before sending
+// anyway.
+const releaseWait = 400 * time.Millisecond
+
 func NewSimulator(display string) *Simulator {
 	return &Simulator{display: display}
 }
@@ -138,8 +143,11 @@ func keyboardMapping(conn *xConn) (kbMap, error) {
 	setup := conn.setup()
 	count := int(setup.MaxKeycode) - int(setup.MinKeycode) + 1
 	r, err := xproto.GetKeyboardMapping(conn.c, setup.MinKeycode, byte(count)).Reply()
-	if err != nil || r == nil {
-		return kbMap{}, xErr(fmt.Errorf("keyboard mapping: %v", err))
+	if err == nil && r == nil {
+		err = errors.New("no reply")
+	}
+	if err != nil {
+		return kbMap{}, xErr(fmt.Errorf("keyboard mapping: %w", err))
 	}
 	syms := make([]uint32, len(r.Keysyms))
 	for i, k := range r.Keysyms {

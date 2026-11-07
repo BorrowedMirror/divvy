@@ -4,10 +4,6 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
-// stalled).
-const hookChannelCapacity = 1024
-
 // Core event codes in a RECORD device-event range.
 const (
 	evKeyPress      = 2

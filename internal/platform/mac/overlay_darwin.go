@@ -90,7 +90,7 @@ func (o *overlay) ShowAt(rect platform.Rect) error {
 	runOnMain(func() {
 		// Cocoa's global origin is the bottom-left of the primary screen.
 		var primaryHeight float64
-		if screens := objc.ID(class("NSScreen")).Send(sel("screens")); screens != 0 &&
+		if screens := class("NSScreen").Send(sel("screens")); screens != 0 &&
 			objc.Send[uint](screens, sel("count")) > 0 {
 			primary := screens.Send(sel("objectAtIndex:"), uint(0))
 			primaryHeight = objc.Send[cgRect](primary, sel("frame")).Size.Height
@@ -129,7 +129,7 @@ func (o *overlay) RaiseAbove(*uint64) error {
 // make the window key and order it front.
 func (o *overlay) Activate() error {
 	runOnMain(func() {
-		app := objc.ID(class("NSApplication")).Send(sel("sharedApplication"))
+		app := class("NSApplication").Send(sel("sharedApplication"))
 		app.Send(sel("activateIgnoringOtherApps:"), true)
 		o.send("makeKeyAndOrderFront:", objc.ID(0))
 	})

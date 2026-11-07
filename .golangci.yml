@@ -1,10 +1,6 @@
 # golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci-go.yml).
 # The "standard" set plus a few bug-finding linters; formatting is gofmt's job.
 #
-# Turned off while the port is in progress, to re-enable once the tree is clean:
-#   - unused: the platform backends are written ahead of the code that calls them.
-#   - bodyclose, errorlint, nilerr, copyloopvar, unconvert: each has a few findings in ported code.
-#
 # CI lints three times: host (Linux, gtk3), GOOS=windows, and GOOS=darwin with -tags purego.
 version: "2"
 
@@ -13,10 +9,13 @@ run:
 
 linters:
   default: standard
-  disable:
-    - unused
   enable:
+    - bodyclose
+    - copyloopvar
+    - errorlint
     - gocritic
+    - nilerr
+    - unconvert
     - misspell
     - nolintlint
     - usestdlibvars

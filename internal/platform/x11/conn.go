@@ -3,6 +3,7 @@
 package x11
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -76,9 +77,12 @@ func connect(display string, events chan<- xgb.Event) (*xConn, error) {
 	}
 	for i, ck := range cookies {
 		r, err := ck.Reply()
-		if err != nil || r == nil {
+		if err == nil && r == nil {
+			err = errors.New("no reply")
+		}
+		if err != nil {
 			c.Close()
-			return nil, xErr(fmt.Errorf("intern %s: %v", names[i], err))
+			return nil, xErr(fmt.Errorf("intern %s: %w", names[i], err))
 		}
 		*targets[i] = r.Atom
 	}

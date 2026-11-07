@@ -75,6 +75,10 @@ var _ platform.InputListener = (*inputListener)(nil)
 
 // Start installs the global hook on its own thread and never blocks. A failure to install is
 // logged and reported by the returned channel closing; the hook can then be started again.
+// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
+// stalled).
+const hookChannelCapacity = 1024
+
 func (l *inputListener) Start() (<-chan platform.InputEvent, error) {
 	if hookStarted.Swap(true) {
 		return nil, platform.ErrAlreadyStarted

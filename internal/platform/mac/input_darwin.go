@@ -88,6 +88,10 @@ type inputListener struct {
 	withMouse bool
 }
 
+// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
+// stalled).
+const hookChannelCapacity = 1024
+
 func (l inputListener) Start() (<-chan platform.InputEvent, error) {
 	// Without Input Monitoring (or Accessibility) the tap would be created but stay silent, so
 	// refuse up front and let the caller surface the missing permission.

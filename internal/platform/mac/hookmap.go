@@ -10,10 +10,6 @@ import (
 // and the non-blocking hand-off, ported from the shared Rust `backend::hook` and the rdev fork's
 // macOS event conversion.
 
-// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
-// stalled).
-const hookChannelCapacity = 1024
-
 // CGEventType values (CGEventTypes.h).
 const (
 	cgEventMouseMoved         uint32 = 5

@@ -6,10 +6,6 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
-// stalled).
-const hookChannelCapacity = 1024
-
 // Low-level hook message identifiers (WinUser.h).
 const (
 	wmKeyDown    = 0x0100

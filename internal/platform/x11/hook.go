@@ -34,6 +34,10 @@ type Listener struct {
 
 // NewListener records the keyboard; mouse also records pointer motion and buttons (Ctrl +
 // wheel stash tab switching needs the wheel).
+// hookChannelCapacity is how many events are buffered before new ones are dropped (consumer
+// stalled).
+const hookChannelCapacity = 1024
+
 func NewListener(display string, mouse bool) *Listener {
 	return &Listener{display: display, mouse: mouse}
 }

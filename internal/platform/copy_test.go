@@ -84,8 +84,6 @@ func (s *clipState) set(text *string) {
 }
 
 //go:fix inline
-func strp(s string) *string { return new(s) }
-
 func textResult(p *string) (string, bool, error) {
 	if p == nil {
 		return "", false, nil

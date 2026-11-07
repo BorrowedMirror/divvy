@@ -91,8 +91,6 @@ func statOf(item *core.ParsedItem, text string) *string {
 }
 
 //go:fix inline
-func sp(s string) *string { return new(s) }
-
 func TestLocalArmourOnGloves(t *testing.T) {
 	gloves := matched(t, "gloves/rare-gloves-advanced")
 	assert.Equal(t, new("explicit.stat_3484657501"), statOf(gloves, "+98 to Armour"))

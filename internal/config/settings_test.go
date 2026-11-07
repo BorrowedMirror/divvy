@@ -377,7 +377,6 @@ func TestJSONAndKoanfTagsAgree(t *testing.T) {
 		}
 		seen[rt] = true
 		for f := range rt.Fields() {
-			f := f
 			j, _, _ := strings.Cut(f.Tag.Get("json"), ",")
 			k, _, _ := strings.Cut(f.Tag.Get("koanf"), ",")
 			if j == "" || j != k {

@@ -19,10 +19,6 @@ import (
 // Keymap is a QueryKeymap bit vector: bit k set = keycode k is down.
 type Keymap [32]byte
 
-// releaseWait is how long the simulator waits for the hotkey key to come up before sending
-// anyway.
-const releaseWait = 400 * time.Millisecond
-
 const releasePoll = 5 * time.Millisecond
 
 func isDown(keys *Keymap, keycode uint8) bool {

@@ -344,12 +344,12 @@ func (s *PoeNinjaSource) overview(ctx context.Context, endpoint ninjaEndpoint, l
 		return nil, TransportError(err)
 	}
 	req.Header.Set("User-Agent", s.UserAgent)
-	resp, body, err := getBody(ctx, s.http, req)
+	status, body, err := getBody(ctx, s.http, req)
 	if err != nil {
 		return nil, err
 	}
-	if !isSuccess(resp.StatusCode) {
-		return nil, HTTPError(uint16(resp.StatusCode), firstChars(lossy(body), 200))
+	if !isSuccess(status) {
+		return nil, HTTPError(uint16(status), firstChars(lossy(body), 200))
 	}
 	var parsed ninjaOverview
 	if err := json.Unmarshal(body, &parsed); err != nil {

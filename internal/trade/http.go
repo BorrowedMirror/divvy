@@ -112,17 +112,17 @@ func transportErr(ctx context.Context, err error) error {
 }
 
 // getBody performs req and reads the body.
-func getBody(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, []byte, error) {
+func getBody(ctx context.Context, client *http.Client, req *http.Request) (status int, body []byte, err error) {
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, nil, transportErr(ctx, err)
+		return 0, nil, transportErr(ctx, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
-	body, err := io.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, transportErr(ctx, err)
+		return 0, nil, transportErr(ctx, err)
 	}
-	return resp, body, nil
+	return resp.StatusCode, body, nil
 }
 
 func isSuccess(status int) bool { return status >= 200 && status < 300 }
