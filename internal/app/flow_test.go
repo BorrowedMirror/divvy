@@ -285,3 +285,16 @@ func TestFlowNothingCopiedIsNotRecordedAsAnError(t *testing.T) {
 	assert.True(t, IsSilentFailure(ipc.From(err)))
 	assert.Empty(t, a.st.RecentErrors(), "no item under the cursor is not a diagnostics error")
 }
+
+func TestFlowHotkeysStayWhileAnRKLWindowIsFocused(t *testing.T) {
+	a, d, h := newTestApp(t, testkit.NewFakePlatformBuilder().Window(game()))
+	a.st.FollowFocus.Store(true)
+	h.WindowTracker.SetFocused(false)
+	d.overlay.Show()
+	d.overlay.Focus() // the panel took focus from the game
+	a.SyncHotkeysToFocus()
+	assert.NotEmpty(t, h.Hotkeys.Registered(), "Ctrl+Alt+D must still close the focused panel")
+	d.overlay.Hide()
+	a.SyncHotkeysToFocus()
+	assert.Empty(t, h.Hotkeys.Registered(), "released once neither the game nor RKL has focus")
+}

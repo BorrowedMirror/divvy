@@ -143,7 +143,7 @@ class R(ctypes.Structure): _fields_ = [("x", ctypes.c_short), ("y", ctypes.c_sho
 xe.XShapeGetRectangles.restype = ctypes.POINTER(R)
 xe.XShapeGetRectangles.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
 n, o = ctypes.c_int(), ctypes.c_int()
-rects = xe.XShapeGetRectangles(d, int(sys.argv[1]), 0, ctypes.byref(n), ctypes.byref(o))
+rects = xe.XShapeGetRectangles(d, int(sys.argv[1], 0), 0, ctypes.byref(n), ctypes.byref(o))
 spans = [(rects[i].x, rects[i].y, rects[i].w, rects[i].h) for i in range(n.value)]
 corner = any(x0 <= 0 < x0 + w and y0 <= 0 < y0 + h for x0, y0, w, h in spans)
 sys.exit(0 if n.value > 1 and not corner else 1)

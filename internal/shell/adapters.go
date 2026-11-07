@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"os"
 	"strings"
 	"sync"
 
@@ -12,16 +13,50 @@ import (
 // Hotkeys implements platform.HotkeyHost with Wails' global shortcuts (Win32 RegisterHotKey,
 // Carbon hot keys, X11 grabs, the XDG GlobalShortcuts portal on Wayland).
 type Hotkeys struct {
-	app    *application.App
-	mu     sync.Mutex
-	bound  map[platform.HotkeyAction]string // action -> accelerator
-	events chan platform.HotkeyEvent
-	taken  bool
+	app *application.App
+	// x11 makes Wails grab the keys through X11 even in a Wayland session (see NewHotkeys).
+	x11     bool
+	started sync.Once
+	mu      sync.Mutex
+	bound   map[platform.HotkeyAction]string // action -> accelerator
+	events  chan platform.HotkeyEvent
+	taken   bool
 }
 
-// NewHotkeys returns a hotkey host on app's global shortcut manager.
-func NewHotkeys(a *application.App) *Hotkeys {
-	return &Hotkeys{app: a, bound: map[platform.HotkeyAction]string{}, events: make(chan platform.HotkeyEvent, 64)}
+// NewHotkeys returns a hotkey host on app's global shortcut manager. x11 is true when RKL uses
+// its X11 backend on Linux: Wails picks X11 key grabs or the Wayland GlobalShortcuts portal from
+// the session type, but under XWayland the game (Proton/Wine) is an X11 window, so the keys must
+// be grabbed through X11 as the Tauri build did.
+func NewHotkeys(a *application.App, x11 bool) *Hotkeys {
+	return &Hotkeys{app: a, x11: x11, bound: map[platform.HotkeyAction]string{}, events: make(chan platform.HotkeyEvent, 64)}
+}
+
+// register is GlobalShortcut.Register. Wails creates its shortcut backend on the first call and
+// decides X11 or portal from XDG_SESSION_TYPE then, so with x11 set that one call runs with the
+// variable set to x11; it is restored straight after, so programs RKL launches (the browser)
+// still see the real session.
+func (h *Hotkeys) register(accel string, callback func()) error {
+	var err error
+	first := false
+	h.started.Do(func() {
+		first = true
+		if !h.x11 {
+			err = h.app.GlobalShortcut.Register(accel, callback)
+			return
+		}
+		prev, had := os.LookupEnv("XDG_SESSION_TYPE")
+		_ = os.Setenv("XDG_SESSION_TYPE", "x11")
+		err = h.app.GlobalShortcut.Register(accel, callback)
+		if had {
+			_ = os.Setenv("XDG_SESSION_TYPE", prev)
+		} else {
+			_ = os.Unsetenv("XDG_SESSION_TYPE")
+		}
+	})
+	if first {
+		return err
+	}
+	return h.app.GlobalShortcut.Register(accel, callback)
 }
 
 var _ platform.HotkeyHost = (*Hotkeys)(nil)
@@ -46,7 +81,7 @@ func (h *Hotkeys) Register(action platform.HotkeyAction, chord platform.Chord) e
 			return platform.HotkeyConflict(chord.String())
 		}
 	}
-	if err := h.app.GlobalShortcut.Register(accel, func() {
+	if err := h.register(accel, func() {
 		select {
 		case h.events <- platform.HotkeyEvent{Action: action}:
 		default: // the consumer is stuck; drop the press rather than block the UI thread

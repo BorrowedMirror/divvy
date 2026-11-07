@@ -128,6 +128,15 @@ func main() {
 		Diagnostics: func() { _ = flow.ShowSettings("diagnostics") },
 	})
 
+	// Hotkeys follow focus: grabbed while the game or an RKL window is focused. The game's focus
+	// comes from the tracker; RKL's own windows report theirs here. Off the UI thread: syncing
+	// can wait on the settings lock.
+	for _, w := range []*application.WebviewWindow{s.Overlay, s.Settings} {
+		for _, ev := range []events.WindowEventType{events.Common.WindowFocus, events.Common.WindowLostFocus} {
+			w.OnWindowEvent(ev, func(*application.WindowEvent) { go flow.SyncHotkeysToFocus() })
+		}
+	}
+
 	s.App.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		start(s, desktop, flow, backend, plat != nil && plat.Capabilities.GlobalHotkeys)
 	})
@@ -228,7 +237,7 @@ func platformFrom(kind platform.BackendKind, parts platform.Parts, ok bool, s *s
 		Kind:           kind,
 		Capabilities:   caps,
 		WindowTracker:  parts.WindowTracker,
-		Hotkeys:        shell.NewHotkeys(s.App),
+		Hotkeys:        shell.NewHotkeys(s.App, kind == platform.BackendX11),
 		InputListener:  parts.InputListener,
 		InputSimulator: parts.InputSimulator,
 		Clipboard:      shell.NewClipboard(s.App),

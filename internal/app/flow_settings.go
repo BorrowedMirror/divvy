@@ -54,7 +54,7 @@ func (f *Flow) RegisterHotkeys(s *config.Settings) error {
 	if err := p.Hotkeys.RegisterAll(HotkeyBindings(s)); err != nil {
 		return ipc.From(err)
 	}
-	if f.st.FollowFocus.Load() && !p.WindowTracker.IsGameFocused() {
+	if f.st.FollowFocus.Load() && !f.hotkeysWanted() {
 		if err := p.Hotkeys.UnregisterAll(); err != nil {
 			return ipc.From(err)
 		}
@@ -62,8 +62,19 @@ func (f *Flow) RegisterHotkeys(s *config.Settings) error {
 	return nil
 }
 
-// SyncHotkeysToFocus grabs the hotkeys while the game has focus and releases them otherwise,
-// so the same keys still work in other apps. Only once the game's focus is tracked (not on
+// hotkeysWanted reports whether the hotkeys should be grabbed: while the game or one of RKL's
+// own windows (the panel, settings) has focus, so Ctrl+Alt+D and the settings hotkey still
+// close what they opened.
+func (f *Flow) hotkeysWanted() bool {
+	if f.st.Platform.WindowTracker.IsGameFocused() {
+		return true
+	}
+	return f.d.Overlay().IsFocused() || f.d.Settings().IsFocused()
+}
+
+// SyncHotkeysToFocus grabs the hotkeys while the game or an RKL window has focus and releases
+// them otherwise, so the same keys still work in other apps. The shell also calls it when an
+// RKL window gains or loses focus. Only once the game's focus is tracked (not on
 // Wayland, where every portal registration asks the user); until then the hotkeys stay
 // grabbed everywhere.
 func (f *Flow) SyncHotkeysToFocus() {
@@ -74,8 +85,8 @@ func (f *Flow) SyncHotkeysToFocus() {
 	}
 	st.ApplyLock.Lock()
 	defer st.ApplyLock.Unlock()
-	focused := p.WindowTracker.IsGameFocused()
-	slog.Debug("game focus changed", "grab_hotkeys", focused)
+	focused := f.hotkeysWanted()
+	slog.Debug("focus changed", "grab_hotkeys", focused)
 	var err error
 	if focused {
 		settings := st.Settings()
