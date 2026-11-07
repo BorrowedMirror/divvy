@@ -1,4 +1,6 @@
 # Codecov: one flag per crate (uploaded from target/coverage/<crate>.lcov by ci.yml) plus web.
+# The Go build uploads one flag per internal package, go-<pkg> (target/go/coverage/<pkg>.out,
+# ci-go.yml); it has no gates yet.
 # Project targets mirror the gates in CONTRACTS.md; `cargo xtask coverage --check` enforces them
 # in CI independently of Codecov.
 codecov:
@@ -55,13 +57,33 @@ flag_management:
       paths: [crates/config/]
     - name: web
       paths: [web/src/]
+    - name: go-core
+      paths: [internal/core/]
+    - name: go-data
+      paths: [internal/data/]
+    - name: go-trade
+      paths: [internal/trade/]
+    - name: go-platform
+      paths: [internal/platform/]
+    - name: go-config
+      paths: [internal/config/]
+    - name: go-app
+      paths: [internal/app/]
+    - name: go-ipc
+      paths: [internal/ipc/]
+
+# Go cover profiles name files by import path.
+fixes:
+  - "github.com/BorrowedMirror/rust-king-ledger/::"
 
 ignore:
   - "xtask/**"
+  - "cmd/xtask/**"
   - "tools/**"
   - "e2e/**"
   - "web/src/bindings.ts"
   - "**/tests/**"
+  - "internal/testkit/**"
 
 comment:
   layout: "condensed_header, diff, flags, files"

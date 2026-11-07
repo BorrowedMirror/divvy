@@ -21,6 +21,21 @@
 Pre-releases use a SemVer pre-release suffix (`0.2.0-rc.1`); the workflow marks them as
 pre-releases automatically.
 
+## Go build releases
+
+While the Go/Wails port is in progress, `.github/workflows/release-go.yml` releases the Go
+build separately. It is started by hand (Actions -> release-go -> Run workflow) with a version
+such as `0.2.0-rc.1`; `release.yml` keeps the `v*` tags.
+
+It builds the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage and the
+macOS universal DMG with `go run ./cmd/xtask package <os> -version <version>`, then creates a
+**draft** release for the tag `go-v<version>` at the commit the run used, with GitHub-generated
+notes, a CycloneDX SBOM and `SHA256SUMS.txt`. The tag is created only when the draft is
+published; delete the draft to discard the run.
+
+Not done yet for the Go build: Windows code signing, macOS Developer ID signing and
+notarisation (the app is signed ad hoc), an updater manifest, and third-party notices.
+
 ## Release notes
 
 There is no changelog file. Each release's notes are GitHub's generated release notes: the pull

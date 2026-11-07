@@ -11,3 +11,5 @@ coverage/
 /.claude/
 *.tsbuildinfo
 *.AppImage
+# Windows resources linked into cmd/rkl by `go run ./cmd/xtask package windows` (removed after the build).
+*.syso

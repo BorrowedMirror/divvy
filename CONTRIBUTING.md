@@ -105,6 +105,42 @@ macOS harness does not build: run `pnpm --dir web build`, then
 script lists the tools it needs in its header comment. The knobs are the `RKL_E2E_*` variables in the
 [README](README.md#environment-variables).
 
+## Go build
+
+RKL is being ported to Go and [Wails v3](https://v3.wails.io) (`cmd/rkl`, `internal/*`). Until
+the port is finished both builds live in the repository, and the Rust commands above keep
+working. The Go build needs the Go version in `go.mod` (the `toolchain` line is downloaded
+automatically) plus the same Linux packages, Xcode tools or Windows setup as the Rust build. The
+binary embeds the web UI, so build that first:
+
+```sh
+pnpm --dir web build
+go run -tags gtk3 ./cmd/rkl         # Linux; drop -tags gtk3 on Windows and macOS
+```
+
+Tasks live in `cmd/xtask` (run them from anywhere in the repository):
+
+| Command | What it does |
+| --- | --- |
+| `go run ./cmd/xtask check [-race] [-no-test] [-no-lint]` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (with `-tags purego`, since cgo needs the macOS SDK); go test; `bindgen -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `go run ./cmd/xtask coverage` | `go test -race` with coverage, one profile per internal package in `target/go/coverage/` |
+| `go run ./cmd/xtask package windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` |
+| `go run ./cmd/xtask package linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
+| `go run ./cmd/xtask package macos` | universal `Rust King Ledger.app` and `target/go/rkl-<version>-macos-universal.dmg`; macOS only |
+| `go run ./cmd/bindgen` | regenerates `web/src/bindings.ts` from the Go IPC types |
+
+The version comes from `apps/desktop/src-tauri/tauri.conf.json` (`-version` overrides it) and
+is linked into `internal/trade.Version`. Packaging uses Wails' CLI at the version in `go.mod`,
+installed into `target/go/tools/` on first use; it is not a module dependency.
+
+The Windows installer installs for the current user to `%LOCALAPPDATA%\Rust King Ledger` and
+uses the Tauri installer's registry keys, so it upgrades a Tauri install in place. It needs
+`makensis` (Debian/Ubuntu: `nsis`; Arch: `nsis` from the AUR). Distribution packages ship
+either the 64-bit or the 32-bit NSIS stubs; either works. When the system NSIS has neither,
+the task adds the 32-bit ones from the official NSIS zip (pinned SHA-256) under
+`target/go/nsis/`, as `cargo xtask windows-installer` does. The AppImage needs `file` and
+`readelf` (binutils). Nothing is code-signed yet; the macOS bundle is signed ad hoc only.
+
 ## Commits and pull requests
 
 We use conventional commits, enforced by commitlint on every commit and on the PR title.

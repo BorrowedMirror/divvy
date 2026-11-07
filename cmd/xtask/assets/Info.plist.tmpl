@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleName</key>
+    <string>{{.ProductName}}</string>
+    <key>CFBundleDisplayName</key>
+    <string>{{.ProductName}}</string>
+    <key>CFBundleExecutable</key>
+    <string>{{.Binary}}</string>
+    <key>CFBundleIdentifier</key>
+    <string>{{.Identifier}}</string>
+    <key>CFBundleVersion</key>
+    <string>{{.Version}}</string>
+    <key>CFBundleShortVersionString</key>
+    <string>{{.Version}}</string>
+    <key>CFBundleIconFile</key>
+    <string>icon</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>{{.MacOSMin}}</string>
+    <!-- Tray app: no Dock icon, as in the Tauri build. -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>{{.Copyright}}</string>
+</dict>
+</plist>

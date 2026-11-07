@@ -9,6 +9,9 @@ pre-commit:
     rustfmt:
       glob: "*.rs"
       run: cargo fmt --all -- --check
+    gofmt:
+      glob: "*.go"
+      run: test -z "$(gofmt -l {staged_files})" || { gofmt -l {staged_files}; exit 1; }
     web-lint:
       root: web/
       glob: "*.{ts,tsx,css,json}"

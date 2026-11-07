@@ -1,0 +1,53 @@
+# golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci-go.yml).
+# The "standard" set plus a few bug-finding linters; formatting is gofmt's job.
+#
+# Turned off while the port is in progress, to re-enable once the tree is clean:
+#   - unused: the platform backends are written ahead of the code that calls them.
+#   - bodyclose, errorlint, nilerr, copyloopvar, unconvert: each has a few findings in ported code.
+#
+# CI lints three times: host (Linux, gtk3), GOOS=windows, and GOOS=darwin with -tags purego.
+version: "2"
+
+run:
+  build-tags: [gtk3]
+
+linters:
+  default: standard
+  disable:
+    - unused
+  enable:
+    - gocritic
+    - misspell
+    - nolintlint
+    - usestdlibvars
+  settings:
+    errcheck:
+      exclude-functions:
+        # Win32 calls through LazyProc: the error is GetLastError and always non-nil.
+        - (*syscall.LazyProc).Call
+        - (*golang.org/x/sys/windows.LazyProc).Call
+    govet:
+      disable:
+        # Suggests //go:fix inline rewrites; not a correctness check.
+        - inline
+    staticcheck:
+      checks:
+        - all
+        # Quick-fix suggestions (De Morgan and the like) and style checks.
+        - -QF*
+        - -ST*
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+        - singleCaseSwitch
+  exclusions:
+    generated: strict
+    presets:
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters: [errcheck, gocritic]
+
+formatters:
+  enable:
+    - gofmt
