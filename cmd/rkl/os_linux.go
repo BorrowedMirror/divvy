@@ -3,11 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
-
 	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/wayland"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/x11"
 )
 
@@ -23,10 +20,9 @@ func preInit(kind platform.BackendKind, errs *[]string) {
 // Ctrl + wheel stash tab switching is on.
 func newParts(kind platform.BackendKind, wheel bool) (platform.Parts, error) {
 	if kind == platform.BackendWayland {
-		return wayland.New(
-			wayland.WithProbe(platform.EnvProbeFromEnv()),
-			wayland.WithMainThread(func(f func()) { application.InvokeSync(f) }),
-		)
+		// The Wayland-native backend is still being ported; XWayland (the default whenever
+		// DISPLAY is set) uses the X11 backend.
+		return platform.Parts{}, platform.Unsupported("wayland-native backend (not ported yet)")
 	}
 	return x11.New(x11.Options{HookMouse: wheel})
 }
