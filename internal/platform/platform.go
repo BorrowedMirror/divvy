@@ -114,4 +114,29 @@ type Parts struct {
 	// Overlay styles a Wails window given its NativeWindow() pointer: an HWND on Windows, an
 	// NSWindow* on macOS, a GtkWindow* on Linux.
 	Overlay func(native unsafe.Pointer) (OverlayWindow, error)
+	// Cursor is the mouse position in physical screen pixels (macOS: points); ok is false when
+	// the backend cannot tell (Wayland-native). Wails has no global cursor query.
+	Cursor func() (x, y float64, ok bool)
+	// ActivateWindow gives keyboard focus to another window by its native id (the game, after
+	// the panel closes). Nil where the platform cannot.
+	ActivateWindow func(nativeID uint64) error
 }
+
+// Optional extras an [OverlayWindow] may implement; the shell checks with a type assertion and
+// skips what a backend does not offer.
+type (
+	// Rounder gives the window rounded corners (physical px); width 0 removes the shape.
+	Rounder interface {
+		SetRoundedShape(width, height, radius int32) error
+	}
+	// DirectMover moves the window straight through the window system, bypassing the
+	// toolkit's "already there" shortcut (X11).
+	DirectMover interface {
+		MoveDirect(x, y int32) error
+	}
+	// LayerAnchorer anchors a layer-shell surface to an output edge (Wayland-native): right
+	// selects the right edge, top and side are margins in px.
+	LayerAnchorer interface {
+		AnchorLayer(right bool, top, side int32) error
+	}
+)
