@@ -36,6 +36,10 @@ type Options struct {
 	// SingleInstance makes a second launch hand its arguments to the running instance and exit.
 	// Off for test-hook runs, so a test instance can start next to an installed RKL.
 	SingleInstance bool
+	// OnPanic is called with a panic Wails recovered (a bound method or event handler).
+	OnPanic func(details *application.PanicDetails)
+	// Services are the bound IPC services.
+	Services []application.Service
 	// OnSecondInstance runs in the first instance when RKL is launched again, with the second
 	// launch's arguments (for example `--trigger`).
 	OnSecondInstance func(args []string)
@@ -47,6 +51,8 @@ type Shell struct {
 	Overlay  *application.WebviewWindow
 	Settings *application.WebviewWindow
 	Tray     *application.SystemTray
+
+	trayActions TrayActions
 }
 
 // New creates the application and its windows. Both windows start hidden, as in the Tauri
@@ -65,10 +71,16 @@ func New(opts Options) *Shell {
 		}
 	}
 	s.App = application.New(application.Options{
-		Name:           "Rust King Ledger",
-		Description:    "Path of Exile 2 price-check overlay",
-		Icon:           opts.Icons.App,
-		Logger:         opts.Logger,
+		Name:        "Rust King Ledger",
+		Description: "Path of Exile 2 price-check overlay",
+		Icon:        opts.Icons.App,
+		Logger:      opts.Logger,
+		Services:    opts.Services,
+		PanicHandler: func(d *application.PanicDetails) {
+			if opts.OnPanic != nil {
+				opts.OnPanic(d)
+			}
+		},
 		Assets:         application.AssetOptions{Handler: application.AssetFileServerFS(opts.Assets)},
 		SingleInstance: single,
 		// RKL lives in the tray: closing the settings window must not quit it.
@@ -137,6 +149,23 @@ func (s *Shell) BuildTray(icons Icons, labels TrayLabels, actions TrayActions) {
 	s.Tray.SetTemplateIcon(icons.TrayTemplate)
 	s.Tray.SetTooltip(labels.Tooltip)
 	s.Tray.SetMenu(menu)
+	s.trayActions = actions
+}
+
+// SetTrayLabels relabels the tray menu (the UI language changed).
+func (s *Shell) SetTrayLabels(labels TrayLabels) {
+	if s.Tray == nil {
+		return
+	}
+	a := s.trayActions
+	menu := s.App.NewMenu()
+	menu.Add(labels.PriceCheck).OnClick(func(*application.Context) { call(a.PriceCheck) })
+	menu.Add(labels.Settings).OnClick(func(*application.Context) { call(a.Settings) })
+	menu.Add(labels.Diagnostics).OnClick(func(*application.Context) { call(a.Diagnostics) })
+	menu.AddSeparator()
+	menu.Add(labels.Quit).OnClick(func(*application.Context) { s.App.Quit() })
+	s.Tray.SetMenu(menu)
+	s.Tray.SetTooltip(labels.Tooltip)
 }
 
 func call(f func()) {
