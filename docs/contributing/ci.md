@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | `ci.yml` | PR, push to `master`, manual | rustfmt; clippy `-D warnings` on ubuntu/windows/macos; cargo-deny; cargo-machete; nextest + llvm-cov on all three OSes via `cargo xtask coverage --check --profile ci` (gates enforced, per-crate lcov uploaded to Codecov with flags `core`, `data`, `trade`, `platform`, `config`); bindings freshness; generated commit docs freshness and xtask tests; web Biome, tsc and Vitest coverage (flag `web`). |
 | `commitlint.yml` | PR | Lints every PR commit and the PR title against `.commitlintrc.json`. |
-| `pr-labels.yml` | PR (`pull_request_target`) | Labels the PR from its title (`type/<type>`, `area/<scope>`, `type/breaking-change`); the labels group the release notes (`.github/release.yml`). |
+| `pr-labels.yml` | PR (`pull_request_target`) | Labels the PR from its title (`type/<type>`, `area/<scope>`, `type/breaking-change`); the labels group the release notes (`.github/release.yml`). Sets the milestone of the release the PR will ship in. |
 | `e2e.yml` | PR, push to `master`, manual | Real app + `tools/fake-game` on Windows (tauri-driver + msedgedriver), Linux X11 (Xvfb + openbox), Linux Wayland (headless sway + xdg-desktop-portal-wlr) and macOS (Rust harness over the test hook). |
 | `contract.yml` | nightly, manual, PRs touching `crates/trade` (not forks) | Live trade2 smoke: `cargo nextest run -p rkl-trade --run-ignored only -E 'test(live_)'`. |
 | `data-refresh.yml` | daily, manual | `cargo xtask data refresh`; opens `build(data): refresh game data` PR only if assets changed. |

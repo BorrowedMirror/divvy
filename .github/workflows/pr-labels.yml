@@ -1,9 +1,10 @@
 name: pr-labels
 
 # Labels each pull request from its Conventional Commits title: type/<type>, area/<scope> for a
-# scoped title, and type/breaking-change for `!` or a BREAKING CHANGE footer. Pull requests are
-# squash-merged, so the title becomes the commit message, and the labels group the release notes
-# (.github/release.yml). commitlint.yml checks the title itself.
+# scoped title, and type/breaking-change for `!` or a BREAKING CHANGE footer, and puts it in the
+# milestone of the release it will ship in. Pull requests are squash-merged, so the title becomes
+# the commit message, and the labels group the release notes (.github/release.yml).
+# commitlint.yml checks the title itself.
 on:
   # Runs with the base repository's token so pull requests from forks can be labelled too.
   # Nothing from the pull request is checked out or run: this only reads the title, body,
@@ -25,9 +26,9 @@ jobs:
     timeout-minutes: 10
     permissions:
       pull-requests: write # add and remove the pull request's labels
-      issues: write # create a label the first time it is used
+      issues: write # create a label or milestone the first time it is used, and set the milestone
     steps:
-      - name: Parse the title and apply labels
+      - name: Parse the title, apply labels and set the milestone
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -70,3 +71,71 @@ jobs:
             if (toAdd.length > 0) {
               await github.rest.issues.addLabels({ ...issue, labels: toAdd });
             }
+
+            // The milestone is the version the pull request will ship in: a release pull request's
+            // own version, otherwise the next major, minor or patch after the latest published
+            // release (GitHub's "latest" skips drafts and pre-releases).
+            const type = match[1];
+            let target;
+            if (type === 'release') {
+              const version = title.match(/v\d+\.\d+\.\d+/);
+              if (!version) {
+                core.warning('Release title has no vX.Y.Z version; no milestone.');
+                return;
+              }
+              target = version[0];
+            } else {
+              let latest;
+              try {
+                ({ data: { tag_name: latest } } = await github.rest.repos.getLatestRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                }));
+              } catch (e) {
+                core.info(`No release yet, so no milestone: ${e.message}`);
+                return;
+              }
+              const v = latest.match(/^v(\d+)\.(\d+)\.(\d+)$/);
+              if (!v) {
+                core.warning(`The latest release tag isn't vX.Y.Z: ${latest}`);
+                return;
+              }
+              const [major, minor, patch] = v.slice(1).map(Number);
+              if (breaking) {
+                target = `v${major + 1}.0.0`;
+              } else if (type === 'feat') {
+                target = `v${major}.${minor + 1}.0`;
+              } else {
+                target = `v${major}.${minor}.${patch + 1}`;
+              }
+            }
+
+            // A milestone someone chose by hand stays; one this workflow set is recomputed.
+            const current = context.payload.pull_request.milestone;
+            if (current) {
+              if (current.title === target) {
+                return;
+              }
+              const events = await github.paginate(github.rest.issues.listEvents, { ...issue, per_page: 100 });
+              const set = events.filter((e) => e.event === 'milestoned' && e.milestone?.title === current.title).pop();
+              if (set?.actor?.login !== 'github-actions[bot]') {
+                core.info(`Milestone ${current.title} was set by ${set?.actor?.login ?? 'someone'}; leaving it.`);
+                return;
+              }
+            }
+
+            const milestones = await github.paginate(github.rest.issues.listMilestones, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            let milestone = milestones.find((m) => m.title === target);
+            if (!milestone) {
+              ({ data: milestone } = await github.rest.issues.createMilestone({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: target,
+              }));
+            }
+            await github.rest.issues.update({ ...issue, milestone: milestone.number });

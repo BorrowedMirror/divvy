@@ -32,6 +32,13 @@ Conventional Commits title whenever it is opened or edited:
 - `area/<scope>` from the scope; `area/deps` (Renovate's `build(deps)`) goes under Dependencies;
 - `type/breaking-change` for `type!:` or a `BREAKING CHANGE:` footer in the body or a commit.
 
+The same workflow puts each pull request in the milestone of the release it will ship in
+(created on first use): the next major for a breaking change, the next minor for `feat`, and
+the next patch for anything else, counted from the latest published release (drafts and
+pre-releases don't count, so nothing gets a milestone until the first stable release). A
+`release: vX.Y.Z` pull request goes in `vX.Y.Z`. A milestone set by hand is left alone; one the
+workflow set is recomputed when the title changes.
+
 `type/release` pull requests are left out, and anything unlabelled lands under Other changes.
 Pull requests are squash-merged, so the title is the commit message; fix a wrong title before
 merging, or relabel the pull request by hand before publishing the draft. Commits pushed
