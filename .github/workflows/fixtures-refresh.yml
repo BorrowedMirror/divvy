@@ -1,7 +1,7 @@
 name: fixtures-refresh
 
 # Manually re-records the trade2 wiremock fixtures from the live API at a low request rate
-# (`cargo xtask fixtures record`, 2 s between requests) and proposes them as a PR.
+# (`go run ./cmd/datarefresh fixtures`, 2 s between requests) and proposes them as a PR.
 on:
   workflow_dispatch:
     inputs:
@@ -33,20 +33,20 @@ jobs:
         with:
           # Kept on purpose: create-pull-request pushes the automation branch with it.
           persist-credentials: true
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          shared-key: xtask
+          go-version-file: go.mod
+          cache: false
       - name: Record fixtures
         env:
           LEAGUE: ${{ inputs.league }}
           BASE_TYPE: ${{ inputs.base_type }}
         run: |
-          args=(--delay-ms 2000 --base-type "$BASE_TYPE")
-          if [ -n "$LEAGUE" ]; then args+=(--league "$LEAGUE"); fi
-          cargo xtask fixtures record "${args[@]}"
+          args=(-delay-ms 2000 -base-type "$BASE_TYPE")
+          if [ -n "$LEAGUE" ]; then args+=(-league "$LEAGUE"); fi
+          go run ./cmd/datarefresh fixtures "${args[@]}"
       - name: Trade tests still pass on the new fixtures
-        run: cargo test --locked -p rkl-trade
+        run: go test ./internal/trade/... ./internal/testkit/...
       - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           token: ${{ github.token }}
@@ -58,4 +58,4 @@ jobs:
 
             Keeps the wiremock fixtures in line with the live trade2 API shape.
           title: "test(trade): re-record trade api fixtures"
-          body: Automated run of `cargo xtask fixtures record` (run ${{ github.run_id }}).
+          body: Automated run of `go run ./cmd/datarefresh fixtures` (run ${{ github.run_id }}).

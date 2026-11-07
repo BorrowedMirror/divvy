@@ -25,14 +25,15 @@ jobs:
         with:
           # Kept on purpose: create-pull-request pushes the automation branch with it.
           persist-credentials: true
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          shared-key: xtask
-      - name: cargo xtask data refresh
-        run: cargo xtask data refresh
-      - name: Data crate still passes its tests
-        run: cargo test --locked -p rkl-data
+          go-version-file: go.mod
+          cache: false
+      - name: Refresh the game data
+        # The next step runs the corpus tests and fails the job on errors.
+        run: go run ./cmd/datarefresh refresh -check=false
+      - name: Parser, matcher and data tests still pass on the new data
+        run: go test ./internal/core/... ./internal/data/...
       - name: Open pull request if the data changed
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
@@ -43,11 +44,11 @@ jobs:
           commit-message: |
             build(data): refresh game data
 
-            Scheduled `cargo xtask data refresh` picked up upstream changes to the
+            Scheduled `go run ./cmd/datarefresh refresh` picked up upstream changes to the
             trade2 data endpoints or the game exports.
           title: "build(data): refresh game data"
           body: |
-            Automated run of `cargo xtask data refresh` (workflow `${{ github.workflow }}`, run ${{ github.run_id }}).
+            Automated run of `go run ./cmd/datarefresh refresh` (workflow `${{ github.workflow }}`, run ${{ github.run_id }}).
 
             Review the manifest diff (`crates/data/assets/manifest.json`) for unexpected schema or count changes before merging.
           labels: data

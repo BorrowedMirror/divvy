@@ -1,0 +1,30 @@
+# Reads files out of an installed Path of Exile 2 client (Oodle-compressed bundles), for
+# `go run ./cmd/datarefresh l10n`. Standalone: not part of any other Cargo workspace.
+[package]
+name = "game-extract"
+description = "Read files and tables out of an installed Path of Exile 2 client"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+repository = "https://github.com/BorrowedMirror/rust-king-ledger"
+publish = false
+
+[workspace]
+
+[lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+cast_possible_truncation = "allow"
+doc_markdown = "allow"
+
+[dependencies]
+anyhow = "1"
+oozextract = { version = "0.5.7", default-features = false }
+serde_json = "1"

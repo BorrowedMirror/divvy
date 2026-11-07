@@ -179,6 +179,16 @@ tasks:
     cmds:
       - go run ./cmd/release updater-keygen
 
+  data:refresh:
+    desc: Download the trade2 data and RePoE exports and rewrite crates/data/assets (OFFLINE=1 reuses target/data-cache).
+    cmds:
+      - go run ./cmd/datarefresh refresh {{if .OFFLINE}}-offline{{end}}
+
+  fixtures:record:
+    desc: Re-record the trade2 fixtures in crates/trade/tests/fixtures from the live API (2 s between requests; LEAGUE=, BASE_TYPE=).
+    cmds:
+      - go run ./cmd/datarefresh fixtures {{if .LEAGUE}}-league '{{.LEAGUE}}'{{end}} {{if .BASE_TYPE}}-base-type '{{.BASE_TYPE}}'{{end}}
+
 
   # End-to-end tests (e2e/, `go test -tags e2e`): the scripts build the web UI, the test-hook
   # app and the fake game (SKIP_BUILD=1 reuses them) and provide the session. RUN=<regexp>

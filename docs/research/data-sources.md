@@ -1,6 +1,6 @@
 # Game data sources
 
-Research for `cargo xtask data refresh` (workstream C). Checked live on 2026-11-05
+Research for the data refresh, `go run ./cmd/datarefresh refresh` (workstream C). Checked live on 2026-11-05
 (PoE2 0.5.5.5) with UA `rkl-data-refresh/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)`.
 
 ## Summary
@@ -11,7 +11,7 @@ Research for `cargo xtask data refresh` (workstream C). Checked live on 2026-11-
 | `bases.json.zst` | trade2 `data/items` (non-unique) | RePoE `base_items` + `item_classes` | 3129 |
 | `uniques.json.zst` | trade2 `data/items` (unique flag) | - | 765 |
 | `statics.json.zst` | trade2 `data/static` | - | 771 |
-| `l10n.json.zst` | an installed PoE2 client (`cargo xtask data l10n`) | - | 8 languages |
+| `l10n.json.zst` | an installed PoE2 client (`tools/game-extract` + `datarefresh l10n`) | - | 8 languages |
 
 The trade site is authoritative for anything we send back to it (stat ids, category ids,
 exchange ids), so it is always the primary source. Exports are only used to fill fields the
@@ -128,23 +128,33 @@ verification only; **not** used by the pipeline.
 
 ## Pipeline
 
-`cargo xtask data refresh [--offline]`:
-1. Download the sources above into `target/data-cache/` (or reuse them with `--offline`).
-2. Normalise (`xtask/src/data/normalise.rs`, pure + unit-tested), sort deterministically.
-3. Write `crates/data/assets/{stats,bases,uniques,statics}.json.zst` (zstd 19) and
-   `manifest.json` (schema version, generated_at, game version, per-file sources, sha256
-   of the decompressed JSON, record counts) via `rkl_data::write_dir`, then reload
-   them with `rkl_data::load_dir` as a sanity check.
-4. Run the parser corpus (`cargo nextest run -p rkl-core`); a failure is reported as
-   a warning (expected while the parser is being implemented).
+`go run ./cmd/datarefresh refresh [-offline]` (`task data:refresh`):
+1. Download the sources above into `target/data-cache/`, 1.5 s apart (or reuse them with
+   `-offline`).
+2. Normalise (`cmd/datarefresh/normalise.go`, pure + unit-tested), sort deterministically.
+3. Write `crates/data/assets/{stats,bases,uniques,statics}.json.zst` (zstd, strongest level)
+   and `manifest.json` (schema version, generated_at, game version, per-file sources, sha256
+   of the decompressed JSON, record counts) via `data.WriteDir`, then reload them with
+   `data.LoadDir` as a sanity check. Existing translations are kept.
+4. Run the parser corpus and data tests (`go test ./internal/core/... ./internal/data/...`);
+   a failure is reported as a warning (`-check=false` skips this; the scheduled workflow runs
+   the tests as a separate, failing step).
 
 Total compressed assets: ~150 KB.
 
 ## Non-English game clients (`l10n.json.zst`)
 
-`cargo xtask data l10n --game-dir <install dir>` reads the client's own data from
-`Bundles2/` (Oodle-compressed bundles, indexed by the MurmurHash64A of each lower-cased path)
-and writes, for each language whose client searches the main trade site (German, French,
+Two steps build the translations. `tools/game-extract` (a standalone Rust tool, since only
+the `oozextract` crate decompresses Oodle) reads the client's own data from `Bundles2/`
+(Oodle-compressed bundles, indexed by the MurmurHash64A of each lower-cased path) and writes
+the tables below as plain JSON:
+
+```sh
+cargo run --release --manifest-path tools/game-extract/Cargo.toml -- l10n <install dir> target/l10n-raw.json
+go run ./cmd/datarefresh l10n target/l10n-raw.json
+```
+
+The second step builds `l10n.json.zst` from that file, for each language whose client searches the main trade site (German, French,
 Spanish, Portuguese, Russian, Thai, Japanese, Korean):
 
 | Table | From | Used for |
@@ -156,7 +166,7 @@ Spanish, Portuguese, Russian, Thai, Japanese, Korean):
 | stats | `data/statdescriptions/*.csd`, which list every wording per language in the same order as English | stat lines, including `reduced` / negated wordings and reordered numbers |
 
 Only names and stat wordings that match the other bundled assets are kept, so run it after
-`data refresh` (which keeps the existing translations). At runtime, item text whose first
+the data refresh (which keeps the existing translations). At runtime, item text whose first
 line uses one of these languages' `Item Class` (or `Rarity`) key is translated to English
 before parsing; everything after that is unchanged.
 

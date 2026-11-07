@@ -16,7 +16,7 @@ Notes on external systems RKL depends on (captured live; background, not a spec)
 
 - [trade2 API](research/trade2.md): endpoints, payloads, rate-limit headers.
 - [poe.ninja and poe2scout](research/ninja-scout.md): aggregated price APIs.
-- [Game data sources](research/data-sources.md): inputs to `cargo xtask data refresh`.
+- [Game data sources](research/data-sources.md): inputs to the data refresh (`go run ./cmd/datarefresh`).
 - [macOS](research/macos.md): permissions, window tracking, overlay panel.
 
 ## Using RKL

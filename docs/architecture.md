@@ -22,7 +22,7 @@ web edits FilterSet -> ipc `query_price` -> trade::PriceSource::price -> event `
 | Path | Crate / package | Role |
 | --- | --- | --- |
 | `crates/core` | `rkl-core` | Pure logic, no I/O: item model, parser, stat matcher, query builder, price summaries. |
-| `crates/data` | `rkl-data` | Bundled game data (stats, bases, uniques, statics) as zstd JSON with a sha256 manifest; implements `Catalog`. Refreshed by `cargo xtask data refresh`. |
+| `crates/data` | `rkl-data` | Bundled game data (stats, bases, uniques, statics) as zstd JSON with a sha256 manifest; implements `Catalog`. Refreshed by `go run ./cmd/datarefresh refresh`. |
 | `crates/trade` | `rkl-trade` | trade2 HTTP client with header-driven rate limiting, plus poe.ninja / poe2scout price sources behind one `PriceSource` trait. |
 | `crates/platform` | `rkl-platform` | OS integration traits (window tracking, hotkeys, input listen/simulate, clipboard, overlay) and backends for Windows, macOS, X11 and Wayland; backend chosen by `detect`. |
 | `crates/config` | `rkl-config` | Versioned TOML settings with migration, validation and atomic save. |
@@ -51,7 +51,7 @@ web edits FilterSet -> ipc `query_price` -> trade::PriceSource::price -> event `
 | Layer | Tooling | Runs in |
 | --- | --- | --- |
 | Unit + property tests | nextest, proptest, insta | `ci.yml` (all OSes), with llvm-cov gates |
-| HTTP | wiremock with recorded fixtures (`cargo xtask fixtures record`) | `ci.yml` |
+| HTTP | wiremock with recorded fixtures (`go run ./cmd/datarefresh fixtures`) | `ci.yml` |
 | Live API contract | `#[ignore]`d `live_*` tests | `contract.yml` (nightly) |
 | Web | Vitest + Testing Library + `mockIPC` | `ci.yml` |
 | End to end | tauri-driver / Xvfb / headless sway / macOS harness + fake-game | `e2e.yml` |
