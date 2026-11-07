@@ -25,6 +25,8 @@ commands:
   coverage                 go test -race with coverage, split per package into target/go/coverage/
   package linux|windows|macos
                            build the release binary and its installer under target/go/
+  updater-keygen           print a new updater key pair (RKL_UPDATER_PUBKEY / RKL_UPDATER_PRIVATE_KEY)
+  update-manifest          sign the update artifacts and write update.json (needs RKL_UPDATER_PRIVATE_KEY)
   version                  print the app version
 
 Run "go run ./cmd/xtask <command> -h" for the flags of a command.
@@ -56,6 +58,10 @@ func run(args []string, stdout io.Writer) error {
 		return runCoverage(root, rest)
 	case "package":
 		return runPackage(root, rest)
+	case "updater-keygen":
+		return runUpdaterKeygen(stdout)
+	case "update-manifest":
+		return runUpdateManifest(rest, stdout)
 	case "version":
 		v, err := appVersion(root)
 		if err != nil {

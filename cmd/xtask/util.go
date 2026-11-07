@@ -98,9 +98,20 @@ func numericVersion(v string) string {
 	return core + ".0"
 }
 
+// updaterKeyVar receives the updater's public key; updaterKeyEnv holds it in the release
+// workflow. Builds without it have the updater off.
+const (
+	updaterKeyVar = modulePath + "/internal/shell.UpdaterPublicKey"
+	updaterKeyEnv = "RKL_UPDATER_PUBKEY"
+)
+
 // ldflags are the linker flags of a release build.
 func ldflags(version string, extra ...string) string {
-	return strings.Join(append([]string{"-s", "-w", "-X", appVersionVar + "=" + version, "-X", tradeVersionVar + "=" + version}, extra...), " ")
+	flags := []string{"-s", "-w", "-X", appVersionVar + "=" + version, "-X", tradeVersionVar + "=" + version}
+	if key := strings.TrimSpace(os.Getenv(updaterKeyEnv)); key != "" {
+		flags = append(flags, "-X", updaterKeyVar+"="+key)
+	}
+	return strings.Join(append(flags, extra...), " ")
 }
 
 // sh runs a command with its output on the terminal.

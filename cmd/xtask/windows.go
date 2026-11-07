@@ -70,6 +70,10 @@ func (p packager) windows() error {
 	if err := p.buildWindowsExe(s, syso, exe); err != nil {
 		return err
 	}
+	// The bare exe is the update artifact: the updater swaps it in place inside the install.
+	if err := copyFile(exe, p.out(p.artifact("windows-x64.exe")), 0o755); err != nil {
+		return err
+	}
 
 	// The evergreen WebView2 bootstrapper, embedded in Wails' CLI.
 	if err := s.run(w3, "generate", "webview2bootstrapper", "-dir", work); err != nil {

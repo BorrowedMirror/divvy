@@ -61,6 +61,10 @@ func (p packager) macos() error {
 	if err := s.run("codesign", "--force", "--deep", "--sign", "-", app); err != nil {
 		return err
 	}
+	// The zipped bundle is the update artifact: the updater replaces the whole .app with it.
+	if err := s.run("ditto", "-c", "-k", "--keepParent", app, p.out(p.artifact("macos-universal.app.zip"))); err != nil {
+		return err
+	}
 	if err := os.Symlink("/Applications", filepath.Join(work, "dmg", "Applications")); err != nil {
 		return err
 	}
