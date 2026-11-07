@@ -18,6 +18,12 @@ changelog:
     - title: Performance
       labels:
         - type/perf
+    - title: Translations
+      labels:
+        - type/l10n
+    - title: Internationalisation
+      labels:
+        - type/i18n
     - title: Documentation
       labels:
         - type/docs

@@ -34,8 +34,8 @@ jobs:
           download_translations: true
           create_pull_request: true
           localization_branch_name: i18n/crowdin
-          commit_message: "feat(web): update translations from crowdin"
-          pull_request_title: "feat(web): update translations from crowdin"
+          commit_message: "l10n(web): update translations from crowdin"
+          pull_request_title: "l10n(web): update translations from crowdin"
           pull_request_body: "Automated translation sync from Crowdin. The i18n completeness tests in `web/src/i18n/i18n.test.ts` must pass before merging."
           pull_request_base_branch_name: master
         env:

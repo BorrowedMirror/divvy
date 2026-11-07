@@ -14,6 +14,8 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `docs` | Documentation only |
 | `feat` | A new feature |
 | `fix` | A bug fix |
+| `i18n` | Internationalisation: the code and tooling that make RKL translatable (not the translations) |
+| `l10n` | Localisation: the translations themselves, usually Crowdin's pull requests |
 | `perf` | A performance improvement |
 | `refactor` | A change that neither fixes a bug nor adds a feature |
 | `release` | Release commits |
