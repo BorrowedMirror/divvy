@@ -129,10 +129,15 @@ func main() {
 	})
 
 	// Hotkeys follow focus: grabbed while the game or an RKL window is focused. The game's focus
-	// comes from the tracker; RKL's own windows report theirs here. Off the UI thread: syncing
-	// can wait on the settings lock.
+	// comes from the tracker; RKL's own windows report theirs here. Wails emits the common focus
+	// events on Windows and macOS only; on Linux it sends its own FocusIn/FocusOut and never maps
+	// them, so both kinds are listened to. Off the UI thread: syncing can wait on the settings lock.
+	focusEvents := []events.WindowEventType{
+		events.Common.WindowFocus, events.Common.WindowLostFocus,
+		events.Linux.WindowFocusIn, events.Linux.WindowFocusOut,
+	}
 	for _, w := range []*application.WebviewWindow{s.Overlay, s.Settings} {
-		for _, ev := range []events.WindowEventType{events.Common.WindowFocus, events.Common.WindowLostFocus} {
+		for _, ev := range focusEvents {
 			w.OnWindowEvent(ev, func(*application.WindowEvent) { go flow.SyncHotkeysToFocus() })
 		}
 	}

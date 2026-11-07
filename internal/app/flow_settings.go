@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"math"
 	"strings"
+	"time"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
@@ -72,6 +73,29 @@ func (f *Flow) hotkeysWanted() bool {
 	return f.d.Overlay().IsFocused() || f.d.Settings().IsFocused()
 }
 
+// focusRecheck is how long after releasing the hotkeys, with an RKL window open, they are
+// checked again.
+const focusRecheck = 250 * time.Millisecond
+
+// recheckHotkeys grabs the hotkeys again if an RKL window got focus after they were released.
+// It never schedules another check, so the two cannot loop.
+func (f *Flow) recheckHotkeys() {
+	st := f.st
+	if st.Platform == nil || !st.FollowFocus.Load() || !f.hotkeysWanted() {
+		return
+	}
+	st.ApplyLock.Lock()
+	defer st.ApplyLock.Unlock()
+	if !f.hotkeysWanted() {
+		return
+	}
+	slog.Debug("focus recheck", "grab_hotkeys", true)
+	settings := st.Settings()
+	if err := f.RegisterHotkeys(&settings); err != nil {
+		st.RecordError(fmt.Sprintf("hotkeys: %v", err))
+	}
+}
+
 // SyncHotkeysToFocus grabs the hotkeys while the game or an RKL window has focus and releases
 // them otherwise, so the same keys still work in other apps. The shell also calls it when an
 // RKL window gains or loses focus. Only once the game's focus is tracked (not on
@@ -87,6 +111,11 @@ func (f *Flow) SyncHotkeysToFocus() {
 	defer st.ApplyLock.Unlock()
 	focused := f.hotkeysWanted()
 	slog.Debug("focus changed", "grab_hotkeys", focused)
+	if !focused && (st.OverlayVisible.Load() || f.d.Settings().IsVisible()) {
+		// The game lost focus to an RKL window that the window manager may not have activated
+		// yet (its own focus event can come later, or not at all); look again shortly.
+		time.AfterFunc(focusRecheck, f.recheckHotkeys)
+	}
 	var err error
 	if focused {
 		settings := st.Settings()
