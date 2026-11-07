@@ -68,10 +68,10 @@ func TestRareDefaults(t *testing.T) {
 	f := BuildFilters(rareBow(t), opts())
 	assert.Equal(t, RouteSearch, f.Route)
 	assert.Equal(t, StatusOnline, f.Status)
-	assert.Equal(t, ptr("Recurve Bow"), f.BaseType)
+	assert.Equal(t, new("Recurve Bow"), f.BaseType)
 	assert.Nil(t, f.Name)
-	assert.Equal(t, ptr("weapon.bow"), f.Category)
-	assert.Equal(t, ptr("nonunique"), f.Rarity)
+	assert.Equal(t, new("weapon.bow"), f.Category)
+	assert.Equal(t, new("nonunique"), f.Rarity)
 	// 6 mods plus pseudo totals: elemental resistance and life (enabled), fire and cold.
 	require.Len(t, f.Stats, 10)
 	var ids []string
@@ -84,19 +84,19 @@ func TestRareDefaults(t *testing.T) {
 		"pseudo.pseudo_total_fire_resistance",
 		"pseudo.pseudo_total_cold_resistance",
 	}, ids)
-	assert.Equal(t, ptr(56.0), statByText(t, &f, "+63% total Elemental Resistance").Min)
+	assert.Equal(t, new(56.0), statByText(t, &f, "+63% total Elemental Resistance").Min)
 	assert.True(t, statByText(t, &f, "+63% total Elemental Resistance").Enabled &&
 		statByText(t, &f, "+42 total maximum Life").Enabled)
 	assert.False(t, statByText(t, &f, "+20% to Fire Resistance").Enabled, "implicit disabled")
 	assert.False(t, statByText(t, &f, "+42 to maximum Life").Enabled, "covered by the life total")
 	assert.False(t, statByText(t, &f, "+31% to Cold Resistance").Enabled, "covered by the resistance total")
-	assert.Equal(t, ptr(37.0), statByText(t, &f, "+42 to maximum Life").Min)
-	assert.Equal(t, ptr(4.95), statByText(t, &f, "Adds 3 to 8 Physical Damage").Min) // avg of 3 and 8, fractional
+	assert.Equal(t, new(37.0), statByText(t, &f, "+42 to maximum Life").Min)
+	assert.Equal(t, new(4.95), statByText(t, &f, "Adds 3 to 8 Physical Damage").Min) // avg of 3 and 8, fractional
 	assert.True(t, statByText(t, &f, "Adds 3 to 8 Physical Damage").Enabled)
 	for _, s := range f.Stats {
 		assert.NotContains(t, s.StatID, "movement", "no pseudo row for a penalty")
 	}
-	assert.Equal(t, ptr(true), f.Misc.Corrupted)
+	assert.Equal(t, new(true), f.Misc.Corrupted)
 	assert.False(t, f.Misc.ItemLevel.Enabled)
 
 	o := opts()
@@ -117,23 +117,23 @@ func TestRewidenRecomputes(t *testing.T) {
 	f := BuildFilters(rareBow(t), opts())
 	f.Rewiden(0)
 	assert.Less(t, math.Abs(f.WidenPct), 2.220446049250313e-16)
-	assert.Equal(t, ptr(42.0), statByText(t, &f, "+42 to maximum Life").Min)
+	assert.Equal(t, new(42.0), statByText(t, &f, "+42 to maximum Life").Min)
 	f.Rewiden(50)
-	assert.Equal(t, ptr(21.0), statByText(t, &f, "+42 to maximum Life").Min)
-	assert.Equal(t, ptr(21.0), statByText(t, &f, "+42 total maximum Life").Min, "pseudo rows rewiden too")
+	assert.Equal(t, new(21.0), statByText(t, &f, "+42 to maximum Life").Min)
+	assert.Equal(t, new(21.0), statByText(t, &f, "+42 total maximum Life").Min, "pseudo rows rewiden too")
 	// Negated stat ("10% reduced ..." -> -10): more negative is better, so it gets an upper
 	// bound widened towards zero instead of a minimum that would match any item.
 	ms := statByText(t, &f, "10% reduced Movement Speed")
 	assert.Equal(t, []float64{-10}, ms.ItemValues)
 	assert.Nil(t, ms.Min)
-	assert.Equal(t, ptr(-5.0), ms.Max)
+	assert.Equal(t, new(-5.0), ms.Max)
 }
 
 func TestTradeQueryShape(t *testing.T) {
 	f := BuildFilters(rareBow(t), opts())
 	f.Status = StatusSecurable
-	f.Misc.Sockets = RangeFilter{Enabled: true, Min: ptr(2.0)}
-	f.Misc.Identified = ptr(false)
+	f.Misc.Sockets = RangeFilter{Enabled: true, Min: new(2.0)}
+	f.Misc.Identified = new(false)
 	q := toValue(t, f.ToTradeQuery())
 	assert.Equal(t, "securable", at(q, "query", "status", "option"))
 	assert.Equal(t, "Recurve Bow", at(q, "query", "type"))
@@ -164,13 +164,13 @@ func TestUniqueGemWaystoneCurrency(t *testing.T) {
 	unique := mustParse(t, "Item Class: Helmets\nRarity: Unique\nGoldrim\nFelt Cap\n--------\nItem Level: 50\n--------\n+42 to maximum Life")
 	NewStatMatcher(newFakeCatalog()).MatchItem(unique)
 	f := BuildFilters(unique, opts())
-	assert.Equal(t, ptr("Goldrim"), f.Name)
-	assert.Equal(t, ptr("Felt Cap"), f.BaseType)
-	assert.Equal(t, ptr("unique"), f.Rarity)
+	assert.Equal(t, new("Goldrim"), f.Name)
+	assert.Equal(t, new("Felt Cap"), f.BaseType)
+	assert.Equal(t, new("unique"), f.Rarity)
 	for _, s := range f.Stats {
 		assert.False(t, s.Enabled)
 	}
-	assert.Equal(t, ptr(false), f.Misc.Corrupted)
+	assert.Equal(t, new(false), f.Misc.Corrupted)
 	q := f.ToTradeQuery()
 	assert.Equal(t, "Goldrim", at(q.Query, "name"))
 
@@ -199,9 +199,9 @@ func TestUniqueGemWaystoneCurrency(t *testing.T) {
 func TestRangeJSONEdges(t *testing.T) {
 	_, ok := rangeJSON(&RangeFilter{Enabled: true})
 	assert.False(t, ok)
-	_, ok = rangeJSON(&RangeFilter{Enabled: false, Min: ptr(1.0)})
+	_, ok = rangeJSON(&RangeFilter{Enabled: false, Min: new(1.0)})
 	assert.False(t, ok)
-	v, ok := rangeJSON(&RangeFilter{Enabled: true, Max: ptr(3.0)})
+	v, ok := rangeJSON(&RangeFilter{Enabled: true, Max: new(3.0)})
 	assert.True(t, ok)
 	assert.Equal(t, map[string]any{"max": 3.0}, v)
 	minV, maxV := WidenBounds(nil, 10)
@@ -231,9 +231,9 @@ func TestWidenNeverExceedsValue(t *testing.T) {
 func TestReducedStatsGetAnUpperBound(t *testing.T) {
 	minV, maxV := WidenBounds([]float64{-30}, 10)
 	assert.Nil(t, minV)
-	assert.Equal(t, ptr(-27.0), maxV)
+	assert.Equal(t, new(-27.0), maxV)
 	minV, maxV = WidenBounds([]float64{55}, 10)
-	assert.Equal(t, ptr(49.0), minV)
+	assert.Equal(t, new(49.0), minV)
 	assert.Nil(t, maxV)
 	minV, maxV = WidenBounds([]float64{}, 10)
 	assert.Nil(t, minV)
@@ -263,7 +263,7 @@ func TestModsWithTheSameStatMergeIntoOneSummedFilter(t *testing.T) {
 	require.Len(t, merged, 2)
 	assert.Equal(t, "68% increased Spirit", merged[0].Text)
 	assert.Equal(t, []float64{68}, merged[0].ItemValues)
-	assert.Equal(t, ptr(61.0), merged[0].Min)
+	assert.Equal(t, new(61.0), merged[0].Min)
 	assert.True(t, merged[0].Enabled)
 	assert.Equal(t, []uint8{3, 7}, merged[0].Tiers, "summed rows keep each tier")
 	assert.Equal(t, []uint8{2}, merged[1].Tiers)

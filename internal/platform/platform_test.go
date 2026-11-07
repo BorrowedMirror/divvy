@@ -60,12 +60,13 @@ func TestUnboundChord(t *testing.T) {
 
 func linux() EnvProbe { return EnvProbe{OS: "linux"} }
 
-func ptr[T any](v T) *T { return &v }
+//go:fix inline
+func ptr[T any](v T) *T { return new(v) }
 
 func TestSettingsOverrideWinsOverEverything(t *testing.T) {
 	probe := linux()
 	probe.OverrideBackend, probe.Display = "wayland", ":0"
-	assert.Equal(t, BackendFake, Detect(probe, ptr(BackendFake)))
+	assert.Equal(t, BackendFake, Detect(probe, new(BackendFake)))
 }
 
 func TestEnvOverrideWinsOverOS(t *testing.T) {
@@ -111,7 +112,7 @@ func TestGNOMEIsX11WhenXWaylandIsAvailable(t *testing.T) {
 
 func TestExplicitWaylandRequestIsHonouredOnGNOME(t *testing.T) {
 	probe := EnvProbe{OS: "linux", Desktop: "GNOME", Display: ":0"}
-	assert.Equal(t, BackendWayland, Detect(probe, ptr(BackendWayland)))
+	assert.Equal(t, BackendWayland, Detect(probe, new(BackendWayland)))
 }
 
 func TestBareLinuxFallsBackToX11(t *testing.T) {

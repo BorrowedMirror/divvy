@@ -216,9 +216,9 @@ func WidenBounds(values []float64, pct float64) (*float64, *float64) {
 	avg := sum / float64(len(values))
 	integral = integral && fract(avg) == 0
 	if avg < 0 {
-		return nil, ptr(WidenMaxNegative(avg, pct, integral))
+		return nil, new(WidenMaxNegative(avg, pct, integral))
 	}
-	return ptr(WidenMin(avg, pct, integral)), nil
+	return new(WidenMin(avg, pct, integral)), nil
 }
 
 // SearchStatID is the stat id to search with. Desecrated mods are ordinary explicit mods
@@ -301,7 +301,7 @@ func mergeSameStats(rows []templatedRow, pct float64) []StatFilter {
 func rangeOf(enabled bool, minV *uint32) RangeFilter {
 	r := RangeFilter{Enabled: enabled && minV != nil}
 	if minV != nil {
-		r.Min = ptr(float64(*minV))
+		r.Min = new(float64(*minV))
 	}
 	return r
 }
@@ -344,18 +344,18 @@ func BuildFilters(item *ParsedItem, opts *QueryOptions) FilterSet {
 	var name, baseType *string
 	switch {
 	case unique:
-		name, baseType = clonePtr(item.Name), ptr(item.BaseType)
+		name, baseType = clonePtr(item.Name), new(item.BaseType)
 	case unresolvedMagic:
 	default:
-		baseType = ptr(item.BaseType)
+		baseType = new(item.BaseType)
 	}
 	var rarity *string
 	switch {
 	case unique:
-		rarity = ptr("unique")
+		rarity = new("unique")
 	case currencyLike || item.Category == CategoryOther:
 	default:
-		rarity = ptr("nonunique")
+		rarity = new("nonunique")
 	}
 
 	explicitSeen := 0
@@ -408,7 +408,7 @@ func BuildFilters(item *ParsedItem, opts *QueryOptions) FilterSet {
 		(item.Category == CategoryEquipment || item.Category == CategoryJewel)
 	var sockets *uint32
 	if item.Sockets > 0 {
-		sockets = ptr(uint32(item.Sockets))
+		sockets = new(uint32(item.Sockets))
 	}
 	misc := MiscFilters{
 		ItemLevel: rangeOf(baseItem, item.ItemLevel),
@@ -420,17 +420,17 @@ func BuildFilters(item *ParsedItem, opts *QueryOptions) FilterSet {
 		Sockets: rangeOf(false, sockets),
 	}
 	if item.WaystoneTier != nil {
-		misc.WaystoneTier.Min = ptr(float64(*item.WaystoneTier))
-		misc.WaystoneTier.Max = ptr(float64(*item.WaystoneTier))
+		misc.WaystoneTier.Min = new(float64(*item.WaystoneTier))
+		misc.WaystoneTier.Max = new(float64(*item.WaystoneTier))
 	}
 	switch {
 	case item.Corrupted:
-		misc.Corrupted = ptr(true)
+		misc.Corrupted = new(true)
 	case gem || unique:
-		misc.Corrupted = ptr(false)
+		misc.Corrupted = new(false)
 	}
 	if item.Unidentified {
-		misc.Identified = ptr(false)
+		misc.Identified = new(false)
 	}
 
 	var category *string

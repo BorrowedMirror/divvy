@@ -2,6 +2,7 @@ package trade
 
 import (
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -160,9 +161,7 @@ func withHeaders(t *testing.T, r testkit.Response, name string) testkit.Response
 	if r.Header == nil {
 		r.Header = http.Header{}
 	}
-	for k, vs := range h {
-		r.Header[k] = vs
-	}
+	maps.Copy(r.Header, h)
 	return r
 }
 

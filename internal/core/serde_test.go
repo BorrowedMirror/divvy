@@ -131,13 +131,13 @@ func TestVecsAreNeverNullAndBytesAreNumbers(t *testing.T) {
 	assert.Equal(t, []uint8{3, 7}, back.Tiers)
 	// `#[serde(default)]` fields may be missing.
 	require.NoError(t, json.Unmarshal([]byte(`{"stat_id":"a","text":"b","enabled":true,"min":1.5,"max":null,"item_values":[1.5]}`), &back))
-	assert.Equal(t, ptr(1.5), back.Min)
+	assert.Equal(t, new(1.5), back.Min)
 	assert.Nil(t, back.Tiers)
 	assert.Equal(t, `{"id":"i","text":"t","kind":"explicit","aliases":[]}`, serde(t, StatDef{ID: "i", Text: "t", Kind: "explicit"}))
 }
 
 func TestPricingJSON(t *testing.T) {
-	l := Listing{ID: "x", Price: Price{Amount: 2, Currency: "divine"}, Online: true, ItemLevel: ptr(uint32(80))}
+	l := Listing{ID: "x", Price: Price{Amount: 2, Currency: "divine"}, Online: true, ItemLevel: new(uint32(80))}
 	assert.Equal(t, `{"id":"x","price":{"amount":2.0,"currency":"divine"},"seller":null,"online":true,"indexed":null,"item_level":80,"stack_size":null,"whisper":null,"equivalent":null}`, serde(t, l))
 	r := ExchangeRates{Base: "exalted", Rates: map[string]float64{"divine": 200, "chaos": 10, "annul": 0.5}}
 	assert.Equal(t, `{"base":"exalted","rates":{"annul":0.5,"chaos":10.0,"divine":200.0}}`, serde(t, r))

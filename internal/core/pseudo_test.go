@@ -15,7 +15,7 @@ func pm(template string, v float64, kind ModKind) Modifier {
 		Template: template,
 		Kind:     kind,
 		Values:   []float64{v},
-		StatID:   ptr("x"),
+		StatID:   new("x"),
 	}
 }
 
@@ -42,7 +42,7 @@ func TestSumsResistancesLifeAndAttributes(t *testing.T) {
 	assert.Equal(t, 80.0, ele.ItemValues[0])
 	assert.Equal(t, "+80% total Elemental Resistance", ele.Text)
 	assert.True(t, ele.Enabled)
-	assert.Equal(t, ptr(72.0), ele.Min)
+	assert.Equal(t, new(72.0), ele.Min)
 	assert.Equal(t, []float64{40}, get("pseudo.pseudo_total_fire_resistance").ItemValues)
 	assert.Equal(t, []float64{85}, get("pseudo.pseudo_total_life").ItemValues)
 	assert.Equal(t, []float64{17}, get("pseudo.pseudo_total_strength").ItemValues)

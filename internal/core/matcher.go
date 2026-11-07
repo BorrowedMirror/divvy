@@ -77,7 +77,7 @@ func (m *StatMatcher) Catalog() Catalog { return m.catalog }
 func (m *StatMatcher) MatchItem(item *ParsedItem) []MatchOutcome {
 	if item.Rarity == RarityMagic && item.Name == nil {
 		if base := m.catalog.BaseInMagicName(item.BaseType); base != nil && base.Name != item.BaseType {
-			item.Name = ptr(item.BaseType)
+			item.Name = new(item.BaseType)
 			item.BaseType = base.Name
 		}
 	}
@@ -97,7 +97,7 @@ func (m *StatMatcher) MatchItem(item *ParsedItem) []MatchOutcome {
 		}
 		switch outcome.Kind {
 		case Matched:
-			mod.StatID = ptr(outcome.StatID)
+			mod.StatID = new(outcome.StatID)
 			if outcome.Negated {
 				for j := range mod.Values {
 					mod.Values[j] = -mod.Values[j]

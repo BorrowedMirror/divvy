@@ -65,12 +65,13 @@ func formEncode(s string) string {
 // appendSegments is `path_segments_mut().pop_if_empty().extend(segments)`.
 func appendSegments(base *url.URL, segments ...string) *url.URL {
 	u := *base
-	p := strings.TrimSuffix(base.EscapedPath(), "/")
+	var p strings.Builder
+	p.WriteString(strings.TrimSuffix(base.EscapedPath(), "/"))
 	for _, s := range segments {
-		p += "/" + encodeSegment(s)
+		p.WriteString("/" + encodeSegment(s))
 	}
-	u.RawPath = p
-	u.Path, _ = url.PathUnescape(p)
+	u.RawPath = p.String()
+	u.Path, _ = url.PathUnescape(p.String())
 	return &u
 }
 

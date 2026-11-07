@@ -129,7 +129,7 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 	var class *ItemClass
 	if v, ok := stripKey(lines[0], "Item Class"); ok {
 		i++
-		class = ptr(ItemClassFromHeader(v))
+		class = new(ItemClassFromHeader(v))
 	}
 	if i >= len(lines) {
 		return nil, ParseError{Kind: ParseErrNotAnItem}
@@ -149,7 +149,7 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 			return nil, ParseError{Kind: ParseErrNotAnItem}
 		}
 		// Meta gems are the only items copied without an `Item Class:` line.
-		class = ptr(OtherClass("Meta Gems"))
+		class = new(OtherClass("Meta Gems"))
 	}
 	names := lines[i:]
 	var name *string
@@ -158,7 +158,7 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 	case len(names) == 0:
 		return nil, ParseError{Kind: ParseErrMalformed, Section: "header", Reason: "missing item name"}
 	case (rarity == RarityRare || rarity == RarityUnique) && len(names) >= 2:
-		name, baseType = ptr(names[0]), names[1]
+		name, baseType = new(names[0]), names[1]
 	default:
 		baseType = names[0]
 	}
@@ -180,9 +180,9 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 		if n, ok := parseU32(m[1]); ok {
 			switch item.Class.Kind {
 			case ClassWaystone:
-				item.WaystoneTier = ptr(n)
+				item.WaystoneTier = new(n)
 			case ClassUncutGem:
-				item.GemLevel = ptr(n)
+				item.GemLevel = new(n)
 			}
 		}
 	}
@@ -257,7 +257,7 @@ func parseSection(item *ParsedItem, state *parserState, lines []string) {
 		return
 	}
 	if note, ok := stripKey(first, "Note"); ok {
-		item.Note = ptr(note)
+		item.Note = new(note)
 		return
 	}
 	if strings.HasPrefix(first, "Requires") || strings.HasPrefix(first, "Requirements") {
@@ -293,13 +293,13 @@ func parseRequirementLine(req *Requirements, line string) {
 	set := func(key string, n uint32) {
 		switch asciiLower(key) {
 		case "level":
-			req.Level = ptr(n)
+			req.Level = new(n)
 		case "str", "strength":
-			req.Str = ptr(n)
+			req.Str = new(n)
 		case "dex", "dexterity":
-			req.Dex = ptr(n)
+			req.Dex = new(n)
 		case "int", "intelligence":
-			req.Int = ptr(n)
+			req.Int = new(n)
 		}
 	}
 	body, ok := strings.CutPrefix(clean, "Requires:")
@@ -318,7 +318,7 @@ func parseRequirementLine(req *Requirements, line string) {
 				}
 			case 1:
 				if n, ok := parseU32(words[0]); ok {
-					req.Level = ptr(n)
+					req.Level = new(n)
 				}
 			}
 		}
@@ -425,11 +425,11 @@ func parsePropertyLine(item *ParsedItem, line string) {
 	case "Attacks per Second":
 		s.AttacksPerSecond = firstF64(clean)
 	case "Physical Damage":
-		s.PhysicalDPS = ptr(damageAverage(clean))
+		s.PhysicalDPS = new(damageAverage(clean))
 	case "Elemental Damage", "Fire Damage", "Cold Damage", "Lightning Damage":
-		s.ElementalDPS = ptr(derefOr(s.ElementalDPS, 0) + damageAverage(clean))
+		s.ElementalDPS = new(derefOr(s.ElementalDPS, 0) + damageAverage(clean))
 	case "Chaos Damage":
-		s.TotalDPS = ptr(derefOr(s.TotalDPS, 0) + damageAverage(clean))
+		s.TotalDPS = new(derefOr(s.TotalDPS, 0) + damageAverage(clean))
 	}
 	item.Properties = append(item.Properties, Property{Name: key, Value: clean, Augmented: augmented})
 }
@@ -479,11 +479,11 @@ func parseAdvancedHeader(line string) *advancedState {
 	var affix *Affix
 	switch {
 	case strings.Contains(kindText, "Prefix"):
-		affix = ptr(AffixPrefix)
+		affix = new(AffixPrefix)
 	case strings.Contains(kindText, "Suffix"):
-		affix = ptr(AffixSuffix)
+		affix = new(AffixSuffix)
 	case strings.Contains(kindText, "Implicit"):
-		affix = ptr(AffixImplicit)
+		affix = new(AffixImplicit)
 	}
 	var kind ModKind
 	switch {
@@ -504,7 +504,7 @@ func parseAdvancedHeader(line string) *advancedState {
 	}
 	info := AdvancedModInfo{Affix: affix, Ranges: []ValueRange{}}
 	if name, ok := group(line, m, advName); ok {
-		info.Name = ptr(name)
+		info.Name = new(name)
 	}
 	if tier, ok := group(line, m, advTier); ok {
 		if n, ok := parseU8(tier); ok {
@@ -597,7 +597,7 @@ func finish(item *ParsedItem) {
 			if p == nil {
 				return nil
 			}
-			return ptr(round(*p * aps))
+			return new(round(*p * aps))
 		}
 		phys, ele, chaos := scale(s.PhysicalDPS), scale(s.ElementalDPS), scale(s.TotalDPS)
 		s.PhysicalDPS = phys
@@ -605,7 +605,7 @@ func finish(item *ParsedItem) {
 		if phys == nil && ele == nil && chaos == nil {
 			s.TotalDPS = nil
 		} else {
-			s.TotalDPS = ptr(round(derefOr(phys, 0) + derefOr(ele, 0) + derefOr(chaos, 0)))
+			s.TotalDPS = new(round(derefOr(phys, 0) + derefOr(ele, 0) + derefOr(chaos, 0)))
 		}
 	} else {
 		s.PhysicalDPS = nil

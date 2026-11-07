@@ -16,6 +16,7 @@
 package testkit
 
 import (
+	"maps"
 	"sync"
 	"time"
 
@@ -486,9 +487,7 @@ func (h *FakeHotkeyHost) Registered() map[platform.HotkeyAction]platform.Chord {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	out := make(map[platform.HotkeyAction]platform.Chord, len(h.registered))
-	for a, c := range h.registered {
-		out[a] = c
-	}
+	maps.Copy(out, h.registered)
 	return out
 }
 

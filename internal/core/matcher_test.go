@@ -190,17 +190,17 @@ func TestMatchesKindsAliasesAndLocals(t *testing.T) {
 	})
 	out := m.MatchItem(item)
 	assert.Equal(t, []*string{
-		ptr("explicit.stat_3299347043"),
-		ptr("implicit.stat_3372524247"),
-		ptr("rune.stat_3372524247"),
-		ptr("explicit.stat_3372524247"),
-		ptr("explicit.stat_4220027924"),
-		ptr("explicit.stat_2250533757"),
-		ptr("explicit.stat_1940865751"),
-		ptr("explicit.stat_dup_a"),
+		new("explicit.stat_3299347043"),
+		new("implicit.stat_3372524247"),
+		new("rune.stat_3372524247"),
+		new("explicit.stat_3372524247"),
+		new("explicit.stat_4220027924"),
+		new("explicit.stat_2250533757"),
+		new("explicit.stat_1940865751"),
+		new("explicit.stat_dup_a"),
 		nil,
-		ptr("explicit.stat_arrows"),
-		ptr("explicit.stat_attr_b"),
+		new("explicit.stat_arrows"),
+		new("explicit.stat_attr_b"),
 		nil,
 	}, statIDs(item))
 	assert.Equal(t, MatchOutcome{Kind: Matched, StatID: "explicit.stat_4220027924", Negated: true}, out[4])
@@ -216,8 +216,8 @@ func TestMatchesKindsAliasesAndLocals(t *testing.T) {
 		{"30% increased Spirit", ModExplicit},
 	})
 	m.MatchItem(ring)
-	assert.Equal(t, ptr("explicit.stat_2223678961"), ring.Modifiers[0].StatID)
-	assert.Equal(t, ptr("explicit.stat_spirit_b"), ring.Modifiers[1].StatID)
+	assert.Equal(t, new("explicit.stat_2223678961"), ring.Modifiers[0].StatID)
+	assert.Equal(t, new("explicit.stat_spirit_b"), ring.Modifiers[1].StatID)
 }
 
 func TestResolvesMagicBase(t *testing.T) {
@@ -226,7 +226,7 @@ func TestResolvesMagicBase(t *testing.T) {
 	item := itemWith(t, ClassHelmet.Class(), RarityMagic, "Hale Expert Hunter Hood of the Kiln", nil)
 	m.MatchItem(item)
 	assert.Equal(t, "Expert Hunter Hood", item.BaseType)
-	assert.Equal(t, ptr("Hale Expert Hunter Hood of the Kiln"), item.Name)
+	assert.Equal(t, new("Hale Expert Hunter Hood of the Kiln"), item.Name)
 	// Already a bare base: untouched.
 	bare := itemWith(t, ClassHelmet.Class(), RarityMagic, "Hunter Hood", nil)
 	m.MatchItem(bare)

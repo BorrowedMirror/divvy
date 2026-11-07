@@ -147,7 +147,7 @@ func ParseChord(s string) (Chord, error) {
 	mods := []KeyModifier{}
 	key := ""
 	haveKey := false
-	for _, raw := range strings.Split(s, "+") {
+	for raw := range strings.SplitSeq(s, "+") {
 		part := strings.TrimSpace(raw)
 		if part == "" {
 			continue

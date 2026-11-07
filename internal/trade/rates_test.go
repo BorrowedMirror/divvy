@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func strp(s string) *string { return &s }
+//go:fix inline
+func strp(s string) *string { return new(s) }
 
 // testItem is the minimal parsed item for source tests (Rust `test_support::item`).
 func testItem(class core.ItemClass, category core.ItemCategory, name *string, base string) core.ParsedItem {

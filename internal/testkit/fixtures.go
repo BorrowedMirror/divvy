@@ -458,7 +458,7 @@ func (m *TradeMock) SearchJSON() map[string]any {
 // API).
 func (m *TradeMock) FetchJSON(ids string) map[string]any {
 	result := []any{}
-	for _, id := range strings.Split(ids, ",") {
+	for id := range strings.SplitSeq(ids, ",") {
 		if id == "" {
 			continue
 		}

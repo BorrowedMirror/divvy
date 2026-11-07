@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 // Rarity is the rarity line (`Rarity: ...`) of an item.
@@ -184,11 +185,9 @@ func (c *ItemClass) UnmarshalJSON(data []byte) error {
 		*c = ItemClass{Kind: kind, Value: v}
 		return nil
 	}
-	for _, k := range unitClassKinds {
-		if k == kind {
-			*c = ItemClass{Kind: kind}
-			return nil
-		}
+	if slices.Contains(unitClassKinds, kind) {
+		*c = ItemClass{Kind: kind}
+		return nil
 	}
 	return fmt.Errorf("ItemClass: unknown variant `%s`", kind)
 }

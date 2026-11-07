@@ -83,7 +83,8 @@ func (s *clipState) set(text *string) {
 	s.text = text
 }
 
-func strp(s string) *string { return &s }
+//go:fix inline
+func strp(s string) *string { return new(s) }
 
 func textResult(p *string) (string, bool, error) {
 	if p == nil {
@@ -127,27 +128,27 @@ func TestCopyChords(t *testing.T) {
 }
 
 func TestAdvancedCopyReturnsItemAndRestoresPreviousText(t *testing.T) {
-	state := newClipState(strp("previous"))
+	state := newClipState(new("previous"))
 	clip := statefulClip(t, state)
 	sim := &mockSim{t: t, send: func(c Chord) error {
 		assert.True(t, c.Equal(CopyChord(true)))
 		assert.Nil(t, state.get(), "clipboard must be cleared before sending")
-		state.set(strp(copyTestItem))
+		state.set(new(copyTestItem))
 		return nil
 	}}
 	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
 	require.NoError(t, err)
 	assert.Equal(t, copyTestItem, text)
 	assert.Equal(t, 1, sim.calls)
-	assert.Equal(t, strp("previous"), state.get())
+	assert.Equal(t, new("previous"), state.get())
 }
 
 func TestPlainCopyWithoutRestoreKeepsItemOnClipboard(t *testing.T) {
-	state := newClipState(strp("previous"))
+	state := newClipState(new("previous"))
 	clip := statefulClip(t, state)
 	sim := &mockSim{t: t, send: func(c Chord) error {
 		assert.True(t, c.Equal(CopyChord(false)))
-		state.set(strp(copyTestItem))
+		state.set(new(copyTestItem))
 		return nil
 	}}
 	o := copyOpts()
@@ -156,7 +157,7 @@ func TestPlainCopyWithoutRestoreKeepsItemOnClipboard(t *testing.T) {
 	text, err := CopyItemText(sim, clip, o, noSleep)
 	require.NoError(t, err)
 	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, strp(copyTestItem), state.get())
+	assert.Equal(t, new(copyTestItem), state.get())
 }
 
 func TestItemArrivingLateIsPickedUpByPolling(t *testing.T) {
@@ -168,7 +169,7 @@ func TestItemArrivingLateIsPickedUpByPolling(t *testing.T) {
 		assert.Equal(t, 10*time.Millisecond, d)
 		sleeps++
 		if sleeps == 3 {
-			state.set(strp(copyTestItem))
+			state.set(new(copyTestItem))
 		}
 	}
 	text, err := CopyItemText(sim, clip, copyOpts(), sleep)
@@ -179,7 +180,7 @@ func TestItemArrivingLateIsPickedUpByPolling(t *testing.T) {
 }
 
 func TestTimesOutWhenNothingArrives(t *testing.T) {
-	state := newClipState(strp("keep me"))
+	state := newClipState(new("keep me"))
 	clip := statefulClip(t, state)
 	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
 	count := 0
@@ -189,13 +190,13 @@ func TestTimesOutWhenNothingArrives(t *testing.T) {
 	assert.Equal(t, KindTimeout, pe.Kind)
 	assert.Equal(t, 100*time.Millisecond, pe.Timeout)
 	assert.Equal(t, 10, count)
-	assert.Equal(t, strp("keep me"), state.get())
+	assert.Equal(t, new("keep me"), state.get())
 }
 
 func TestNonItemTextReportsNoItemText(t *testing.T) {
 	state := newClipState(nil)
 	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { state.set(strp("not an item")); return nil }}
+	sim := &mockSim{t: t, send: func(Chord) error { state.set(new("not an item")); return nil }}
 	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
 	assert.ErrorIs(t, err, ErrNoItemText)
 }
@@ -212,12 +213,12 @@ func TestZeroPollIntervalStillTerminates(t *testing.T) {
 }
 
 func TestSimulatorErrorIsReturnedAfterRestoring(t *testing.T) {
-	state := newClipState(strp("prev"))
+	state := newClipState(new("prev"))
 	clip := statefulClip(t, state)
 	sim := &mockSim{t: t, send: func(Chord) error { return Unsupported("keystroke_injection") }}
 	_, err := CopyItemText(sim, clip, copyOpts(), func(time.Duration) { t.Fatal("must not poll") })
 	assert.ErrorIs(t, err, ErrUnsupported)
-	assert.Equal(t, strp("prev"), state.get())
+	assert.Equal(t, new("prev"), state.get())
 }
 
 // seqText returns the given results in order, failing the test when called more often.
@@ -292,7 +293,7 @@ func TestImageOnClipboardIsNeitherClearedNorRestored(t *testing.T) {
 		hasNonText: func() bool { return item.get() == nil },
 		// clear and setText nil: never called.
 	}
-	sim := &mockSim{t: t, send: func(Chord) error { item.set(strp(copyTestItem)); return nil }}
+	sim := &mockSim{t: t, send: func(Chord) error { item.set(new(copyTestItem)); return nil }}
 	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
 	require.NoError(t, err)
 	assert.Equal(t, copyTestItem, text)
@@ -323,23 +324,23 @@ func clipWhereUserCopiesAfter(t *testing.T, s *clipState, nthGet int, user *stri
 }
 
 func TestUserCopyAfterTheItemIsNotOverwritten(t *testing.T) {
-	state := newClipState(strp("previous"))
-	clip := clipWhereUserCopiesAfter(t, state, 3, strp("user copy"))
-	sim := &mockSim{t: t, send: func(Chord) error { state.set(strp(copyTestItem)); return nil }}
+	state := newClipState(new("previous"))
+	clip := clipWhereUserCopiesAfter(t, state, 3, new("user copy"))
+	sim := &mockSim{t: t, send: func(Chord) error { state.set(new(copyTestItem)); return nil }}
 	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
 	require.NoError(t, err)
 	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, strp("user copy"), state.get())
+	assert.Equal(t, new("user copy"), state.get())
 }
 
 func TestUserCopyDuringATimeoutIsKept(t *testing.T) {
-	state := newClipState(strp("previous"))
+	state := newClipState(new("previous"))
 	// The user copies non-item text while we poll: NoItemText, and their copy stays.
-	clip := clipWhereUserCopiesAfter(t, state, 4, strp("user copy"))
+	clip := clipWhereUserCopiesAfter(t, state, 4, new("user copy"))
 	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
 	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
 	assert.ErrorIs(t, err, ErrNoItemText)
-	assert.Equal(t, strp("user copy"), state.get())
+	assert.Equal(t, new("user copy"), state.get())
 }
 
 func TestImageCopiedByUserDuringCopyIsKept(t *testing.T) {

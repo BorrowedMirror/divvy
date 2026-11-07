@@ -72,13 +72,13 @@ func TestRareHelmet(t *testing.T) {
 	item := mustParse(t, rareHelm)
 	assert.Equal(t, ClassHelmet.Class(), item.Class)
 	assert.Equal(t, CategoryEquipment, item.Category)
-	assert.Equal(t, ptr("Doom Visor"), item.Name)
+	assert.Equal(t, new("Doom Visor"), item.Name)
 	assert.Equal(t, "Superior Expert Hunter Hood", item.BaseType)
-	assert.Equal(t, ptr(uint32(20)), item.Quality)
-	assert.Equal(t, ptr(uint32(312)), item.Stats.Evasion)
-	assert.Equal(t, Requirements{Level: ptr(uint32(65)), Dex: ptr(uint32(87))}, item.Requirements)
+	assert.Equal(t, new(uint32(20)), item.Quality)
+	assert.Equal(t, new(uint32(312)), item.Stats.Evasion)
+	assert.Equal(t, Requirements{Level: new(uint32(65)), Dex: new(uint32(87))}, item.Requirements)
 	assert.Equal(t, uint8(2), item.Sockets)
-	assert.Equal(t, ptr(uint32(79)), item.ItemLevel)
+	assert.Equal(t, new(uint32(79)), item.ItemLevel)
 	require.Len(t, item.Modifiers, 4)
 	assert.Equal(t, ModRune, item.Modifiers[0].Kind)
 	assert.Equal(t, "+12% to Fire Resistance", item.Modifiers[0].Text)
@@ -86,7 +86,7 @@ func TestRareHelmet(t *testing.T) {
 	assert.Equal(t, []float64{42}, item.Modifiers[1].Values)
 	assert.Equal(t, ModFractured, item.Modifiers[3].Kind)
 	assert.True(t, item.Corrupted && item.Mirrored && !item.Unidentified)
-	assert.Equal(t, ptr("~price 2 divine"), item.Note)
+	assert.Equal(t, new("~price 2 divine"), item.Note)
 	assert.True(t, item.Properties[0].Augmented)
 	assert.False(t, item.Advanced)
 }
@@ -104,20 +104,20 @@ func TestMultiLineRequirementsAndSuperior(t *testing.T) {
 	text := "Item Class: Gloves\nRarity: Normal\nSuperior Stocky Mitts\n--------\nRequirements:\nLevel: 12\nStr: 20\nDexterity: 5\nInt: 7\nBogus\n--------\nItem Level: 15"
 	item := mustParse(t, text)
 	assert.Equal(t, "Stocky Mitts", item.BaseType)
-	assert.Equal(t, Requirements{Level: ptr(uint32(12)), Str: ptr(uint32(20)), Dex: ptr(uint32(5)), Int: ptr(uint32(7))},
+	assert.Equal(t, Requirements{Level: new(uint32(12)), Str: new(uint32(20)), Dex: new(uint32(5)), Int: new(uint32(7))},
 		item.Requirements)
 	var req Requirements
 	parseRequirementLine(&req, "Requires: Str 30, 40, Strange Thing Here, 50 Intelligence")
-	assert.Equal(t, Requirements{Level: ptr(uint32(40)), Str: ptr(uint32(30)), Int: ptr(uint32(50))}, req)
+	assert.Equal(t, Requirements{Level: new(uint32(40)), Str: new(uint32(30)), Int: new(uint32(50))}, req)
 }
 
 func TestWeaponDPS(t *testing.T) {
 	text := "Item Class: Bows\nRarity: Rare\nHate Thirst\nWarmonger Bow\n--------\nPhysical Damage: 50-100 (augmented)\nElemental Damage: 10-20 (fire), 5-15 (cold)\nLightning Damage: 1-9 (lightning)\nChaos Damage: 2-4\nCritical Hit Chance: 5.00%\nAttacks per Second: 1.20\n--------\nItem Level: 80\n--------\nAdds 1 to 4 Lightning Damage"
 	item := mustParse(t, text)
-	assert.Equal(t, ptr(90.0), item.Stats.PhysicalDPS)
-	assert.Equal(t, ptr(36.0), item.Stats.ElementalDPS)
-	assert.Equal(t, ptr(129.6), item.Stats.TotalDPS)
-	assert.Equal(t, ptr(5.0), item.Stats.CriticalHitChance)
+	assert.Equal(t, new(90.0), item.Stats.PhysicalDPS)
+	assert.Equal(t, new(36.0), item.Stats.ElementalDPS)
+	assert.Equal(t, new(129.6), item.Stats.TotalDPS)
+	assert.Equal(t, new(5.0), item.Stats.CriticalHitChance)
 	// Without APS no DPS is reported.
 	noAPS := mustParse(t, "Item Class: Bows\nRarity: Normal\nShort Bow\n--------\nPhysical Damage: 5-10")
 	assert.Nil(t, noAPS.Stats.PhysicalDPS)
@@ -133,18 +133,18 @@ func TestAdvancedCopy(t *testing.T) {
 	assert.Equal(t, "+25% to Fire Resistance", m[0].Text)
 	adv := m[0].Advanced
 	require.NotNil(t, adv)
-	assert.Equal(t, ptr(AffixImplicit), adv.Affix)
+	assert.Equal(t, new(AffixImplicit), adv.Affix)
 	assert.Equal(t, []ValueRange{{Min: 20, Max: 30}}, adv.Ranges)
 	hale := m[1].Advanced
-	assert.Equal(t, ptr(AffixPrefix), hale.Affix)
-	assert.Equal(t, ptr("Hale"), hale.Name)
-	assert.Equal(t, ptr(uint8(7)), hale.Tier)
+	assert.Equal(t, new(AffixPrefix), hale.Affix)
+	assert.Equal(t, new("Hale"), hale.Name)
+	assert.Equal(t, new(uint8(7)), hale.Tier)
 	assert.Equal(t, "14% reduced Attack Speed", m[2].Text)
 	assert.Equal(t, []ValueRange{{Min: 10, Max: 15}}, m[2].Advanced.Ranges)
-	assert.Equal(t, ptr(AffixSuffix), m[2].Advanced.Affix)
+	assert.Equal(t, new(AffixSuffix), m[2].Advanced.Affix)
 	assert.Equal(t, ModFractured, m[3].Kind)
 	assert.Len(t, m[3].Advanced.Ranges, 2)
-	assert.Equal(t, ptr(uint8(2)), m[3].Advanced.Tier)
+	assert.Equal(t, new(uint8(2)), m[3].Advanced.Tier)
 	assert.Equal(t, ModDesecrated, m[4].Kind)
 	assert.Equal(t, ModCrafted, m[5].Kind)
 	assert.Equal(t, ModEnchant, m[6].Kind)
@@ -157,7 +157,7 @@ func TestUniqueFlavourAndSkills(t *testing.T) {
 	text := "Item Class: Sceptres\nRarity: Unique\nThe Dark Defiler\nRattling Sceptre\n--------\nSpirit: 100\n--------\nItem Level: 70\n--------\nGrants Skill: Level 12 Skeletal Warrior\n--------\n+20 to Intelligence\n--------\nA dark gift.\n--------\nUnidentified (Tier 4)"
 	item := mustParse(t, text)
 	assert.Equal(t, CategoryUnique, item.Category)
-	assert.Equal(t, ptr(uint32(100)), item.Stats.Spirit)
+	assert.Equal(t, new(uint32(100)), item.Stats.Spirit)
 	require.Len(t, item.Modifiers, 2)
 	assert.Equal(t, ModSkill, item.Modifiers[0].Kind)
 	assert.True(t, item.Unidentified)
@@ -167,11 +167,11 @@ func TestMetaGemAndRefinements(t *testing.T) {
 	gem := mustParse(t, "Rarity: Gem\nCast on Critical\n--------\nLevel: 5\n--------\nSome text")
 	assert.Equal(t, OtherClass("Meta Gems"), gem.Class)
 	assert.Equal(t, CategoryGem, gem.Category)
-	assert.Equal(t, ptr(uint32(5)), gem.GemLevel)
+	assert.Equal(t, new(uint32(5)), gem.GemLevel)
 	uncut := mustParse(t, "Item Class: Uncut Skill Gems\nRarity: Currency\nUncut Skill Gem (Level 19)")
-	assert.Equal(t, ptr(uint32(19)), uncut.GemLevel)
+	assert.Equal(t, new(uint32(19)), uncut.GemLevel)
 	way := mustParse(t, "Item Class: Waystones\nRarity: Normal\nWaystone (Tier 15)")
-	assert.Equal(t, ptr(uint32(15)), way.WaystoneTier)
+	assert.Equal(t, new(uint32(15)), way.WaystoneTier)
 	core := mustParse(t, "Item Class: Augment\nRarity: Currency\nSoul Core of Tacati")
 	assert.Equal(t, ClassSoulCore.Class(), core.Class)
 	for _, c := range []struct {
@@ -193,7 +193,7 @@ func TestMetaGemAndRefinements(t *testing.T) {
 func TestStackSizeAndAreaLevel(t *testing.T) {
 	item := mustParse(t, "Item Class: Stackable Currency\nRarity: Currency\nExalted Orb\n--------\nStack Size: 1,234/5,000\nArea Level: 70")
 	assert.Equal(t, &StackSize{Current: 1234, Max: 5000}, item.StackSize)
-	assert.Equal(t, ptr(uint32(70)), item.AreaLevel)
+	assert.Equal(t, new(uint32(70)), item.AreaLevel)
 }
 
 // Go-only: Rust's regex `\d` is Unicode-aware; numbers in other scripts are found by the

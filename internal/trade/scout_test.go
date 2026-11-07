@@ -22,7 +22,7 @@ func scoutCurrency(base string) core.ParsedItem {
 }
 
 func scoutUnique(name, base string) core.ParsedItem {
-	return testItem(core.ClassBelt.Class(), core.CategoryUnique, strp(name), base)
+	return testItem(core.ClassBelt.Class(), core.CategoryUnique, new(name), base)
 }
 
 func scoutRequest(item core.ParsedItem, league string) *PriceRequest {
@@ -75,7 +75,7 @@ func TestScoutPricesUniques(t *testing.T) {
 	mb := priceOf(t, src, scoutUnique("Mageblood", "Utility Belt"))
 	assert.Equal(t, "divine", mb.Currency)
 	assert.InDelta(t, 70000.0/966.563_873_384_240_5, mb.Amount, 1e-6)
-	andv := priceOf(t, src, testItem(core.ClassRing.Class(), core.CategoryUnique, strp("Andvarius"), "Gold Ring"))
+	andv := priceOf(t, src, testItem(core.ClassRing.Class(), core.CategoryUnique, new("Andvarius"), "Gold Ring"))
 	assert.Equal(t, core.Price{Amount: 15, Currency: "exalted"}, andv)
 	// Base type mismatch falls back to the name alone.
 	hh := priceOf(t, src, scoutUnique("Headhunter", "Some Other Belt"))

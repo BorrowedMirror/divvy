@@ -27,7 +27,7 @@ func TestSaveThenLoadRoundtripsAndCreatesDirs(t *testing.T) {
 	paths := Under(filepath.Join(t.TempDir(), "deep", "nested"))
 	s := DefaultSettings()
 	s.UI.Language = "de"
-	s.Trade.Contact = ptr("me@example.com")
+	s.Trade.Contact = new("me@example.com")
 	if err := Save(paths, &s); err != nil {
 		t.Fatal(err)
 	}
@@ -162,8 +162,7 @@ func TestLoadRunsValidation(t *testing.T) {
 	paths := Under(t.TempDir())
 	writeSettings(t, paths, "version = 1\n[overlay]\nauto_hide_ms = 60000\n")
 	_, err := Load(paths)
-	var inv *InvalidError
-	if !errors.As(err, &inv) {
+	if _, ok := errors.AsType[*InvalidError](err); !ok {
 		t.Fatalf("%v", err)
 	}
 }
@@ -215,7 +214,7 @@ func randomSettings(r *rand.Rand) Settings {
 		if r.IntN(2) == 0 {
 			return nil
 		}
-		return ptr(f())
+		return new(f())
 	}
 	s := DefaultSettings()
 	s.League.AutoDetect = r.IntN(2) == 0
@@ -256,7 +255,7 @@ func randomSettings(r *rand.Rand) Settings {
 	s.UI.Theme = []Theme{ThemeSystem, ThemeDark, ThemeLight}[r.IntN(3)]
 	s.UI.StartMinimised, s.UI.CheckUpdates, s.UI.OnboardingDone = r.IntN(2) == 0, r.IntN(2) == 0, r.IntN(2) == 0
 	if r.IntN(2) == 0 {
-		s.Platform.BackendOverride = ptr([]platform.BackendKind{
+		s.Platform.BackendOverride = new([]platform.BackendKind{
 			platform.BackendWindows, platform.BackendMacos, platform.BackendX11, platform.BackendWayland, platform.BackendFake,
 		}[r.IntN(5)])
 	}

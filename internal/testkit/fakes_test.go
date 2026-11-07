@@ -50,19 +50,20 @@ func peek(c *FakeClipboard) *string {
 	return &s
 }
 
-func strp(s string) *string { return &s }
+//go:fix inline
+func strp(s string) *string { return new(s) }
 
 func TestClipboardSharesStateAndRecordsHistory(t *testing.T) {
 	a := NewFakeClipboard()
 	b := a // a handle: the same pointer
 	assert.Nil(t, text(t, a))
 	require.NoError(t, b.SetText("hi"))
-	assert.Equal(t, strp("hi"), text(t, a))
+	assert.Equal(t, new("hi"), text(t, a))
 	require.NoError(t, a.Clear())
 	assert.Nil(t, peek(b))
 	assert.Equal(t, []ClipboardOp{{Kind: OpGet}, {Kind: OpSet, Text: "hi"}, {Kind: OpGet}, {Kind: OpClear}}, a.History())
 	b.Put("external")
-	assert.Equal(t, strp("external"), peek(a))
+	assert.Equal(t, new("external"), peek(a))
 	assert.Len(t, a.History(), 4, "put/peek are not recorded")
 	assert.False(t, a.HasNonText())
 }
@@ -75,16 +76,16 @@ func TestClipboardFailureInjection(t *testing.T) {
 	assert.Error(t, c.SetText("y"))
 	assert.Error(t, c.Clear())
 	c.SetFailing(false)
-	assert.Equal(t, strp("x"), text(t, c))
+	assert.Equal(t, new("x"), text(t, c))
 }
 
 func TestSimulatorWritesScriptedText(t *testing.T) {
 	clip := NewFakeClipboard()
 	sim := NewFakeInputSimulator(clip).Responding(fakesItem).OnChord(AdvancedCopyChord(), "ADV")
 	require.NoError(t, sim.SendChord(CopyChord()))
-	assert.Equal(t, strp(fakesItem), peek(clip))
+	assert.Equal(t, new(fakesItem), peek(clip))
 	require.NoError(t, sim.SendChord(AdvancedCopyChord()))
-	assert.Equal(t, strp("ADV"), peek(clip))
+	assert.Equal(t, new("ADV"), peek(clip))
 	assert.Equal(t, []platform.Chord{CopyChord(), AdvancedCopyChord()}, sim.Sent())
 	assert.Same(t, sim.Clipboard(), sim.Clipboard())
 }
@@ -93,10 +94,10 @@ func TestSimulatorWithoutScriptOnlyRecords(t *testing.T) {
 	clip := FakeClipboardWithText("old")
 	sim := NewFakeInputSimulator(clip)
 	require.NoError(t, sim.SendChord(CopyChord()))
-	assert.Equal(t, strp("old"), peek(clip))
-	sim.SetResponse(strp("new"))
+	assert.Equal(t, new("old"), peek(clip))
+	sim.SetResponse(new("new"))
 	require.NoError(t, sim.SendChord(CopyChord()))
-	assert.Equal(t, strp("new"), peek(clip))
+	assert.Equal(t, new("new"), peek(clip))
 	sim.SetResponse(nil)
 	clip.PutNothing()
 	require.NoError(t, sim.SendChord(CopyChord()))
@@ -113,7 +114,7 @@ func TestSimulatorDelayWritesLater(t *testing.T) {
 		require.True(t, time.Now().Before(deadline), "delayed write never happened")
 		time.Sleep(5 * time.Millisecond)
 	}
-	assert.Equal(t, strp(fakesItem), peek(clip))
+	assert.Equal(t, new(fakesItem), peek(clip))
 }
 
 func TestSimulatorFailure(t *testing.T) {
@@ -263,11 +264,11 @@ func TestPlatformBuilderWiresEverything(t *testing.T) {
 		Build()
 	assert.Equal(t, platform.BackendFake, p.Kind)
 	assert.True(t, p.Capabilities.Clipboard)
-	assert.Equal(t, strp("previous"), text(t, p.Clipboard))
+	assert.Equal(t, new("previous"), text(t, p.Clipboard))
 	require.NoError(t, p.InputSimulator.SendChord(CopyChord()))
-	assert.Equal(t, strp(fakesItem), peek(h.Clipboard))
+	assert.Equal(t, new(fakesItem), peek(h.Clipboard))
 	require.NoError(t, p.InputSimulator.SendChord(AdvancedCopyChord()))
-	assert.Equal(t, strp("ADV"), text(t, p.Clipboard))
+	assert.Equal(t, new("ADV"), text(t, p.Clipboard))
 	assert.True(t, p.WindowTracker.IsGameFocused())
 	rx, err := p.InputListener.Start()
 	require.NoError(t, err)
@@ -309,5 +310,5 @@ func TestFakesDriveTheCopyFlow(t *testing.T) {
 	got, err := platform.CopyItemText(p.InputSimulator, p.Clipboard, platform.DefaultCopyOptions(), func(time.Duration) {})
 	require.NoError(t, err)
 	assert.Equal(t, fakesItem, got)
-	assert.Equal(t, strp("previous"), peek(h.Clipboard))
+	assert.Equal(t, new("previous"), peek(h.Clipboard))
 }

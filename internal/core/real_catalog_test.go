@@ -90,16 +90,17 @@ func statOf(item *core.ParsedItem, text string) *string {
 	return nil
 }
 
-func sp(s string) *string { return &s }
+//go:fix inline
+func sp(s string) *string { return new(s) }
 
 func TestLocalArmourOnGloves(t *testing.T) {
 	gloves := matched(t, "gloves/rare-gloves-advanced")
-	assert.Equal(t, sp("explicit.stat_3484657501"), statOf(gloves, "+98 to Armour"))
+	assert.Equal(t, new("explicit.stat_3484657501"), statOf(gloves, "+98 to Armour"))
 }
 
 func TestLocalEvasionOnHelmet(t *testing.T) {
 	helmet := matched(t, "helmet/rare-hunter-hood-advanced")
-	assert.Equal(t, sp("explicit.stat_53045048"), statOf(helmet, "+109 to Evasion Rating"))
+	assert.Equal(t, new("explicit.stat_53045048"), statOf(helmet, "+109 to Evasion Rating"))
 }
 
 func TestBowAdditionalArrowMatchesPluralStat(t *testing.T) {
@@ -142,8 +143,8 @@ func stdOpts(status core.OnlineStatus) *core.QueryOptions {
 // searched as explicit, and "reduced" requirements get an upper bound.
 func TestSceptreSpiritSearchMatchesTradeListings(t *testing.T) {
 	sceptre := matched(t, "weapon/rare-sceptre-spirit-advanced")
-	assert.Equal(t, sp("explicit.stat_3984865854"), statOf(sceptre, "55% increased Spirit"))
-	assert.Equal(t, sp("desecrated.stat_3984865854"), statOf(sceptre, "13% increased Spirit"))
+	assert.Equal(t, new("explicit.stat_3984865854"), statOf(sceptre, "55% increased Spirit"))
+	assert.Equal(t, new("desecrated.stat_3984865854"), statOf(sceptre, "13% increased Spirit"))
 	f := core.BuildFilters(sceptre, stdOpts(core.StatusOnline))
 	var spirit []core.StatFilter
 	for _, s := range f.Stats {
@@ -176,7 +177,7 @@ func TestGlobalSpiritOnAmuletsStaysGlobal(t *testing.T) {
 	amulet, err := core.ParseItem(text)
 	require.NoError(t, err)
 	core.NewStatMatcher(d).MatchItem(amulet)
-	assert.Equal(t, sp("explicit.stat_1416406066"), statOf(amulet, "20% increased Spirit"))
+	assert.Equal(t, new("explicit.stat_1416406066"), statOf(amulet, "20% increased Spirit"))
 }
 
 func TestStatFiltersCarryModTiersFromAdvancedCopies(t *testing.T) {

@@ -24,8 +24,7 @@ func Load(paths Paths) (Settings, error) {
 		if errors.Is(err, fs.ErrNotExist) {
 			return DefaultSettings(), nil
 		}
-		var pe *fs.PathError
-		if errors.As(err, &pe) {
+		if _, ok := errors.AsType[*fs.PathError](err); ok {
 			return Settings{}, ioErr(path, err)
 		}
 		return Settings{}, &ParseError{Err: err}

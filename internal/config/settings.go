@@ -10,6 +10,7 @@ import (
 	"maps"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
@@ -420,12 +421,12 @@ func checkEnum(key reflect.Type, s string) error {
 }
 
 func quoteList(names []string) string {
-	out := ""
+	var out strings.Builder
 	for i, n := range names {
 		if i > 0 {
-			out += ", "
+			out.WriteString(", ")
 		}
-		out += "`" + n + "`"
+		out.WriteString("`" + n + "`")
 	}
-	return out
+	return out.String()
 }

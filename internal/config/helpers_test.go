@@ -111,7 +111,8 @@ func settingsEqual(a, b Settings) bool {
 	return reflect.DeepEqual(normalised(a), normalised(b))
 }
 
-func ptr[T any](v T) *T { return &v }
+//go:fix inline
+func ptr[T any](v T) *T { return new(v) }
 
 func chord(key string, mods ...platform.KeyModifier) platform.Chord {
 	return platform.NewChord(key, mods...)

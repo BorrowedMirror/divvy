@@ -14,7 +14,7 @@ import (
 
 func TestCandidateMapping(t *testing.T) {
 	unique := func(class core.ItemClass) []ninjaCandidate {
-		it := testItem(class, core.CategoryUnique, strp("X"), "Y")
+		it := testItem(class, core.CategoryUnique, new("X"), "Y")
 		return ninjaCandidates(&it)
 	}
 	stash := func(kinds ...string) []ninjaCandidate {
@@ -64,7 +64,7 @@ func TestStashMatchFallsBackToNameOnly(t *testing.T) {
 	var ov ninjaOverview
 	require.NoError(t, json.Unmarshal([]byte(`{"core":{"primary":"divine","rates":{"exalted":0.0}},
 		"lines":[{"id":1,"name":"Foo","baseType":"Other Base","primaryValue":2.0}]}`), &ov))
-	it := testItem(core.ClassRing.Class(), core.CategoryUnique, strp("Foo"), "Gold Ring")
+	it := testItem(core.ClassRing.Class(), core.CategoryUnique, new("Foo"), "Gold Ring")
 	v, n, ok := ov.find(endpointStash, &it)
 	assert.True(t, ok)
 	assert.Equal(t, 2.0, v)
@@ -111,7 +111,7 @@ func ninjaCurrency(base string) *PriceRequest {
 }
 
 func ninjaUnique(name, base string) *PriceRequest {
-	return ninjaRequest(testItem(core.ClassBelt.Class(), core.CategoryUnique, strp(name), base))
+	return ninjaRequest(testItem(core.ClassBelt.Class(), core.CategoryUnique, new(name), base))
 }
 
 func ninjaSourceFor(m *mockServer) *PoeNinjaSource { return NewPoeNinjaSource(m.baseURL(), ninjaUA) }
@@ -170,7 +170,7 @@ func TestNinjaPricesUniquesInDivineOrExalted(t *testing.T) {
 	assert.Equal(t, uint32(7570), mb.Total)
 
 	andv := ninjaUnique("Andvarius", "Gold Ring")
-	andv.Item = testItem(core.ClassRing.Class(), core.CategoryUnique, strp("Andvarius"), "Gold Ring")
+	andv.Item = testItem(core.ClassRing.Class(), core.CategoryUnique, new("Andvarius"), "Gold Ring")
 	p, err := src.Price(t.Context(), andv)
 	require.NoError(t, err)
 	// 0.07735 divine at 704.8 exalted/divine (rates in this fixture's core).
@@ -207,7 +207,7 @@ func TestNinjaSupportsMatrix(t *testing.T) {
 		return src.Supports(&it)
 	}
 	assert.True(t, supports(core.ClassStackableCurrency.Class(), core.CategoryCurrency, nil, "Divine Orb"))
-	assert.True(t, supports(core.ClassRing.Class(), core.CategoryUnique, strp("Andvarius"), "Gold Ring"))
+	assert.True(t, supports(core.ClassRing.Class(), core.CategoryUnique, new("Andvarius"), "Gold Ring"))
 	assert.False(t, supports(core.ClassRing.Class(), core.CategoryUnique, nil, "Gold Ring"))
 	assert.True(t, supports(core.ClassUncutGem.Class(), core.CategoryGem, nil, "Uncut Skill Gem"))
 	assert.True(t, supports(core.ClassSupportGem.Class(), core.CategoryGem, nil, "Some Lineage Support"))

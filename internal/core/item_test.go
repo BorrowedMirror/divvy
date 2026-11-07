@@ -81,9 +81,9 @@ func TestWeaponTradeCategories(t *testing.T) {
 	}
 	assert.Nil(t, tradeCategory(WeaponClass("Lances")))
 	assert.Nil(t, tradeCategory(OtherClass("x")))
-	assert.Equal(t, ptr("gem.metagem"), tradeCategory(OtherClass("Meta Gems")))
-	assert.Equal(t, ptr("weapon.talisman"), tradeCategory(ItemClassFromHeader("Talismans")))
-	assert.Equal(t, ptr("armour.helmet"), tradeCategory(ClassHelmet.Class()))
+	assert.Equal(t, new("gem.metagem"), tradeCategory(OtherClass("Meta Gems")))
+	assert.Equal(t, new("weapon.talisman"), tradeCategory(ItemClassFromHeader("Talismans")))
+	assert.Equal(t, new("armour.helmet"), tradeCategory(ClassHelmet.Class()))
 }
 
 func TestEveryClassHasCategory(t *testing.T) {
@@ -131,17 +131,17 @@ func tradeOption(r Rarity) *string {
 }
 
 func TestRarityHeader(t *testing.T) {
-	assert.Equal(t, ptr(RarityRare), rarityOf("Rare"))
-	assert.Equal(t, ptr(RarityNormal), rarityOf("Normal"))
-	assert.Equal(t, ptr(RarityMagic), rarityOf("Magic"))
-	assert.Equal(t, ptr(RarityUnique), rarityOf("Unique"))
-	assert.Equal(t, ptr(RarityCurrency), rarityOf("Currency"))
-	assert.Equal(t, ptr(RarityGem), rarityOf("Gem"))
-	assert.Equal(t, ptr(RarityOther), rarityOf("Quest"))
+	assert.Equal(t, new(RarityRare), rarityOf("Rare"))
+	assert.Equal(t, new(RarityNormal), rarityOf("Normal"))
+	assert.Equal(t, new(RarityMagic), rarityOf("Magic"))
+	assert.Equal(t, new(RarityUnique), rarityOf("Unique"))
+	assert.Equal(t, new(RarityCurrency), rarityOf("Currency"))
+	assert.Equal(t, new(RarityGem), rarityOf("Gem"))
+	assert.Equal(t, new(RarityOther), rarityOf("Quest"))
 	assert.Nil(t, rarityOf("Legendary"))
-	assert.Equal(t, ptr("rare"), tradeOption(RarityRare))
-	assert.Equal(t, ptr("normal"), tradeOption(RarityNormal))
-	assert.Equal(t, ptr("magic"), tradeOption(RarityMagic))
-	assert.Equal(t, ptr("unique"), tradeOption(RarityUnique))
+	assert.Equal(t, new("rare"), tradeOption(RarityRare))
+	assert.Equal(t, new("normal"), tradeOption(RarityNormal))
+	assert.Equal(t, new("magic"), tradeOption(RarityMagic))
+	assert.Equal(t, new("unique"), tradeOption(RarityUnique))
 	assert.Nil(t, tradeOption(RarityGem))
 }

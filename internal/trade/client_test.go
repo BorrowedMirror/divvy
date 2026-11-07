@@ -539,7 +539,7 @@ func TestPriceFullSearchPath(t *testing.T) {
 	m.mount(mockSpec{Method: "GET", Expect: anyHits}, fetchOK(t))
 	c := newClient(t, tradeConfig(m))
 	f := testFilters(core.RouteSearch, "Gold Ring")
-	f.Name = strp("Andvarius")
+	f.Name = new("Andvarius")
 	item, err := core.ParseItem("Item Class: Rings\nRarity: Unique\nAndvarius\nGold Ring\n--------\nItem Level: 40\n")
 	require.NoError(t, err)
 	summary, err := c.Price(t.Context(), &PriceRequest{Item: *item, Filters: f})

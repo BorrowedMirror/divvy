@@ -63,9 +63,9 @@ func convert(r *ExchangeRates, a float64, from, to string) *float64 {
 
 func TestConvertsWithRates(t *testing.T) {
 	rates := &ExchangeRates{Base: "exalted", Rates: map[string]float64{"divine": 200, "chaos": 10, "bad": 0}}
-	assert.Equal(t, ptr(1.0), rate(rates, "exalted"))
+	assert.Equal(t, new(1.0), rate(rates, "exalted"))
 	assert.Nil(t, rate(rates, "bad"))
-	assert.Equal(t, ptr(20.0), convert(rates, 1, "divine", "chaos"))
+	assert.Equal(t, new(20.0), convert(rates, 1, "divine", "chaos"))
 	assert.Nil(t, convert(rates, 1, "bad", "chaos"))
 	ls := func() []Listing {
 		return []Listing{
@@ -115,10 +115,10 @@ func TestEquivalentsAndRatesInSummaries(t *testing.T) {
 	assert.Nil(t, Equivalent(pp(1, "mirror"), rates), "unknown rate")
 	s := Summarise(SourceTrade, 3, []Listing{listing(1, "chaos"), listing(2, "chaos"), listing(20, "exalted")}, nil)
 	assert.Equal(t, pp(2, "chaos"), s.Max, "without rates the exalted listing is left out")
-	s.TradeURL = ptr("u")
+	s.TradeURL = new("u")
 	s = WithRates(s, rates)
 	assert.Equal(t, pp(2, "chaos"), s.Max)
 	assert.Nil(t, s.Listings[2].Equivalent, "20 ex is under a divine and already exalted")
 	assert.Equal(t, pp(10, "exalted"), s.Listings[0].Equivalent)
-	assert.Equal(t, ptr("u"), s.TradeURL)
+	assert.Equal(t, new("u"), s.TradeURL)
 }

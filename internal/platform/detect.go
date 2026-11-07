@@ -84,7 +84,7 @@ func EnvProbeFromEnv() EnvProbe {
 // IsGNOME reports whether XDG_CURRENT_DESKTOP contains GNOME (a colon-separated list, for
 // example `ubuntu:GNOME`).
 func (p EnvProbe) IsGNOME() bool {
-	for _, part := range strings.Split(p.Desktop, ":") {
+	for part := range strings.SplitSeq(p.Desktop, ":") {
 		if strings.EqualFold(part, "gnome") {
 			return true
 		}

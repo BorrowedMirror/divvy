@@ -228,8 +228,8 @@ func (t *tracked) insert(at time.Duration) {
 
 // remove removes one hit recorded at exactly at, if still present.
 func (t *tracked) remove(at time.Duration) {
-	for i := len(t.hits) - 1; i >= 0; i-- {
-		if t.hits[i] == at {
+	for i, v := range slices.Backward(t.hits) {
+		if v == at {
 			t.hits = slices.Delete(t.hits, i, i+1)
 			return
 		}

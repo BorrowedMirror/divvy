@@ -45,11 +45,11 @@ func TestDefaultSettingsAreValid(t *testing.T) {
 func TestSettingsRoundtripThroughTOML(t *testing.T) {
 	s := DefaultSettings()
 	s.League.AutoDetect = false
-	s.League.League = ptr(`Hardcore "Quoted"`)
+	s.League.League = new(`Hardcore "Quoted"`)
 	s.Hotkeys.OpenSettings = chord("F5", platform.Meta)
 	s.Trade.Source = core.SourcePoe2Scout
-	s.Trade.Contact = ptr("exile@example.com")
-	s.Trade.Poesessid = ptr("abc123")
+	s.Trade.Contact = new("exile@example.com")
+	s.Trade.Poesessid = new("abc123")
 	s.Overlay.Side = SideLeft
 	s.UI.Theme = ThemeLight
 	s.Platform.BackendOverride = ptr(platform.BackendWayland)
@@ -187,7 +187,7 @@ func TestRustCustomFileLoads(t *testing.T) {
 	}
 	want := Settings{
 		Version: 1,
-		League:  LeagueSettings{AutoDetect: false, League: ptr(`Hardcore "Quoted"`)},
+		League:  LeagueSettings{AutoDetect: false, League: new(`Hardcore "Quoted"`)},
 		Hotkeys: HotkeySettings{
 			PriceCheck:       chord("KeyD", platform.Alt),
 			PriceCheckPinned: chord("KeyD", platform.Ctrl, platform.Shift),
@@ -198,7 +198,7 @@ func TestRustCustomFileLoads(t *testing.T) {
 		Trade: TradeSettings{
 			Source: core.SourcePoe2Scout, Sellers: core.StatusSecurable, WidenPct: 25.5,
 			EnableAllStats: true, ListingCount: 40, ConvertPrices: false, RememberFilters: false,
-			Contact: ptr("exile@example.com"), Poesessid: ptr("abc123"),
+			Contact: new("exile@example.com"), Poesessid: new("abc123"),
 		},
 		Overlay: OverlaySettings{
 			AutoHideMs: 1500, Opacity: 0.8, Side: SideLast, GroupBySeller: false,
@@ -295,8 +295,8 @@ func TestDefaultSettingsJSONMatchesSerde(t *testing.T) {
 
 func TestSettingsJSONShapeOfSetOptionsAndNilLists(t *testing.T) {
 	s := DefaultSettings()
-	s.League.League = ptr("Standard")
-	s.Trade.Contact = ptr("me@example.com")
+	s.League.League = new("Standard")
+	s.Trade.Contact = new("me@example.com")
 	s.Platform.BackendOverride = ptr(platform.BackendX11)
 	s.Trade.WidenPct = 12.5
 	s.Overlay.ListingColumns = nil
@@ -325,7 +325,7 @@ func TestSettingsJSONShapeOfSetOptionsAndNilLists(t *testing.T) {
 
 func TestSettingsJSONRoundtripAndSerdeDefaults(t *testing.T) {
 	s := DefaultSettings()
-	s.League.League = ptr("Standard")
+	s.League.League = new("Standard")
 	s.Platform.BackendOverride = ptr(platform.BackendWayland)
 	s.Stash.Searches = []StashSearch{{Chord: chord("Digit1", platform.Alt), Text: "x"}}
 	b, err := json.Marshal(s)
@@ -376,8 +376,8 @@ func TestJSONAndKoanfTagsAgree(t *testing.T) {
 			return
 		}
 		seen[rt] = true
-		for i := range rt.NumField() {
-			f := rt.Field(i)
+		for f := range rt.Fields() {
+			f := f
 			j, _, _ := strings.Cut(f.Tag.Get("json"), ",")
 			k, _, _ := strings.Cut(f.Tag.Get("koanf"), ",")
 			if j == "" || j != k {
@@ -556,9 +556,9 @@ func TestValidateLeagueRequiredWithoutAutoDetect(t *testing.T) {
 	s := DefaultSettings()
 	s.League.AutoDetect = false
 	assertInvalid(t, Validate(&s), "league.league")
-	s.League.League = ptr("   ")
+	s.League.League = new("   ")
 	assertInvalid(t, Validate(&s), "league.league")
-	s.League.League = ptr("Standard")
+	s.League.League = new("Standard")
 	if err := Validate(&s); err != nil {
 		t.Fatal(err)
 	}
@@ -590,11 +590,11 @@ func TestValidateChordNeedsNonModifierKey(t *testing.T) {
 func TestValidateContactEmail(t *testing.T) {
 	for _, bad := range []string{"", "exile", "@example.com", "exile@", "exile@localhost", "a@b@c.com", "ex ile@a.com", "e@a..com"} {
 		s := DefaultSettings()
-		s.Trade.Contact = ptr(bad)
+		s.Trade.Contact = new(bad)
 		assertInvalid(t, Validate(&s), "trade.contact")
 	}
 	s := DefaultSettings()
-	s.Trade.Contact = ptr("exile.42+poe@mail.example.org")
+	s.Trade.Contact = new("exile.42+poe@mail.example.org")
 	if err := Validate(&s); err != nil {
 		t.Fatal(err)
 	}
@@ -603,23 +603,22 @@ func TestValidateContactEmail(t *testing.T) {
 func TestValidateRejectsFutureVersion(t *testing.T) {
 	s := DefaultSettings()
 	s.Version = SettingsVersion + 1
-	var tooNew *TooNewError
-	if !errors.As(Validate(&s), &tooNew) {
+	if _, ok := errors.AsType[*TooNewError](Validate(&s)); !ok {
 		t.Fatal("future version accepted")
 	}
 }
 
 func TestRejectsHeaderUnsafeSecretsAndContacts(t *testing.T) {
 	s := DefaultSettings()
-	s.Trade.Poesessid = ptr("abc;def")
+	s.Trade.Poesessid = new("abc;def")
 	assertInvalid(t, Validate(&s), "trade.poesessid")
-	s.Trade.Poesessid = ptr("0123abcdef")
+	s.Trade.Poesessid = new("0123abcdef")
 	if err := Validate(&s); err != nil {
 		t.Fatal(err)
 	}
-	s.Trade.Contact = ptr("me@example.com;x")
+	s.Trade.Contact = new("me@example.com;x")
 	assertInvalid(t, Validate(&s), "trade.contact")
-	s.Trade.Contact = ptr("me@exa\u0007mple.com")
+	s.Trade.Contact = new("me@exa\u0007mple.com")
 	if Validate(&s) == nil {
 		t.Fatal("control character accepted")
 	}

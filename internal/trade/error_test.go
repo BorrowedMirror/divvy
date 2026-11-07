@@ -10,7 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func u64p(v uint64) *uint64 { return &v }
+//go:fix inline
+func u64p(v uint64) *uint64 { return new(v) }
 
 func TestFlattensEveryVariant(t *testing.T) {
 	cases := []struct {

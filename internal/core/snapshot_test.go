@@ -73,7 +73,7 @@ func readSnapshot(t testing.TB, dir, name string) string {
 // same generic shape encoding/json produces (map[string]any, []any, float64, ...).
 func parseInstaYAML(src string) (any, error) {
 	var lines []yamlLine
-	for _, l := range strings.Split(src, "\n") {
+	for l := range strings.SplitSeq(src, "\n") {
 		if strings.TrimSpace(l) == "" {
 			continue
 		}

@@ -215,7 +215,7 @@ func newCompiled(lang *Language) *compiled {
 	key := func(en string) *string {
 		for _, p := range lang.Keys {
 			if p[0] == en {
-				return ptr(p[1])
+				return new(p[1])
 			}
 		}
 		return nil
@@ -410,7 +410,7 @@ func (c *compiled) translate(text string) string {
 		}
 		translated := c.line(line)
 		if r, ok := strings.CutPrefix(translated, "Rarity: "); ok {
-			rarity = ptr(r)
+			rarity = new(r)
 			inNames = true
 		}
 		out = append(out, translated)
