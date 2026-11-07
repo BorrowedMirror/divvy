@@ -111,6 +111,25 @@ tasks:
     cmds:
       - go run ./cmd/bindgen -check
 
+  vuln:
+    desc: govulncheck for this OS, Windows and macOS (purego).
+    cmds:
+      - '{{.TOOL}} govulncheck -tags "{{.TAGS}}" ./...'
+      - cmd: '{{.TOOL}} govulncheck ./...'
+        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
+      - cmd: '{{.TOOL}} govulncheck -tags purego ./...'
+        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+
+  licenses:check:
+    desc: Fail when a dependency of any OS build has a licence outside the policy (cmd/release/notices.go).
+    cmds:
+      - go run ./cmd/release notices -check
+
+  notices:
+    desc: Third-party notices for a release, target/go/THIRD-PARTY-NOTICES.html.
+    cmds:
+      - go run ./cmd/release notices
+
   commitconfig:check:
     desc: Fail when .commitlintrc.json or the commit docs are out of date with .commit-config.toml.
     cmds:

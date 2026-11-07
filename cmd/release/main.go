@@ -4,6 +4,7 @@
 //	go run ./cmd/release package linux      # AppImage        -> target/go/
 //	go run ./cmd/release package windows    # NSIS installer  -> target/go/ (cross-compiled)
 //	go run ./cmd/release package macos      # .app + DMG      -> target/go/ (macOS only)
+//	go run ./cmd/release notices            # third-party notices -> target/go/
 //	go run ./cmd/release version            # print the app version
 //
 // The web UI is embedded into the binary, so build it first: `pnpm --dir web build`.
@@ -24,6 +25,7 @@ commands:
                            build the release binary and its installer under target/go/
   updater-keygen           print a new updater key pair (RKL_UPDATER_PUBKEY / RKL_UPDATER_PRIVATE_KEY)
   update-manifest          sign the update artifacts and write update.json (needs RKL_UPDATER_PRIVATE_KEY)
+  notices [-check]         write THIRD-PARTY-NOTICES.html (or only check the licence policy)
   version                  print the app version
 
 Run "go run ./cmd/release <command> -h" for the flags of a command.
@@ -55,6 +57,8 @@ func run(args []string, stdout io.Writer) error {
 		return runUpdaterKeygen(stdout)
 	case "update-manifest":
 		return runUpdateManifest(rest, stdout)
+	case "notices":
+		return runNotices(root, rest)
 	case "version":
 		v, err := appVersion(root)
 		if err != nil {
