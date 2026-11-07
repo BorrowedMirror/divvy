@@ -1,8 +1,5 @@
 packages:
   - web
-  - e2e
 allowBuilds:
   lefthook: true
   esbuild: true
-  edgedriver: false
-  geckodriver: false

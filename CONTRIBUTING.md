@@ -60,7 +60,7 @@ Windows (WiX).
 ### First run
 
 ```sh
-pnpm install                 # web + e2e deps, commitlint, lefthook
+pnpm install                 # web deps, commitlint, lefthook
 pnpm exec lefthook install   # hooks from .lefthook.yml: rustfmt check + biome on commit, commitlint on commit-msg
 cargo test                   # default members (crates/*)
 pnpm --dir web dev           # web UI on http://localhost:5173 (keep running for the app)
@@ -86,24 +86,31 @@ web >= 80%; patch coverage >= 80%.
 
 ### End-to-end tests
 
-The e2e suites drive the real app (built with the test hook) against `tools/fake-game` and a
-mock trade2 server; see `e2e/` and [docs/contributing/ci.md](docs/contributing/ci.md).
+The e2e tests run the real Go app against `tools/fake-game` (a window titled "Path of Exile 2"
+that puts an item on the clipboard when it gets the copy chord) and a mock trade2 API. They are
+Go tests in `e2e/` behind the `e2e` build tag. They start a test-hook build of the app
+(`-tags testhook`) with a fresh `RKL_CONFIG_DIR`, point its trade, poe2scout and poe.ninja URLs
+at the mock, and drive it over the test hook on 127.0.0.1. The hook's `dom <window> <selector>`
+command checks what the overlay and settings pages render, without WebDriver.
+
+The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and, when missing, the
+fake game (`target/e2e/debug/fake-game`), set up the session, then run
+`go test -tags e2e ./e2e/...`:
 
 ```sh
-bash e2e/scripts/run-x11.sh          # Linux X11: Xvfb + openbox, WebDriver specs
-bash e2e/scripts/run-wayland.sh      # Linux Wayland: headless sway + portal, WebDriver specs
-bash e2e/scripts/run-hook-x11.sh     # Linux X11: hook harness, no WebDriver
-pwsh e2e/scripts/run-windows.ps1     # Windows: tauri-driver + msedgedriver
-cargo run --manifest-path e2e/macos-harness/Cargo.toml   # macOS: hook harness
+task e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
+task e2e:wayland        # Linux: headless sway + portal + virtual keyboard (E2E_XWAYLAND=1 for XWayland)
+task e2e:stacking       # Linux: overlay stacking over a fullscreen game (needs the binaries above)
+task e2e:macos          # macOS desktop (bash e2e/scripts/run-macos.sh)
+task e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
 ```
 
-The scripts build the web UI, the app (`--features test-hook,tauri/custom-protocol`) and
-`fake-game` themselves; `SKIP_BUILD=1` (`-SkipBuild` on Windows) reuses existing binaries. The
-macOS harness does not build: run `pnpm --dir web build`, then
-`cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol` and
-`cargo build -p fake-game` first. Each
-script lists the tools it needs in its header comment. The knobs are the `RKL_E2E_*` variables in the
-[README](README.md#environment-variables).
+`task` is `go tool -modfile=tools/go.mod wails3 task`, see [Go build](#go-build).
+`RUN=<regexp>` picks tests (`task e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
+for the PowerShell script) reuses the binaries. Each script lists the tools it needs in its
+header comment. The `RKL_E2E_*` variables (binary paths, how the price check is triggered,
+where logs are kept) are listed in `e2e/doc.go`. With a display already running,
+`go test -tags e2e ./e2e/...` works on its own, and `-run TestMockTrade` needs no display.
 
 ## Go build
 

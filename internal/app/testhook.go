@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -33,7 +34,14 @@ type HookActions struct {
 	TrayPresent func() bool
 	// Quit exits the app.
 	Quit func()
+	// DOM asks the web view of window (`overlay` or `settings`) about the first element
+	// matching a CSS selector and returns its JSON reply,
+	// `{"exists":bool,"visible":bool,"text":string}`. Read-only.
+	DOM func(window, selector string) (string, error)
 }
+
+// DOMWindows are the windows `dom` can query.
+var DOMWindows = []string{"overlay", "settings"}
 
 // StartTestHook serves the e2e line protocol on 127.0.0.1:port (0 picks a port) and returns
 // the bound port. One command per line, one reply line each.
@@ -137,6 +145,8 @@ func (f *Flow) HandleHookLine(line string, actions HookActions) string {
 			return "err " + err.Error()
 		}
 		return "ok"
+	case "dom":
+		return hookDOM(arg, actions)
 	case "hide":
 		if err := f.HideOverlay(); err != nil {
 			return "err " + err.Error()
@@ -153,6 +163,23 @@ func (f *Flow) HandleHookLine(line string, actions HookActions) string {
 		return "ok"
 	}
 	return fmt.Sprintf("err unknown command `%s`", cmd)
+}
+
+// hookDOM runs `dom <window> <css selector>`; the selector is the rest of the line.
+func hookDOM(arg string, actions HookActions) string {
+	window, selector, _ := strings.Cut(arg, " ")
+	selector = strings.TrimSpace(selector)
+	if !slices.Contains(DOMWindows, window) || selector == "" {
+		return "err usage: dom <" + strings.Join(DOMWindows, "|") + "> <css selector>"
+	}
+	if actions.DOM == nil {
+		return "err dom is not available"
+	}
+	reply, err := actions.DOM(window, selector)
+	if err != nil {
+		return "err " + err.Error()
+	}
+	return reply
 }
 
 func (f *Flow) hookState(actions HookActions) string {

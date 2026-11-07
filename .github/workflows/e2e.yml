@@ -1,10 +1,10 @@
 name: e2e
 
-# End-to-end runs of the real app against tools/fake-game and recorded trade fixtures.
-# Scripts live in e2e/scripts (workstream H); this file only provisions each environment and
-# builds the binaries once, then runs the scripts with SKIP_BUILD (-SkipBuild on Windows).
-# The app is a debug build with the test hook and `tauri/custom-protocol`, so it serves
-# web/dist itself instead of waiting for the Vite dev server.
+# End-to-end runs of the Go/Wails app (a test-hook build of cmd/rkl) against tools/fake-game
+# and a mock trade2 API, driven by the Go tests in e2e/ (`go test -tags e2e ./e2e/...`) over
+# the app's test hook. Each job builds the binaries once and runs the e2e/scripts script with
+# SKIP_BUILD (-SkipBuild on Windows); the Linux scripts provide the session themselves. The
+# app and fake-game logs are uploaded when a job fails.
 on:
   push:
     branches: [master]
@@ -21,48 +21,11 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
-  TAURI_DRIVER_VERSION: 2.1.0
+  RKL_E2E_ARTIFACTS: ${{ github.workspace }}/target/e2e/logs
 
 jobs:
-  windows:
-    name: windows (tauri-driver + msedgedriver)
-    runs-on: windows-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          shared-key: e2e
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked --version "$env:TAURI_DRIVER_VERSION"
-      - name: msedgedriver matching the installed WebView2
-        shell: pwsh
-        run: |
-          $version = (Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}').pv
-          Write-Host "WebView2 $version"
-          $zip = "$env:RUNNER_TEMP\edgedriver.zip"
-          Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile $zip
-          Expand-Archive $zip -DestinationPath "$env:RUNNER_TEMP\edgedriver" -Force
-          "$env:RUNNER_TEMP\edgedriver" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-      - name: Build web, app (debug, test hook) and fake game
-        run: |
-          pnpm --dir web build
-          cargo build --locked -p rkl-desktop --features test-hook,tauri/custom-protocol
-          cargo build --locked -p fake-game
-      - name: Run e2e
-        shell: pwsh
-        run: ./e2e/scripts/run-windows.ps1 -SkipBuild
-
   linux-x11:
-    name: linux x11 (Xvfb + openbox, webdriver)
+    name: linux x11 (Xvfb + openbox, real hotkey)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -71,7 +34,10 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          extra: webkit2gtk-driver xdotool
+          extra: xdotool
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -82,19 +48,25 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked --version "$TAURI_DRIVER_VERSION"
-      - name: Build web, app (debug, test hook) and fake game
+      - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p rkl-desktop --features test-hook,tauri/custom-protocol
-          cargo build --locked -p fake-game
+          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard
+          cargo build --locked -p fake-game --target-dir target/e2e
       - name: Run e2e (script starts Xvfb + openbox in a private D-Bus session)
         env:
           SKIP_BUILD: "1"
         run: bash e2e/scripts/run-x11.sh
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-logs-linux-x11
+          path: target/e2e/logs
+          if-no-files-found: ignore
 
-  linux-x11-hook:
-    name: linux x11 (Xvfb + openbox, hook harness + real hotkey)
+  linux-x11-stacking:
+    name: linux x11 (overlay stacking over a fullscreen game)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -104,28 +76,24 @@ jobs:
       - uses: ./.github/actions/linux-deps
         with:
           extra: xdotool wmctrl x11-utils
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-          workspaces: |
-            .
-            e2e/macos-harness
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build web, app (debug, test hook) and fake game
+      - name: Build web, app (test hook) and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p rkl-desktop --features test-hook,tauri/custom-protocol
-          cargo build --locked -p fake-game
-      - name: Run hook harness (script builds it, starts Xvfb + openbox, presses the hotkey)
-        env:
-          SKIP_BUILD: "1"
-        run: bash e2e/scripts/run-hook-x11.sh
+          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          cargo build --locked -p fake-game --target-dir target/e2e
       - name: Check overlay stacking over a fullscreen game (openbox)
         run: bash e2e/scripts/stacking-x11.sh
 
@@ -139,60 +107,111 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          # libxkbcommon-tools: xkbcli compiles the keymap for the wl-keyboard helper.
-          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr webkit2gtk-driver libxkbcommon-tools
+          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-          workspaces: |
-            .
-            e2e/macos-harness
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo install tauri-driver --locked --version "$TAURI_DRIVER_VERSION"
-      - name: Build web, app (debug, test hook) and fake game
+      - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
-          cargo build --locked -p rkl-desktop --features test-hook,tauri/custom-protocol
-          cargo build --locked -p fake-game
+          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard
+          cargo build --locked -p fake-game --target-dir target/e2e
       - name: Run e2e (script starts headless sway + portal + virtual keyboard in a D-Bus session)
         env:
           SKIP_BUILD: "1"
           # Debian/Ubuntu install the portal daemons under /usr/libexec.
           PORTAL_LIBEXEC: /usr/libexec
         run: bash e2e/scripts/run-wayland.sh
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-logs-linux-wayland
+          path: target/e2e/logs
+          if-no-files-found: ignore
 
-  macos:
-    name: macos (rust harness)
-    runs-on: macos-latest
+  windows:
+    name: windows
+    runs-on: windows-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: e2e
-          workspaces: |
-            .
-            e2e/macos-harness
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build web, app (debug, test hook) and fake game
+      - name: Build web, app (test hook) and fake game
+        # bash: stop at the first failing command (pwsh would only check the last one).
+        shell: bash
         run: |
           pnpm --dir web build
-          cargo build --locked -p rkl-desktop --features test-hook,tauri/custom-protocol
-          cargo build --locked -p fake-game
-      # WKWebView has no WebDriver; the harness drives the app over the RKL_TEST_HOOK socket.
-      - name: Run macOS harness
-        run: cargo run --locked --manifest-path e2e/macos-harness/Cargo.toml
+          go build -tags testhook -o target/go/rkl-e2e.exe ./cmd/rkl
+          cargo build --locked -p fake-game --target-dir target/e2e
+      - name: Run e2e
+        shell: pwsh
+        run: ./e2e/scripts/run-windows.ps1 -SkipBuild
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-logs-windows
+          path: target/e2e/logs
+          if-no-files-found: ignore
+
+  macos:
+    name: macos
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: e2e
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build web, app (test hook) and fake game
+        run: |
+          pnpm --dir web build
+          go build -tags testhook -o target/go/rkl-e2e ./cmd/rkl
+          cargo build --locked -p fake-game --target-dir target/e2e
+      # WKWebView has no WebDriver; the Go tests drive the app over its test hook.
+      - name: Run e2e
+        env:
+          SKIP_BUILD: "1"
+        run: bash e2e/scripts/run-macos.sh
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-logs-macos
+          path: target/e2e/logs
+          if-no-files-found: ignore

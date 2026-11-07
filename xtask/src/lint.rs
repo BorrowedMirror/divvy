@@ -54,7 +54,6 @@ pub fn steps(args: &LintArgs) -> Vec<Step> {
     if !args.no_web {
         steps.push(Step { name: "biome", dir: "web", argv: &["pnpm", "lint"] });
         steps.push(Step { name: "tsc", dir: "web", argv: &["pnpm", "typecheck"] });
-        steps.push(Step { name: "tsc (e2e)", dir: "e2e", argv: &["pnpm", "typecheck"] });
     }
     steps
 }
@@ -99,8 +98,7 @@ mod tests {
                 "cargo-deny",
                 "cargo-machete",
                 "biome",
-                "tsc",
-                "tsc (e2e)"
+                "tsc"
             ]
         );
     }

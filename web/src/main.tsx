@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 
 import { createRoot } from "react-dom/client";
 
+import { installE2E } from "@lib/e2e";
 import { inNativeWebview } from "@lib/mockTransport";
 import { App } from "@src/App";
 import "@src/index.css";
@@ -13,6 +14,7 @@ async function boot() {
     const { installDevMock } = await import("@src/devMock");
     installDevMock(routeFromHash(window.location.hash));
   }
+  installE2E();
   const root = document.getElementById("root");
   if (!root) throw new Error("missing #root");
   createRoot(root).render(

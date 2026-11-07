@@ -158,3 +158,32 @@ tasks:
     desc: Sign the update artifacts into update.json (needs RKL_UPDATER_PRIVATE_KEY).
     cmds:
       - go run ./cmd/release update-manifest {{.CLI_ARGS}}
+
+  # End-to-end tests (e2e/, `go test -tags e2e`): the scripts build the web UI, the test-hook
+  # app and the fake game (SKIP_BUILD=1 reuses them) and provide the session. RUN=<regexp>
+  # picks tests (`task e2e:x11 RUN=TestPriceCheck`); with standalone Task, `-- <go test args>`
+  # works too (Wails' built-in runner drops arguments after `--`).
+  e2e:x11:
+    desc: e2e tests under Xvfb + openbox with real hotkey presses (Linux).
+    cmds:
+      - bash e2e/scripts/run-x11.sh {{if .RUN}}-run '{{.RUN}}'{{end}} {{.CLI_ARGS}}
+
+  e2e:wayland:
+    desc: e2e tests under headless sway (Linux; E2E_XWAYLAND=1 runs the clients on XWayland).
+    cmds:
+      - bash e2e/scripts/run-wayland.sh {{if .RUN}}-run '{{.RUN}}'{{end}} {{.CLI_ARGS}}
+
+  e2e:stacking:
+    desc: Overlay stacking checks over a fullscreen game under Xvfb + openbox (Linux, built e2e binaries).
+    cmds:
+      - bash e2e/scripts/stacking-x11.sh
+
+  e2e:macos:
+    desc: e2e tests on the macOS desktop.
+    cmds:
+      - bash e2e/scripts/run-macos.sh {{if .RUN}}-run '{{.RUN}}'{{end}} {{.CLI_ARGS}}
+
+  e2e:windows:
+    desc: e2e tests on the Windows desktop.
+    cmds:
+      - pwsh e2e/scripts/run-windows.ps1 {{if .RUN}}-run '{{.RUN}}'{{end}} {{.CLI_ARGS}}

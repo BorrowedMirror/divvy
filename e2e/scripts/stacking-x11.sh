@@ -4,12 +4,13 @@
 #   - the unpinned price panel stacks above the game and leaves the game focused,
 #   - the pinned price panel stacks above the game and takes focus,
 #   - the settings window covers the game exactly, above it, focused.
-# Needs: Xvfb openbox xdotool wmctrl xprop xwininfo dbus-run-session python3, and binaries built
-# with `cargo build -p rkl-desktop --features test-hook,tauri/custom-protocol && cargo build -p fake-game`.
+# Needs: Xvfb openbox xdotool wmctrl xprop xwininfo dbus-run-session python3, and the binaries
+# e2e/scripts/build.sh builds (test-hook app target/go/rkl-e2e, target/e2e/debug/fake-game);
+# RKL_E2E_APP / RKL_E2E_FAKE_GAME override them.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-APP=${RKL_APP_BIN:-target/debug/rkl}
-GAMEBIN=${RKL_FAKE_GAME_BIN:-target/debug/fake-game}
+APP=${RKL_E2E_APP:-target/go/rkl-e2e}
+GAMEBIN=${RKL_E2E_FAKE_GAME:-target/e2e/debug/fake-game}
 DISP=${STACK_DISPLAY:-:87}
 PORT=${STACK_HOOK_PORT:-47188}
 Xvfb "$DISP" -screen 0 1920x1080x24 >/dev/null 2>&1 &
@@ -41,7 +42,10 @@ RKL_TEST_HOOK=$PORT RKL_CONFIG_DIR=$CFG RKL_LOG=warn "$APP" >"$LOG/app" 2>&1 & P
 trap "kill $FG $PID 2>/dev/null || true" EXIT
 for _ in $(seq 100); do (exec 3<>/dev/tcp/127.0.0.1/$PORT) 2>/dev/null && break; sleep 0.1; done
 hook() { exec 3<>/dev/tcp/127.0.0.1/$PORT; echo "$1" >&3; head -1 <&3; exec 3>&-; }
-name() { xprop -id "$1" _NET_WM_NAME 2>/dev/null | sed "s/.*= //; s/\"//g"; }
+# Wails does not title frameless windows on Linux, so the overlay is named after the program
+# ("rkl"); report it as "RKL overlay" like the titled settings window ("RKL settings").
+name() { local n; n=$(xprop -id "$1" _NET_WM_NAME 2>/dev/null | sed "s/.*= //; s/\"//g"); [ "$n" = rkl ] && n="RKL overlay"; echo "$n"; }
+overlay_id() { for w in $(xprop -root _NET_CLIENT_LIST | sed "s/.*# //; s/,//g"); do [ "$(name "$w")" = "RKL overlay" ] && { echo "$w"; return; }; done; }
 top() { name "$(xprop -root _NET_CLIENT_LIST_STACKING | sed "s/.*# //; s/.*, //")"; }
 active() { name "$(xprop -root _NET_ACTIVE_WINDOW | sed "s/.*# //")"; }
 geo() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}/Width/{w=\$NF}/Height/{h=\$NF}END{print x\",\"y\",\"w\",\"h}"; }
@@ -81,7 +85,8 @@ done
 # Unpinned panel covers the game; with focus-follows-mouse the pointer cannot hand focus back.
 hook hide >/dev/null; xdotool windowactivate --sync "$GAME"; xdotool mousemove 300 300; sleep 0.3
 xdotool key --clearmodifiers ctrl+d; sleep 1.5
-OW=$(xdotool search --name "^RKL overlay$" | head -1)
+OW=$(overlay_id)
+[ -n "$OW" ] || fail "no overlay window"
 [ "$(geo "$OW")" = "$(geo "$GAME")" ] || fail "unpinned panel $(geo "$OW") does not cover the game $(geo "$GAME")"
 xdotool mousemove 1700 900; sleep 0.6; xdotool mousemove 1750 950; sleep 0.6
 [ "$(active)" = "RKL overlay" ] || fail "moving the mouse handed focus away (active: $(active))"
