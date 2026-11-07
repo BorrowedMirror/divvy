@@ -12,11 +12,13 @@ use std::sync::mpsc::{self, Receiver, Sender};
 
 use windows::Win32::Foundation::{HWND, LPARAM, RECT};
 use windows::Win32::Graphics::Dwm::{DWMWA_EXTENDED_FRAME_BOUNDS, DwmGetWindowAttribute};
+use windows::Win32::System::Threading::GetCurrentProcessId;
 use windows::Win32::UI::Accessibility::{HWINEVENTHOOK, SetWinEventHook, UnhookWinEvent};
 use windows::Win32::UI::WindowsAndMessaging::{
     CHILDID_SELF, DispatchMessageW, EVENT_OBJECT_LOCATIONCHANGE, EVENT_SYSTEM_FOREGROUND, EnumWindows, FindWindowW,
-    GetForegroundWindow, GetMessageW, GetWindowRect, GetWindowTextW, IsWindow, IsWindowVisible, KillTimer, MSG,
-    OBJID_WINDOW, PostQuitMessage, SetTimer, TranslateMessage, WINEVENT_OUTOFCONTEXT, WM_TIMER,
+    GetForegroundWindow, GetMessageW, GetWindowRect, GetWindowTextW, GetWindowThreadProcessId, IsWindow,
+    IsWindowVisible, KillTimer, MSG, OBJID_WINDOW, PostQuitMessage, SetTimer, TranslateMessage, WINEVENT_OUTOFCONTEXT,
+    WM_TIMER,
 };
 use windows::core::{BOOL, HSTRING, PCWSTR};
 
@@ -60,7 +62,25 @@ pub(super) fn hwnd_id(hwnd: HWND) -> u64 {
     hwnd.0 as usize as u64
 }
 
+/// Whether `hwnd` belongs to this process (the settings and price windows, hidden helpers).
+fn is_own_window(hwnd: HWND) -> bool {
+    let mut pid = 0u32;
+    // SAFETY: `pid` is a valid out-pointer; any HWND value is accepted (0 for a stale one).
+    unsafe { GetWindowThreadProcessId(hwnd, Some(&raw mut pid)) };
+    // SAFETY: no arguments.
+    pid == unsafe { GetCurrentProcessId() }
+}
+
+/// The title of another process's window; `None` for our own windows, which are never the game.
+///
+/// Our own windows are skipped because `GetWindowTextW` on a window of this process that
+/// another thread owns sends it `WM_GETTEXT` and waits for the reply. While the game is not
+/// running, the tracker thread looks at every visible window each second, so it would block on
+/// the UI thread, and the UI thread waits for the tracker's first scan during startup.
 fn window_title(hwnd: HWND) -> Option<String> {
+    if is_own_window(hwnd) {
+        return None;
+    }
     let mut buf = [0u16; 256];
     // SAFETY: `buf` is a valid writable buffer; the wrapper passes its length. Reading another
     // process's window title does not send messages, so this cannot re-enter our hook callback.
@@ -223,8 +243,10 @@ fn hook_thread(tx: Sender<WindowEvent>, ready: mpsc::SyncSender<Result<(), Platf
     }
     // SAFETY: a thread timer (no HWND, no TIMERPROC) just posts WM_TIMER to this thread's queue.
     let timer = unsafe { SetTimer(None, 0, RESCAN_MS, None) };
-    rescan();
+    // Report ready before the first scan: `subscribe` runs on the UI thread and must not wait
+    // on Win32 calls made here.
     let _ = ready.send(Ok(()));
+    rescan();
 
     let mut msg = MSG::default();
     // SAFETY: `msg` is a valid out-pointer. GetMessageW returns 0 on WM_QUIT and -1 on error; both

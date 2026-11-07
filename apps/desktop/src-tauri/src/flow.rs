@@ -587,6 +587,11 @@ pub fn spawn_game_follower(app: &AppHandle, state: &AppState) {
         sync_hotkeys_to_focus(&app.state::<Arc<AppState>>());
         for ev in rx {
             let state = app.state::<Arc<AppState>>();
+            match &ev {
+                WindowEvent::Found(info) => tracing::info!(rect = ?info.rect, "game window found"),
+                WindowEvent::Lost => tracing::info!("game window lost"),
+                _ => {}
+            }
             if matches!(ev, WindowEvent::Found(_) | WindowEvent::FocusChanged { .. } | WindowEvent::Lost) {
                 sync_hotkeys_to_focus(&state);
             }

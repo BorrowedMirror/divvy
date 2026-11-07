@@ -116,6 +116,13 @@ fn init_logging() -> LogFile {
         .with(fmt::layer().with_writer(std::io::stderr))
         .with(fmt::layer().with_ansi(false).with_writer(move || LogFileWriter(Arc::clone(&writer))))
         .try_init();
+    // Release builds on Windows have no console, so a panic would otherwise leave no trace.
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let thread = std::thread::current();
+        tracing::error!("panic on thread {}: {info}", thread.name().unwrap_or("unnamed"));
+        default_hook(info);
+    }));
     slot
 }
 
@@ -306,6 +313,12 @@ pub fn run() {
             if let Some(path) = attach_log_file(&log_slot, state.paths.as_ref()) {
                 let _ = state.log_path.set(path);
             }
+            tracing::info!(
+                version = env!("CARGO_PKG_VERSION"),
+                os = std::env::consts::OS,
+                backend = ?state.backend,
+                "rkl starting"
+            );
             spawn_data_decode(&state);
             let tray_ok = match tray::build(&handle, &state.settings().ui.language) {
                 Ok(()) => true,
