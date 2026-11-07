@@ -107,7 +107,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/linux-deps
         with:
-          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr
+          extra: sway xdg-desktop-portal xdg-desktop-portal-wlr wl-clipboard
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod

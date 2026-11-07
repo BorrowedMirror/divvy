@@ -597,9 +597,20 @@ func run(t *testing.T, cmd string) {
 
 // TriggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
 // (the app sends its copy chord to whatever has focus, as for a real player).
+// lastTrigger is when the previous TriggerPriceCheck fired. The app drops presses that come
+// less than its debounce (150 ms) after the previous price check started, as key bounce; on a
+// fast run (Wayland, no focus delay) a second trigger could land inside it.
+var lastTrigger time.Time
+
+const triggerSpacing = 300 * time.Millisecond
+
 func TriggerPriceCheck(t *testing.T, a *App, pinned bool) {
 	t.Helper()
 	FocusGame(t)
+	if wait := triggerSpacing - time.Since(lastTrigger); wait > 0 {
+		time.Sleep(wait)
+	}
+	defer func() { lastTrigger = time.Now() }()
 	switch triggerMode() {
 	case "xdotool":
 		// The app grabs its hotkeys only while it sees the game focused (it polls for that);

@@ -240,8 +240,16 @@ func platformFrom(kind platform.BackendKind, parts platform.Parts, ok bool, s *s
 		Hotkeys:        shell.NewHotkeys(s.App, kind == platform.BackendX11),
 		InputListener:  parts.InputListener,
 		InputSimulator: parts.InputSimulator,
-		Clipboard:      shell.NewClipboard(s.App),
+		Clipboard:      clipboardFor(parts, s),
 	}
+}
+
+// clipboardFor is the backend's own clipboard when it has one (Wayland-native), else Wails'.
+func clipboardFor(parts platform.Parts, s *shell.Shell) platform.Clipboard {
+	if parts.Clipboard != nil {
+		return parts.Clipboard
+	}
+	return shell.NewClipboard(s.App)
 }
 
 func trayLabels(language string) shell.TrayLabels {

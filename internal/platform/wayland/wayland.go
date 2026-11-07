@@ -73,8 +73,18 @@ func New(opts ...Option) (platform.Parts, error) {
 		sim = vk
 	}
 
+	clip, haveClip := detectWLClipboard()
+	if !haveClip {
+		caps.Notes = append(caps.Notes, "install wl-clipboard (wl-paste, wl-copy): without it the item the game copies is only seen while an RKL window has focus")
+	}
+	var clipboard platform.Clipboard
+	if haveClip {
+		clipboard = clip
+	}
+
 	return platform.Parts{
 		Kind:           platform.BackendWayland,
+		Clipboard:      clipboard,
 		Capabilities:   caps,
 		WindowTracker:  unsupported("window_tracking"),
 		InputListener:  unsupported("passive_hook"),

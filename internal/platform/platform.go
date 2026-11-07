@@ -120,6 +120,9 @@ type Parts struct {
 	// ActivateWindow gives keyboard focus to another window by its native id (the game, after
 	// the panel closes). Nil where the platform cannot.
 	ActivateWindow func(nativeID uint64) error
+	// Clipboard, when set, replaces Wails' clipboard (Wayland-native: GTK only sees clipboard
+	// changes while RKL has a focused window, so the backend reads it through data-control).
+	Clipboard Clipboard
 }
 
 // Optional extras an [OverlayWindow] may implement; the shell checks with a type assertion and
