@@ -52,7 +52,7 @@ jobs:
           token: ${{ github.token }}
           branch: automation/fixtures-refresh
           delete-branch: true
-          add-paths: crates/trade/tests/fixtures/**
+          add-paths: internal/trade/testdata/fixtures/**
           commit-message: |
             test(trade): re-record trade api fixtures
 

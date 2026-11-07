@@ -1,9 +1,9 @@
-// Command datarefresh regenerates the bundled game data in crates/data/assets/ and records
+// Command datarefresh regenerates the bundled game data in internal/data/assets/ and records
 // the trade API test fixtures.
 //
 //	go run ./cmd/datarefresh refresh [-offline]   # download, normalise and write the assets
 //	go run ./cmd/datarefresh l10n <raw.json>      # rebuild the translations (see below)
-//	go run ./cmd/datarefresh fixtures [flags]     # re-record crates/trade/tests/fixtures/
+//	go run ./cmd/datarefresh fixtures [flags]     # re-record internal/trade/testdata/fixtures/
 //
 // Translations come from an installed game client, whose files are Oodle-compressed. The
 // standalone Rust tool in tools/game-extract reads them and writes the raw tables as JSON
@@ -24,10 +24,10 @@ const usage = `usage: go run ./cmd/datarefresh <command> [flags]
 
 commands:
   refresh [-offline]   download the trade2 data and RePoE exports (cached in target/data-cache),
-                       normalise them and write crates/data/assets
+                       normalise them and write internal/data/assets
   l10n <raw.json>      rebuild the translations for non-English clients from the output of
                        tools/game-extract (game-extract l10n <game_dir> <raw.json>)
-  fixtures [flags]     re-record the trade2 fixtures in crates/trade/tests/fixtures from the
+  fixtures [flags]     re-record the trade2 fixtures in internal/trade/testdata/fixtures from the
                        live API, 2 s between requests
 
 Run "go run ./cmd/datarefresh <command> -h" for the flags of a command.

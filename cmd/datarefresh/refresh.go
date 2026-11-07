@@ -1,7 +1,7 @@
 package main
 
 // `refresh [-offline]`: download upstream game data, normalise it into internal/core
-// catalog records and write crates/data/assets/.
+// catalog records and write internal/data/assets/.
 
 import (
 	"context"
@@ -146,7 +146,7 @@ func runRefresh(args []string) error {
 	fs := flag.NewFlagSet("refresh", flag.ContinueOnError)
 	offline := fs.Bool("offline", false, "use the cached downloads in the cache directory instead of the network")
 	cacheDir := fs.String("cache", "", "download cache (default: target/data-cache)")
-	assetsDir := fs.String("assets", "", "asset directory to write (default: crates/data/assets)")
+	assetsDir := fs.String("assets", "", "asset directory to write (default: internal/data/assets)")
 	check := fs.Bool("check", true, "run the parser corpus tests against the new data afterwards")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -162,7 +162,7 @@ func runRefresh(args []string) error {
 		*cacheDir = filepath.Join(root, "target", "data-cache")
 	}
 	if *assetsDir == "" {
-		*assetsDir = filepath.Join(root, "crates", "data", "assets")
+		*assetsDir = filepath.Join(root, "internal", "data", "assets")
 	}
 	var fetch fetcher
 	if !*offline {

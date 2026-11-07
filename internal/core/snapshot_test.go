@@ -1,7 +1,7 @@
 package core
 
-// Readers for the Rust side's insta snapshots (`crates/core/tests/snapshots/*/*.snap`) and
-// the shared item corpus (`crates/testkit/corpus`), so Go is checked against the exact Rust
+// Readers for the Rust side's insta snapshots (`internal/core/testdata/snapshots/*/*.snap`) and
+// the shared item corpus (`internal/testkit/testdata/corpus`), so Go is checked against the exact Rust
 // output. The .snap files are only ever read.
 
 import (
@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	corpusDir    = "../../crates/testkit/corpus"
-	snapshotsDir = "../../crates/core/tests/snapshots"
+	corpusDir    = "../../internal/testkit/testdata/corpus"
+	snapshotsDir = "../../internal/core/testdata/snapshots"
 )
 
 type corpusEntry struct {

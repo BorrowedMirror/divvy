@@ -2,16 +2,13 @@
 target/
 node_modules/
 web/dist/
-*.profraw
-lcov.info
 coverage/
 .idea/
-*.snap.new
 .DS_Store
 /.claude/
 *.tsbuildinfo
 *.AppImage
-# Windows resources linked into cmd/rkl by `go run ./cmd/xtask package windows` (removed after the build).
+# Windows resources linked into cmd/rkl by `go run ./cmd/release package windows` (removed after the build).
 *.syso
 
 # Task (Taskfile.yml) checksums

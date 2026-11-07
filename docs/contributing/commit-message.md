@@ -25,8 +25,7 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 
 | Scope | Description |
 | --- | --- |
-| `cargo` | Cargo configuration (build) |
-| `clippy` | Clippy configuration (ci) |
+| `cargo` | Cargo configuration of tools/game-extract (build) |
 | `codecov` | Codecov (ci) |
 | `commitlint` | commitlint configuration (ci) |
 | `config` | internal/config |
@@ -40,8 +39,6 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `platform` | internal/platform |
 | `pnpm` | pnpm configuration (build) |
 | `renovate` | Renovate (ci) |
-| `tauri` | Tauri configuration (build) |
 | `testkit` | internal/testkit |
 | `trade` | internal/trade |
 | `web` | web/ |
-| `xtask` | xtask |

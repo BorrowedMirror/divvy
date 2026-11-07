@@ -1,6 +1,6 @@
 name: data-refresh
 
-# Regenerates the bundled game data (crates/data/assets) and opens a PR only when it changed.
+# Regenerates the bundled game data (internal/data/assets) and opens a PR only when it changed.
 on:
   schedule:
     - cron: "17 4 * * *"
@@ -40,7 +40,7 @@ jobs:
           token: ${{ github.token }}
           branch: automation/data-refresh
           delete-branch: true
-          add-paths: crates/data/assets/**
+          add-paths: internal/data/assets/**
           commit-message: |
             build(data): refresh game data
 
@@ -50,5 +50,5 @@ jobs:
           body: |
             Automated run of `go run ./cmd/datarefresh refresh` (workflow `${{ github.workflow }}`, run ${{ github.run_id }}).
 
-            Review the manifest diff (`crates/data/assets/manifest.json`) for unexpected schema or count changes before merging.
+            Review the manifest diff (`internal/data/assets/manifest.json`) for unexpected schema or count changes before merging.
           labels: data

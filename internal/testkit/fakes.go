@@ -2,7 +2,7 @@
 //
 //   - Fakes (fakes.go): deterministic in-memory implementations of every internal/platform
 //     interface.
-//   - Corpus (corpus.go): the item-text corpus (crates/testkit/corpus/).
+//   - Corpus (corpus.go): the item-text corpus (internal/testkit/testdata/corpus/).
 //   - Fixtures (fixtures.go): an httptest mock server serving recorded trade API responses.
 //
 // Every fake is a pointer handle over shared, mutex-guarded state: put it into a

@@ -1,7 +1,0 @@
-# Legacy (pre-versioned) settings: flat keys, no sections.
-league = "Rise of the Abyssal"
-hotkey = "Ctrl+Shift+D"
-online_only = false
-
-[ui]
-theme = "dark"

@@ -29,7 +29,7 @@ type idText struct{ id, text string }
 // corpusTexts returns every corpus item's id and raw text.
 func corpusTexts(t *testing.T) []idText {
 	t.Helper()
-	dir := "../../crates/testkit/corpus"
+	dir := "../../internal/testkit/testdata/corpus"
 	raw, err := os.ReadFile(filepath.Join(dir, "index.toml"))
 	require.NoError(t, err)
 	var index struct {

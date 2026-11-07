@@ -7,8 +7,9 @@ pre-commit:
   parallel: true
   commands:
     rustfmt:
+      root: tools/game-extract/
       glob: "*.rs"
-      run: cargo fmt --all -- --check
+      run: cargo fmt -- --check
     gofmt:
       glob: "*.go"
       run: test -z "$(gofmt -l {staged_files})" || { gofmt -l {staged_files}; exit 1; }

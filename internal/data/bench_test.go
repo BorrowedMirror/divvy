@@ -11,8 +11,8 @@ import (
 	"io/fs"
 	"testing"
 
-	"github.com/BorrowedMirror/rust-king-ledger/crates/data/assets"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/data/assets"
 )
 
 func benchFile(b *testing.B, name string) []byte {

@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/crates/data/assets"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/data/assets"
 )
 
 func stat(id, kind, text string, aliases ...core.StatAlias) core.StatDef {
@@ -386,7 +386,7 @@ func TestBundledIsCached(t *testing.T) {
 // readSnapshot returns the body of an insta snapshot (after the YAML front matter).
 func readSnapshot(t *testing.T, name string) []byte {
 	t.Helper()
-	raw, err := os.ReadFile(filepath.Join("..", "..", "crates", "data", "src", "snapshots", name))
+	raw, err := os.ReadFile(filepath.Join("testdata", "snapshots", name))
 	require.NoError(t, err)
 	s := strings.ReplaceAll(string(raw), "\r\n", "\n")
 	rest, ok := strings.CutPrefix(s, "---\n")

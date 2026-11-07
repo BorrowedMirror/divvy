@@ -1,6 +1,6 @@
 package main
 
-// `fixtures`: re-record the trade2 fixtures in crates/trade/tests/fixtures/ from the live
+// `fixtures`: re-record the trade2 fixtures in internal/trade/testdata/fixtures/ from the live
 // API, slowly (default 2 s between requests, well under the published rate limits). Used by
 // .github/workflows/fixtures-refresh.yml, whose output is reviewed as a pull request.
 //
@@ -236,7 +236,7 @@ func record(ctx context.Context, opts recordOptions, client *http.Client) (strin
 func runFixtures(args []string) error {
 	fs := flag.NewFlagSet("fixtures", flag.ContinueOnError)
 	league := fs.String("league", "", "league to search in (default: the first poe2 league returned by the API)")
-	out := fs.String("out", "", "output directory (default: crates/trade/tests/fixtures)")
+	out := fs.String("out", "", "output directory (default: internal/trade/testdata/fixtures)")
 	delayMS := fs.Int("delay-ms", 2000, "delay between requests in milliseconds")
 	fetchCount := fs.Int("fetch-count", 10, "number of listings to fetch (trade2 caps this at 10)")
 	baseType := fs.String("base-type", "Leather Belt", "base type of the unique to search for")
@@ -251,7 +251,7 @@ func runFixtures(args []string) error {
 		return err
 	}
 	if *out == "" {
-		*out = filepath.Join(root, "crates", "trade", "tests", "fixtures")
+		*out = filepath.Join(root, "internal", "trade", "testdata", "fixtures")
 	}
 	version, err := os.ReadFile(filepath.Join(root, "VERSION"))
 	if err != nil {

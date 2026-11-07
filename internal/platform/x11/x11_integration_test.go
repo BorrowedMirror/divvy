@@ -173,7 +173,7 @@ func fakeGame(t *testing.T, display string) (cmd *exec.Cmd, lines <-chan string,
 	if _, err := os.Stat(bin); err != nil {
 		t.Skipf("fake game not built: %v", err)
 	}
-	corpus := filepath.Join(root, "crates/testkit/corpus")
+	corpus := filepath.Join(root, "internal/testkit/testdata/corpus")
 	b, err := os.ReadFile(filepath.Join(corpus, "currency/chaos-orb.txt"))
 	if err != nil {
 		t.Fatal(err)

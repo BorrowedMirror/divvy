@@ -2,9 +2,9 @@ package testkit
 
 // Trade API fixtures and a small programmable HTTP mock (the Go stand-in for wiremock).
 //
-// Recorded trade2 JSON lives in crates/trade/tests/fixtures/ (owned by the trade crate).
+// Recorded trade2 JSON lives in internal/trade/testdata/fixtures/ (owned by the trade crate).
 // [Fixture] reads from there first and falls back to testkit's own minimal samples in
-// crates/testkit/fixtures/, so testkit (and anything built on it) works even before the recorded
+// internal/testkit/testdata/fixtures/, so testkit (and anything built on it) works even before the recorded
 // set exists.
 //
 //   - [MountTradeFixtures] mounts static leagues / search / fetch responses.
@@ -36,14 +36,14 @@ var (
 	fetchPath  = regexp.MustCompile("^" + regexp.QuoteMeta(FetchPrefix) + "[^/]+$")
 )
 
-// TradeFixturesDir is the trade crate's recorded fixtures (crates/trade/tests/fixtures).
+// TradeFixturesDir is the trade crate's recorded fixtures (internal/trade/testdata/fixtures).
 func TradeFixturesDir() string {
-	return filepath.Join(repoRoot(), "crates", "trade", "tests", "fixtures")
+	return filepath.Join(repoRoot(), "internal", "trade", "testdata", "fixtures")
 }
 
-// TestkitFixturesDir is testkit's own minimal sample fixtures (crates/testkit/fixtures).
+// TestkitFixturesDir is testkit's own minimal sample fixtures (internal/testkit/testdata/fixtures).
 func TestkitFixturesDir() string {
-	return filepath.Join(repoRoot(), "crates", "testkit", "fixtures")
+	return filepath.Join(repoRoot(), "internal", "testkit", "testdata", "fixtures")
 }
 
 // FixtureErrorKind classifies a [FixtureError].
@@ -113,8 +113,8 @@ func TryFixtureIn(dirs []string, name string) (json.RawMessage, error) {
 	return nil, &FixtureError{Kind: FixtureNotFound, Name: name, Searched: searched}
 }
 
-// TryFixture loads crates/trade/tests/fixtures/<name>.json, else
-// crates/testkit/fixtures/<name>.json.
+// TryFixture loads internal/trade/testdata/fixtures/<name>.json, else
+// internal/testkit/testdata/fixtures/<name>.json.
 func TryFixture(name string) (json.RawMessage, error) {
 	return TryFixtureIn([]string{TradeFixturesDir(), TestkitFixturesDir()}, name)
 }
@@ -138,7 +138,7 @@ func TestkitFixture(name string) json.RawMessage {
 	return b
 }
 
-// FixtureHeaders reads a recorded header set, crates/trade/tests/fixtures/headers/<name>.txt
+// FixtureHeaders reads a recorded header set, internal/trade/testdata/fixtures/headers/<name>.txt
 // (`Name: value` per line), as the trade crate's tests do.
 func FixtureHeaders(name string) (http.Header, error) {
 	b, err := os.ReadFile(filepath.Join(TradeFixturesDir(), "headers", name+".txt"))

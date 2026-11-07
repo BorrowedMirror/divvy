@@ -27,7 +27,6 @@
       "always",
       [
         "cargo",
-        "clippy",
         "codecov",
         "commitlint",
         "config",
@@ -41,11 +40,9 @@
         "platform",
         "pnpm",
         "renovate",
-        "tauri",
         "testkit",
         "trade",
-        "web",
-        "xtask"
+        "web"
       ]
     ],
     "subject-case": [

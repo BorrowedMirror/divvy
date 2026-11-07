@@ -1,6 +1,6 @@
 // Package data holds the bundled game data.
 //
-// Assets live in `crates/data/assets/` as zstd-compressed JSON (`*.json.zst`) plus a
+// Assets live in `internal/data/assets/` as zstd-compressed JSON (`*.json.zst`) plus a
 // plain `manifest.json` ([Manifest]) recording schema version, source URLs and sha256
 // of each decompressed file. Assets are produced by `cargo xtask data refresh`.
 package data
@@ -18,8 +18,8 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/BorrowedMirror/rust-king-ledger/crates/data/assets"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/data/assets"
 )
 
 // SchemaVersion is the current asset schema version. Bump on breaking asset format change.

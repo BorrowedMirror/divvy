@@ -1,4 +1,4 @@
-# golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci-go.yml).
+# golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci.yml).
 # The "standard" set plus a few bug-finding linters; formatting is gofmt's job.
 #
 # CI lints three times: host (Linux, gtk3), GOOS=windows, and GOOS=darwin with -tags purego.

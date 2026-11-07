@@ -1,5 +1,7 @@
 name: ci
 
+# The Go/Wails app (cmd/rkl, internal/...) and the React UI (web/). Every Go job builds web/dist
+# first: the Go binary embeds it.
 on:
   push:
     branches: [master]
@@ -13,102 +15,43 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  CARGO_TERM_COLOR: always
-  CARGO_INCREMENTAL: "0"
-  RUST_BACKTRACE: "1"
-
 jobs:
-  fmt:
-    name: rustfmt
+  check:
+    name: gofmt + vet (linux, windows, darwin) + golangci-lint + generated files + vuln + licences
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - run: rustup toolchain install
-      - run: cargo fmt --all -- --check
-      # e2e/macos-harness is a standalone workspace (own Cargo.lock), so --all skips it.
-      - run: cargo fmt --manifest-path e2e/macos-harness/Cargo.toml -- --check
-
-  generated:
-    name: generated files + xtask
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: ./.github/actions/linux-deps
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          persist-credentials: false
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+          go-version-file: go.mod
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          shared-key: xtask
-      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
-        with:
-          tool: cargo-nextest
-      - name: xtask unit tests
-        run: cargo nextest run -p xtask --locked
-      - name: commitlint config and commit docs are fresh
-        run: |
-          cargo xtask gen --no-bindings
-          git diff --exit-code -- .commitlintrc.json docs/contributing/commit-message.md
-
-  clippy:
-    name: clippy (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/linux-deps
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          shared-key: clippy
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - name: clippy (e2e/macos-harness, standalone workspace)
-        run: cargo clippy --manifest-path e2e/macos-harness/Cargo.toml --all-targets --locked -- -D warnings
-
-  deny:
-    name: cargo deny
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        checks: [advisories, "bans licenses sources"]
-    # New advisories must not block unrelated PRs; they still fail on master and nightly.
-    continue-on-error: ${{ matrix.checks == 'advisories' && github.event_name == 'pull_request' }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
-        with:
-          command: check ${{ matrix.checks }}
-
-  machete:
-    name: cargo machete
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
-        with:
-          tool: cargo-machete
-      - run: cargo machete --skip-target-dir
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web build
+      # gofmt; go vet for the host (gtk3), GOOS=windows and GOOS=darwin (purego, since cgo needs
+      # the macOS SDK); bindgen and commitconfig -check; golangci-lint (pinned in tools/go.mod) for
+      # the same three targets. The tests run in the matrix below.
+      - run: go tool -modfile=tools/go.mod wails3 task fmt vet bindings:check commitconfig:check lint
+      # Known vulnerabilities in reachable code, and the dependency licence policy, for all three
+      # targets (cmd/release/notices.go holds the allow-list).
+      - run: go tool -modfile=tools/go.mod wails3 task vuln licenses:check
 
   test:
-    name: test + coverage (${{ matrix.os }})
+    name: test + coverage + build (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -122,28 +65,35 @@ jobs:
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           sleep 1
           DISPLAY=:99 openbox &
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          shared-key: test
-      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+          go-version-file: go.mod
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          tool: cargo-nextest,cargo-llvm-cov
-      - name: nextest + llvm-cov with per-crate gates
-        run: cargo xtask coverage --check --profile ci
-      - name: Upload junit
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: junit-${{ matrix.os }}
-          path: target/nextest/ci/junit.xml
-          if-no-files-found: ignore
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web build
+      - name: go vet (native, with cgo)
+        run: |
+          tags=()
+          if [ "$RUNNER_OS" = Linux ]; then tags=(-tags gtk3); fi
+          go vet "${tags[@]}" ./...
+      - name: go build ./cmd/rkl
+        run: |
+          tags=()
+          if [ "$RUNNER_OS" = Linux ]; then tags=(-tags gtk3); fi
+          go build "${tags[@]}" -o target/go/ci/ ./cmd/rkl
+      # go test -race, one coverage profile per internal package in target/go/coverage/.
+      - name: go test -race + coverage
+        run: go tool -modfile=tools/go.mod wails3 task coverage
       - name: Upload coverage (core)
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: target/coverage/core.lcov
+          files: target/go/coverage/core.out
           flags: core
           name: core-${{ matrix.os }}
           disable_search: true
@@ -153,7 +103,7 @@ jobs:
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: target/coverage/data.lcov
+          files: target/go/coverage/data.out
           flags: data
           name: data-${{ matrix.os }}
           disable_search: true
@@ -163,7 +113,7 @@ jobs:
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: target/coverage/trade.lcov
+          files: target/go/coverage/trade.out
           flags: trade
           name: trade-${{ matrix.os }}
           disable_search: true
@@ -173,7 +123,7 @@ jobs:
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: target/coverage/platform.lcov
+          files: target/go/coverage/platform.out
           flags: platform
           name: platform-${{ matrix.os }}
           disable_search: true
@@ -183,29 +133,59 @@ jobs:
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: target/coverage/config.lcov
+          files: target/go/coverage/config.out
           flags: config
           name: config-${{ matrix.os }}
           disable_search: true
           fail_ci_if_error: false
+      - name: Upload coverage (app)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/go/coverage/app.out
+          flags: app
+          name: app-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload coverage (ipc)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/go/coverage/ipc.out
+          flags: ipc
+          name: ipc-${{ matrix.os }}
+          disable_search: true
+          fail_ci_if_error: false
 
-  bindings:
-    name: bindings are fresh
+  package-windows:
+    name: windows installer (cross-compiled)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/linux-deps
-      - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - name: apt install nsis
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends nsis
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          shared-key: bindings
-      - name: web/src/bindings.ts matches the Rust IPC types
-        run: cargo test --locked -p rkl-desktop --test bindings
+          go-version-file: go.mod
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web build
+      - run: go tool -modfile=tools/go.mod wails3 task package:windows
+      - name: Installer contains rkl.exe
+        run: 7z l target/go/rkl-*-windows-x64-setup.exe | grep -E ' rkl\.exe$'
 
   web:
-    name: web lint + typecheck + coverage (+ e2e typecheck)
+    name: web lint + typecheck + coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0

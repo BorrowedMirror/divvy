@@ -1,18 +1,19 @@
 name: release
 
-# Tag `v*` (created by `cargo xtask release <version>`) -> draft GitHub release, with notes
-# GitHub generates from the labelled pull requests (.github/release.yml), and signed
-# bundles, the Tauri updater manifest (latest.json), SHA-256 checksums, an SBOM and
-# third-party notices. A maintainer reviews and publishes the draft by hand.
+# Pushing a `v<version>` tag drafts a GitHub release for it; a maintainer reviews and publishes
+# the draft by hand. The tag must match the VERSION file at the tagged commit (see
+# docs/contributing/releasing.md).
 #
-# Signing secrets live ONLY in the `release` environment (protected: tags `v*`, required
-# reviewers), and only the `build` job enters that environment. The updater public key
-# (`TAURI_UPDATER_PUBKEY`, minisign, from `cargo tauri signer generate`) lives there too and is
-# merged into the bundle config at build time; see docs/contributing/releasing.md.
+# Assets: the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage, the macOS
+# universal DMG, a CycloneDX SBOM, third-party notices and SHA256SUMS.txt. Notes are generated
+# by GitHub from the labelled pull requests (.github/release.yml).
 #
-# Bundles are built by `cargo tauri build`: release profile, default features (`native`) plus
-# `tauri/custom-protocol`, which the CLI adds itself. The `test-hook` feature is never enabled
-# here and the hook is compiled only with it or with debug assertions.
+# Updates: every build links in the updater's public key (RKL_UPDATER_PUBKEY), and the draft job
+# signs the update artifacts (the bare Windows exe, the AppImage, the zipped .app) with
+# RKL_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. Both
+# keys live only in the protected `release` environment. Nothing is code-signed yet; see
+# docs/contributing/releasing.md. The build jobs only read the repository; the last job is the
+# only one that can write.
 on:
   push:
     tags: ["v*"]
@@ -24,163 +25,154 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
-env:
-  CARGO_TERM_COLOR: always
-  CARGO_INCREMENTAL: "0"
-
 jobs:
-  draft:
-    name: draft release + notes
+  version:
+    name: validate version
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
-      release_id: ${{ steps.create.outputs.release_id }}
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
     steps:
-      # GitHub writes the notes from the merged pull requests since the previous release,
-      # grouped by their labels (.github/release.yml, applied by pr-labels.yml).
-      - name: Create draft release
-        id: create
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - id: v
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          prerelease=()
-          case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
-          gh release create "$TAG" --draft --verify-tag "${prerelease[@]}" \
-            --title "rkl $TAG" --generate-notes
-          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id")
-          echo "release_id=$id" >> "$GITHUB_OUTPUT"
+          VERSION="${TAG#v}"
+          if [ "$VERSION" != "$(tr -d '[:space:]' < VERSION)" ]; then
+            echo "::error::tag $TAG does not match the VERSION file ($(cat VERSION))" >&2
+            exit 1
+          fi
+          if ! [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "::error::version '$VERSION' must be MAJOR.MINOR.PATCH[-PRE] without a leading v" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
   build:
-    name: bundle (${{ matrix.name }})
-    needs: draft
-    environment: release
-    permissions:
-      contents: write
+    name: package (${{ matrix.name }})
+    needs: version
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: windows
-            os: windows-latest
-            args: --bundles msi,nsis
-          - name: macos-universal
-            os: macos-latest
-            args: --target universal-apple-darwin --bundles app,dmg
+            os: ubuntu-24.04
           - name: linux
             os: ubuntu-24.04
-            args: --bundles appimage,deb,rpm
+          - name: macos
+            os: macos-latest
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 60
+    environment: release
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - if: runner.os == 'Linux'
+      - if: matrix.name == 'linux'
         uses: ./.github/actions/linux-deps
         with:
-          # AppImage bundling (linuxdeploy) shells out to `file`.
+          # linuxdeploy (run by `wails3 generate appimage`) shells out to `file`.
           extra: file
-      - run: rustup toolchain install
-      - if: runner.os == 'macOS'
-        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - if: matrix.name == 'windows'
+        name: apt install nsis
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends nsis
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
-          shared-key: release-${{ matrix.name }}
-          save-if: false
+          go-version-file: go.mod
+          cache: false
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node v4 caches nothing unless `cache` is set, and it is not here.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        # zizmor: ignore[cache-poisoning]
         with:
           node-version: 24
-          cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
-      - run: cargo install tauri-cli --version 2.12.4 --locked
-      - name: Release bundle config (updater public key) and bundle args
-        id: bundle
-        shell: bash
+      - name: task package:${{ matrix.name }}
         env:
-          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
-          OUT: ${{ runner.temp }}/tauri-release.conf.json
-          ARGS: ${{ matrix.args }}
-          TAG: ${{ github.ref_name }}
+          TARGET: ${{ matrix.name }}
+          VERSION: ${{ needs.version.outputs.version }}
+          # Linked into the build: installs only accept updates signed with its private key.
+          RKL_UPDATER_PUBKEY: ${{ secrets.RKL_UPDATER_PUBKEY }}
         run: |
-          # RPM versions cannot contain `-`, so SemVer pre-releases (v0.2.0-rc.1) ship no rpm.
-          case "$TAG" in *-*) ARGS=${ARGS/,rpm/} ;; esac
-          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
-          if [ -z "$TAURI_UPDATER_PUBKEY" ]; then
-            echo "::error::TAURI_UPDATER_PUBKEY is not set in the release environment" >&2
+          if [ -z "$RKL_UPDATER_PUBKEY" ]; then
+            echo "::error::RKL_UPDATER_PUBKEY is not set in the release environment" >&2
             exit 1
           fi
-          jq --arg key "$TAURI_UPDATER_PUBKEY" '.plugins.updater.pubkey = $key' \
-            .github/tauri-release.conf.json > "$OUT"
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # action-v0.6.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          # Updater signatures (latest.json).
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # macOS code signing + notarisation (ignored on other runners).
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          RKL_RELEASE_VERSION="$VERSION" go tool -modfile=tools/go.mod wails3 task "package:$TARGET"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          projectPath: apps/desktop
-          tauriScript: cargo tauri
-          releaseId: ${{ needs.draft.outputs.release_id }}
-          includeUpdaterJson: true
-          updaterJsonPreferNsis: true
-          # web/dist is built above; .github/tauri-release.conf.json (merged over tauri.conf.json)
-          # skips beforeBuildCommand and enables updater artifacts; the step above adds the
-          # updater pubkey, which `createUpdaterArtifacts` requires.
-          args: ${{ steps.bundle.outputs.args }} --config ${{ runner.temp }}/tauri-release.conf.json
+          name: rkl-${{ matrix.name }}
+          path: |
+            target/go/rkl-*.exe
+            target/go/rkl-*.AppImage
+            target/go/rkl-*.dmg
+            target/go/rkl-*.app.zip
+          if-no-files-found: error
 
-  attest:
-    name: checksums + sbom + notices
-    needs: [draft, build]
+  draft:
+    name: draft release + checksums + sbom + notices
+    needs: [version, build]
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - run: rustup toolchain install
-      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          tool: cargo-about
-      - name: Download release assets
+          pattern: rkl-*
+          path: dist
+          merge-multiple: true
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      # Raw ed25519 over each artifact's SHA-256 digest, as Wails' updater verifies it. The URLs
+      # point at this release's tag, which exists once the draft is published.
+      - name: Sign the update artifacts (update.json)
         env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          RKL_UPDATER_PRIVATE_KEY: ${{ secrets.RKL_UPDATER_PRIVATE_KEY }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          mkdir -p dist
-          gh release download "$TAG" --dir dist --pattern '*'
-      - name: SBOM (CycloneDX, Cargo.lock + pnpm-lock.yaml)
+          go run ./cmd/release update-manifest -version "$VERSION" -dir dist \
+            -base-url "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/"
+      - name: SBOM (CycloneDX, go.mod + pnpm-lock.yaml)
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: .
           format: cyclonedx-json
-          output-file: rkl.cdx.json
+          output-file: dist/rkl.cdx.json
           upload-artifact: false
           upload-release-assets: false
+      # The licences of the Go packages linked into the Linux, Windows and macOS builds; fails on
+      # any outside the policy in cmd/release/notices.go.
       - name: Third-party notices
-        run: cargo about generate --workspace -c .about.toml .about.hbs -o THIRD-PARTY-NOTICES.html
-      - name: SHA-256 checksums (bundles, updater manifest, SBOM, notices)
+        run: go run ./cmd/release notices -o dist/THIRD-PARTY-NOTICES.html
+      - name: SHA-256 checksums
         run: |
-          cp rkl.cdx.json THIRD-PARTY-NOTICES.html dist/
-          rm -f dist/SHA256SUMS.txt
           (cd dist && sha256sum -- *) > SHA256SUMS.txt
           cat SHA256SUMS.txt
-      - name: Attach to the draft release
+          mv SHA256SUMS.txt dist/
+      # GitHub writes the notes from the merged pull requests since the previous release,
+      # grouped by their labels (.github/release.yml).
+      - name: Create the draft release with the assets
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          gh release upload "$TAG" --clobber \
-            SHA256SUMS.txt rkl.cdx.json THIRD-PARTY-NOTICES.html
+          prerelease=()
+          case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
+          gh release create "$TAG" --draft "${prerelease[@]}" --verify-tag \
+            --title "rkl $VERSION" --generate-notes dist/*

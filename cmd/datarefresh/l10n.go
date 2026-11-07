@@ -1,7 +1,7 @@
 package main
 
 // `l10n <raw.json>`: build the item text translations for non-English clients
-// (crates/data/assets/l10n.json.zst) from the game tables that tools/game-extract read out
+// (internal/data/assets/l10n.json.zst) from the game tables that tools/game-extract read out
 // of an installed client, keeping the other assets as they are.
 //
 //   - keywords from `ClientStrings` (header keys, rarities, flags, mod-header phrases), by id;
@@ -507,7 +507,7 @@ func buildLanguages(raw *rawGame, b *data.Bundle) ([]core.Language, error) {
 
 func runL10n(args []string) error {
 	fs := flag.NewFlagSet("l10n", flag.ContinueOnError)
-	assetsDir := fs.String("assets", "", "asset directory to update (default: crates/data/assets)")
+	assetsDir := fs.String("assets", "", "asset directory to update (default: internal/data/assets)")
 	fs.Usage = func() {
 		fmt.Fprintln(fs.Output(), "usage: go run ./cmd/datarefresh l10n [-assets dir] <raw.json>")
 		fmt.Fprintln(fs.Output(), "\n<raw.json> is written by: cargo run --manifest-path tools/game-extract/Cargo.toml -- l10n <game_dir> <raw.json>")
@@ -525,7 +525,7 @@ func runL10n(args []string) error {
 		if err != nil {
 			return err
 		}
-		*assetsDir = filepath.Join(root, "crates", "data", "assets")
+		*assetsDir = filepath.Join(root, "internal", "data", "assets")
 	}
 	b, err := os.ReadFile(fs.Arg(0))
 	if err != nil {

@@ -2,7 +2,7 @@ package testkit
 
 // Corpus format
 //
-// crates/testkit/corpus/index.toml lists entries:
+// internal/testkit/testdata/corpus/index.toml lists entries:
 //
 //	[[item]]
 //	id = "currency/divine-orb"         # path under corpus/ without extension
@@ -49,9 +49,9 @@ func repoRoot() string {
 	return filepath.Join(filepath.Dir(file), "..", "..")
 }
 
-// CorpusDir is crates/testkit/corpus.
+// CorpusDir is internal/testkit/testdata/corpus.
 func CorpusDir() string {
-	return filepath.Join(repoRoot(), "crates", "testkit", "corpus")
+	return filepath.Join(repoRoot(), "internal", "testkit", "testdata", "corpus")
 }
 
 // LoadCorpus returns all corpus entries with their text, in index order.

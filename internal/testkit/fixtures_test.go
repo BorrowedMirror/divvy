@@ -85,8 +85,8 @@ func TestMissingFixtureReportsPaths(t *testing.T) {
 	require.Error(t, err)
 	msg := err.Error()
 	assert.Contains(t, msg, "definitely-not-a-fixture")
-	assert.Contains(t, msg, filepath.Join("trade", "tests", "fixtures"))
-	assert.Contains(t, msg, filepath.Join("testkit", "fixtures"))
+	assert.Contains(t, msg, filepath.Join("trade", "testdata", "fixtures"))
+	assert.Contains(t, msg, filepath.Join("testkit", "testdata", "fixtures"))
 }
 
 func TestFixturePanicsReadably(t *testing.T) {
