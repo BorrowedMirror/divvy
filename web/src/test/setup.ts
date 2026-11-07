@@ -1,10 +1,10 @@
 import "@testing-library/jest-dom/vitest";
 
-import { clearMocks } from "@tauri-apps/api/mocks";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach } from "vitest";
 
 import i18n from "@i18n/index";
+import { setTransport } from "@src/bindings";
 import { useOverlayStore } from "@stores/overlay";
 import { useSettingsStore } from "@stores/settings";
 import { useUpdateStore } from "@stores/update";
@@ -35,7 +35,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   cleanup();
-  clearMocks();
+  setTransport(null);
   useOverlayStore.getState().reset();
   useSettingsStore.setState({ base: null, draft: null, externalChange: false });
   useUpdateStore.setState({ available: null, dismissed: null, installing: false });

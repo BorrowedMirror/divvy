@@ -1,7 +1,6 @@
-import { listen } from "@tauri-apps/api/event";
 import { expect, test, vi } from "vitest";
 
-import { commands } from "@src/bindings";
+import { commands, events } from "@src/bindings";
 import { installDevMock } from "@src/devMock";
 import { diagnostics, filterSet, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";
 
@@ -23,7 +22,7 @@ test("dev mock resolves queries and emits an item on the overlay route", async (
   try {
     installDevMock("overlay");
     const seen = vi.fn();
-    await listen("item-copied", (e) => seen(e.payload));
+    await events.itemCopied.listen((e) => seen(e.payload));
     const pending = commands.queryPrice(filterSet());
     await vi.advanceTimersByTimeAsync(500);
     expect(await pending).toEqual({ status: "ok", data: priceSummary() });
@@ -38,7 +37,7 @@ test("dev mock does not emit items outside the overlay", async () => {
   try {
     installDevMock("diagnostics");
     const seen = vi.fn();
-    await listen("item-copied", seen);
+    await events.itemCopied.listen(seen);
     await vi.advanceTimersByTimeAsync(1000);
     expect(seen).not.toHaveBeenCalled();
   } finally {
