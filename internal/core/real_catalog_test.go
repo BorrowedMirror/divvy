@@ -1,9 +1,5 @@
-//go:build realdata
-
 // Port of crates/core/tests/real_catalog.rs: matches corpus items against the real bundled
-// trade2 catalog from internal/data (the Go port of rkl-data). Kept behind the `realdata`
-// build tag (`go test -tags realdata ./internal/core/`) so core's default test run does not
-// depend on the bundled game data. It uses this internal/data API:
+// trade2 catalog from internal/data (the Go port of rkl-data). It uses this internal/data API:
 //
 //	data.Bundled() (*data.GameData, error)      // GameData implements core.Catalog
 //	(*data.GameData).Translate(string) *core.Translated
