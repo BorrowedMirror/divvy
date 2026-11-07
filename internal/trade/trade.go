@@ -10,7 +10,7 @@ package trade
 // Version is the application version reported in the default User-Agent (the Rust crate used
 // CARGO_PKG_VERSION). Override at link time with
 // `-ldflags "-X github.com/BorrowedMirror/rust-king-ledger/internal/trade.Version=..."`.
-var Version = "0.1.0-rc.1"
+var Version = "dev"
 
 // DefaultUserAgent is the default User-Agent. GGG asks for a descriptive UA with contact
 // details; users can append their own contact e-mail via settings (`trade.contact`).

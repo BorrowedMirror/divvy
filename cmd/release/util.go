@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -16,8 +15,8 @@ const (
 	// own (diagnostics, updater) and the trade client's (User-Agent).
 	appVersionVar   = modulePath + "/internal/app.Version"
 	tradeVersionVar = modulePath + "/internal/trade.Version"
-	// versionFile holds the app version until the Rust build is retired.
-	versionFile = "apps/desktop/src-tauri/tauri.conf.json"
+	// versionFile holds the app version (one line, MAJOR.MINOR.PATCH[-PRE]).
+	versionFile = "VERSION"
 	// outDir is where packaging writes, relative to the module root (gitignored via target/).
 	outDir = "target/go"
 )
@@ -51,16 +50,11 @@ func appVersion(root string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var conf struct {
-		Version string `json:"version"`
+	v := strings.TrimSpace(string(b))
+	if v == "" {
+		return "", fmt.Errorf("%s is empty", versionFile)
 	}
-	if err := json.Unmarshal(b, &conf); err != nil {
-		return "", fmt.Errorf("%s: %w", versionFile, err)
-	}
-	if conf.Version == "" {
-		return "", fmt.Errorf("%s has no version", versionFile)
-	}
-	return conf.Version, validateVersion(conf.Version)
+	return v, validateVersion(v)
 }
 
 // validateVersion accepts MAJOR.MINOR.PATCH with an optional -prerelease of dot-separated

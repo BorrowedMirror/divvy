@@ -142,8 +142,8 @@ task --list
 Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
 inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
 `production` tag. Packaging steps the `go` command can't do (installers, signing updates) live
-in `cmd/release`. The version comes from `apps/desktop/src-tauri/tauri.conf.json` (`-version`
-overrides it: `task package:linux -- -version 0.2.0`).
+in `cmd/release`. The version comes from the `VERSION` file (`-version` overrides it for a
+package: `task package:linux -- -version 0.2.0`); a plain `go build` reports `dev`.
 
 The Windows installer installs for the current user to `%LOCALAPPDATA%\Rust King Ledger` and
 uses the Tauri installer's registry keys, so it upgrades a Tauri install in place. It needs

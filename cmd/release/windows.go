@@ -57,7 +57,7 @@ func (p packager) windows() error {
 	if err := p.render("info.json.tmpl", info); err != nil {
 		return err
 	}
-	icon := filepath.Join(p.root, "apps/desktop/src-tauri/icons/icon.ico")
+	icon := filepath.Join(p.root, "build/windows/icon.ico")
 	if err := wails3(s, p.root, "generate", "syso", "-arch", "amd64", "-icon", icon, "-manifest", manifest, "-info", info, "-out", syso); err != nil {
 		return err
 	}

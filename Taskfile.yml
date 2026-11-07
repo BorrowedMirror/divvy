@@ -12,6 +12,10 @@ vars:
   TAGS: '{{if eq OS "linux"}}gtk3{{end}}'
   OUT: target/go
   VITE_PORT: '{{.WAILS_VITE_PORT | default 5173}}'
+  VERSION:
+    sh: cat VERSION
+  # The version in diagnostics and the trade User-Agent (cmd/release does the same for packages).
+  LDFLAGS: -X github.com/BorrowedMirror/rust-king-ledger/internal/app.Version={{.VERSION}} -X github.com/BorrowedMirror/rust-king-ledger/internal/trade.Version={{.VERSION}}
 
 tasks:
   default:
@@ -35,7 +39,7 @@ tasks:
     desc: Build a development binary (web inspector on, FRONTEND_DEVSERVER_URL honoured).
     deps: [web]
     cmds:
-      - go build -tags '{{.TAGS}}' -o {{.OUT}}/rkl{{exeExt}} ./cmd/rkl
+      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/rkl{{exeExt}} ./cmd/rkl
 
   run:
     desc: Build and run the development binary.
@@ -53,7 +57,7 @@ tasks:
   dev:build:
     internal: true
     cmds:
-      - go build -tags '{{.TAGS}}' -o {{.OUT}}/rkl-dev{{exeExt}} ./cmd/rkl
+      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/rkl-dev{{exeExt}} ./cmd/rkl
   dev:frontend:
     internal: true
     cmds:

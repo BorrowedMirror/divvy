@@ -13,9 +13,9 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
 )
 
-// Version is the app version, set at build time with
-// `-ldflags "-X github.com/BorrowedMirror/rust-king-ledger/internal/app.Version=..."`.
-var Version = "0.1.0-rc.1"
+// Version is the app version, linked in from the VERSION file by the Taskfile builds and the
+// packages (-ldflags -X); a plain `go build` reports "dev".
+var Version = "dev"
 
 // Updater is what the commands need from the auto-updater.
 type Updater interface {

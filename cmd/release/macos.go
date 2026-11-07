@@ -54,7 +54,7 @@ func (p packager) macos() error {
 	if err := p.render("Info.plist.tmpl", filepath.Join(app, "Contents/Info.plist")); err != nil {
 		return err
 	}
-	if err := copyFile(filepath.Join(p.root, "apps/desktop/src-tauri/icons/icon.icns"),
+	if err := copyFile(filepath.Join(p.root, "build/darwin/icons.icns"),
 		filepath.Join(app, "Contents/Resources/icon.icns"), 0o644); err != nil {
 		return err
 	}

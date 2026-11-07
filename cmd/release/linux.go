@@ -45,7 +45,7 @@ func (p packager) linux() error {
 	// The generator names the icon in the AppDir after the file, so it must match Icon= in the
 	// desktop entry.
 	icon := filepath.Join(work, binaryName+".png")
-	if err := copyFile(filepath.Join(p.root, "apps/desktop/src-tauri/icons/128x128@2x.png"), icon, 0o644); err != nil {
+	if err := copyFile(filepath.Join(p.root, "build/appicon.png"), icon, 0o644); err != nil {
 		return err
 	}
 	desktop := filepath.Join(work, binaryName+".desktop")

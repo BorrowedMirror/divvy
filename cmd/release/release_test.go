@@ -36,14 +36,14 @@ func TestLdflagsSetsTheVersion(t *testing.T) {
 	}
 }
 
-func TestAppVersionReadsTheTauriConfig(t *testing.T) {
+func TestAppVersionReadsTheVersionFile(t *testing.T) {
 	root := t.TempDir()
-	write(t, filepath.Join(root, versionFile), `{"productName": "x", "version": "0.3.0-rc.2"}`)
+	write(t, filepath.Join(root, versionFile), "0.3.0-rc.2\n")
 	v, err := appVersion(root)
 	if err != nil || v != "0.3.0-rc.2" {
 		t.Fatalf("appVersion = %q, %v", v, err)
 	}
-	write(t, filepath.Join(root, versionFile), `{"version": "0.3"}`)
+	write(t, filepath.Join(root, versionFile), "0.3\n")
 	if _, err := appVersion(root); err == nil {
 		t.Fatal("appVersion accepted a bad version")
 	}
