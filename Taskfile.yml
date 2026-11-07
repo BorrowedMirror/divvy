@@ -135,29 +135,25 @@ tasks:
     desc: AppImage under target/go/ (production build).
     deps: [web]
     cmds:
-      - go run ./cmd/release package linux {{.CLI_ARGS}}
+      - go run ./cmd/release package linux
 
   package:windows:
     desc: NSIS installer and update exe under target/go/, cross-compiled (production build).
     deps: [web]
     cmds:
-      - go run ./cmd/release package windows {{.CLI_ARGS}}
+      - go run ./cmd/release package windows
 
   package:macos:
     desc: Universal .app, DMG and update zip under target/go/ (macOS only; production build).
     deps: [web]
     cmds:
-      - go run ./cmd/release package macos {{.CLI_ARGS}}
+      - go run ./cmd/release package macos
 
   updater:keygen:
     desc: Print a new updater key pair for the release environment.
     cmds:
       - go run ./cmd/release updater-keygen
 
-  updater:manifest:
-    desc: Sign the update artifacts into update.json (needs RKL_UPDATER_PRIVATE_KEY).
-    cmds:
-      - go run ./cmd/release update-manifest {{.CLI_ARGS}}
 
   # End-to-end tests (e2e/, `go test -tags e2e`): the scripts build the web UI, the test-hook
   # app and the fake game (SKIP_BUILD=1 reuses them) and provide the session. RUN=<regexp>

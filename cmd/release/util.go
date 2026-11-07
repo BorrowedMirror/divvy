@@ -17,6 +17,9 @@ const (
 	tradeVersionVar = modulePath + "/internal/trade.Version"
 	// versionFile holds the app version (one line, MAJOR.MINOR.PATCH[-PRE]).
 	versionFile = "VERSION"
+	// versionEnv overrides versionFile for a package build (the release workflow sets it; the
+	// Task runner inside wails3 drops arguments after --, so tasks can't pass -version).
+	versionEnv = "RKL_RELEASE_VERSION"
 	// outDir is where packaging writes, relative to the module root (gitignored via target/).
 	outDir = "target/go"
 )

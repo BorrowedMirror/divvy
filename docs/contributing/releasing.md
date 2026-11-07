@@ -28,7 +28,7 @@ build separately. It is started by hand (Actions -> release-go -> Run workflow) 
 such as `0.2.0-rc.1`; `release.yml` keeps the `v*` tags.
 
 It builds the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage and the
-macOS universal DMG with `task package:<os> -- -version <version>`, signs the update artifacts
+macOS universal DMG with `RKL_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts
 into `update.json` with `go run ./cmd/release update-manifest`, then creates a
 **draft** release for the tag `go-v<version>` at the commit the run used, with GitHub-generated
 notes, a CycloneDX SBOM and `SHA256SUMS.txt`. The tag is created only when the draft is

@@ -77,7 +77,7 @@ func runPackage(root string, args []string) error {
 	}
 	target, rest := args[0], args[1:]
 	fs := flag.NewFlagSet("package "+target, flag.ContinueOnError)
-	version := fs.String("version", "", "app version (default: from "+versionFile+")")
+	version := fs.String("version", os.Getenv(versionEnv), "app version (default: $"+versionEnv+", else "+versionFile+")")
 	if err := fs.Parse(rest); err != nil {
 		return err
 	}
