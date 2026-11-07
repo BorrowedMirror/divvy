@@ -161,6 +161,9 @@ func start(s *shell.Shell, desktop *shell.Desktop, flow *app.Flow, backend *app.
 			_ = flow.ShowSettings("settings")
 		}
 	}()
+	if up := shell.StartUpdater(s.App, st, desktop.Emit); up != nil {
+		backend.Updater = up
+	}
 	flow.RunHotkeyLoop()
 	flow.RunInputLoop()
 	flow.RunGameFollower()
