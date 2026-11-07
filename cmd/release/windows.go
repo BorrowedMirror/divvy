@@ -43,10 +43,6 @@ func (p packager) windows() error {
 	if err := requireWebDist(p.root); err != nil {
 		return err
 	}
-	w3, err := wails3(p.root)
-	if err != nil {
-		return err
-	}
 	work, err := p.fresh("windows")
 	if err != nil {
 		return err
@@ -62,7 +58,7 @@ func (p packager) windows() error {
 		return err
 	}
 	icon := filepath.Join(p.root, "apps/desktop/src-tauri/icons/icon.ico")
-	if err := s.run(w3, "generate", "syso", "-arch", "amd64", "-icon", icon, "-manifest", manifest, "-info", info, "-out", syso); err != nil {
+	if err := wails3(s, p.root, "generate", "syso", "-arch", "amd64", "-icon", icon, "-manifest", manifest, "-info", info, "-out", syso); err != nil {
 		return err
 	}
 
@@ -76,7 +72,7 @@ func (p packager) windows() error {
 	}
 
 	// The evergreen WebView2 bootstrapper, embedded in Wails' CLI.
-	if err := s.run(w3, "generate", "webview2bootstrapper", "-dir", work); err != nil {
+	if err := wails3(s, p.root, "generate", "webview2bootstrapper", "-dir", work); err != nil {
 		return err
 	}
 	script := filepath.Join(work, "rkl.nsi")
@@ -155,7 +151,7 @@ func (p packager) nsisX86(systemDir, version string) (string, error) {
 	}
 	want, ok := nsisZips[version]
 	if !ok {
-		return "", fmt.Errorf("the system NSIS %s has no amd64-unicode or x86-unicode stubs and there is no pinned checksum for its zip; add one to nsisZips in cmd/xtask/windows.go", version)
+		return "", fmt.Errorf("the system NSIS %s has no amd64-unicode or x86-unicode stubs and there is no pinned checksum for its zip; add one to nsisZips in cmd/release/windows.go", version)
 	}
 	if err := requireTools([][2]string{{"unzip", "unzip"}, {"cp", "coreutils"}}); err != nil {
 		return "", err

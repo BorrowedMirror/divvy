@@ -1,0 +1,151 @@
+# Tasks for the Go/Wails build, run with Wails' embedded Task runner:
+#
+#   go tool -modfile=tools/go.mod wails3 task <task>      (or `task <task>` with Task installed)
+#
+# Everyday work needs no task: `go build`, `go test ./...`, `go vet ./...` and `go generate ./...`
+# work as usual. The tools (wails3, golangci-lint) are pinned in tools/go.mod.
+version: "3"
+
+vars:
+  TOOL: go tool -modfile=tools/go.mod
+  # GTK3 + webkit2gtk-4.1 on Linux, the same WebKit the Tauri build needed.
+  TAGS: '{{if eq OS "linux"}}gtk3{{end}}'
+  OUT: target/go
+  VITE_PORT: '{{.WAILS_VITE_PORT | default 5173}}'
+
+tasks:
+  default:
+    cmds:
+      - "{{.TOOL}} wails3 task --list"
+    silent: true
+
+  web:
+    desc: Build the React app into web/dist (go build embeds it).
+    cmds:
+      - pnpm --dir web build
+    sources: [web/src/**/*, web/index.html, web/package.json, web/vite.config.ts]
+    generates: [web/dist/index.html]
+
+  generate:
+    desc: Regenerate web/src/bindings.ts from the Go IPC service.
+    cmds:
+      - go generate ./...
+
+  build:
+    desc: Build a development binary (web inspector on, FRONTEND_DEVSERVER_URL honoured).
+    deps: [web]
+    cmds:
+      - go build -tags '{{.TAGS}}' -o {{.OUT}}/rkl{{exeExt}} ./cmd/rkl
+
+  run:
+    desc: Build and run the development binary.
+    deps: [build]
+    cmds:
+      - ./{{.OUT}}/rkl{{exeExt}}
+
+  dev:
+    desc: Vite with hot reload, plus a Go rebuild and restart on every Go change.
+    deps: [web]
+    cmds:
+      - '{{.TOOL}} wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}'
+
+  # Steps of `dev`, run by build/config.yml.
+  dev:build:
+    internal: true
+    cmds:
+      - go build -tags '{{.TAGS}}' -o {{.OUT}}/rkl-dev{{exeExt}} ./cmd/rkl
+  dev:frontend:
+    internal: true
+    cmds:
+      # IPv4: Wails proxies FRONTEND_DEVSERVER_URL over tcp4, and localhost may be IPv6 only.
+      - pnpm --dir web exec vite --host 127.0.0.1 --port {{.VITE_PORT}} --strictPort
+  dev:run:
+    internal: true
+    cmds:
+      - ./{{.OUT}}/rkl-dev{{exeExt}}
+
+  test:
+    desc: Run the Go tests with the race detector.
+    deps: [web]
+    cmds:
+      - go test -tags '{{.TAGS}}' -race ./...
+
+  fmt:
+    desc: Fail when a Go file is not gofmt-clean.
+    cmds:
+      - |
+        files=$(gofmt -l $(go list -f '{{"{{"}}.Dir{{"}}"}}' ./...))
+        if [ -n "$files" ]; then echo "not gofmt-clean:"; echo "$files"; exit 1; fi
+
+  vet:
+    desc: go vet for this OS, Windows and macOS (macOS as the cgo-free purego build).
+    deps: [web]
+    cmds:
+      - go vet -tags '{{.TAGS}}' ./...
+      - cmd: go vet ./...
+        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
+      - cmd: go vet -tags purego ./...
+        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+
+  lint:
+    desc: golangci-lint for this OS, Windows and macOS (purego).
+    deps: [web]
+    cmds:
+      - '{{.TOOL}} golangci-lint run'
+      - cmd: '{{.TOOL}} golangci-lint run'
+        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
+      - cmd: '{{.TOOL}} golangci-lint run --build-tags purego'
+        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+
+  bindings:check:
+    desc: Fail when web/src/bindings.ts is out of date.
+    cmds:
+      - go run ./cmd/bindgen -check
+
+  check:
+    desc: Everything CI checks on the Go side.
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: test
+      - task: bindings:check
+      - task: lint
+
+  coverage:
+    desc: Race-detector tests with coverage, one profile per package for Codecov's flags.
+    deps: [web]
+    cmds:
+      - rm -rf {{.OUT}}/coverage && mkdir -p {{.OUT}}/coverage
+      - |
+        for pkg in app config core data ipc platform trade; do
+          go test -tags '{{.TAGS}}' -race -covermode=atomic \
+            -coverprofile={{.OUT}}/coverage/$pkg.out ./internal/$pkg/...
+        done
+
+  package:linux:
+    desc: AppImage under target/go/ (production build).
+    deps: [web]
+    cmds:
+      - go run ./cmd/release package linux {{.CLI_ARGS}}
+
+  package:windows:
+    desc: NSIS installer and update exe under target/go/, cross-compiled (production build).
+    deps: [web]
+    cmds:
+      - go run ./cmd/release package windows {{.CLI_ARGS}}
+
+  package:macos:
+    desc: Universal .app, DMG and update zip under target/go/ (macOS only; production build).
+    deps: [web]
+    cmds:
+      - go run ./cmd/release package macos {{.CLI_ARGS}}
+
+  updater:keygen:
+    desc: Print a new updater key pair for the release environment.
+    cmds:
+      - go run ./cmd/release updater-keygen
+
+  updater:manifest:
+    desc: Sign the update artifacts into update.json (needs RKL_UPDATER_PRIVATE_KEY).
+    cmds:
+      - go run ./cmd/release update-manifest {{.CLI_ARGS}}

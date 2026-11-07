@@ -34,13 +34,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
-      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
-        with:
-          version: v2.15.0
-          install-only: true
       # gofmt; go vet for the host (gtk3), GOOS=windows and GOOS=darwin (purego, since cgo needs
-      # the macOS SDK); bindgen -check; golangci-lint for the same three targets.
-      - run: go run ./cmd/xtask check -no-test
+      # the macOS SDK); bindgen -check; golangci-lint (pinned in tools/go.mod) for the same three
+      # targets. The tests run in the matrix below.
+      - run: go tool -modfile=tools/go.mod wails3 task fmt vet bindings:check lint
 
   test:
     name: test + coverage + build (${{ matrix.os }})
@@ -85,9 +82,9 @@ jobs:
           tags=()
           if [ "$RUNNER_OS" = Linux ]; then tags=(-tags gtk3); fi
           go build "${tags[@]}" -o target/go/ci/ ./cmd/rkl
-      # go test -race once, then one profile per internal package in target/go/coverage/.
+      # go test -race, one coverage profile per internal package in target/go/coverage/.
       - name: go test -race + coverage
-        run: go run ./cmd/xtask coverage
+        run: go tool -modfile=tools/go.mod wails3 task coverage
       - name: Upload coverage (go-core)
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
@@ -180,6 +177,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
-      - run: go run ./cmd/xtask package windows
+      - run: go tool -modfile=tools/go.mod wails3 task package:windows
       - name: Installer contains rkl.exe
         run: 7z l target/go/rkl-*-windows-x64-setup.exe | grep -E ' rkl\.exe$'

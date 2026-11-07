@@ -89,7 +89,7 @@ jobs:
           node-version: 24
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir web build
-      - name: go run ./cmd/xtask package ${{ matrix.name }}
+      - name: task package:${{ matrix.name }}
         env:
           TARGET: ${{ matrix.name }}
           VERSION: ${{ needs.version.outputs.version }}
@@ -100,7 +100,7 @@ jobs:
             echo "::error::RKL_UPDATER_PUBKEY is not set in the release environment" >&2
             exit 1
           fi
-          go run ./cmd/xtask package "$TARGET" -version "$VERSION"
+          go tool -modfile=tools/go.mod wails3 task "package:$TARGET" -- -version "$VERSION"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: rkl-${{ matrix.name }}
@@ -139,7 +139,7 @@ jobs:
           TAG: ${{ needs.version.outputs.tag }}
           VERSION: ${{ needs.version.outputs.version }}
         run: |
-          go run ./cmd/xtask update-manifest -version "$VERSION" -dir dist \
+          go run ./cmd/release update-manifest -version "$VERSION" -dir dist \
             -base-url "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/"
       - name: SBOM (CycloneDX, go.mod + pnpm-lock.yaml)
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3

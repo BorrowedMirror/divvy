@@ -1,7 +1,7 @@
 // Package ipc is the boundary between the Go backend and the React frontend: the bound Wails
 // service (one method per command in web/src/bindings.ts), the event payloads, and the error
 // shape every command returns. The behaviour lives in internal/app; this package only defines
-// the wire contract, which `go run ./cmd/bindgen` turns into bindings.ts.
+// the wire contract, which `go generate ./...` turns into bindings.ts.
 package ipc
 
 import (

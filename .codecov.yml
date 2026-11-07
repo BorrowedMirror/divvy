@@ -78,7 +78,7 @@ fixes:
 
 ignore:
   - "xtask/**"
-  - "cmd/xtask/**"
+  - "cmd/release/**"
   - "tools/**"
   - "e2e/**"
   - "web/src/bindings.ts"

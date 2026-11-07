@@ -118,20 +118,32 @@ pnpm --dir web build
 go run -tags gtk3 ./cmd/rkl         # Linux; drop -tags gtk3 on Windows and macOS
 ```
 
-Tasks live in `cmd/xtask` (run them from anywhere in the repository):
+Everyday work is plain Go: `go build`, `go test ./...`, `go vet ./...`, and `go generate ./...`
+to regenerate `web/src/bindings.ts` after changing the IPC service. The rest are
+[Task](https://taskfile.dev) tasks in `Taskfile.yml`, run with the Task runner built into the
+Wails CLI, which is pinned with golangci-lint in `tools/go.mod`:
 
-| Command | What it does |
+```sh
+alias task='go tool -modfile=tools/go.mod wails3 task'   # or install Task
+task --list
+```
+
+| Task | What it does |
 | --- | --- |
-| `go run ./cmd/xtask check [-race] [-no-test] [-no-lint]` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (with `-tags purego`, since cgo needs the macOS SDK); go test; `bindgen -check`; golangci-lint for the same three targets (`.golangci.yml`) |
-| `go run ./cmd/xtask coverage` | `go test -race` with coverage, one profile per internal package in `target/go/coverage/` |
-| `go run ./cmd/xtask package windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` |
-| `go run ./cmd/xtask package linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
-| `go run ./cmd/xtask package macos` | universal `Rust King Ledger.app` and `target/go/rkl-<version>-macos-universal.dmg`; macOS only |
-| `go run ./cmd/bindgen` | regenerates `web/src/bindings.ts` from the Go IPC types |
+| `task dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
+| `task run` | builds the frontend and a development binary (`target/go/rkl`) and runs it |
+| `task check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `task coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
+| `task package:windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` and the update exe |
+| `task package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
+| `task package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
+| `task updater:keygen` | prints a new updater key pair (see docs/contributing/releasing.md) |
 
-The version comes from `apps/desktop/src-tauri/tauri.conf.json` (`-version` overrides it) and
-is linked into `internal/trade.Version`. Packaging uses Wails' CLI at the version in `go.mod`,
-installed into `target/go/tools/` on first use; it is not a module dependency.
+Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
+inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
+`production` tag. Packaging steps the `go` command can't do (installers, signing updates) live
+in `cmd/release`. The version comes from `apps/desktop/src-tauri/tauri.conf.json` (`-version`
+overrides it: `task package:linux -- -version 0.2.0`).
 
 The Windows installer installs for the current user to `%LOCALAPPDATA%\Rust King Ledger` and
 uses the Tauri installer's registry keys, so it upgrades a Tauri install in place. It needs

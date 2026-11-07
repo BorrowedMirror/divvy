@@ -10,9 +10,10 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
 )
 
+//go:generate go run ../../cmd/bindgen
+
 // Service is the Wails-bound IPC service: one exported method per command the web UI calls
-// through the generated web/src/bindings.ts (`go run ./cmd/bindgen` after changing a
-// signature). Methods returning an error reject with an [ipc.IpcError], which the frontend
+// through the generated web/src/bindings.ts (`go generate ./...` after changing a signature). Methods returning an error reject with an [ipc.IpcError], which the frontend
 // receives as `{status: "error", error}`. A leading context.Context is supplied by Wails.
 type Service struct {
 	b Backend

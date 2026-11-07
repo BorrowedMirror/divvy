@@ -1,11 +1,10 @@
-// Command xtask holds the Go build's maintenance tasks: checks, coverage and packaging.
+// Command release packages RKL and signs its updates: the steps of a release that the go
+// command cannot do on its own. Taskfile.yml runs it (task package:linux, updater:manifest, ...).
 //
-//	go run ./cmd/xtask check              # gofmt, vet, tests, cross-vet, bindgen -check
-//	go run ./cmd/xtask coverage           # go test -race with per-package coverage profiles
-//	go run ./cmd/xtask package linux      # AppImage        -> target/go/
-//	go run ./cmd/xtask package windows    # NSIS installer  -> target/go/ (cross-compiled)
-//	go run ./cmd/xtask package macos      # .app + DMG      -> target/go/ (macOS only)
-//	go run ./cmd/xtask version            # print the app version
+//	go run ./cmd/release package linux      # AppImage        -> target/go/
+//	go run ./cmd/release package windows    # NSIS installer  -> target/go/ (cross-compiled)
+//	go run ./cmd/release package macos      # .app + DMG      -> target/go/ (macOS only)
+//	go run ./cmd/release version            # print the app version
 //
 // The web UI is embedded into the binary, so build it first: `pnpm --dir web build`.
 package main
@@ -18,18 +17,16 @@ import (
 	"os"
 )
 
-const usage = `usage: go run ./cmd/xtask <command> [flags]
+const usage = `usage: go run ./cmd/release <command> [flags]
 
 commands:
-  check                    gofmt, go vet (host, windows, darwin), go test, bindgen -check, golangci-lint
-  coverage                 go test -race with coverage, split per package into target/go/coverage/
   package linux|windows|macos
                            build the release binary and its installer under target/go/
   updater-keygen           print a new updater key pair (RKL_UPDATER_PUBKEY / RKL_UPDATER_PRIVATE_KEY)
   update-manifest          sign the update artifacts and write update.json (needs RKL_UPDATER_PRIVATE_KEY)
   version                  print the app version
 
-Run "go run ./cmd/xtask <command> -h" for the flags of a command.
+Run "go run ./cmd/release <command> -h" for the flags of a command.
 `
 
 func main() {
@@ -37,7 +34,7 @@ func main() {
 		if errors.Is(err, flag.ErrHelp) {
 			os.Exit(0)
 		}
-		fmt.Fprintln(os.Stderr, "xtask:", err)
+		fmt.Fprintln(os.Stderr, "release:", err)
 		os.Exit(1)
 	}
 }
@@ -52,10 +49,6 @@ func run(args []string, stdout io.Writer) error {
 		return err
 	}
 	switch cmd, rest := args[0], args[1:]; cmd {
-	case "check":
-		return runCheck(root, rest)
-	case "coverage":
-		return runCoverage(root, rest)
 	case "package":
 		return runPackage(root, rest)
 	case "updater-keygen":

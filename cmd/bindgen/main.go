@@ -1,6 +1,7 @@
-// Command bindgen writes web/src/bindings.ts from the Go IPC service and event types.
+// Command bindgen writes web/src/bindings.ts from the Go IPC service and event types. It runs
+// from a go:generate line on app.Service.
 //
-//	go run ./cmd/bindgen          # write the file
+//	go generate ./...             # write the file
 //	go run ./cmd/bindgen -check   # fail if the file is out of date (CI)
 package main
 
@@ -59,7 +60,7 @@ func run(check bool) error {
 			return err
 		}
 		if !bytes.Equal(cur, out) {
-			return fmt.Errorf("%s is out of date; run `go run ./cmd/bindgen`", path)
+			return fmt.Errorf("%s is out of date; run `go generate ./...`", path)
 		}
 		return nil
 	}

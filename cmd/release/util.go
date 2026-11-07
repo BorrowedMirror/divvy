@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -21,8 +20,6 @@ const (
 	versionFile = "apps/desktop/src-tauri/tauri.conf.json"
 	// outDir is where packaging writes, relative to the module root (gitignored via target/).
 	outDir = "target/go"
-	// wailsModule is the module whose CLI (wails3) packaging uses; its version comes from go.mod.
-	wailsModule = "github.com/wailsapp/wails/v3"
 )
 
 // Product metadata shared by the installers.
@@ -171,27 +168,10 @@ func requireWebDist(root string) error {
 	return nil
 }
 
-// wails3 returns the path of the Wails CLI at the version go.mod requires, installing it into
-// target/go/tools/<version>/ on first use. It is not a go.mod dependency.
-func wails3(root string) (string, error) {
-	s := sh{dir: root}
-	out, err := s.output("go", "list", "-m", "-f", "{{.Version}}", wailsModule)
-	if err != nil {
-		return "", err
-	}
-	version := strings.TrimSpace(out)
-	bin := filepath.Join(root, outDir, "tools", "wails3-"+version)
-	exe := filepath.Join(bin, "wails3")
-	if runtime.GOOS == "windows" {
-		exe += ".exe"
-	}
-	if _, err := os.Stat(exe); err == nil {
-		return exe, nil
-	}
-	if err := s.with("GOBIN="+bin, "GOOS=", "GOARCH=", "CGO_ENABLED=").run("go", "install", wailsModule+"/cmd/wails3@"+version); err != nil {
-		return "", err
-	}
-	return exe, nil
+// wails3 runs the Wails CLI pinned in tools/go.mod (`go tool -modfile=tools/go.mod wails3`).
+func wails3(s sh, root string, args ...string) error {
+	tool := []string{"tool", "-modfile=" + filepath.Join(root, "tools", "go.mod"), "wails3"}
+	return s.with("GOOS=", "GOARCH=", "CGO_ENABLED=").run("go", append(tool, args...)...)
 }
 
 func copyFile(src, dst string, mode os.FileMode) error {

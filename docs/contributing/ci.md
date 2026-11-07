@@ -9,7 +9,7 @@
 | `contract.yml` | nightly, manual, PRs touching `crates/trade` (not forks) | Live trade2 smoke: `cargo nextest run -p rkl-trade --run-ignored only -E 'test(live_)'`. |
 | `data-refresh.yml` | daily, manual | `cargo xtask data refresh`; opens `build(data): refresh game data` PR only if assets changed. |
 | `fixtures-refresh.yml` | manual | `cargo xtask fixtures record` (2 s between requests); opens a PR with new trade fixtures. |
-| `ci-go.yml` | PR, push to `master`, manual | Go build: `go run ./cmd/xtask check -no-test` (gofmt; go vet and golangci-lint for Linux, `GOOS=windows` and `GOOS=darwin` with `-tags purego`; `bindgen -check`); on ubuntu/windows/macos a native `go vet`, `go build ./cmd/rkl` and `go test -race` with coverage (`go run ./cmd/xtask coverage`, uploaded to Codecov with flags `go-core`, `go-data`, `go-trade`, `go-platform`, `go-config`, `go-app`, `go-ipc`); the Windows NSIS installer cross-compiled on Linux. |
+| `ci-go.yml` | PR, push to `master`, manual | Go build: `task fmt vet bindings:check lint` (gofmt; go vet and golangci-lint for Linux, `GOOS=windows` and `GOOS=darwin` with `-tags purego`; `bindgen -check`); on ubuntu/windows/macos a native `go vet`, `go build ./cmd/rkl` and `go test -race` with coverage (`task coverage`, uploaded to Codecov with flags `go-core`, `go-data`, `go-trade`, `go-platform`, `go-config`, `go-app`, `go-ipc`); the Windows NSIS installer cross-compiled on Linux. |
 | `release-go.yml` | manual (version input) | Go build release: draft release for tag `go-v<version>` at the run's commit with GitHub-generated notes; Windows NSIS installer (built on Linux), Linux AppImage, macOS universal DMG, CycloneDX SBOM, `SHA256SUMS.txt`. Nothing signed yet. The tag is created when the draft is published. |
 | `release.yml` | tag `v*` | Draft release with GitHub-generated notes grouped by PR labels (`.github/release.yml`); signed bundles via tauri-action (Windows MSI/NSIS, macOS universal DMG, Linux AppImage/deb/rpm), `latest.json`, `SHA256SUMS.txt`, CycloneDX SBOM, third-party notices. |
 
@@ -31,9 +31,9 @@ cargo xtask lint
 cargo xtask coverage --check
 cargo xtask gen && git diff --exit-code
 pnpm --dir web coverage
-# Go build (after pnpm --dir web build)
-go run ./cmd/xtask check -race
-go run ./cmd/xtask coverage
+# Go build (Task through the pinned wails3: go tool -modfile=tools/go.mod wails3 task ...)
+go tool -modfile=tools/go.mod wails3 task check
+go tool -modfile=tools/go.mod wails3 task coverage
 ```
 
 Lint workflows with [actionlint](https://github.com/rhysd/actionlint):

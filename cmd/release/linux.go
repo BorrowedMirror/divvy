@@ -31,10 +31,6 @@ func (p packager) linux() error {
 	if err := requireWebDist(p.root); err != nil {
 		return err
 	}
-	w3, err := wails3(p.root)
-	if err != nil {
-		return err
-	}
 	work, err := p.fresh("linux")
 	if err != nil {
 		return err
@@ -62,7 +58,7 @@ func (p packager) linux() error {
 	if err := os.MkdirAll(build, 0o755); err != nil {
 		return err
 	}
-	if err := s.run(w3, "generate", "appimage", "-binary", bin, "-icon", icon, "-desktopfile", desktop,
+	if err := wails3(s, p.root, "generate", "appimage", "-binary", bin, "-icon", icon, "-desktopfile", desktop,
 		"-outputdir", work, "-builddir", build); err != nil {
 		return err
 	}

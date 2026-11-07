@@ -1,9 +1,9 @@
-; Per-user NSIS installer for the Go build of Rust King Ledger (`go run ./cmd/xtask package windows`).
+; Per-user NSIS installer for the Go build of Rust King Ledger (`task package:windows`).
 ;
 ; Installs to %LOCALAPPDATA%\Rust King Ledger without UAC, under the same uninstall and
 ; product registry keys as the Tauri installer, so it upgrades a Tauri install in place.
 ;
-; xtask passes these with -D:
+; cmd/release passes these with -D:
 ;   VERSION    app version, e.g. 0.1.0-rc.1
 ;   VERSION4   numeric version, e.g. 0.1.0.0
 ;   BINARY     path of rkl.exe

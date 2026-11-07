@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,36 +87,6 @@ func TestPickNSISTarget(t *testing.T) {
 	write(t, filepath.Join(dir, "Stubs", "lzma_solid-x86-ansi"), "stub")
 	if hasNSISTarget(dir, "x86-ansi") {
 		t.Fatal("x86-ansi has no nsExec plugin")
-	}
-}
-
-func TestSplitProfile(t *testing.T) {
-	const profile = `mode: atomic
-github.com/BorrowedMirror/rust-king-ledger/internal/core/a.go:1.1,2.2 3 1
-github.com/BorrowedMirror/rust-king-ledger/internal/core/a.go:3.1,4.2 1 0
-github.com/BorrowedMirror/rust-king-ledger/internal/platform/x11/b.go:1.1,2.2 2 5
-github.com/BorrowedMirror/rust-king-ledger/cmd/rkl/main.go:1.1,2.2 4 0
-`
-	groups, err := splitProfile(bufio.NewScanner(strings.NewReader(profile)))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(groups) != 2 {
-		t.Fatalf("groups = %v", groups)
-	}
-	core := groups["core"]
-	if core.covered != 3 || core.total != 4 || core.percent() != 75 {
-		t.Errorf("core = %+v", core)
-	}
-	want := "mode: atomic\n" + strings.Join(strings.Split(profile, "\n")[1:3], "\n") + "\n"
-	if got := core.profile(); got != want {
-		t.Errorf("core profile:\n%s\nwant:\n%s", got, want)
-	}
-	if p := groups["platform"]; p.covered != 2 || p.total != 2 {
-		t.Errorf("platform = %+v", p)
-	}
-	if _, err := splitProfile(bufio.NewScanner(strings.NewReader("mode: set\nnot a line\n"))); err == nil {
-		t.Error("splitProfile accepted a bad line")
 	}
 }
 

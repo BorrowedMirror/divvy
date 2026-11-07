@@ -28,13 +28,20 @@ build separately. It is started by hand (Actions -> release-go -> Run workflow) 
 such as `0.2.0-rc.1`; `release.yml` keeps the `v*` tags.
 
 It builds the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage and the
-macOS universal DMG with `go run ./cmd/xtask package <os> -version <version>`, then creates a
+macOS universal DMG with `task package:<os> -- -version <version>`, signs the update artifacts
+into `update.json` with `go run ./cmd/release update-manifest`, then creates a
 **draft** release for the tag `go-v<version>` at the commit the run used, with GitHub-generated
 notes, a CycloneDX SBOM and `SHA256SUMS.txt`. The tag is created only when the draft is
 published; delete the draft to discard the run.
 
+Updates: every build links in the updater's public key, and installs only accept artifacts
+whose SHA-256 digest is signed with the matching private key (raw ed25519). Generate the pair
+once with `task updater:keygen` and store both lines as secrets of the `release` environment
+(`RKL_UPDATER_PUBKEY`, `RKL_UPDATER_PRIVATE_KEY`); the release fails without them. Installed
+builds trust only the key they were built with, so keep the private key safe.
+
 Not done yet for the Go build: Windows code signing, macOS Developer ID signing and
-notarisation (the app is signed ad hoc), an updater manifest, and third-party notices.
+notarisation (the app is signed ad hoc), and third-party notices.
 
 ## Release notes
 
