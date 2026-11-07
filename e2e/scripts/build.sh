@@ -13,7 +13,7 @@ e2e_build() {
   [ "$(uname -s)" = Linux ] && tags=gtk3,testhook
   (
     cd "$repo"
-    pnpm install --frozen-lockfile
+    pnpm --dir web install --frozen-lockfile
     pnpm --dir web build
     if [ -z "${RKL_E2E_APP:-}" ]; then
       go build -tags "$tags" -o target/go/rkl-e2e ./cmd/rkl

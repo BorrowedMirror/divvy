@@ -84,9 +84,9 @@
           "level": "error",
           "options": {
             "paths": {
-              "@tauri-apps/api/core": {
-                "importNames": ["invoke"],
-                "message": "Use the generated commands from src/bindings.ts instead of invoke()."
+              "@wailsio/runtime": {
+                "importNames": ["Call"],
+                "message": "Use the generated commands from src/bindings.ts instead of Call()."
               }
             },
             "patterns": [

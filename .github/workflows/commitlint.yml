@@ -20,17 +20,20 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Lint PR commits
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
-        run: pnpm exec commitlint --config .commitlintrc.json --from "$BASE" --to "$HEAD" --verbose
+        run: pnpm --dir web exec commitlint --cwd .. --config .commitlintrc.json --from "$BASE" --to "$HEAD" --verbose
       - name: Lint PR title
         env:
           TITLE: ${{ github.event.pull_request.title }}
-        run: printf '%s\n' "$TITLE" | pnpm exec commitlint --config .commitlintrc.json --verbose
+        run: printf '%s\n' "$TITLE" | pnpm --dir web exec commitlint --cwd .. --config .commitlintrc.json --verbose

@@ -1,0 +1,4 @@
+# pnpm settings for web/ (a single package, not a workspace).
+allowBuilds:
+  lefthook: true
+  esbuild: true

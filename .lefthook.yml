@@ -1,8 +1,9 @@
-# Install hooks with `pnpm exec lefthook install`.
+# Install hooks with `pnpm --dir web exec lefthook install` (pnpm lives in web/).
 commit-msg:
   commands:
     commitlint:
-      run: pnpm exec commitlint --edit {1}
+      # commitlint is installed in web/; --cwd .. reads .commitlintrc.json from the repo root.
+      run: pnpm --dir web exec commitlint --cwd .. --edit {1}
 pre-commit:
   parallel: true
   commands:

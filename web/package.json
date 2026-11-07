@@ -12,12 +12,12 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "commitlint": "commitlint"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
     "@tanstack/react-query": "5.106.1",
-    "@tauri-apps/api": "2.12.4",
     "@wailsio/runtime": "3.1.0",
     "i18next": "26.7.1",
     "react": "19.3.1",
@@ -27,6 +27,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.5",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@tailwindcss/vite": "4.3.4",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
@@ -36,6 +38,7 @@
     "@vitejs/plugin-react": "6.2.1",
     "@vitest/coverage-v8": "5.1.0",
     "jsdom": "31.0.0",
+    "lefthook": "^2",
     "tailwindcss": "4.3.4",
     "typescript": "7.0.2",
     "vite": "8.3.6",

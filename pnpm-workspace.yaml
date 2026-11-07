@@ -1,5 +1,0 @@
-packages:
-  - web
-allowBuilds:
-  lefthook: true
-  esbuild: true

@@ -14,7 +14,7 @@ $repo = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Push-Location $repo
 try {
   if (-not $SkipBuild) {
-    pnpm install --frozen-lockfile; if ($LASTEXITCODE) { throw "pnpm install failed" }
+    pnpm --dir web install --frozen-lockfile; if ($LASTEXITCODE) { throw "pnpm install failed" }
     pnpm --dir web build; if ($LASTEXITCODE) { throw "web build failed" }
     if (-not $env:RKL_E2E_APP) {
       go build -tags testhook -o target/go/rkl-e2e.exe ./cmd/rkl; if ($LASTEXITCODE) { throw "app build failed" }

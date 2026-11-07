@@ -37,11 +37,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
@@ -74,11 +77,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Build web, app (test hook) and fake game
         run: |
           pnpm --dir web build
@@ -102,11 +108,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
@@ -138,11 +147,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Build web, app (test hook) and fake game
         # bash: stop at the first failing command (pwsh would only check the last one).
         shell: bash
@@ -172,11 +184,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm --dir web install --frozen-lockfile
       - name: Build web, app (test hook) and fake game
         run: |
           pnpm --dir web build

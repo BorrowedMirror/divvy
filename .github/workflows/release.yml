@@ -87,12 +87,14 @@ jobs:
           go-version-file: go.mod
           cache: false
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
       # setup-node v4 caches nothing unless `cache` is set, and it is not here.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         # zizmor: ignore[cache-poisoning]
         with:
           node-version: 24
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web install --frozen-lockfile
       - run: pnpm --dir web build
       - name: task package:${{ matrix.name }}
         env:
@@ -146,7 +148,7 @@ jobs:
         run: |
           go run ./cmd/release update-manifest -version "$VERSION" -dir dist \
             -base-url "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/"
-      - name: SBOM (CycloneDX, go.mod + pnpm-lock.yaml)
+      - name: SBOM (CycloneDX, go.mod + web/pnpm-lock.yaml)
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: .
