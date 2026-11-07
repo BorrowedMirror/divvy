@@ -1,7 +1,7 @@
 //go:build e2e
 
 // Package e2e drives the real RKL app end to end: a test-hook build of cmd/rkl, the fake game
-// window from tools/fake-game and a mock trade2 API, all on the current desktop session.
+// window from e2e/cmd/fake-game and a mock trade2 API, all on the current desktop session.
 //
 //	go test -tags e2e ./e2e/...
 //
@@ -13,7 +13,7 @@
 // Environment:
 //
 //	RKL_E2E_APP          test-hook app binary (default target/go/rkl-e2e)
-//	RKL_E2E_FAKE_GAME    fake game binary (default target/e2e/debug/fake-game)
+//	RKL_E2E_FAKE_GAME    fake game binary (default target/e2e/fake-game)
 //	RKL_E2E_TRIGGER      how a price check is started: hook (`trigger` over the hook), xdotool
 //	                     (a real XTest key press of the global hotkey), signal (SIGUSR2/SIGUSR1),
 //	                     or auto (default: xdotool on X11, hook elsewhere)

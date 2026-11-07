@@ -8,7 +8,7 @@ package x11
 //	go test -tags x11test ./internal/platform/x11/
 //
 // They need xdotool and xclip; the copy test also needs the fake game
-// (RKL_FAKE_GAME, default target/e2e/debug/fake-game at the repository root).
+// (RKL_FAKE_GAME, default target/e2e/fake-game at the repository root).
 
 import (
 	"bufio"
@@ -164,10 +164,10 @@ func fakeGame(t *testing.T, display string) (cmd *exec.Cmd, lines <-chan string,
 	root := repoRoot(t)
 	bin := os.Getenv("RKL_FAKE_GAME")
 	if bin == "" {
-		bin = filepath.Join(root, "target/e2e/debug/fake-game")
+		bin = filepath.Join(root, "target/e2e/fake-game")
 		if _, err := os.Stat(bin); err != nil {
 			// A worktree shares the main checkout's build output.
-			bin = filepath.Join(root, "../../target/e2e/debug/fake-game")
+			bin = filepath.Join(root, "../../target/e2e/fake-game")
 		}
 	}
 	if _, err := os.Stat(bin); err != nil {

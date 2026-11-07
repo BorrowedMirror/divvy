@@ -4,7 +4,7 @@
 #   e2e/scripts/run-x11.sh [go test args...]      e.g. -run TestPriceCheck
 # Env: SKIP_BUILD=1 to reuse binaries; E2E_DISPLAY (default :99); the RKL_E2E_* knobs in
 # e2e/doc.go.
-# Needs: Xvfb openbox xdotool dbus-run-session go pnpm (cargo if fake-game is not built).
+# Needs: Xvfb openbox xdotool dbus-run-session go pnpm.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)

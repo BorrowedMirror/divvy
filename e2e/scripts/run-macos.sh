@@ -5,7 +5,7 @@
 # The price check is triggered over the test hook (`trigger 0`); the app's Cmd+C then has to
 # reach the focused fake game, which needs the Accessibility permission for the process that
 # runs the tests. Env: SKIP_BUILD=1 to reuse binaries; the RKL_E2E_* knobs in e2e/doc.go.
-# Needs: go, pnpm, the Xcode command line tools, cargo (for tools/fake-game).
+# Needs: go, pnpm, the Xcode command line tools.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)

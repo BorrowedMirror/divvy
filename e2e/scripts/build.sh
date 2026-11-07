@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds what the e2e tests run, unless SKIP_BUILD=1: the web UI, the test-hook app
-# (target/go/rkl-e2e), on Linux the wl-keyboard helper (target/e2e/wl-keyboard, used by
-# run-wayland.sh) and, when missing, the fake game (target/e2e/debug/fake-game).
+# (target/go/rkl-e2e), the fake game (target/e2e/fake-game) and on Linux the wl-keyboard helper
+# (target/e2e/wl-keyboard, used by run-wayland.sh).
 # Sourced by run-x11.sh and run-wayland.sh; also runnable on its own.
 #   RKL_E2E_APP / RKL_E2E_FAKE_GAME override the binaries (then nothing is built for them).
 set -euo pipefail
@@ -21,8 +21,8 @@ e2e_build() {
     if [ "$(uname -s)" = Linux ]; then
       go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard
     fi
-    if [ -z "${RKL_E2E_FAKE_GAME:-}" ] && [ ! -x target/e2e/debug/fake-game ]; then
-      cargo build -p fake-game --target-dir target/e2e
+    if [ -z "${RKL_E2E_FAKE_GAME:-}" ]; then
+      go build -o target/e2e/fake-game ./e2e/cmd/fake-game
     fi
   )
 }

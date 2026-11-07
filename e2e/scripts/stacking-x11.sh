@@ -5,12 +5,12 @@
 #   - the pinned price panel stacks above the game and takes focus,
 #   - the settings window covers the game exactly, above it, focused.
 # Needs: Xvfb openbox xdotool wmctrl xprop xwininfo dbus-run-session python3, and the binaries
-# e2e/scripts/build.sh builds (test-hook app target/go/rkl-e2e, target/e2e/debug/fake-game);
+# e2e/scripts/build.sh builds (test-hook app target/go/rkl-e2e, target/e2e/fake-game);
 # RKL_E2E_APP / RKL_E2E_FAKE_GAME override them.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 APP=${RKL_E2E_APP:-target/go/rkl-e2e}
-GAMEBIN=${RKL_E2E_FAKE_GAME:-target/e2e/debug/fake-game}
+GAMEBIN=${RKL_E2E_FAKE_GAME:-target/e2e/fake-game}
 DISP=${STACK_DISPLAY:-:87}
 PORT=${STACK_HOOK_PORT:-47188}
 Xvfb "$DISP" -screen 0 1920x1080x24 >/dev/null 2>&1 &

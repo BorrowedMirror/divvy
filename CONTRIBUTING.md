@@ -75,9 +75,7 @@ cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
 | `cargo xtask lint` | rustfmt check, clippy `-D warnings` (workspace and `e2e/macos-harness`), cargo-deny, cargo-machete, biome, tsc for web and e2e (`--no-web`, `--no-tools` to skip groups) |
 | `cargo xtask coverage [--check] [--no-run] [--profile <p>]` | nextest under llvm-cov; prints per-crate line coverage, writes `target/coverage/<crate>.lcov`, `--check` enforces the gates |
 | `cargo xtask gen [--no-bindings]` | regenerates `.commitlintrc.json`, `docs/contributing/commit-message.md` (from `.commit-config.toml`) and `web/src/bindings.ts` |
-| `cargo xtask data refresh [--offline]` | re-downloads and rebuilds the bundled game data in `crates/data/assets` |
 | `cargo xtask windows-installer [-- <tauri args>]` | cross-compiles the Windows NSIS installer on Linux; see [Windows installer from Linux](#windows-installer-from-linux) |
-| `cargo xtask fixtures record` | re-records trade fixtures from the live API (2 s between requests) |
 | `cargo nextest run` | tests (profiles in `.config/nextest.toml`) |
 | `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, biome, tsc |
 
@@ -86,16 +84,18 @@ web >= 80%; patch coverage >= 80%.
 
 ### End-to-end tests
 
-The e2e tests run the real Go app against `tools/fake-game` (a window titled "Path of Exile 2"
-that puts an item on the clipboard when it gets the copy chord) and a mock trade2 API. They are
+The e2e tests run the real Go app against `e2e/cmd/fake-game` (a window titled "Path of Exile 2"
+that puts an item on the clipboard when it gets the copy chord; X11, native Wayland, Windows and
+macOS) and a mock trade2 API. They are
 Go tests in `e2e/` behind the `e2e` build tag. They start a test-hook build of the app
 (`-tags testhook`) with a fresh `RKL_CONFIG_DIR`, point its trade, poe2scout and poe.ninja URLs
 at the mock, and drive it over the test hook on 127.0.0.1. The hook's `dom <window> <selector>`
 command checks what the overlay and settings pages render, without WebDriver.
 
-The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and, when missing, the
-fake game (`target/e2e/debug/fake-game`), set up the session, then run
-`go test -tags e2e ./e2e/...`:
+The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and the fake game
+(`go build -o target/e2e/fake-game ./e2e/cmd/fake-game`), set up the session, then run
+`go test -tags e2e ./e2e/...`. `e2e/scripts/fake-game-smoke-{x11,wayland}.sh` check the fake game
+on its own (copy chords, clipboard, `--log-keys`).
 
 ```sh
 task e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
@@ -145,6 +145,21 @@ task --list
 | `task package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
 | `task package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
 | `task updater:keygen` | prints a new updater key pair (see docs/contributing/releasing.md) |
+| `task data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `crates/data/assets` |
+| `task fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `crates/trade/tests/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
+
+The translations for non-English game clients come from an installed copy of the game. Its
+files are Oodle-compressed, which only the small Rust tool in `tools/game-extract` reads (it is
+not part of the Cargo workspace and needs only a Rust toolchain):
+
+```sh
+cargo run --release --manifest-path tools/game-extract/Cargo.toml -- l10n <game dir> target/l10n-raw.json
+go run ./cmd/datarefresh l10n target/l10n-raw.json
+```
+
+`<game dir>` is the folder holding `Bundles2/`. Run it after `task data:refresh`, which keeps
+the translations it finds. `game-extract file <game dir> <path> <out>` copies a single game
+file out (`list:<text>` as the path lists the matching paths instead).
 
 Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
 inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the

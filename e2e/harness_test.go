@@ -86,8 +86,8 @@ func appBinary(t *testing.T) string {
 }
 
 func fakeGameBinary(t *testing.T) string {
-	return binary(t, "RKL_E2E_FAKE_GAME", filepath.Join("target", "e2e", "debug", exe("fake-game")),
-		"build it with `cargo build -p fake-game --target-dir target/e2e`")
+	return binary(t, "RKL_E2E_FAKE_GAME", filepath.Join("target", "e2e", exe("fake-game")),
+		"build it with `go build -o target/e2e/fake-game ./e2e/cmd/fake-game`")
 }
 
 func fixture(name string) string { return filepath.Join(repoRoot(), "e2e", "fixtures", name) }
@@ -452,7 +452,7 @@ func dumpLog(t *testing.T, what, path string) {
 // Fake game
 // ---------------------------------------------------------------------------------------------
 
-// Game is a running tools/fake-game window.
+// Game is a running fake game window (e2e/cmd/fake-game).
 type Game struct {
 	cmd    *exec.Cmd
 	lines  chan string

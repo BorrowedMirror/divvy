@@ -11,8 +11,8 @@
 # Env: SKIP_BUILD=1; PORTAL_LIBEXEC (where xdg-desktop-portal(-wlr) live, default /usr/lib);
 # the RKL_E2E_* knobs in e2e/doc.go.
 # Needs: sway swaymsg dbus-run-session go pnpm, the wayland-client and xkbcommon headers (for
-# the wl-keyboard helper), xdg-desktop-portal + xdg-desktop-portal-wlr (optional), Xwayland +
-# xdotool for E2E_XWAYLAND=1.
+# the wl-keyboard helper and the fake game's Wayland window), xdg-desktop-portal +
+# xdg-desktop-portal-wlr (optional), Xwayland + xdotool for E2E_XWAYLAND=1.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)
