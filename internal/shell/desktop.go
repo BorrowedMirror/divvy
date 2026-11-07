@@ -31,9 +31,8 @@ func (x window) ExecJS(js string)     { x.w.ExecJS(js) }
 func (x window) SetZoom(zoom float64) { x.w.SetZoom(zoom) }
 func (x window) Center()              { x.w.Center() }
 
-func (x window) SetIgnoreMouseEvents(ignore bool) { x.w.SetIgnoreMouseEvents(ignore) }
-func (x window) SetAlwaysOnTop(on bool)           { x.w.SetAlwaysOnTop(on) }
-func (x window) SetFrameless(frameless bool)      { x.w.SetFrameless(frameless) }
+func (x window) SetAlwaysOnTop(on bool)      { x.w.SetAlwaysOnTop(on) }
+func (x window) SetFrameless(frameless bool) { x.w.SetFrameless(frameless) }
 
 // SetSkipTaskbar is a no-op: Wails sets taskbar visibility when a window is created (the
 // overlay is created hidden from the taskbar, the settings window is not).

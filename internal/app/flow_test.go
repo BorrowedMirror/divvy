@@ -70,7 +70,6 @@ func (w *fakeWindow) SetLogicalBounds(x, y, wd, h float64) {
 func (w *fakeWindow) SetLogicalSize(wd, h float64) { w.SetSize(int32(wd), int32(h)) }
 func (w *fakeWindow) SetZoom(z float64)            { w.mu.Lock(); w.zoom = z; w.mu.Unlock() }
 func (w *fakeWindow) ExecJS(js string)             { w.mu.Lock(); w.js = append(w.js, js); w.mu.Unlock() }
-func (w *fakeWindow) SetIgnoreMouseEvents(bool)    {}
 func (w *fakeWindow) SetAlwaysOnTop(on bool)       { w.alwaysTop = on }
 func (w *fakeWindow) SetFrameless(frameless bool)  { w.frameless = frameless }
 func (w *fakeWindow) SetSkipTaskbar(bool)          {}
@@ -276,4 +275,13 @@ func TestFlowEscFromTheHookClosesAnUnpinnedPanel(t *testing.T) {
 	a.st.OverlayVisible.Store(true)
 	h.InputListener.Emit(platform.InputEvent{Type: platform.KeyDown, Key: "Escape"})
 	require.Eventually(t, func() bool { return !d.overlay.IsVisible() }, 5*time.Second, 10*time.Millisecond)
+}
+
+func TestFlowNothingCopiedIsNotRecordedAsAnError(t *testing.T) {
+	a, _, h := newTestApp(t, testkit.NewFakePlatformBuilder().Window(game()))
+	h.InputSimulator.SetResponse(nil) // the game copies nothing: the copy times out
+	_, _, err := a.RunPriceCheck(context.Background(), false)
+	require.Error(t, err)
+	assert.True(t, IsSilentFailure(ipc.From(err)))
+	assert.Empty(t, a.st.RecentErrors(), "no item under the cursor is not a diagnostics error")
 }

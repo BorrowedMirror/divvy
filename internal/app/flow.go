@@ -33,7 +33,6 @@ type Window interface {
 	SetLogicalSize(w, h float64)
 	SetZoom(zoom float64)
 	ExecJS(js string)
-	SetIgnoreMouseEvents(ignore bool)
 	SetAlwaysOnTop(on bool)
 	SetFrameless(frameless bool)
 	SetSkipTaskbar(skip bool)
@@ -231,8 +230,14 @@ func (f *Flow) RunPriceCheck(ctx context.Context, pinned bool) (*core.ParsedItem
 	opts.Advanced = st.Settings().Hotkeys.AdvancedCopy
 	text, err := platform.CopyItemText(p.InputSimulator, p.Clipboard, opts, f.sleep)
 	if err != nil {
-		st.RecordError(err)
-		return nil, core.FilterSet{}, CopyError(err)
+		e := CopyError(err)
+		// Nothing under the cursor is a normal outcome, not an error worth keeping.
+		if IsSilentFailure(e) {
+			slog.Debug("price check: nothing copied", "err", err)
+		} else {
+			st.RecordError(err)
+		}
+		return nil, core.FilterSet{}, e
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, core.FilterSet{}, err
@@ -411,7 +416,6 @@ func (f *Flow) ShowOverlay() {
 	}
 	st.CardMoved.Store(false)
 	f.layoutOverlay(w, card)
-	w.SetIgnoreMouseEvents(false)
 	w.Show()
 	// A focused fullscreen game can sit above "always on top" windows (openbox and other X11
 	// WMs), so explicitly stack the panel above the game and give it keyboard focus (Esc,
