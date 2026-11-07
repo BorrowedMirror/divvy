@@ -66,6 +66,6 @@ mod tests {
     fn default_user_agent_has_version_and_contact() {
         let ua = crate::default_user_agent();
         assert!(ua.starts_with(&format!("rkl/{}", env!("CARGO_PKG_VERSION"))));
-        assert!(ua.contains("github.com/nightah/rust-king-ledger"));
+        assert!(ua.contains("github.com/BorrowedMirror/rust-king-ledger"));
     }
 }

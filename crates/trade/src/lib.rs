@@ -17,7 +17,7 @@ pub use source::{PriceRequest, PriceSource};
 /// append their own contact e-mail via settings (`trade.contact`).
 pub fn default_user_agent() -> String {
     format!(
-        "rkl/{} (+https://github.com/nightah/rust-king-ledger; contact: https://github.com/nightah/rust-king-ledger/issues)",
+        "rkl/{} (+https://github.com/BorrowedMirror/rust-king-ledger; contact: https://github.com/BorrowedMirror/rust-king-ledger/issues)",
         env!("CARGO_PKG_VERSION")
     )
 }

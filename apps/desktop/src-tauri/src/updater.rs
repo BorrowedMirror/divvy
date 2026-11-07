@@ -152,7 +152,7 @@ mod tests {
         let c: serde_json::Value = serde_json::from_str(text).unwrap();
         assert_eq!(
             c.pointer("/plugins/updater/endpoints/0").and_then(|e| e.as_str()),
-            Some("https://github.com/nightah/rust-king-ledger/releases/latest/download/latest.json")
+            Some("https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/latest.json")
         );
         assert!(c.pointer("/plugins/updater/pubkey").is_none(), "release.yml injects the pubkey");
     }

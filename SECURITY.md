@@ -3,14 +3,14 @@
 ## Supported versions
 
 Only the latest release receives security fixes. Please make sure you are on the newest
-version from the [releases page](https://github.com/nightah/rust-king-ledger/releases) before reporting.
+version from the [releases page](https://github.com/BorrowedMirror/rust-king-ledger/releases) before reporting.
 Release artefacts are signed (Tauri updater signatures, Apple Developer ID on macOS) and listed
 in `SHA256SUMS.txt`; the app does not update itself yet.
 
 ## Reporting a vulnerability
 
 Please **do not** open a public issue. Report privately through
-[GitHub security advisories](https://github.com/nightah/rust-king-ledger/security/advisories/new).
+[GitHub security advisories](https://github.com/BorrowedMirror/rust-king-ledger/security/advisories/new).
 
 Include what you found, how to reproduce it, the affected version and OS, and the impact you
 expect. We aim to acknowledge reports within 3 days and to ship a fix or mitigation within 30

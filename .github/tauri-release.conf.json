@@ -7,7 +7,7 @@
   },
   "plugins": {
     "updater": {
-      "endpoints": ["https://github.com/nightah/rust-king-ledger/releases/latest/download/latest.json"]
+      "endpoints": ["https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/latest.json"]
     }
   }
 }

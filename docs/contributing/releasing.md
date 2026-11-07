@@ -72,7 +72,7 @@ never check for updates and record no errors about it. Keep the pubkey out of th
 `tauri.conf.json`; a unit test enforces this.
 
 Release builds read `plugins.updater.endpoints` from `.github/tauri-release.conf.json`
-(`https://github.com/nightah/rust-king-ledger/releases/latest/download/latest.json`). GitHub's
+(`https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/latest.json`). GitHub's
 `latest` skips drafts and pre-releases, so installs only see a release once it is published,
 and rc builds update to the next stable release. The first check runs 30 s after startup and
 then every 24 h while **Settings > General > Check for updates automatically**

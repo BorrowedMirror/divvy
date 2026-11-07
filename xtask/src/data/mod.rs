@@ -16,7 +16,7 @@ pub mod l10n;
 pub mod normalise;
 
 /// Descriptive UA as GGG asks for API consumers.
-const USER_AGENT: &str = "rkl-data-refresh/0.1 (+https://github.com/nightah/rust-king-ledger)";
+const USER_AGENT: &str = "rkl-data-refresh/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)";
 /// Pause between requests to the same host, to stay well under rate limits.
 const POLITE_DELAY: Duration = Duration::from_millis(1500);
 

@@ -1,7 +1,7 @@
 # Game data sources
 
 Research for `cargo xtask data refresh` (workstream C). Checked live on 2026-11-05
-(PoE2 0.5.5.5) with UA `rkl-data-refresh/0.1 (+https://github.com/nightah/rust-king-ledger)`.
+(PoE2 0.5.5.5) with UA `rkl-data-refresh/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)`.
 
 ## Summary
 

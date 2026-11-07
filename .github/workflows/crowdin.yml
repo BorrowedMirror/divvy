@@ -18,7 +18,7 @@ concurrency:
 jobs:
   sync:
     # Requires repository secrets CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN.
-    if: github.repository_owner == 'nightah'
+    if: github.repository_owner == 'BorrowedMirror'
     runs-on: ubuntu-latest
     permissions:
       contents: write
