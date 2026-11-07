@@ -595,15 +595,16 @@ func run(t *testing.T, cmd string) {
 	require.NoError(t, err, "`%s`: %s", cmd, out)
 }
 
-// TriggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
-// (the app sends its copy chord to whatever has focus, as for a real player).
 // lastTrigger is when the previous TriggerPriceCheck fired. The app drops presses that come
 // less than its debounce (150 ms) after the previous price check started, as key bounce; on a
 // fast run (Wayland, no focus delay) a second trigger could land inside it.
 var lastTrigger time.Time
 
+// triggerSpacing is the least time TriggerPriceCheck leaves between two triggers.
 const triggerSpacing = 300 * time.Millisecond
 
+// TriggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
+// (the app sends its copy chord to whatever has focus, as for a real player).
 func TriggerPriceCheck(t *testing.T, a *App, pinned bool) {
 	t.Helper()
 	FocusGame(t)
