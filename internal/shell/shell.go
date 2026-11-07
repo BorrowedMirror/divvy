@@ -6,6 +6,7 @@ package shell
 import (
 	"io/fs"
 	"log/slog"
+	"runtime"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
@@ -145,8 +146,14 @@ func (s *Shell) BuildTray(icons Icons, labels TrayLabels, actions TrayActions) {
 	menu.Add(labels.Quit).OnClick(func(*application.Context) { s.App.Quit() })
 
 	s.Tray = s.App.SystemTray.New()
-	s.Tray.SetIcon(icons.Tray)
-	s.Tray.SetTemplateIcon(icons.TrayTemplate)
+	// Dedicated small glyphs: the full app tile is too detailed at tray size. macOS gets the
+	// black template image the menu bar recolours; everywhere else the colour icon. Wails'
+	// SetTemplateIcon replaces the icon on every OS, so it is only called on macOS.
+	if runtime.GOOS == "darwin" {
+		s.Tray.SetTemplateIcon(icons.TrayTemplate)
+	} else {
+		s.Tray.SetIcon(icons.Tray)
+	}
 	s.Tray.SetTooltip(labels.Tooltip)
 	s.Tray.SetMenu(menu)
 	s.trayActions = actions
