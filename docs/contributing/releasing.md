@@ -5,7 +5,6 @@
    `cargo xtask release 0.2.0`. This:
    - sets the version in `Cargo.toml` (`[workspace.package]`), `apps/desktop/src-tauri/tauri.conf.json`
      and `web/package.json`, and refreshes `Cargo.lock`;
-   - regenerates `CHANGELOG.md` with git-cliff (`.cliff.toml`);
    - commits `release: v0.2.0` and creates the annotated tag `v0.2.0`.
    It never pushes.
 3. Review the commit, then `git push origin master v0.2.0`.
@@ -14,11 +13,29 @@
    pre-releases, since RPM versions cannot contain `-`), uploads
    `latest.json` for the updater, `SHA256SUMS.txt`, a CycloneDX SBOM and
    `THIRD-PARTY-NOTICES.html`.
+   GitHub writes the draft's notes from the pull requests merged since the previous release,
+   grouped by label (see [Release notes](#release-notes)).
 5. Check the draft (install one bundle per OS if possible) and publish it. Publishing makes
    `latest.json` visible to the updater.
 
 Pre-releases use a SemVer pre-release suffix (`0.2.0-rc.1`); the workflow marks them as
 pre-releases automatically.
+
+## Release notes
+
+There is no changelog file. Each release's notes are GitHub's generated release notes: the pull
+requests merged since the previous release, grouped into the categories in `.github/release.yml`
+by their labels. `.github/workflows/pr-labels.yml` sets those labels from the pull request's
+Conventional Commits title whenever it is opened or edited:
+
+- `type/<type>` from the type (`feat` -> Features, `fix` -> Bug fixes, and so on);
+- `area/<scope>` from the scope; `area/deps` (Renovate's `build(deps)`) goes under Dependencies;
+- `type/breaking-change` for `type!:` or a `BREAKING CHANGE:` footer in the body or a commit.
+
+`type/release` pull requests are left out, and anything unlabelled lands under Other changes.
+Pull requests are squash-merged, so the title is the commit message; fix a wrong title before
+merging, or relabel the pull request by hand before publishing the draft. Commits pushed
+straight to `master` without a pull request do not appear in the notes.
 
 ## Secrets
 

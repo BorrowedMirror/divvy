@@ -31,7 +31,7 @@ enum Cmd {
         #[arg(long)]
         no_bindings: bool,
     },
-    /// Bump versions, regenerate CHANGELOG.md, commit `release: v<version>` and tag (never pushes).
+    /// Bump versions, commit `release: v<version>` and tag (never pushes).
     Release(release::ReleaseArgs),
     /// fmt + clippy + deny + machete + web lint/typecheck.
     Lint(lint::LintArgs),

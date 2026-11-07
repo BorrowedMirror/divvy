@@ -1,6 +1,7 @@
 name: release
 
-# Tag `v*` (created by `cargo xtask release <version>`) -> draft GitHub release with signed
+# Tag `v*` (created by `cargo xtask release <version>`) -> draft GitHub release, with notes
+# GitHub generates from the labelled pull requests (.github/release.yml), and signed
 # bundles, the Tauri updater manifest (latest.json), SHA-256 checksums, an SBOM and
 # third-party notices. A maintainer reviews and publishes the draft by hand.
 #
@@ -36,27 +37,19 @@ jobs:
     outputs:
       release_id: ${{ steps.create.outputs.release_id }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Release notes (git-cliff)
-        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
-        with:
-          config: .cliff.toml
-          args: --latest --strip header
-        env:
-          OUTPUT: RELEASE_NOTES.md
+      # GitHub writes the notes from the merged pull requests since the previous release,
+      # grouped by their labels (.github/release.yml, applied by pr-labels.yml).
       - name: Create draft release
         id: create
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
           prerelease=()
           case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
           gh release create "$TAG" --draft --verify-tag "${prerelease[@]}" \
-            --title "rkl $TAG" --notes-file RELEASE_NOTES.md
+            --title "rkl $TAG" --generate-notes
           id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id")
           echo "release_id=$id" >> "$GITHUB_OUTPUT"
 

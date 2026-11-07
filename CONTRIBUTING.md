@@ -16,7 +16,7 @@ All platforms need:
 - **Node.js 24** and **pnpm** (version pinned by `packageManager` in `package.json`; `corepack enable`
   picks it up).
 - Cargo tools used by the checks:
-  `cargo install --locked cargo-nextest cargo-llvm-cov cargo-deny cargo-machete cargo-about git-cliff`
+  `cargo install --locked cargo-nextest cargo-llvm-cov cargo-deny cargo-machete cargo-about`
   (or `cargo binstall` the same list).
 
 ### Linux (Debian/Ubuntu)
@@ -126,7 +126,8 @@ A fix should add that text to `crates/testkit/corpus/` so it stays fixed.
 
 ## Releases (maintainers)
 
-`cargo xtask release <version>` bumps every version, regenerates `CHANGELOG.md` with git-cliff,
-commits `release: v<version>` and creates an annotated tag. It never pushes; pushing the tag runs
-`.github/workflows/release.yml`, which produces a draft GitHub release. See
+`cargo xtask release <version>` bumps every version, commits `release: v<version>` and creates an
+annotated tag. It never pushes; pushing the tag runs `.github/workflows/release.yml`, which
+produces a draft GitHub release whose notes GitHub generates from the merged pull requests,
+grouped by the labels `pr-labels.yml` applies from each title. See
 [docs/contributing/releasing.md](docs/contributing/releasing.md).

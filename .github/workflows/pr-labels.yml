@@ -1,0 +1,72 @@
+name: pr-labels
+
+# Labels each pull request from its Conventional Commits title: type/<type>, area/<scope> for a
+# scoped title, and type/breaking-change for `!` or a BREAKING CHANGE footer. Pull requests are
+# squash-merged, so the title becomes the commit message, and the labels group the release notes
+# (.github/release.yml). commitlint.yml checks the title itself.
+on:
+  # Runs with the base repository's token so pull requests from forks can be labelled too.
+  # Nothing from the pull request is checked out or run: this only reads the title, body,
+  # labels and commit messages.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened, edited, synchronize, reopened]
+
+# One run per pull request at a time, in order, so labels from an older title never land after
+# a newer one's.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write # add and remove the pull request's labels
+      issues: write # create a label the first time it is used
+    steps:
+      - name: Parse the title and apply labels
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            // commitlint.yml checks the title in full; this only labels a well-formed one.
+            const title = context.payload.pull_request.title;
+            const match = title.match(/^([a-z]+)(\(([a-z0-9-]+)\))?(!)?: .+/);
+            if (!match) {
+              core.info(`Not a Conventional Commits title, so no labels: ${title}`);
+              return;
+            }
+
+            const issue = { owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number };
+            const breakingRe = /^BREAKING[ -]CHANGE: /m;
+            let breaking = match[4] === '!' || breakingRe.test(context.payload.pull_request.body || '');
+            if (!breaking) {
+              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                per_page: 100,
+              });
+              breaking = commits.some((c) => breakingRe.test(c.commit.message));
+            }
+
+            const desired = new Set([`type/${match[1]}`]);
+            if (match[3]) {
+              desired.add(`area/${match[3]}`);
+            }
+            if (breaking) {
+              desired.add('type/breaking-change');
+            }
+
+            const existing = context.payload.pull_request.labels.map((l) => l.name);
+            for (const name of existing) {
+              if ((name.startsWith('type/') || name.startsWith('area/')) && !desired.has(name)) {
+                await github.rest.issues.removeLabel({ ...issue, name });
+              }
+            }
+            const toAdd = [...desired].filter((name) => !existing.includes(name));
+            if (toAdd.length > 0) {
+              await github.rest.issues.addLabels({ ...issue, labels: toAdd });
+            }

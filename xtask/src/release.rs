@@ -1,6 +1,7 @@
-//! `cargo xtask release <version>`: bump every version source, regenerate CHANGELOG.md with
-//! git-cliff, then create a `release: v<version>` commit and an annotated `v<version>` tag.
-//! It never pushes: pushing the tag is what triggers `.github/workflows/release.yml`.
+//! `cargo xtask release <version>`: bump every version source, then create a
+//! `release: v<version>` commit and an annotated `v<version>` tag. It never pushes: pushing the
+//! tag is what triggers `.github/workflows/release.yml`, where GitHub writes the release notes
+//! from the labelled pull requests (`.github/release.yml`).
 use std::fmt::Write as _;
 
 use anyhow::{Context as _, bail, ensure};
@@ -111,7 +112,7 @@ pub fn run(args: &ReleaseArgs) -> anyhow::Result<()> {
         for (f, _) in &edits {
             println!("would set version {version} in {f}");
         }
-        println!("would run: git cliff --tag {tag} -o CHANGELOG.md; git commit -m 'release: {tag}'; git tag -a {tag}");
+        println!("would run: git commit -m 'release: {tag}'; git tag -a {tag}");
         return Ok(());
     }
     for (f, body) in &edits {
@@ -119,9 +120,8 @@ pub fn run(args: &ReleaseArgs) -> anyhow::Result<()> {
     }
     // Refresh the workspace members' entries in Cargo.lock only.
     cmd!(sh, "cargo update --workspace --offline").run()?;
-    cmd!(sh, "git cliff --config .cliff.toml --tag {tag} --output CHANGELOG.md").run()?;
 
-    let files: Vec<&str> = edits.iter().map(|(f, _)| *f).chain(["Cargo.lock", "CHANGELOG.md"]).collect();
+    let files: Vec<&str> = edits.iter().map(|(f, _)| *f).chain(["Cargo.lock"]).collect();
     cmd!(sh, "git add {files...}").run()?;
     let msg = format!("release: {tag}");
     cmd!(sh, "git commit -m {msg}").run()?;
