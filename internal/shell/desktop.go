@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -17,6 +18,8 @@ import (
 // points on macOS).
 type window struct {
 	w *application.WebviewWindow
+	// resizer, when set, also sizes the window natively (Wayland layer surfaces).
+	resizer platform.Resizer
 }
 
 func (x window) Show()                { x.w.Show() }
@@ -65,7 +68,14 @@ func (x window) SetLogicalBounds(px, py, w, h float64) {
 	x.w.SetBounds(application.Rect{X: int(px), Y: int(py), Width: int(w + 0.5), Height: int(h + 0.5)})
 }
 
-func (x window) SetLogicalSize(w, h float64) { x.w.SetSize(int(w+0.5), int(h+0.5)) }
+func (x window) SetLogicalSize(w, h float64) {
+	x.w.SetSize(int(w+0.5), int(h+0.5))
+	if x.resizer != nil {
+		if err := x.resizer.Resize(int32(w+0.5), int32(h+0.5)); err != nil {
+			slog.Debug("resize layer surface", "err", err)
+		}
+	}
+}
 
 // Desktop implements app.Desktop over the Wails application, with native window styling from
 // the OS backend's Parts.
@@ -87,10 +97,18 @@ func NewDesktop(s *Shell, parts platform.Parts) *Desktop {
 var _ app.Desktop = (*Desktop)(nil)
 
 // Overlay is the price panel window.
-func (d *Desktop) Overlay() app.Window { return window{d.shell.Overlay} }
+func (d *Desktop) Overlay() app.Window {
+	w := window{w: d.shell.Overlay}
+	d.mu.Lock()
+	if r, ok := d.stylers[d.shell.Overlay].(platform.Resizer); ok {
+		w.resizer = r
+	}
+	d.mu.Unlock()
+	return w
+}
 
 // Settings is the settings window.
-func (d *Desktop) Settings() app.Window { return window{d.shell.Settings} }
+func (d *Desktop) Settings() app.Window { return window{w: d.shell.Settings} }
 
 // Styler is the backend's native styling for w, created on first use.
 func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, error) {
@@ -102,6 +120,13 @@ func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, 
 	}
 	if d.parts.Overlay == nil {
 		return nil, platform.Unsupported("overlay styling")
+	}
+	// Wails creates the native window from a goroutine after Run starts.
+	for i := 0; w.NativeWindow() == nil; i++ {
+		if i == 100 {
+			return nil, platform.Backend("native window not created after 2s")
+		}
+		time.Sleep(20 * time.Millisecond)
 	}
 	// Linux backends read the GtkWindow, which GTK only allows on its main thread. The lock is
 	// not held across the hop: the main thread may be asking for a styler too.

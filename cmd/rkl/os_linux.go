@@ -3,14 +3,20 @@ package main
 import (
 	"fmt"
 
+	"github.com/wailsapp/wails/v3/pkg/application"
+
 	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/wayland"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/x11"
 )
 
-// preInit points GTK at the X11 backend for X11/XWayland (window positions are global there)
-// and at Wayland for Wayland-native, before Wails initialises GTK.
+// preInit runs before Wails initialises GTK and creates any web view: it points GTK at the X11
+// backend for X11/XWayland (window positions are global there) and at Wayland for
+// Wayland-native, and moves WebKitGTK's garbage-collector signal off SIGUSR1, which it would
+// otherwise take over, crashing the app on the first `pkill -USR1 rkl`.
 func preInit(kind platform.BackendKind, errs *[]string) {
+	wayland.MoveJSCSignal()
 	if err := x11.PreInit(kind); err != nil {
 		*errs = append(*errs, fmt.Sprintf("GDK backend: %v", err))
 	}
@@ -20,9 +26,10 @@ func preInit(kind platform.BackendKind, errs *[]string) {
 // Ctrl + wheel stash tab switching is on.
 func newParts(kind platform.BackendKind, wheel bool) (platform.Parts, error) {
 	if kind == platform.BackendWayland {
-		// The Wayland-native backend is still being ported; XWayland (the default whenever
-		// DISPLAY is set) uses the X11 backend.
-		return platform.Parts{}, platform.Unsupported("wayland-native backend (not ported yet)")
+		return wayland.New(
+			wayland.WithProbe(platform.EnvProbeFromEnv()),
+			wayland.WithMainThread(func(f func()) { application.InvokeSync(f) }),
+		)
 	}
 	return x11.New(x11.Options{HookMouse: wheel})
 }

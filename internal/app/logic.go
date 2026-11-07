@@ -140,11 +140,6 @@ func MayCopy(windowTracking bool, gameFocused func() bool) bool {
 	return !windowTracking || gameFocused()
 }
 
-// ShellHandlesSIGUSR2 reports whether the shell must handle SIGUSR2 itself: a Wayland platform
-// already maps it to a hotkey. SIGUSR1 (pinned) is always the shell's, else its default action
-// would kill the app.
-func ShellHandlesSIGUSR2(waylandPlatform bool) bool { return !waylandPlatform }
-
 // MustShowSettings reports whether settings must be shown at startup: only when the user would
 // otherwise have no way in, neither a tray icon nor a registered hotkey. With either one the
 // app is reachable (missing hotkeys are explained by first-run onboarding and the diagnostics

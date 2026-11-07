@@ -39,6 +39,7 @@ func parseArgs(args []string) cli {
 }
 
 func main() {
+	listenSignals()
 	var logFile app.LogFile
 	logger := app.NewLogger(os.Stderr, &logFile)
 	args := parseArgs(os.Args[1:])

@@ -3,27 +3,25 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
 	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/wayland"
 )
 
-// startSignalTriggers makes SIGUSR1 a pinned price check and SIGUSR2 a normal one, for
-// compositor key bindings (`pkill -USR2 rkl`). SIGUSR1 is always ours (unhandled, it would end
-// the process); SIGUSR2 is ours unless the Wayland backend already maps it.
+var signalEvents <-chan platform.HotkeyEvent
+
+// listenSignals takes SIGUSR1 and SIGUSR2 at the very top of main: unhandled, either ends the
+// process, so a trigger during startup must not reach the default action.
+func listenSignals() { signalEvents, _ = wayland.SignalTriggers() }
+
+// startSignalTriggers makes SIGUSR2 a price check and SIGUSR1 a pinned one, for compositor key
+// bindings (`pkill -USR2 rkl`) on every unix backend. One listener for both: a second would
+// deliver each signal twice. Triggers that arrived during startup run now.
 func startSignalTriggers(flow *app.Flow) {
-	sigs := []os.Signal{syscall.SIGUSR1}
-	if app.ShellHandlesSIGUSR2(flow.State().Backend == platform.BackendWayland) {
-		sigs = append(sigs, syscall.SIGUSR2)
-	}
-	ch := make(chan os.Signal, 4)
-	signal.Notify(ch, sigs...)
+	events := signalEvents
 	go func() {
-		for sig := range ch {
-			flow.Trigger(sig == syscall.SIGUSR1)
+		for ev := range events {
+			flow.Trigger(ev.Action.Kind == platform.PriceCheckPinned)
 		}
 	}()
 }

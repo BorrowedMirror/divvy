@@ -465,12 +465,6 @@ func TestLogicCopyRequiresFocusOnlyWithTracking(t *testing.T) {
 	}
 }
 
-func TestLogicSIGUSR2Ownership(t *testing.T) {
-	if !ShellHandlesSIGUSR2(false) || ShellHandlesSIGUSR2(true) {
-		t.Error("the shell handles SIGUSR2 unless a Wayland platform maps it")
-	}
-}
-
 func TestLogicLogFilterCapsHTTPStack(t *testing.T) {
 	if got := LogFilter(""); got != "info,reqwest=info,hyper=info,hyper_util=info,h2=info,rustls=info,enigo=error" {
 		t.Errorf("default: %q", got)

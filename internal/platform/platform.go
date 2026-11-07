@@ -134,6 +134,11 @@ type (
 	DirectMover interface {
 		MoveDirect(x, y int32) error
 	}
+	// Resizer sizes the window itself (logical px) where the toolkit's resize does not reach
+	// it: a Wayland layer surface takes its size from the window's size request.
+	Resizer interface {
+		Resize(width, height int32) error
+	}
 	// LayerAnchorer anchors a layer-shell surface to an output edge (Wayland-native): right
 	// selects the right edge, top and side are margins in px.
 	LayerAnchorer interface {
