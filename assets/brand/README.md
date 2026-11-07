@@ -2,7 +2,7 @@
 
 Three gold blades swirl clockwise out of a crowned rust core, and each blade ends in a crab claw.
 It riffs on Path of Exile's Chaos Orb and on Ferris, the Rust crab. All of it is original artwork
-under the project's licence (MIT OR Apache-2.0); no Grinding Gear Games or third-party art is used.
+under the project's licence (Apache-2.0); no Grinding Gear Games or third-party art is used.
 
 | File | Use |
 | --- | --- |

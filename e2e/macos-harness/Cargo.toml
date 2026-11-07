@@ -4,7 +4,7 @@ description = "e2e harness driving rkl over its test hook (macOS CI; runs on any
 version = "0.1.0-rc.1"
 edition = "2024"
 rust-version = "1.98"
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0"
 publish = false
 
 # Standalone on purpose: not a member of the root workspace (whose member list the lead owns),

@@ -20,7 +20,7 @@ version = 2
 confidence-threshold = 0.9
 # The allow-list is policy, not an inventory: do not warn when an entry is unused today.
 unused-allowed-license = "allow"
-# Everything here is compatible with distributing rkl under MIT OR Apache-2.0.
+# Everything here is compatible with distributing rkl under Apache-2.0.
 allow = [
   "MIT",
   "MIT-0",

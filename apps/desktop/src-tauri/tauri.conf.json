@@ -54,7 +54,7 @@
     ],
     "category": "Utility",
     "shortDescription": "Path of Exile 2 price-check overlay",
-    "licenseFile": "../../../LICENSE-MIT",
+    "licenseFile": "../../../LICENSE",
     "linux": {
       "deb": {
         "depends": [
@@ -73,7 +73,7 @@
     },
     "longDescription": "Hover an item in Path of Exile 2 and press Ctrl+D to see its price from the official trade API in an overlay beside the cursor. Reads only the item text the game copies to the clipboard.",
     "publisher": "rkl contributors",
-    "copyright": "Copyright (c) 2026 rkl contributors. MIT OR Apache-2.0."
+    "copyright": "Copyright (c) 2026 rkl contributors. Apache-2.0."
   },
   "mainBinaryName": "rkl"
 }

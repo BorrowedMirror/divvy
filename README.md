@@ -142,6 +142,6 @@ See [docs/architecture.md](docs/architecture.md) for an overview,
 
 ## Licence
 
-Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+Licensed under the [Apache License, Version 2.0](LICENSE).
 Path of Exile is a trademark of Grinding Gear Games; RKL is not affiliated with or endorsed
 by Grinding Gear Games.
