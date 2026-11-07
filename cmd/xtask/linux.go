@@ -42,7 +42,7 @@ func (p packager) linux() error {
 	s := sh{dir: p.root}
 
 	bin := filepath.Join(work, binaryName)
-	if err := s.with("CGO_ENABLED=1").run("go", "build", "-tags", "gtk3", "-trimpath",
+	if err := s.with("CGO_ENABLED=1").run("go", "build", "-tags", "gtk3,production", "-trimpath",
 		"-ldflags", ldflags(p.version), "-o", bin, "./cmd/rkl"); err != nil {
 		return err
 	}

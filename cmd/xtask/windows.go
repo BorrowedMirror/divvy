@@ -109,7 +109,7 @@ func (p packager) buildWindowsExe(s sh, syso, exe string) error {
 		return err
 	}
 	defer os.Remove(linked)
-	return s.with("GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0").run("go", "build",
+	return s.with("GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0").run("go", "build", "-tags", "production",
 		"-trimpath", "-ldflags", ldflags(p.version, "-H", "windowsgui"), "-o", exe, "./cmd/rkl")
 }
 
