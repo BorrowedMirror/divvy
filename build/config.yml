@@ -11,9 +11,6 @@ dev_mode:
       - node_modules
       - web
       - target
-      - crates
-      - apps
-      - xtask
       - e2e
       - tools
     file:

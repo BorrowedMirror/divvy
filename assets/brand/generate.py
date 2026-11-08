@@ -1,7 +1,7 @@
 """Generate the Chaos Claw brand SVGs (flattened geometry, one light source).
 
 Usage: python3 generate.py [out-dir]   (defaults to this directory)
-Run build-icons.sh afterwards to refresh the Tauri icon set.
+Run build-icons.sh afterwards to refresh the app icons.
 """
 import math
 import sys

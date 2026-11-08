@@ -24,6 +24,19 @@ The SVGs are generated; edit `generate.py`, not the SVGs. Then run:
 ./assets/brand/build-icons.sh
 ```
 
-That rewrites the SVGs, the Tauri icon set in `apps/desktop/src-tauri/icons` (including
-`tray.png` and `tray-template.png`) and the web header glyph. It needs `python3`,
-`rsvg-convert`, ImageMagick 7 and `cargo tauri`.
+It needs python3, `rsvg-convert` (librsvg), ImageMagick 7 (`magick`) and Go (Wails' icon
+generator, pinned in `tools/go.mod`, writes the `.icns`). It rewrites the SVGs, the web header
+glyph (`web/src/assets/rkl-glyph.svg`) and the app icons, which live in:
+
+| File | Size | From |
+| --- | --- | --- |
+| `build/appicon.png` | 256 px | `rkl-app-icon.svg` (Linux AppImage icon) |
+| `build/windows/icon.ico` | 16-256 px | `rkl-app-icon-16.svg` (16, 24), `rkl-app-icon-32.svg` (32), `rkl-app-icon.svg` (48-256) |
+| `build/darwin/icons.icns` | up to 1024 px | `rkl-app-icon-macos.svg` |
+| `cmd/rkl/icons/icon.png` | 512 px | `rkl-app-icon.svg` (window icon) |
+| `cmd/rkl/icons/tray.png` | 64 px | `rkl-glyph-16.svg` (Windows/Linux tray) |
+| `cmd/rkl/icons/tray-template.png` | 44 px | `rkl-glyph-mono.svg` (macOS menu bar, 22 pt @2x) |
+
+`./assets/brand/build-icons.sh <dir>` writes the same tree under `<dir>` instead, to compare
+before committing. The PNGs and the `.ico` come out byte-identical for unchanged SVGs; the
+`.icns` encoding differs from the committed one (made by an earlier tool), not its artwork.
