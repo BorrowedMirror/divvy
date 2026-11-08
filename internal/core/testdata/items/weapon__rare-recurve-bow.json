@@ -1,0 +1,132 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Recurve Bow",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Bows"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "rune",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "36% increased Physical Damage",
+      "values": [
+        36
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "142% increased Physical Damage",
+      "values": [
+        142
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Fire Damage",
+      "text": "Adds 15 to 24 Fire Damage",
+      "values": [
+        15,
+        24
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Level of all Projectile Skills",
+      "text": "+2 to Level of all Projectile Skills",
+      "values": [
+        2
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Critical Hit Chance",
+      "text": "22% increased Critical Hit Chance",
+      "values": [
+        22
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+148 to Accuracy Rating",
+      "values": [
+        148
+      ]
+    }
+  ],
+  "name": "Hate Thirst",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "82-152"
+    },
+    {
+      "augmented": false,
+      "name": "Elemental Damage",
+      "value": "18-30"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.20"
+    }
+  ],
+  "quality": 20,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 103,
+    "int": null,
+    "level": 55,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 2,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.2,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": 28.8,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 140.4,
+    "spirit": null,
+    "total_dps": 169.2
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

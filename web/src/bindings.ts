@@ -176,13 +176,15 @@ export type AdvancedModInfo_Deserialize = {
 export type Affix = "prefix" | "suffix" | "implicit";
 
 /** BackendKind is the OS integration backend in use. */
-export type BackendKind = "windows" | "macos" | 
-/**  X11 or XWayland (default on Linux). */
-"x11" | 
-/**  Wayland-native (layer-shell + portals). */
-"wayland" | 
-/**  In-process fakes (tests, `RKL_BACKEND=fake`). */
-"fake";
+export type BackendKind =
+	| "windows"
+	| "macos"
+	/** X11 or XWayland (the default on Linux). */
+	| "x11"
+	/** Wayland-native (layer-shell and portals). */
+	| "wayland"
+	/** In-process fakes (tests, `RKL_BACKEND=fake`). */
+	| "fake";
 
 /** Capabilities is the per-capability support report shown on the diagnostics page. */
 export type Capabilities = {
@@ -207,7 +209,7 @@ export type Capabilities_Deserialize = Capabilities;
 /**
  * ChatCommand is a chat command sent with one hotkey: Enter, the text, and (with Send)
  * Enter again. `&&` chains several lines in one key press; `@last` and `@area` are filled
- * from the game log. All fields are required in the TOML (no serde default).
+ * from the game log. A document that has a chat command must set all its fields.
  */
 export type ChatCommand = ChatCommand_Serialize | ChatCommand_Deserialize;
 export type ChatCommand_Serialize = {
@@ -291,7 +293,13 @@ export type Diagnostics_Deserialize = {
 };
 
 /** DragPhase is the phase of a header drag of the price card. */
-export type DragPhase = "start" | "move" | "end";
+export type DragPhase =
+	/** The press on the header that starts a drag. */
+	| "start"
+	/** A pointer move while dragging. */
+	| "move"
+	/** The release that ends a drag. */
+	| "end";
 
 /** FilterSet is everything the user can edit before (re)querying. Round-trips through IPC. */
 export type FilterSet = FilterSet_Serialize | FilterSet_Deserialize;
@@ -311,7 +319,7 @@ export type FilterSet_Serialize = {
 	route: QueryRoute,
 	/**
 	 * Unidentified unique: the uniques that use this base, to price one of them by name.
-	 * Optional when decoding (`#[serde(default)]`).
+	 * May be missing when decoding.
 	 */
 	unique_candidates: string[],
 };
@@ -331,7 +339,7 @@ export type FilterSet_Deserialize = {
 	route: QueryRoute,
 	/**
 	 * Unidentified unique: the uniques that use this base, to price one of them by name.
-	 * Optional when decoding (`#[serde(default)]`).
+	 * May be missing when decoding.
 	 */
 	unique_candidates: string[],
 };
@@ -364,7 +372,10 @@ export type HotkeySettings_Deserialize = {
 	advanced_copy: boolean,
 };
 
-/** IpcError is the error shape for every command. */
+/**
+ * IpcError is the error every command fails with, which the frontend receives as the `error` of
+ * `{status: "error"}`.
+ */
 export type IpcError = IpcError_Serialize | IpcError_Deserialize;
 export type IpcError_Serialize = {
 	/** `parse`, `trade`, `rate_limited`, `config`, `platform`, `no_item`, `busy`, `update`, `internal`. */
@@ -385,9 +396,9 @@ export type ItemCategory = "currency" | "gem" | "unique" | "equipment" | "waysto
 /**
  * ItemClass is the exact `Item Class:` header value, normalised.
  *
- * It mirrors an adjacently tagged Rust enum: unit variants serialise as `{"type":"helmet"}`,
- * the [ClassWeapon] and [ClassOther] variants as `{"type":"weapon","value":"Bows"}`.
- * Value is only meaningful for those two kinds and must be empty otherwise.
+ * Its JSON is `{"type":"helmet"}`, or `{"type":"weapon","value":"Bows"}` for the
+ * [ClassWeapon] and [ClassOther] kinds. Value is only meaningful for those two kinds and
+ * must be empty otherwise.
  */
 export type ItemClass = { type: "stackable_currency" } | { type: "omen" } | { type: "essence" } | { type: "soul_core" } | { type: "rune" } | { type: "talisman" } | { type: "distilled_emotion" } | { type: "splinter" } | { type: "catalyst" } | { type: "skill_gem" } | { type: "support_gem" } | { type: "uncut_gem" } | { type: "waystone" } | { type: "tablet" } | { type: "jewel" } | { type: "life_flask" } | { type: "mana_flask" } | { type: "charm" } | { type: "relic" } | { type: "amulet" } | { type: "ring" } | { type: "belt" } | { type: "body_armour" } | { type: "helmet" } | { type: "gloves" } | { type: "boots" } | { type: "shield" } | { type: "buckler" } | { type: "focus" } | { type: "quiver" } | 
 /**  Weapon subclasses ("Bows", "Two Hand Maces", ...), raw header value preserved. */
@@ -579,9 +590,11 @@ export type Modifier_Deserialize = {
 };
 
 /** OnlineStatus is the trade "status" option. */
-export type OnlineStatus = 
-/**  `securable` (instant buyout) in trade2. */
-"securable" | "online" | "any";
+export type OnlineStatus =
+	/** `securable` (instant buyout) in trade2. */
+	| "securable"
+	| "online"
+	| "any";
 
 /**
  * OverlayLayout is how the price panel window is laid out. Cover: the window covers the game
@@ -599,7 +612,7 @@ export type OverlayLayout_Deserialize = OverlayLayout;
 /** OverlaySettings configure the price panel. */
 export type OverlaySettings = OverlaySettings_Serialize | OverlaySettings_Deserialize;
 export type OverlaySettings_Serialize = {
-	/** AutoHideMs auto-hides after the mouse leaves (ms); pinned panels ignore this. */
+	/** AutoHideMS auto-hides after the mouse leaves (ms); pinned panels ignore this. */
 	auto_hide_ms: number,
 	opacity: number | null,
 	side: OverlaySide,
@@ -628,7 +641,7 @@ export type OverlaySettings_Serialize = {
 	results: ResultsLayout,
 };
 export type OverlaySettings_Deserialize = {
-	/** AutoHideMs auto-hides after the mouse leaves (ms); pinned panels ignore this. */
+	/** AutoHideMS auto-hides after the mouse leaves (ms); pinned panels ignore this. */
 	auto_hide_ms: number,
 	opacity: number | null,
 	side: OverlaySide,
@@ -658,11 +671,13 @@ export type OverlaySettings_Deserialize = {
 };
 
 /** OverlaySide is where the price panel opens. */
-export type OverlaySide = 
-/**  Beside the cursor, flipping when near the screen edge. */
-"cursor" | "left" | "right" | 
-/**  Where the user last dragged the panel (beside the cursor until it has been moved). */
-"last";
+export type OverlaySide =
+	/** Beside the cursor, flipping when near the screen edge. */
+	| "cursor"
+	| "left"
+	| "right"
+	/** Where the user last dragged the panel (beside the cursor until it has been moved). */
+	| "last";
 
 /** OverlayState says whether the price panel is visible and pinned. */
 export type OverlayState = {
@@ -791,10 +806,7 @@ export type PermissionReport_Deserialize = {
 	gnome: boolean,
 };
 
-/**
- * PermissionsChanged is pushed (event `permissions-changed`) when a recheck finds the
- * permission state changed.
- */
+/** PermissionsChanged is pushed when a recheck finds the permission state changed. */
 export type PermissionsChanged = PermissionsChanged_Serialize | PermissionsChanged_Deserialize;
 export type PermissionsChanged_Serialize = {
 	report: PermissionReport_Serialize,
@@ -824,12 +836,12 @@ export type Price_Deserialize = Price;
 /** PriceCheckRequest asks for a price check. */
 export type PriceCheckRequest = PriceCheckRequest_Serialize | PriceCheckRequest_Deserialize;
 export type PriceCheckRequest_Serialize = {
-	/** Item text to parse directly (debug / paste). `None` = run the copy flow against the game. */
+	/** Item text to parse directly (debug / paste). `null` = run the copy flow against the game. */
 	text: string | null,
 	pinned: boolean,
 };
 export type PriceCheckRequest_Deserialize = {
-	/** Item text to parse directly (debug / paste). `None` = run the copy flow against the game. */
+	/** Item text to parse directly (debug / paste). `null` = run the copy flow against the game. */
 	text?: string | null,
 	pinned: boolean,
 };
@@ -904,11 +916,11 @@ export type Property_Serialize = Property;
 export type Property_Deserialize = Property;
 
 /** QueryRoute selects the trade endpoint. */
-export type QueryRoute = 
-/**  `/api/trade2/search/{league}` */
-"search" | 
-/**  `/api/trade2/exchange/{league}` (bulk currency). */
-"exchange";
+export type QueryRoute =
+	/** `/api/trade2/search/{league}`. */
+	| "search"
+	/** `/api/trade2/exchange/{league}` (bulk currency). */
+	| "exchange";
 
 /** RangeFilter is a numeric range filter for misc properties (ilvl, quality, gem level, ...). */
 export type RangeFilter = RangeFilter_Serialize | RangeFilter_Deserialize;
@@ -924,9 +936,15 @@ export type RangeFilter_Deserialize = {
 };
 
 /** Rarity is the rarity line (`Rarity: ...`) of an item. */
-export type Rarity = "normal" | "magic" | "rare" | "unique" | "currency" | "gem" | 
-/**  Quest items, divination-like or other. */
-"other";
+export type Rarity =
+	| "normal"
+	| "magic"
+	| "rare"
+	| "unique"
+	| "currency"
+	| "gem"
+	/** RarityOther covers quest items, divination-like or other. */
+	| "other";
 
 /** Requirements are the level and attribute requirements. */
 export type Requirements = Requirements_Serialize | Requirements_Deserialize;
@@ -944,19 +962,19 @@ export type Requirements_Deserialize = {
 };
 
 /** ResultsLayout is the placement of the results (prices and listings) in the price panel. */
-export type ResultsLayout = 
-/**  Under the Search button (one narrow column). */
-"below" | 
-/**  In a column to the left of the filters. */
-"left" | 
-/**  In a column to the right of the filters. */
-"right" | 
-/**  Beside the filters (right) for items with many stats, below otherwise. */
-"auto";
+export type ResultsLayout =
+	/** Under the Search button (one narrow column). */
+	| "below"
+	/** A column to the left of the filters. */
+	| "left"
+	/** A column to the right of the filters. */
+	| "right"
+	/** Beside the filters (right) for items with many stats, below otherwise. */
+	| "auto";
 
 /**
- * Settings is the whole settings document. Missing sections and fields take their
- * defaults (Rust `#[serde(default)]`).
+ * Settings is the whole settings document. Sections and fields missing from a document
+ * take their defaults ([DefaultSettings]).
  */
 export type Settings = Settings_Serialize | Settings_Deserialize;
 export type Settings_Serialize = {
@@ -1003,7 +1021,7 @@ export type StackSize_Deserialize = StackSize;
 
 /**
  * StashSearch is a saved stash search: the hotkey fills the stash (or vendor) search box
- * with Text. All fields are required in the TOML (no serde default).
+ * with Text. A document that has a stash search must set all its fields.
  */
 export type StashSearch = StashSearch_Serialize | StashSearch_Deserialize;
 export type StashSearch_Serialize = {
@@ -1047,7 +1065,7 @@ export type StatFilter_Serialize = {
 	item_values: (number | null)[],
 	/**
 	 * Mod tiers from advanced item text (1 = best), one per mod the row sums; empty when
-	 * unknown. Optional when decoding (`#[serde(default)]`).
+	 * unknown. May be missing when decoding.
 	 */
 	tiers: number[],
 };
@@ -1062,7 +1080,7 @@ export type StatFilter_Deserialize = {
 	item_values: (number | null)[],
 	/**
 	 * Mod tiers from advanced item text (1 = best), one per mod the row sums; empty when
-	 * unknown. Optional when decoding (`#[serde(default)]`).
+	 * unknown. May be missing when decoding.
 	 */
 	tiers: number[],
 };
@@ -1095,7 +1113,7 @@ export type TradeSettings_Serialize = {
 	remember_filters: boolean,
 	/** Contact is an optional e-mail appended to the User-Agent, as GGG requests. */
 	contact: string | null,
-	/** Poesessid is an optional POESESSID; stored in plain text, so off by default. */
+	/** POESESSID is an optional session cookie; stored in plain text, so off by default. */
 	poesessid: string | null,
 };
 export type TradeSettings_Deserialize = {
@@ -1121,7 +1139,7 @@ export type TradeSettings_Deserialize = {
 	remember_filters: boolean,
 	/** Contact is an optional e-mail appended to the User-Agent, as GGG requests. */
 	contact?: string | null,
-	/** Poesessid is an optional POESESSID; stored in plain text, so off by default. */
+	/** POESESSID is an optional session cookie; stored in plain text, so off by default. */
 	poesessid?: string | null,
 };
 
@@ -1192,7 +1210,7 @@ export type WaystoneModGroup = "player" | "monster" | "area";
 /**
  * WaystoneSettings is the waystone mod check: flags per mod, keyed by the mod's template as
  * the game copies it (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
- * Serialised with sorted keys, like Rust's BTreeMap.
+ * Written with sorted keys.
  */
 export type WaystoneSettings = {
 	flags: { [key in string]: ModFlag },

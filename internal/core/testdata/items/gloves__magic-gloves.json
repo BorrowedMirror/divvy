@@ -1,0 +1,70 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Sanguine Riveted Mitts of the Penguin",
+  "category": "equipment",
+  "class": {
+    "type": "gloves"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 52,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+57 to maximum Life",
+      "values": [
+        57
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+21% to Cold Resistance",
+      "values": [
+        21
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Armour",
+      "value": "96"
+    }
+  ],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 45,
+    "str": 74
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": 96,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

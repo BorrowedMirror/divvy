@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -21,18 +22,25 @@ func parseErr(text string) error {
 }
 
 func TestErrors(t *testing.T) {
-	assert.Equal(t, ParseError{Kind: ParseErrEmpty}, parseErr("  \n"))
-	assert.Equal(t, ParseError{Kind: ParseErrNotAnItem}, parseErr("hello world"))
-	assert.Equal(t, ParseError{Kind: ParseErrNotAnItem}, parseErr("Item Class: Rings"))
-	assert.Equal(t, ParseError{Kind: ParseErrNotAnItem}, parseErr("Item Class: Rings\nBogus"))
-	assert.Equal(t, ParseError{Kind: ParseErrNotAnItem}, parseErr("Rarity: Rare\nFoo"))
-	assert.Equal(t, ParseError{Kind: ParseErrUnknownRarity, Value: "Legendary"},
-		parseErr("Item Class: Rings\nRarity: Legendary\nX"))
-	err := parseErr("Item Class: Rings\nRarity: Rare")
-	var pe ParseError
-	require.ErrorAs(t, err, &pe)
-	assert.Equal(t, ParseErrMalformed, pe.Kind)
-	assert.Equal(t, ParseError{Kind: ParseErrEmpty}, parseErr("--------\n--------"))
+	require.ErrorIs(t, parseErr("  \n"), ErrEmpty)
+	require.ErrorIs(t, parseErr("hello world"), ErrNotAnItem)
+	require.ErrorIs(t, parseErr("Item Class: Rings"), ErrNotAnItem)
+	require.ErrorIs(t, parseErr("Item Class: Rings\nBogus"), ErrNotAnItem)
+	require.ErrorIs(t, parseErr("Rarity: Rare\nFoo"), ErrNotAnItem)
+	require.ErrorIs(t, parseErr("--------\n--------"), ErrEmpty)
+
+	err := parseErr("Item Class: Rings\nRarity: Legendary\nX")
+	rarity, ok := errors.AsType[*UnknownRarityError](err)
+	require.True(t, ok, "%v", err)
+	assert.Equal(t, "Legendary", rarity.Value)
+	require.EqualError(t, err, "unknown rarity `Legendary`")
+
+	err = parseErr("Item Class: Rings\nRarity: Rare")
+	malformed, ok := errors.AsType[*MalformedError](err)
+	require.True(t, ok, "%v", err)
+	assert.Equal(t, &MalformedError{Section: "header", Reason: "missing item name"}, malformed)
+	require.EqualError(t, err, "malformed section `header`: missing item name")
+	require.EqualError(t, ErrEmpty, "item text is empty")
 }
 
 const rareHelm = `Item Class: Helmets
@@ -61,10 +69,10 @@ Mirrored
 Note: ~price 2 divine
 `
 
-func mustParse(t testing.TB, text string) *ParsedItem {
-	t.Helper()
+func mustParse(tb testing.TB, text string) *ParsedItem {
+	tb.Helper()
 	item, err := ParseItem(text)
-	require.NoError(t, err)
+	require.NoError(tb, err)
 	return item
 }
 
@@ -196,11 +204,11 @@ func TestStackSizeAndAreaLevel(t *testing.T) {
 	assert.Equal(t, new(uint32(70)), item.AreaLevel)
 }
 
-// Go-only: Rust's regex `\d` is Unicode-aware; numbers in other scripts are found by the
-// patterns but do not parse (Rust's `parse` is ASCII-only), so they are dropped.
-func TestUnicodeDigitsBehaveLikeRust(t *testing.T) {
+// The patterns find numbers in any script (`\p{Nd}`), but only ASCII digits parse, so the
+// others are dropped.
+func TestUnicodeDigitsAreTemplatedButNotParsed(t *testing.T) {
 	assert.Equal(t, "+# to maximum Life", Templatize("+٣ to maximum Life"))
-	assert.Empty(t, ExtractValues("+٣ to maximum Life"))
+	assert.Empty(t, extractValues("+٣ to maximum Life"))
 	item := mustParse(t, "Item Class: Rings\nRarity: Rare\nX\nRuby Ring\n--------\nItem Level: ٨٠")
 	assert.Nil(t, item.ItemLevel)
 }

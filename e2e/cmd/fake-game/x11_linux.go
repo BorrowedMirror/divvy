@@ -215,8 +215,8 @@ func (x *x11Game) keyEvent(code xproto.Keycode, state uint16, pressed bool) keyE
 	return ev
 }
 
-// keysymName is winit's KeyCode name for a key (X keysym, X/xkb keycode), as far as the tests
-// care.
+// keysymName is the W3C KeyboardEvent.code name for a key (X keysym, X/xkb keycode), as far as
+// the tests care.
 func keysymName(ks, code uint32) string {
 	if ks < 0x80 {
 		if n := charCode(rune(ks)); n != "" {

@@ -1,0 +1,85 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Concentrated Ultimate Life Flask of the Surgeon",
+  "category": "flask",
+  "class": {
+    "type": "life_flask"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Amount Recovered",
+      "text": "30% increased Amount Recovered",
+      "values": [
+        30
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% chance to gain a Flask Charge when you deal a Critical Hit",
+      "text": "23% chance to gain a Flask Charge when you deal a Critical Hit",
+      "values": [
+        23
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": false,
+      "name": "Recovers 1243 (augmented) Life over 3 Seconds",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Consumes 10 of 75 Charges on use",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Currently has 75 Charges",
+      "value": ""
+    }
+  ],
+  "quality": 20,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 50,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

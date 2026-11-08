@@ -1,0 +1,36 @@
+{
+  "query": {
+    "filters": {
+      "misc_filters": {
+        "filters": {
+          "identified": {
+            "option": "false"
+          }
+        }
+      },
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "weapon.crossbow"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Tense Crossbow"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

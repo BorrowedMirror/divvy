@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -120,20 +121,14 @@ func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, 
 	if d.parts.Overlay == nil {
 		return nil, platform.Unsupported("overlay styling")
 	}
-	// Wails creates the native window from a goroutine after Run starts.
-	for i := 0; w.NativeWindow() == nil; i++ {
-		if i == 100 {
-			return nil, platform.Backend("native window not created after 2s")
-		}
-		time.Sleep(20 * time.Millisecond)
+	native, err := nativeWindow(w)
+	if err != nil {
+		return nil, err
 	}
 	// Linux backends read the GtkWindow, which GTK only allows on its main thread. The lock is
 	// not held across the hop: the main thread may be asking for a styler too.
-	var (
-		s   platform.OverlayWindow
-		err error
-	)
-	application.InvokeSync(func() { s, err = d.parts.Overlay(w.NativeWindow()) })
+	var s platform.OverlayWindow
+	application.InvokeSync(func() { s, err = d.parts.Overlay(native) })
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +139,19 @@ func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, 
 	}
 	d.stylers[w] = s
 	return s, nil
+}
+
+// nativeWindow waits up to 2 s for w's native window, which Wails creates from a goroutine
+// after Run starts. No event marks its creation (WindowRuntimeReady is the web view's runtime,
+// later, and may already have fired), so this polls.
+func nativeWindow(w *application.WebviewWindow) (unsafe.Pointer, error) {
+	for range 100 {
+		if native := w.NativeWindow(); native != nil {
+			return native, nil
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	return nil, platform.Backend("native window not created after 2s")
 }
 
 func (d *Desktop) styler(w app.Window) (platform.OverlayWindow, error) {
@@ -175,8 +183,8 @@ func (d *Desktop) MonitorAt(x, y float64) (app.Area, bool) {
 	return app.Area{X: int32(r.X), Y: int32(r.Y), Width: int32(r.Width), Height: int32(r.Height)}, true
 }
 
-// Emit sends an event to both web views. Payloads marshal through their MarshalJSON, which
-// writes serde's exact JSON.
+// Emit sends an event to both web views. Payloads are internal/ipc types, which write the
+// wire format (see internal/ipc/wire.go).
 func (d *Desktop) Emit(event string, payload any) { d.shell.App.Event.Emit(event, payload) }
 
 // OpenURL opens url in the default browser.
@@ -194,7 +202,11 @@ func (d *Desktop) BringToFront(w app.Window, gameID *uint64, focus bool) error {
 		}
 		return err
 	}
-	if err := s.RaiseAbove(gameID); err != nil {
+	var owner uint64
+	if gameID != nil {
+		owner = *gameID
+	}
+	if err := s.RaiseAbove(owner); err != nil {
 		return err
 	}
 	if !focus {

@@ -1,0 +1,91 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Rattling Sceptre",
+  "category": "unique",
+  "class": {
+    "type": "weapon",
+    "value": "Sceptres"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 66,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Level # Skeletal Warrior",
+      "text": "Grants Skill: Level 16 Skeletal Warrior",
+      "values": [
+        16
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Intelligence",
+      "text": "+20 to Intelligence",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Spirit",
+      "text": "40% increased Spirit",
+      "values": [
+        40
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Minions deal #% increased Damage",
+      "text": "Minions deal 38% increased Damage",
+      "values": [
+        38
+      ]
+    }
+  ],
+  "name": "The Dark Defiler",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Spirit",
+      "value": "100"
+    }
+  ],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 50,
+    "level": 52,
+    "str": 50
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": 100,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

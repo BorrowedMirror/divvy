@@ -1,0 +1,95 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Ashen Staff",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Staves"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 79,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Level # Firebolt",
+      "text": "Grants Skill: Level 18 Firebolt",
+      "values": [
+        18
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Level of all Fire Spell Skills",
+      "text": "+4 to Level of all Fire Spell Skills",
+      "values": [
+        4
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Spell Damage",
+      "text": "169% increased Spell Damage",
+      "values": [
+        169
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Critical Hit Chance for Spells",
+      "text": "43% increased Critical Hit Chance for Spells",
+      "values": [
+        43
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Cast Speed",
+      "text": "27% increased Cast Speed",
+      "values": [
+        27
+      ]
+    }
+  ],
+  "name": "Mind Spire",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 117,
+    "level": 60,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

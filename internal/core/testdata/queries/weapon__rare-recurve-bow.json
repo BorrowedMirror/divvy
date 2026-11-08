@@ -1,0 +1,72 @@
+{
+  "query": {
+    "filters": {
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "weapon.bow"
+          },
+          "rarity": {
+            "option": "nonunique"
+          }
+        }
+      }
+    },
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": true,
+            "id": "rune.stat_4081531279",
+            "value": {
+              "min": 32.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_4081531279",
+            "value": {
+              "min": 127.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_828896081",
+            "value": {
+              "min": 17.55
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_1591748831",
+            "value": {
+              "min": 1.0
+            }
+          },
+          {
+            "disabled": false,
+            "id": "explicit.stat_2708841521",
+            "value": {
+              "min": 19.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_1757188622",
+            "value": {
+              "min": 133.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Recurve Bow"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

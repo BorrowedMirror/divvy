@@ -3,11 +3,11 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -16,14 +16,21 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/shell"
 )
 
-// startTestHook serves the e2e hook on RKL_TEST_HOOK (test-hook builds only).
-func startTestHook(s *shell.Shell, flow *app.Flow) {
-	port, ok := app.TestHookPort()
-	if !ok {
+// domTimeout is how long the `dom` hook command waits for a web view's reply.
+const domTimeout = 5 * time.Second
+
+// startTestHook serves the e2e hook on the port in RKL_TEST_HOOK (0 picks one) until ctx is
+// done (test-hook builds only). When RKL_TEST_HOOK_PORT_FILE names a file, the bound port is
+// written to it, so a harness can start the app on port 0 without racing for a free port.
+func startTestHook(ctx context.Context, s *shell.Shell, flow *app.Flow) {
+	port, err := strconv.Atoi(os.Getenv("RKL_TEST_HOOK"))
+	if err != nil || port < 0 || port > 65535 {
 		return
 	}
-	dom := newDOMBridge(s.App.Event, domTimeout)
-	_, err := flow.StartTestHook(port, app.HookActions{
+	st := flow.State()
+	dom := app.NewDOMBridge(func(event string, payload any) { s.App.Event.Emit(event, payload) }, domTimeout)
+	s.App.Event.On(app.DOMReplyEvent, func(e *application.CustomEvent) { dom.OnReply(e.Data) })
+	bound, err := flow.StartTestHook(ctx, port, app.HookActions{
 		TrayPresent: func() bool { return s.Tray != nil },
 		Tray: func(item string) (bool, error) {
 			if s.Tray == nil {
@@ -31,14 +38,14 @@ func startTestHook(s *shell.Shell, flow *app.Flow) {
 			}
 			switch item {
 			case "open_settings":
-				return true, flow.ShowSettings("settings")
+				flow.ShowSettings("settings")
 			case "open_diagnostics":
-				return true, flow.ShowSettings("diagnostics")
+				flow.ShowSettings("diagnostics")
 			case "price_check":
 				flow.Trigger(true)
 			case "quit":
-				flow.State().Quitting.Store(true)
-				s.App.Quit()
+				// After the reply has gone out: quitting closes the hook's connections.
+				time.AfterFunc(50*time.Millisecond, s.App.Quit)
 			}
 			return true, nil
 		},
@@ -46,92 +53,21 @@ func startTestHook(s *shell.Shell, flow *app.Flow) {
 		DOM:  dom.Query,
 	})
 	if err != nil {
-		flow.State().RecordError(fmt.Sprintf("test hook: %v", err))
-	}
-}
-
-// The events of the `dom` hook command, answered by web/src/lib/e2e.ts.
-const (
-	domQueryEvent = "e2e-query"
-	domReplyEvent = "e2e-reply"
-	domTimeout    = 5 * time.Second
-)
-
-// domQuery asks the web view of Window about the first element matching Selector.
-type domQuery struct {
-	ID       string `json:"id"`
-	Window   string `json:"window"`
-	Selector string `json:"selector"`
-}
-
-// domReply is the web view's answer, and (without ID) the hook's reply line.
-type domReply struct {
-	ID      string `json:"id,omitempty"`
-	Exists  bool   `json:"exists"`
-	Visible bool   `json:"visible"`
-	Text    string `json:"text"`
-}
-
-// eventBus is the part of Wails' event manager the bridge uses.
-type eventBus interface {
-	On(name string, callback func(event *application.CustomEvent)) func()
-	Emit(name string, data ...any) bool
-}
-
-// domBridge sends `e2e-query` events to the web views and matches their `e2e-reply` events
-// to the waiting hook command by id.
-type domBridge struct {
-	events  eventBus
-	timeout time.Duration
-	next    atomic.Uint64
-
-	mu      sync.Mutex
-	pending map[string]chan domReply
-}
-
-func newDOMBridge(ev eventBus, timeout time.Duration) *domBridge {
-	b := &domBridge{events: ev, timeout: timeout, pending: map[string]chan domReply{}}
-	ev.On(domReplyEvent, b.onReply)
-	return b
-}
-
-func (b *domBridge) onReply(e *application.CustomEvent) {
-	raw, err := json.Marshal(e.Data)
-	if err != nil {
+		st.RecordError("test hook", err)
 		return
 	}
-	var r domReply
-	if json.Unmarshal(raw, &r) != nil {
-		return
-	}
-	b.mu.Lock()
-	ch := b.pending[r.ID]
-	delete(b.pending, r.ID)
-	b.mu.Unlock()
-	if ch != nil {
-		ch <- r // buffered: never blocks
+	if path := os.Getenv("RKL_TEST_HOOK_PORT_FILE"); path != "" {
+		if err := writePortFile(path, bound); err != nil {
+			st.RecordError("test hook port file", err)
+		}
 	}
 }
 
-// Query implements [app.HookActions.DOM].
-func (b *domBridge) Query(window, selector string) (string, error) {
-	id := strconv.FormatUint(b.next.Add(1), 10)
-	ch := make(chan domReply, 1)
-	b.mu.Lock()
-	b.pending[id] = ch
-	b.mu.Unlock()
-	defer func() {
-		b.mu.Lock()
-		delete(b.pending, id)
-		b.mu.Unlock()
-	}()
-	b.events.Emit(domQueryEvent, domQuery{ID: id, Window: window, Selector: selector})
-	select {
-	case r := <-ch:
-		r.ID = ""
-		out, err := json.Marshal(r)
-		return string(out), err
-	case <-time.After(b.timeout):
-		return "", fmt.Errorf("no reply from the %s window within %s (not loaded yet?)", window, b.timeout)
+// writePortFile writes port to path atomically, so a reader never sees a partial number.
+func writePortFile(path string, port int) error {
+	tmp := filepath.Join(filepath.Dir(path), "."+filepath.Base(path)+".tmp")
+	if err := os.WriteFile(tmp, fmt.Appendf(nil, "%d\n", port), 0o600); err != nil {
+		return err
 	}
+	return os.Rename(tmp, path)
 }

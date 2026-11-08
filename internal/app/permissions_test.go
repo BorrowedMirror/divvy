@@ -5,11 +5,13 @@ import (
 	"encoding/json/v2"
 	"errors"
 	"slices"
-	"strings"
 	"sync"
 	"testing"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
@@ -41,7 +43,7 @@ func (f *fakeProbe) setMissing(m ...string) {
 }
 
 func TestPermissionsMacosListsAllPermissionsInOrderWithDeepLinks(t *testing.T) {
-	r := BuildPermissionReport(platform.BackendMacos, []string{PermScreenRecording}, nil, false)
+	r := buildPermissionReport(platform.BackendMacOS, []string{permScreenRecording}, nil, false)
 	type row struct {
 		kind              string
 		granted, required bool
@@ -49,174 +51,122 @@ func TestPermissionsMacosListsAllPermissionsInOrderWithDeepLinks(t *testing.T) {
 	var got []row
 	for _, p := range r.Missing {
 		got = append(got, row{p.Kind, p.Granted, p.Required})
+		require.NotNil(t, p.SettingsURL)
+		assert.Regexp(t, "^x-apple.systempreferences:", *p.SettingsURL)
 	}
-	want := []row{{PermAccessibility, true, true}, {PermScreenRecording, false, true}, {PermInputMonitoring, true, false}}
-	if !slices.Equal(got, want) {
-		t.Fatalf("got %v", got)
-	}
-	for _, p := range r.Missing {
-		if p.SettingsURL == nil || !strings.HasPrefix(*p.SettingsURL, "x-apple.systempreferences:") {
-			t.Fatalf("deep link %v", p.SettingsURL)
-		}
-	}
-	if !strings.HasSuffix(*r.Missing[1].SettingsURL, "Privacy_ScreenCapture") {
-		t.Fatal(*r.Missing[1].SettingsURL)
-	}
-	if !r.Blocked() || len(r.Notes) != 0 {
-		t.Fatalf("%+v", r)
-	}
+	assert.Equal(t, []row{{permAccessibility, true, true}, {permScreenRecording, false, true}, {permInputMonitoring, true, false}}, got)
+	assert.Regexp(t, "Privacy_ScreenCapture$", *r.Missing[1].SettingsURL)
+	assert.True(t, r.Blocked())
+	assert.Empty(t, r.Notes)
 }
 
 func TestPermissionsOptionalPermissionMissingDoesNotBlock(t *testing.T) {
-	r := BuildPermissionReport(platform.BackendMacos, []string{PermInputMonitoring}, nil, false)
-	if r.Blocked() || NeedsOnboarding(true, r) || !NeedsOnboarding(false, r) {
-		t.Fatalf("%+v", r)
-	}
+	r := buildPermissionReport(platform.BackendMacOS, []string{permInputMonitoring}, nil, false)
+	assert.False(t, r.Blocked())
+	assert.False(t, NeedsOnboarding(true, r))
+	assert.True(t, NeedsOnboarding(false, r))
 }
 
 func TestPermissionsWindowsAndX11HaveNoPermissions(t *testing.T) {
 	for _, kind := range []platform.BackendKind{platform.BackendWindows, platform.BackendX11} {
-		r := BuildPermissionReport(kind, nil, []string{"X server lacks XTEST"}, false)
-		if len(r.Missing) != 0 || r.Blocked() || NeedsOnboarding(true, r) {
-			t.Fatalf("%s: %+v", kind, r)
-		}
-		if !slices.Equal(r.Notes, []string{"X server lacks XTEST"}) {
-			t.Fatalf("%s: %q", kind, r.Notes)
-		}
+		r := buildPermissionReport(kind, nil, []string{"X server lacks XTEST"}, false)
+		assert.Empty(t, r.Missing, kind)
+		assert.False(t, NeedsOnboarding(true, r), kind)
+		assert.Equal(t, []string{"X server lacks XTEST"}, r.Notes, kind)
 	}
 }
 
 func TestPermissionsNonMacosMissingCapabilitiesAreListedButNotRequired(t *testing.T) {
-	r := BuildPermissionReport(platform.BackendX11, []string{"foo"}, nil, false)
-	if len(r.Missing) != 1 || !r.Missing[0].equal(PermissionInfo{Kind: "foo"}) {
-		t.Fatalf("%+v", r.Missing)
-	}
-	if r.Blocked() {
-		t.Fatal("blocked")
-	}
+	r := buildPermissionReport(platform.BackendX11, []string{"foo"}, nil, false)
+	assert.Equal(t, []ipc.PermissionInfo{{Kind: "foo"}}, r.Missing)
+	assert.False(t, r.Blocked())
 }
 
 func TestPermissionsWaylandNotesExplainPortalTriggerAndLayerShell(t *testing.T) {
-	capsNotes := []string{"Wayland-native: no passive input hook", NoteWaylandPortal}
-	r := BuildPermissionReport(platform.BackendWayland, nil, capsNotes, false)
-	if !slices.Equal(r.Notes[:3], []string{NoteWaylandPortal, NoteWaylandTrigger, NoteWaylandLayerShell}) {
-		t.Fatalf("%q", r.Notes)
-	}
-	if !slices.ContainsFunc(r.Notes, func(n string) bool { return strings.Contains(n, "rkl --trigger") }) {
-		t.Fatal("trigger note")
-	}
-	if len(r.Notes) != 4 {
-		t.Fatalf("duplicate capability notes are dropped: %q", r.Notes)
-	}
-	if r.GNOME {
-		t.Fatal("gnome")
-	}
+	capsNotes := []string{"Wayland-native: no passive input hook", noteWaylandPortal}
+	r := buildPermissionReport(platform.BackendWayland, nil, capsNotes, false)
+	assert.Equal(t, []string{noteWaylandPortal, noteWaylandTrigger, noteWaylandLayerShell, capsNotes[0]}, r.Notes,
+		"duplicate capability notes are dropped")
+	assert.Contains(t, noteWaylandTrigger, "rkl --trigger")
+	assert.False(t, r.GNOME)
 }
 
 func TestPermissionsGNOMENoteIsAdded(t *testing.T) {
-	r := BuildPermissionReport(platform.BackendX11, nil, nil, true)
-	if !r.GNOME || !slices.Equal(r.Notes, []string{NoteGNOME}) {
-		t.Fatalf("%+v", r)
-	}
+	r := buildPermissionReport(platform.BackendX11, nil, nil, true)
+	assert.True(t, r.GNOME)
+	assert.Equal(t, []string{noteGNOME}, r.Notes)
 }
 
 func TestPermissionsRecheckReportsChangesOnlyAfterBaseline(t *testing.T) {
 	probe := &fakeProbe{}
-	probe.setMissing(PermAccessibility, PermScreenRecording)
-	p := NewPermissions(platform.BackendMacos, platform.Capabilities{}, false, probe)
+	probe.setMissing(permAccessibility, permScreenRecording)
+	p := newPermissions(platform.BackendMacOS, platform.Capabilities{}, false, probe)
 
-	first, changed := p.Recheck()
-	if changed {
-		t.Fatal("no baseline yet")
-	}
-	if !first.Blocked() {
-		t.Fatal("blocked")
-	}
-	if _, changed := p.Recheck(); changed {
-		t.Fatal("unchanged")
-	}
+	first, changed := p.recheck()
+	assert.False(t, changed, "no baseline yet")
+	assert.True(t, first.Blocked())
+	_, changed = p.recheck()
+	assert.False(t, changed, "unchanged")
 
-	probe.setMissing(PermScreenRecording)
-	r, changed := p.Recheck()
-	if !changed || !r.Missing[0].Granted || !r.Blocked() {
-		t.Fatalf("%v %+v", changed, r)
-	}
+	probe.setMissing(permScreenRecording)
+	r, changed := p.recheck()
+	assert.True(t, changed)
+	assert.True(t, r.Missing[0].Granted)
+	assert.True(t, r.Blocked())
 
 	probe.setMissing()
-	r, changed = p.Recheck()
-	if !changed || r.Blocked() {
-		t.Fatalf("%v %+v", changed, r)
-	}
-	if !p.Current().Equal(r) {
-		t.Fatal("current")
-	}
-	if _, changed := p.Recheck(); changed {
-		t.Fatal("unchanged after current")
-	}
-	if probe.calls != 6 {
-		t.Fatalf("calls = %d", probe.calls)
-	}
+	r, changed = p.recheck()
+	assert.True(t, changed)
+	assert.False(t, r.Blocked())
+	assert.True(t, p.Current().Equal(r))
+	_, changed = p.recheck()
+	assert.False(t, changed, "unchanged after Current")
+	assert.Equal(t, 6, probe.calls)
 }
 
 func TestPermissionsRequestOpensKnownMacosPanesOnly(t *testing.T) {
 	probe := &fakeProbe{}
-	p := NewPermissions(platform.BackendMacos, platform.Capabilities{}, false, probe)
-	for _, k := range []string{PermAccessibility, PermInputMonitoring} {
-		if err := p.Request(k); err != nil {
-			t.Fatal(err)
-		}
+	p := newPermissions(platform.BackendMacOS, platform.Capabilities{}, false, probe)
+	for _, k := range []string{permAccessibility, permInputMonitoring} {
+		require.NoError(t, p.request(k))
 	}
-	err := p.Request("camera")
-	reqErr, ok := errors.AsType[*PermissionRequestError](err)
-	if !ok || reqErr.IPCKind() != "platform" {
-		t.Fatalf("%v", err)
-	}
-	if err.Error() != "permission `camera` cannot be requested on this platform" {
-		t.Fatal(err)
-	}
-	if !slices.Equal(probe.opened, []string{PermAccessibility, PermInputMonitoring}) {
-		t.Fatalf("%q", probe.opened)
-	}
+	err := p.request("camera")
+	_, ok := errors.AsType[*permissionRequestError](err)
+	require.True(t, ok, "%v", err)
+	require.EqualError(t, err, "permission `camera` cannot be requested on this platform")
+	assert.Equal(t, []string{permAccessibility, permInputMonitoring}, probe.opened)
 }
 
 func TestPermissionsRequestIsUnsupportedOffMacos(t *testing.T) {
-	p := NewPermissions(platform.BackendWayland, platform.Capabilities{}, false, StaticProbe{})
-	if _, ok := errors.AsType[*PermissionRequestError](p.Request(PermAccessibility)); !ok {
-		t.Fatal("expected a platform error")
-	}
-	if !strings.Contains(p.String(), "wayland") {
-		t.Fatal(p.String())
-	}
+	p := newPermissions(platform.BackendWayland, platform.Capabilities{}, false, staticProbe{})
+	_, ok := errors.AsType[*permissionRequestError](p.request(permAccessibility))
+	assert.True(t, ok, "expected a platform error")
 }
 
 func TestPermissionsStaticProbeUsesCapabilityNotes(t *testing.T) {
 	caps := platform.Capabilities{Notes: []string{"note"}}
-	p := NewPermissions(platform.BackendX11, caps, false, StaticProbe{"x"})
-	r := p.Current()
-	if !slices.Equal(r.Notes, []string{"note"}) || len(r.Missing) != 1 {
-		t.Fatalf("%+v", r)
-	}
-	StaticProbe{}.OpenSettings("x")
+	r := newPermissions(platform.BackendX11, caps, false, staticProbe{"x"}).Current()
+	assert.Equal(t, []string{"note"}, r.Notes)
+	assert.Len(t, r.Missing, 1)
 }
 
 func TestPermissionsForBackendPicksTheProbe(t *testing.T) {
-	caps := platform.Capabilities{MissingPermissions: []string{PermAccessibility}}
+	caps := platform.Capabilities{MissingPermissions: []string{permAccessibility}}
 	live := &fakeProbe{}
-	if r := PermissionsForBackend(platform.BackendMacos, caps, false, live).Current(); r.Blocked() || live.calls != 1 {
-		t.Fatalf("live probe on macOS: %+v", r)
-	}
-	if r := PermissionsForBackend(platform.BackendMacos, caps, false, nil).Current(); !r.Blocked() {
-		t.Fatalf("static fallback on macOS: %+v", r)
-	}
-	if r := PermissionsForBackend(platform.BackendX11, caps, true, live).Current(); live.calls != 1 || len(r.Missing) != 1 || !r.GNOME {
-		t.Fatalf("static elsewhere: %+v", r)
-	}
+	r := PermissionsForBackend(platform.BackendMacOS, caps, false, live).Current()
+	assert.False(t, r.Blocked(), "live probe on macOS")
+	assert.Equal(t, 1, live.calls)
+	r = PermissionsForBackend(platform.BackendMacOS, caps, false, nil).Current()
+	assert.True(t, r.Blocked(), "static fallback on macOS")
+	r = PermissionsForBackend(platform.BackendX11, caps, true, live).Current()
+	assert.Equal(t, 1, live.calls, "static elsewhere")
+	assert.Len(t, r.Missing, 1)
+	assert.True(t, r.GNOME)
 }
 
-// The JSON goes to the frontend: it must be byte-identical to serde (see
-// PermissionReport_Serialize / PermissionInfo_Serialize / PermissionsChanged_Serialize in
-// web/src/bindings.ts).
-func TestPermissionsJSONMatchesSerde(t *testing.T) {
+// The JSON goes to the frontend (PermissionReport / PermissionInfo / PermissionsChanged in
+// web/src/bindings.ts): lists are never null.
+func TestPermissionsJSON(t *testing.T) {
 	cases := []struct {
 		name string
 		v    any
@@ -224,7 +174,7 @@ func TestPermissionsJSONMatchesSerde(t *testing.T) {
 	}{
 		{
 			"macos",
-			PermissionsChanged{Report: BuildPermissionReport(platform.BackendMacos, []string{PermScreenRecording}, nil, false)},
+			ipc.PermissionsChanged{Report: buildPermissionReport(platform.BackendMacOS, []string{permScreenRecording}, nil, false)},
 			`{"report":{"platform":"macos","missing":[` +
 				`{"kind":"accessibility","granted":true,"required":true,"settings_url":"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"},` +
 				`{"kind":"screen_recording","granted":false,"required":true,"settings_url":"x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"},` +
@@ -233,12 +183,12 @@ func TestPermissionsJSONMatchesSerde(t *testing.T) {
 		},
 		{
 			"x11 without permissions",
-			BuildPermissionReport(platform.BackendX11, nil, nil, false),
+			buildPermissionReport(platform.BackendX11, nil, nil, false),
 			`{"platform":"x11","missing":[],"notes":[],"gnome":false}`,
 		},
 		{
 			"wayland gnome",
-			BuildPermissionReport(platform.BackendWayland, []string{"foo"}, nil, true),
+			buildPermissionReport(platform.BackendWayland, []string{"foo"}, nil, true),
 			`{"platform":"wayland","missing":[{"kind":"foo","granted":false,"required":false,"settings_url":null}],"notes":[` +
 				`"Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it",` +
 				"\"Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor\"," +
@@ -247,49 +197,25 @@ func TestPermissionsJSONMatchesSerde(t *testing.T) {
 		},
 		{
 			"zero value",
-			PermissionReport{Platform: platform.BackendWindows},
+			ipc.PermissionReport{Platform: platform.BackendWindows},
 			`{"platform":"windows","missing":[],"notes":[],"gnome":false}`,
 		},
 	}
 	for _, c := range cases {
 		v2, err := json.Marshal(c.v)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if string(v2) != c.want {
-			t.Errorf("%s json/v2:\n got %s\nwant %s", c.name, v2, c.want)
-		}
-		serde, err := core.MarshalSerde(c.v)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if string(serde) != c.want {
-			t.Errorf("%s MarshalSerde:\n got %s\nwant %s", c.name, serde, c.want)
-		}
-		if c.name == "zero value" {
-			continue // encoding/json (v1) writes nil slices as null
-		}
+		require.NoError(t, err)
+		assert.JSONEq(t, c.want, string(v2), "%s (json/v2)", c.name)
 		v1, err := stdjson.Marshal(c.v)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if string(v1) != c.want {
-			t.Errorf("%s encoding/json:\n got %s\nwant %s", c.name, v1, c.want)
-		}
+		require.NoError(t, err)
+		assert.JSONEq(t, c.want, string(v1), "%s (encoding/json)", c.name)
 	}
 }
 
 func TestPermissionsJSONRoundTrips(t *testing.T) {
-	r := BuildPermissionReport(platform.BackendMacos, []string{PermAccessibility}, []string{"n"}, true)
-	b, err := json.Marshal(PermissionsChanged{Report: r})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var back PermissionsChanged
-	if err := json.Unmarshal(b, &back); err != nil {
-		t.Fatal(err)
-	}
-	if !back.Report.Equal(r) {
-		t.Fatalf("%+v", back.Report)
-	}
+	r := buildPermissionReport(platform.BackendMacOS, []string{permAccessibility}, []string{"n"}, true)
+	b, err := json.Marshal(ipc.PermissionsChanged{Report: r})
+	require.NoError(t, err)
+	var back ipc.PermissionsChanged
+	require.NoError(t, json.Unmarshal(b, &back))
+	assert.True(t, back.Report.Equal(r), "%+v", back.Report)
 }

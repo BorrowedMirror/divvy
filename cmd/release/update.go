@@ -36,7 +36,9 @@ var updateArtifacts = []updateArtifact{
 }
 
 // manifestArtifact and updateManifest are Wails' update manifest (the endpoint provider's
-// schemaVersion 1).
+// schemaVersion 1). Wails' own types are unexported (wails/v3/pkg/updater/providers/endpoint),
+// so they are mirrored here; TestManifestIsReadByWailsEndpointProvider checks the provider
+// reads what this writes.
 type manifestArtifact struct {
 	URL           string `json:"url"`
 	Filename      string `json:"filename"`
@@ -73,12 +75,12 @@ func runUpdaterKeygen(stdout io.Writer) error {
 
 // runUpdateManifest signs the update artifacts in -dir and writes update.json there.
 func runUpdateManifest(args []string, stdout io.Writer) error {
-	fs := flag.NewFlagSet("update-manifest", flag.ContinueOnError)
-	version := fs.String("version", "", "release version (required)")
-	dir := fs.String("dir", "", "directory holding the packaged artifacts (required)")
-	baseURL := fs.String("base-url", "", "URL the artifacts are downloaded from, ending in / (required)")
-	notes := fs.String("notes", "", "release notes shown in the update banner")
-	if err := fs.Parse(args); err != nil {
+	flags := flag.NewFlagSet("update-manifest", flag.ContinueOnError)
+	version := flags.String("version", "", "release version (required)")
+	dir := flags.String("dir", "", "directory holding the packaged artifacts (required)")
+	baseURL := flags.String("base-url", "", "URL the artifacts are downloaded from, ending in / (required)")
+	notes := flags.String("notes", "", "release notes shown in the update banner")
+	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	if *version == "" || *dir == "" || *baseURL == "" {

@@ -11,11 +11,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"path/filepath"
 )
 
 const usage = `usage: go run ./cmd/release <command> [flags]
@@ -28,11 +31,15 @@ commands:
   notices [-check]         write THIRD-PARTY-NOTICES.html (or only check the licence policy)
   version                  print the app version
 
-Run "go run ./cmd/release <command> -h" for the flags of a command.
+Run it from the repository root. Run "go run ./cmd/release <command> -h" for the flags of a
+command.
 `
 
 func main() {
-	if err := run(os.Args[1:], os.Stdout); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	err := run(ctx, os.Args[1:], os.Stdout)
+	stop()
+	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			os.Exit(0)
 		}
@@ -41,7 +48,7 @@ func main() {
 	}
 }
 
-func run(args []string, stdout io.Writer) error {
+func run(ctx context.Context, args []string, stdout io.Writer) error {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, usage)
 		return errors.New("no command")
@@ -52,13 +59,13 @@ func run(args []string, stdout io.Writer) error {
 	}
 	switch cmd, rest := args[0], args[1:]; cmd {
 	case "package":
-		return runPackage(root, rest)
+		return runPackage(ctx, root, rest)
 	case "updater-keygen":
 		return runUpdaterKeygen(stdout)
 	case "update-manifest":
 		return runUpdateManifest(rest, stdout)
 	case "notices":
-		return runNotices(root, rest)
+		return runNotices(ctx, root, rest)
 	case "version":
 		v, err := appVersion(root)
 		if err != nil {
@@ -75,14 +82,27 @@ func run(args []string, stdout io.Writer) error {
 	}
 }
 
-func runPackage(root string, args []string) error {
+// moduleRoot is the working directory, which must be the module root: `go run ./cmd/release`
+// runs from there.
+func moduleRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	if _, err := os.Stat(filepath.Join(dir, "go.mod")); err != nil {
+		return "", errors.New("run from the repository root (no go.mod in the working directory)")
+	}
+	return dir, nil
+}
+
+func runPackage(ctx context.Context, root string, args []string) error {
 	if len(args) == 0 {
 		return errors.New("package: name a target: linux, windows or macos")
 	}
 	target, rest := args[0], args[1:]
-	fs := flag.NewFlagSet("package "+target, flag.ContinueOnError)
-	version := fs.String("version", os.Getenv(versionEnv), "app version (default: $"+versionEnv+", else "+versionFile+")")
-	if err := fs.Parse(rest); err != nil {
+	flags := flag.NewFlagSet("package "+target, flag.ContinueOnError)
+	version := flags.String("version", os.Getenv(versionEnv), "app version (default: $"+versionEnv+", else "+versionFile+")")
+	if err := flags.Parse(rest); err != nil {
 		return err
 	}
 	v := *version
@@ -98,11 +118,11 @@ func runPackage(root string, args []string) error {
 	p := packager{root: root, version: v}
 	switch target {
 	case "linux":
-		return p.linux()
+		return p.linux(ctx)
 	case "windows":
-		return p.windows()
+		return p.windows(ctx)
 	case "macos":
-		return p.macos()
+		return p.macos(ctx)
 	default:
 		return fmt.Errorf("package: unknown target %q (linux, windows, macos)", target)
 	}

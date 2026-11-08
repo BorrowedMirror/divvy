@@ -1,0 +1,66 @@
+{
+  "query": {
+    "filters": {
+      "misc_filters": {
+        "filters": {
+          "corrupted": {
+            "option": "false"
+          }
+        }
+      },
+      "type_filters": {
+        "filters": {
+          "category": {
+            "option": "armour.helmet"
+          },
+          "rarity": {
+            "option": "unique"
+          }
+        }
+      }
+    },
+    "name": "Goldrim",
+    "stats": [
+      {
+        "filters": [
+          {
+            "disabled": true,
+            "id": "explicit.stat_55120748",
+            "value": {
+              "min": 30.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_3396551737",
+            "value": {
+              "min": 9.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_667594967",
+            "value": {
+              "min": 28.0
+            }
+          },
+          {
+            "disabled": true,
+            "id": "explicit.stat_1788396301",
+            "value": {
+              "min": 3.0
+            }
+          }
+        ],
+        "type": "and"
+      }
+    ],
+    "status": {
+      "option": "online"
+    },
+    "type": "Felt Cap"
+  },
+  "sort": {
+    "price": "asc"
+  }
+}

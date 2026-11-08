@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -20,9 +21,9 @@ import (
 //
 // NSIS installers can be built for the amd64-unicode or x86-unicode target; both run on 64-bit
 // Windows. Distribution packages of NSIS often ship only one of them (Arch: amd64, Debian and
-// Ubuntu: x86), so this uses whichever the system copy has. When it has neither, it does what
-// `cargo xtask windows-installer` does: copy the system data directory to target/go/nsis/ and
-// add the x86-unicode stubs and plugins from the official NSIS zip (pinned by SHA-256).
+// Ubuntu: x86), so this uses whichever the system copy has. When it has neither, it copies the
+// system data directory to target/go/nsis/ and adds the x86-unicode stubs and plugins from the
+// official NSIS zip (pinned by SHA-256).
 
 // nsisTargets in order of preference.
 var nsisTargets = []string{"amd64-unicode", "x86-unicode"}
@@ -36,8 +37,8 @@ var nsisZips = map[string]string{
 // The .syso Go links into cmd/rkl for windows/amd64 builds; it exists only during the build.
 const sysoName = "rsrc_windows_amd64.syso"
 
-func (p packager) windows() error {
-	if err := requireTools([][2]string{{"makensis", "nsis (apt: nsis; Arch: nsis from the AUR; Windows: winget install NSIS.NSIS)"}}); err != nil {
+func (p packager) windows(ctx context.Context) error {
+	if err := requireTools(tool{"makensis", "nsis (apt: nsis; Arch: nsis from the AUR; Windows: winget install NSIS.NSIS)"}); err != nil {
 		return err
 	}
 	if err := requireWebDist(p.root); err != nil {
@@ -58,12 +59,12 @@ func (p packager) windows() error {
 		return err
 	}
 	icon := filepath.Join(p.root, "build/windows/icon.ico")
-	if err := wails3(s, p.root, "generate", "syso", "-arch", "amd64", "-icon", icon, "-manifest", manifest, "-info", info, "-out", syso); err != nil {
+	if err := wails3(ctx, s, p.root, "generate", "syso", "-arch", "amd64", "-icon", icon, "-manifest", manifest, "-info", info, "-out", syso); err != nil {
 		return err
 	}
 
 	exe := filepath.Join(work, binaryName+".exe")
-	if err := p.buildWindowsExe(s, syso, exe); err != nil {
+	if err := p.buildWindowsExe(ctx, s, syso, exe); err != nil {
 		return err
 	}
 	// The bare exe is the update artifact: the updater swaps it in place inside the install.
@@ -72,14 +73,14 @@ func (p packager) windows() error {
 	}
 
 	// The evergreen WebView2 bootstrapper, embedded in Wails' CLI.
-	if err := wails3(s, p.root, "generate", "webview2bootstrapper", "-dir", work); err != nil {
+	if err := wails3(ctx, s, p.root, "generate", "webview2bootstrapper", "-dir", work); err != nil {
 		return err
 	}
 	script := filepath.Join(work, "rkl.nsi")
 	if err := copyFromAssets("rkl.nsi", script); err != nil {
 		return err
 	}
-	makensis, env, target, err := p.nsis()
+	makensis, env, target, err := p.nsis(ctx)
 	if err != nil {
 		return err
 	}
@@ -95,7 +96,7 @@ func (p packager) windows() error {
 		"-DOUTFILE=" + installer,
 		script,
 	}
-	if err := s.with(env...).run(makensis, args...); err != nil {
+	if err := s.with(env...).run(ctx, makensis, args...); err != nil {
 		return err
 	}
 	return p.done(installer)
@@ -103,20 +104,20 @@ func (p packager) windows() error {
 
 // buildWindowsExe links the .syso into cmd/rkl only for the duration of the build: Go picks up
 // .syso files from the package directory alone (go build -overlay does not cover them).
-func (p packager) buildWindowsExe(s sh, syso, exe string) error {
+func (p packager) buildWindowsExe(ctx context.Context, s sh, syso, exe string) error {
 	linked := filepath.Join(p.root, "cmd/rkl", sysoName)
 	if err := copyFile(syso, linked, 0o644); err != nil {
 		return err
 	}
 	defer os.Remove(linked)
-	return s.with("GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0").run("go", "build", "-tags", "production",
+	return s.with("GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0").run(ctx, "go", "build", "-tags", "production",
 		"-trimpath", "-ldflags", ldflags(p.version, "-H", "windowsgui"), "-o", exe, "./cmd/rkl")
 }
 
 // nsis picks the makensis to run, the environment for it and the NSIS target.
-func (p packager) nsis() (makensis string, env []string, target string, err error) {
+func (p packager) nsis(ctx context.Context) (makensis string, env []string, target string, err error) {
 	s := sh{dir: p.root}
-	hdr, _ := s.output("makensis", "-HDRINFO") // exits non-zero by design
+	hdr, _ := s.output(ctx, "makensis", "-HDRINFO") // exits non-zero by design
 	dir := nsisDir(hdr)
 	if dir == "" {
 		// makensis on Windows finds its data next to itself; the installer packages there
@@ -126,7 +127,7 @@ func (p packager) nsis() (makensis string, env []string, target string, err erro
 	if t := pickNSISTarget(dir); t != "" {
 		return "makensis", nil, t, nil
 	}
-	out, err := s.output("makensis", "-VERSION")
+	out, err := s.output(ctx, "makensis", "-VERSION")
 	if err != nil {
 		return "", nil, "", err
 	}
@@ -134,7 +135,7 @@ func (p packager) nsis() (makensis string, env []string, target string, err erro
 	if err != nil {
 		return "", nil, "", err
 	}
-	data, err := p.nsisX86(dir, version)
+	data, err := p.nsisX86(ctx, dir, version)
 	if err != nil {
 		return "", nil, "", err
 	}
@@ -143,7 +144,7 @@ func (p packager) nsis() (makensis string, env []string, target string, err erro
 
 // nsisX86 builds target/go/nsis/<version>/nsis: the system data directory plus the x86-unicode
 // stubs and plugins from the official zip. A finished setup is reused.
-func (p packager) nsisX86(systemDir, version string) (string, error) {
+func (p packager) nsisX86(ctx context.Context, systemDir, version string) (string, error) {
 	work := p.out("nsis", version)
 	data := filepath.Join(work, "nsis")
 	if hasNSISTarget(data, "x86-unicode") {
@@ -153,7 +154,7 @@ func (p packager) nsisX86(systemDir, version string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("the system NSIS %s has no amd64-unicode or x86-unicode stubs and there is no pinned checksum for its zip; add one to nsisZips in cmd/release/windows.go", version)
 	}
-	if err := requireTools([][2]string{{"unzip", "unzip"}, {"cp", "coreutils"}}); err != nil {
+	if err := requireTools(tool{"unzip", "unzip"}, tool{"cp", "coreutils"}); err != nil {
 		return "", err
 	}
 	if err := os.RemoveAll(work); err != nil {
@@ -163,16 +164,16 @@ func (p packager) nsisX86(systemDir, version string) (string, error) {
 		return "", err
 	}
 	s := sh{dir: work}
-	if err := s.run("cp", "-rL", systemDir, data); err != nil {
+	if err := s.run(ctx, "cp", "-rL", systemDir, data); err != nil {
 		return "", err
 	}
 	url := fmt.Sprintf("https://downloads.sourceforge.net/project/nsis/NSIS%%203/%s/nsis-%s.zip", version, version)
 	zip := filepath.Join(work, "nsis.zip")
-	if err := download(url, want, zip); err != nil {
+	if err := download(ctx, url, want, zip); err != nil {
 		return "", err
 	}
 	unpacked := filepath.Join(work, "zip")
-	if err := s.run("unzip", "-q", zip, "-d", unpacked); err != nil {
+	if err := s.run(ctx, "unzip", "-q", zip, "-d", unpacked); err != nil {
 		return "", err
 	}
 	src := filepath.Join(unpacked, "nsis-"+version)
@@ -187,7 +188,7 @@ func (p packager) nsisX86(systemDir, version string) (string, error) {
 			}
 		}
 	}
-	if err := s.run("cp", "-r", filepath.Join(src, "Plugins/x86-unicode"), filepath.Join(data, "Plugins")); err != nil {
+	if err := s.run(ctx, "cp", "-r", filepath.Join(src, "Plugins/x86-unicode"), filepath.Join(data, "Plugins")); err != nil {
 		return "", err
 	}
 	if err := os.RemoveAll(unpacked); err != nil {
@@ -239,10 +240,15 @@ func pickNSISTarget(dir string) string {
 }
 
 // download fetches url to dst, checking its SHA-256.
-func download(url, wantSHA256, dst string) error {
+func download(ctx context.Context, url, wantSHA256, dst string) error {
 	fmt.Fprintln(os.Stderr, "fetch", url)
-	client := &http.Client{Timeout: 5 * time.Minute}
-	resp, err := client.Get(url)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

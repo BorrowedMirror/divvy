@@ -10,18 +10,19 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 )
 
 const tradeBase = "https://www.pathofexile.com"
@@ -97,34 +98,14 @@ func fetchPath(search any, count int) (string, error) {
 	return "/api/trade2/fetch/" + strings.Join(ids, ",") + "?query=" + id, nil
 }
 
-// urlEscape percent-encodes a league name for use as a path segment.
-func urlEscape(s string) string {
-	var b strings.Builder
-	for i := range len(s) {
-		c := s[i]
-		switch {
-		case 'A' <= c && c <= 'Z', 'a' <= c && c <= 'z', '0' <= c && c <= '9', c == '-', c == '_', c == '.', c == '~':
-			b.WriteByte(c)
-		default:
-			fmt.Fprintf(&b, "%%%02X", c)
-		}
-	}
-	return b.String()
-}
-
-// prettyJSON formats v like serde_json::to_string_pretty (sorted keys, two-space indent)
-// plus a newline.
+// prettyJSON formats v with sorted keys and a two-space indent, plus a newline, so
+// re-recorded fixtures diff cleanly.
 func prettyJSON(v any) ([]byte, error) {
-	compact, err := core.MarshalSerde(v)
+	b, err := json.Marshal(v, json.Deterministic(true), jsontext.WithIndent("  "))
 	if err != nil {
 		return nil, err
 	}
-	var buf bytes.Buffer
-	if err := json.Indent(&buf, compact, "", "  "); err != nil {
-		return nil, err
-	}
-	buf.WriteByte('\n')
-	return buf.Bytes(), nil
+	return append(b, '\n'), nil
 }
 
 // recorder sends the requests of one run, pausing between them.
@@ -136,20 +117,22 @@ type recorder struct {
 
 func (r *recorder) call(ctx context.Context, path string, body any) (any, error) {
 	if r.sent > 0 {
-		time.Sleep(r.opts.delay)
+		if err := sleep(ctx, r.opts.delay); err != nil {
+			return nil, err
+		}
 	}
 	r.sent++
-	url := r.opts.base + path
-	logf("-> %s", url)
+	target := r.opts.base + path
+	slog.Info("request", "url", target)
 	method, reader := http.MethodGet, io.Reader(http.NoBody)
 	if body != nil {
-		b, err := core.MarshalSerde(body)
+		b, err := json.Marshal(body, json.Deterministic(true))
 		if err != nil {
 			return nil, err
 		}
 		method, reader = http.MethodPost, bytes.NewReader(b)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, url, reader)
+	req, err := http.NewRequestWithContext(ctx, method, target, reader)
 	if err != nil {
 		return nil, err
 	}
@@ -167,13 +150,11 @@ func (r *recorder) call(ctx context.Context, path string, body any) (any, error)
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("%s: HTTP %s: %s", url, resp.Status, raw)
+		return nil, fmt.Errorf("%s: HTTP %s: %s", target, resp.Status, raw)
 	}
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.UseNumber()
 	var v any
-	if err := dec.Decode(&v); err != nil {
-		return nil, fmt.Errorf("%s: %w", url, err)
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return nil, fmt.Errorf("%s: %w", target, err)
 	}
 	return v, nil
 }
@@ -215,7 +196,7 @@ func record(ctx context.Context, opts recordOptions, client *http.Client) (strin
 			return "", errors.New("no league in leagues response")
 		}
 	}
-	search, err := r.call(ctx, "/api/trade2/search/poe2/"+urlEscape(league), searchBody(opts.baseType))
+	search, err := r.call(ctx, "/api/trade2/search/poe2/"+url.PathEscape(league), searchBody(opts.baseType))
 	if err != nil {
 		return "", err
 	}
@@ -233,20 +214,20 @@ func record(ctx context.Context, opts recordOptions, client *http.Client) (strin
 	return league, r.write("fetch.json", fetched)
 }
 
-func runFixtures(args []string) error {
-	fs := flag.NewFlagSet("fixtures", flag.ContinueOnError)
-	league := fs.String("league", "", "league to search in (default: the first poe2 league returned by the API)")
-	out := fs.String("out", "", "output directory (default: internal/trade/testdata/fixtures)")
-	delayMS := fs.Int("delay-ms", 2000, "delay between requests in milliseconds")
-	fetchCount := fs.Int("fetch-count", 10, "number of listings to fetch (trade2 caps this at 10)")
-	baseType := fs.String("base-type", "Leather Belt", "base type of the unique to search for")
-	if err := fs.Parse(args); err != nil {
+func runFixtures(ctx context.Context, args []string) error {
+	flags := flag.NewFlagSet("fixtures", flag.ContinueOnError)
+	league := flags.String("league", "", "league to search in (default: the first poe2 league returned by the API)")
+	out := flags.String("out", "", "output directory (default: internal/trade/testdata/fixtures)")
+	delayMS := flags.Int("delay-ms", 2000, "delay between requests in milliseconds")
+	fetchCount := flags.Int("fetch-count", 10, "number of listings to fetch (trade2 caps this at 10)")
+	baseType := flags.String("base-type", "Leather Belt", "base type of the unique to search for")
+	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() > 0 {
-		return fmt.Errorf("fixtures: unexpected arguments %q", fs.Args())
+	if flags.NArg() > 0 {
+		return fmt.Errorf("fixtures: unexpected arguments %q", flags.Args())
 	}
-	root, err := repoRoot()
+	root, err := moduleRoot()
 	if err != nil {
 		return err
 	}
@@ -266,10 +247,10 @@ func runFixtures(args []string) error {
 		delay:     time.Duration(*delayMS) * time.Millisecond,
 		userAgent: fixturesUserAgent(strings.TrimSpace(string(version))),
 	}
-	got, err := record(context.Background(), opts, &http.Client{Timeout: 60 * time.Second})
+	got, err := record(ctx, opts, &http.Client{Timeout: 60 * time.Second})
 	if err != nil {
 		return err
 	}
-	logf("recorded fixtures for league `%s` into %s", got, *out)
+	slog.Info("recorded fixtures", "league", got, "dir", *out)
 	return nil
 }

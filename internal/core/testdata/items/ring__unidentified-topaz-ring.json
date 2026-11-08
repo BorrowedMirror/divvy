@@ -1,0 +1,54 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Topaz Ring",
+  "category": "equipment",
+  "class": {
+    "type": "ring"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 68,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "+#% to Lightning Resistance",
+      "text": "+22% to Lightning Resistance",
+      "values": [
+        22
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 30,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": true,
+  "waystone_tier": null
+}

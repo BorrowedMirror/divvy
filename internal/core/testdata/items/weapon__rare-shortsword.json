@@ -1,0 +1,81 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Shortsword",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "One Hand Swords"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 22,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "71% increased Physical Damage",
+      "values": [
+        71
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+31 to Accuracy Rating",
+      "values": [
+        31
+      ]
+    }
+  ],
+  "name": "Blood Song",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "22-38"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.55"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 22,
+    "int": null,
+    "level": 15,
+    "str": 22
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.55,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 46.5,
+    "spirit": null,
+    "total_dps": 46.5
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

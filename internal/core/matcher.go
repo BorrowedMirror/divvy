@@ -15,108 +15,80 @@ import (
 )
 
 // numberRe matches numbers, optionally with thousands separators and decimals (`1,043`,
-// `4.40`). `\d` is Unicode-aware as in Rust's regex.
+// `4.40`), with Unicode digits.
 var numberRe = regexp.MustCompile(reDigit + `{1,3}(?:,` + reDigit + `{3})+(?:\.` + reDigit + `+)?|` + reDigit + `+(?:\.` + reDigit + `+)?`)
 
 // Templatize replaces every number in line with `#` (keeping `+`/`-` signs as text),
 // matching trade templates.
 func Templatize(line string) string {
-	return numberRe.ReplaceAllLiteralString(trimSpace(line), "#")
+	return numberRe.ReplaceAllLiteralString(strings.TrimSpace(line), "#")
 }
 
-// ExtractValues returns the numeric values of line in order of appearance (unsigned; signs
+// extractValues returns the numeric values of line in order of appearance (unsigned; signs
 // stay in the template).
-func ExtractValues(line string) []float64 {
+func extractValues(line string) []float64 {
 	out := []float64{}
 	for _, m := range numberRe.FindAllString(line, -1) {
-		if v, ok := parseF64(strings.ReplaceAll(m, ",", "")); ok {
+		if v, ok := parseFloat(strings.ReplaceAll(m, ",", "")); ok {
 			out = append(out, v)
 		}
 	}
 	return out
 }
 
-// MatchOutcomeKind is the variant of a [MatchOutcome].
-type MatchOutcomeKind int
-
-// MatchOutcomeKind values.
-const (
-	Unmatched MatchOutcomeKind = iota
-	Matched
-	Ambiguous
-)
-
-// MatchOutcome is the outcome per modifier.
-type MatchOutcome struct {
-	Kind MatchOutcomeKind
-	// StatID and Negated are set for [Matched].
-	StatID  string
-	Negated bool
-	// Candidates is set for [Ambiguous].
-	Candidates []string
-}
-
-// StatMatcher fills stat ids from a [Catalog].
-type StatMatcher struct {
-	catalog Catalog
-}
-
-// NewStatMatcher returns a matcher over catalog.
-func NewStatMatcher(catalog Catalog) *StatMatcher { return &StatMatcher{catalog: catalog} }
-
-// Catalog returns the matcher's catalog.
-func (m *StatMatcher) Catalog() Catalog { return m.catalog }
-
-// MatchItem fills StatID on every modifier that can be matched; returns per-modifier
-// outcomes.
+// MatchStats fills StatID on every modifier of item that catalog can match (nil when it
+// cannot).
 //
-// Also resolves the base type of magic items (whose single header line carries the affix
-// names): when the catalog finds a base inside the line, the full line moves to Name and
-// BaseType becomes the bare base. Negated matches (e.g. a "reduced" line matched to an
+// It also resolves the base type of magic items (whose single header line carries the
+// affix names): when the catalog finds a base inside the line, the full line moves to Name
+// and BaseType becomes the bare base. Negated matches (e.g. a "reduced" line matched to an
 // "increased" stat) flip the sign of the values.
-func (m *StatMatcher) MatchItem(item *ParsedItem) []MatchOutcome {
+func MatchStats(item *ParsedItem, catalog Catalog) {
 	if item.Rarity == RarityMagic && item.Name == nil {
-		if base := m.catalog.BaseInMagicName(item.BaseType); base != nil && base.Name != item.BaseType {
+		if base := catalog.BaseInMagicName(item.BaseType); base != nil && base.Name != item.BaseType {
 			item.Name = new(item.BaseType)
 			item.BaseType = base.Name
 		}
 	}
-	local := prefersLocal(item.Class)
-	out := make([]MatchOutcome, 0, len(item.Modifiers))
+	m := matcher{catalog: catalog, local: prefersLocal(item.Class)}
 	for i := range item.Modifiers {
 		mod := &item.Modifiers[i]
-		outcome := m.matchOne(mod.Template, mod.Kind, local)
-		if outcome.Kind == Unmatched {
-			if plural, index, ok := pluraliseAdditional(mod.Template); ok {
-				outcome = m.matchOne(plural, mod.Kind, local)
-				if outcome.Kind != Unmatched {
+		match, ok := m.matchOne(mod.Template, mod.Kind)
+		if !ok {
+			if plural, index, found := pluraliseAdditional(mod.Template); found {
+				if match, ok = m.matchOne(plural, mod.Kind); ok {
 					// "an additional Arrow" carries an implicit value of 1.
 					mod.Values = slices.Insert(mod.Values, min(index, len(mod.Values)), 1.0)
 				}
 			}
 		}
-		switch outcome.Kind {
-		case Matched:
-			mod.StatID = new(outcome.StatID)
-			if outcome.Negated {
-				for j := range mod.Values {
-					mod.Values[j] = -mod.Values[j]
-				}
-			}
-		default:
+		if !ok {
 			mod.StatID = nil
+			continue
 		}
-		out = append(out, outcome)
+		mod.StatID = new(match.Stat.ID)
+		if match.Negate {
+			for j := range mod.Values {
+				mod.Values[j] = -mod.Values[j]
+			}
+		}
 	}
-	return out
 }
 
-func (m *StatMatcher) matchOne(template string, kind ModKind, local bool) MatchOutcome {
-	candidates := m.candidates(template, kind, local)
+// matcher looks templates up in a catalog for one item.
+type matcher struct {
+	catalog Catalog
+	// local: the item prefers the `(Local)` variants of stats (weapons and armour).
+	local bool
+}
+
+// matchOne finds the stat for template, if any.
+func (m *matcher) matchOne(template string, kind ModKind) (StatMatch, bool) {
+	candidates := m.candidates(template, kind)
 	if len(candidates) == 0 {
 		if rest, ok := strings.CutPrefix(template, "-"); ok {
 			// `-#% to Fire Resistance` is listed as `+#% to Fire Resistance` with negative values.
-			candidates = m.candidates("+"+rest, kind, local)
+			candidates = m.candidates("+"+rest, kind)
 			for i := range candidates {
 				candidates[i].Negate = !candidates[i].Negate
 			}
@@ -124,17 +96,16 @@ func (m *StatMatcher) matchOne(template string, kind ModKind, local bool) MatchO
 	}
 	switch len(candidates) {
 	case 0:
-		return MatchOutcome{Kind: Unmatched}
+		return StatMatch{}, false
 	case 1:
-		return MatchOutcome{Kind: Matched, StatID: candidates[0].Stat.ID, Negated: candidates[0].Negate}
+		return candidates[0], true
 	}
-	c := breakTie(candidates, template, local)
-	return MatchOutcome{Kind: Matched, StatID: c.Stat.ID, Negated: c.Negate}
+	return breakTie(candidates, template, m.local), true
 }
 
 // candidates for template; on weapons/armour the `(Local)` variants win when present.
-func (m *StatMatcher) candidates(template string, kind ModKind, local bool) []StatMatch {
-	if local {
+func (m *matcher) candidates(template string, kind ModKind) []StatMatch {
+	if m.local {
 		if locals := m.lookup(template+" (Local)", kind); len(locals) > 0 {
 			return locals
 		}
@@ -142,15 +113,17 @@ func (m *StatMatcher) candidates(template string, kind ModKind, local bool) []St
 	return m.lookup(template, kind)
 }
 
-func (m *StatMatcher) lookup(template string, kind ModKind) []StatMatch {
+func (m *matcher) lookup(template string, kind ModKind) []StatMatch {
 	found := slices.Clone(m.catalog.StatsByTemplate(template, kind))
-	if len(found) == 0 {
-		switch kind {
-		case ModCrafted, ModFractured, ModDesecrated, ModSanctified:
-			return slices.Clone(m.catalog.StatsByTemplate(template, ModExplicit))
-		}
+	if len(found) > 0 {
+		return found
 	}
-	return found
+	switch kind {
+	case ModCrafted, ModFractured, ModDesecrated, ModSanctified:
+		return slices.Clone(m.catalog.StatsByTemplate(template, ModExplicit))
+	default:
+		return nil
+	}
 }
 
 // breakTie makes a deterministic choice among several stats sharing a template: exact
@@ -169,39 +142,45 @@ func breakTie(candidates []StatMatch, template string, local bool) StatMatch {
 }
 
 // singularRe is `\b(?:an|a) (?:additional )?([A-Z][A-Za-z]*)\b` without the word
-// boundaries: Go's `\b` is ASCII-only while Rust's is Unicode, so the boundaries are checked
-// by hand in [pluraliseAdditional].
+// boundaries, which are Unicode-aware and so checked by hand in [findSingular] (Go's `\b`
+// is ASCII-only).
 var singularRe = regexp.MustCompile(`^(?:an|a) (?:additional )?([A-Z][A-Za-z]*)`)
 
-// findSingular returns the leftmost match of the Rust pattern (start, end, noun start, noun
-// end). After the greedy ASCII noun no shorter match can satisfy the trailing `\b` (the
-// next character would be an ASCII letter), so one anchored attempt per start suffices.
-func findSingular(s string) []int {
-	for i := 0; i < len(s); i++ {
-		if (s[i] != 'a') || wordBefore(s, i) {
+// singularMatch is a match of [singularRe] in a template: the whole phrase and the noun,
+// as byte offsets.
+type singularMatch struct {
+	start, end         int
+	nounStart, nounEnd int
+}
+
+// findSingular returns the leftmost match of singularRe between word boundaries. After the
+// greedy ASCII noun no shorter match can satisfy the trailing boundary (the next character
+// would be an ASCII letter), so one anchored attempt per start suffices.
+func findSingular(s string) (singularMatch, bool) {
+	for i := range len(s) {
+		if s[i] != 'a' || wordBefore(s, i) {
 			continue
 		}
 		m := singularRe.FindStringSubmatchIndex(s[i:])
 		if m == nil || wordAt(s, i+m[1]) {
 			continue
 		}
-		return []int{i + m[0], i + m[1], i + m[2], i + m[3]}
+		return singularMatch{i + m[0], i + m[1], i + m[2], i + m[3]}, true
 	}
-	return nil
+	return singularMatch{}, false
 }
 
 // pluraliseAdditional turns `an additional Arrow` / `a Projectile` into
 // `# additional Arrows`; returns the new template and the index of the inserted `#` among
 // the template's placeholders.
 func pluraliseAdditional(template string) (string, int, bool) {
-	m := findSingular(template)
-	if m == nil {
+	m, ok := findSingular(template)
+	if !ok {
 		return "", 0, false
 	}
-	start, end := m[0], m[1]
-	noun := template[m[2]:m[3]]
-	index := strings.Count(template[:start], "#")
-	plural := template[:start] + "# additional " + noun + "s" + template[end:]
+	noun := template[m.nounStart:m.nounEnd]
+	index := strings.Count(template[:m.start], "#")
+	plural := template[:m.start] + "# additional " + noun + "s" + template[m.end:]
 	return plural, index, true
 }
 
@@ -225,6 +204,7 @@ func prefersLocal(class ItemClass) bool {
 	switch class.Kind {
 	case ClassWeapon, ClassBodyArmour, ClassHelmet, ClassGloves, ClassBoots, ClassShield, ClassBuckler, ClassFocus:
 		return true
+	default:
+		return false
 	}
-	return false
 }

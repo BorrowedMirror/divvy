@@ -1,8 +1,10 @@
 package platform
 
 import (
+	"errors"
 	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +14,7 @@ import (
 const copyTestItem = "Item Class: Rings\nRarity: Rare\n"
 
 // mockClip is a Clipboard whose methods are set per test; a nil method fails the test when
-// called (mockall's `never()`).
+// called.
 type mockClip struct {
 	t          *testing.T
 	text       func() (string, bool, error)
@@ -83,7 +85,6 @@ func (s *clipState) set(text *string) {
 	s.text = text
 }
 
-//go:fix inline
 func textResult(p *string) (string, bool, error) {
 	if p == nil {
 		return "", false, nil
@@ -93,6 +94,7 @@ func textResult(p *string) (string, bool, error) {
 
 // statefulClip is a clipboard mock backed by shared state.
 func statefulClip(t *testing.T, s *clipState) *mockClip {
+	t.Helper()
 	return &mockClip{
 		t:          t,
 		text:       func() (string, bool, error) { return textResult(s.get()) },
@@ -109,8 +111,6 @@ func copyOpts() CopyOptions {
 	return o
 }
 
-func noSleep(time.Duration) {}
-
 func TestLooksLikeItemChecksHeader(t *testing.T) {
 	assert.True(t, LooksLikeItem("\r\n  Item Class: Rings"))
 	assert.True(t, LooksLikeItem("Gegenstandsklasse: Ringe\nSeltenheit: Selten\nX\nSaphirring\n--------\nY"))
@@ -126,101 +126,115 @@ func TestCopyChords(t *testing.T) {
 }
 
 func TestAdvancedCopyReturnsItemAndRestoresPreviousText(t *testing.T) {
-	state := newClipState(new("previous"))
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(c Chord) error {
-		assert.True(t, c.Equal(CopyChord(true)))
-		assert.Nil(t, state.get(), "clipboard must be cleared before sending")
-		state.set(new(copyTestItem))
-		return nil
-	}}
-	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, 1, sim.calls)
-	assert.Equal(t, new("previous"), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("previous"))
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(c Chord) error {
+			assert.True(t, c.Equal(CopyChord(true)))
+			assert.Nil(t, state.get(), "clipboard must be cleared before sending")
+			state.set(new(copyTestItem))
+			return nil
+		}}
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, 1, sim.calls)
+		assert.Equal(t, new("previous"), state.get())
+	})
 }
 
 func TestPlainCopyWithoutRestoreKeepsItemOnClipboard(t *testing.T) {
-	state := newClipState(new("previous"))
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(c Chord) error {
-		assert.True(t, c.Equal(CopyChord(false)))
-		state.set(new(copyTestItem))
-		return nil
-	}}
-	o := copyOpts()
-	o.Advanced = false
-	o.RestoreClipboard = false
-	text, err := CopyItemText(sim, clip, o, noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, new(copyTestItem), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("previous"))
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(c Chord) error {
+			assert.True(t, c.Equal(CopyChord(false)))
+			state.set(new(copyTestItem))
+			return nil
+		}}
+		o := copyOpts()
+		o.Advanced = false
+		o.RestoreClipboard = false
+		text, err := CopyItemText(sim, clip, o)
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, new(copyTestItem), state.get())
+	})
 }
 
 func TestItemArrivingLateIsPickedUpByPolling(t *testing.T) {
-	state := newClipState(nil)
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	sleeps := 0
-	sleep := func(d time.Duration) {
-		assert.Equal(t, 10*time.Millisecond, d)
-		sleeps++
-		if sleeps == 3 {
-			state.set(new(copyTestItem))
-		}
-	}
-	text, err := CopyItemText(sim, clip, copyOpts(), sleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	// Previous clipboard was empty, so restoring clears it again.
-	assert.Nil(t, state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(nil)
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(Chord) error {
+			time.AfterFunc(25*time.Millisecond, func() { state.set(new(copyTestItem)) })
+			return nil
+		}}
+		start := time.Now()
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, 30*time.Millisecond, time.Since(start), "seen on the fourth poll")
+		// Previous clipboard was empty, so restoring clears it again.
+		assert.Nil(t, state.get())
+	})
 }
 
 func TestTimesOutWhenNothingArrives(t *testing.T) {
-	state := newClipState(new("keep me"))
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	count := 0
-	_, err := CopyItemText(sim, clip, copyOpts(), func(time.Duration) { count++ })
-	var pe *Error
-	require.ErrorAs(t, err, &pe)
-	assert.Equal(t, KindTimeout, pe.Kind)
-	assert.Equal(t, 100*time.Millisecond, pe.Timeout)
-	assert.Equal(t, 10, count)
-	assert.Equal(t, new("keep me"), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("keep me"))
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		start := time.Now()
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrTimeout)
+		pe, ok := errors.AsType[*Error](err)
+		require.True(t, ok)
+		assert.Equal(t, 100*time.Millisecond, pe.Timeout)
+		assert.Equal(t, 100*time.Millisecond, time.Since(start))
+		assert.Equal(t, new("keep me"), state.get())
+	})
 }
 
 func TestNonItemTextReportsNoItemText(t *testing.T) {
-	state := newClipState(nil)
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { state.set(new("not an item")); return nil }}
-	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	assert.ErrorIs(t, err, ErrNoItemText)
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(nil)
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(Chord) error { state.set(new("not an item")); return nil }}
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrNoItemText)
+	})
 }
 
 func TestZeroPollIntervalStillTerminates(t *testing.T) {
-	state := newClipState(nil)
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	o := copyOpts()
-	o.PollInterval = 0
-	o.Timeout = 3 * time.Millisecond
-	_, err := CopyItemText(sim, clip, o, noSleep)
-	assert.ErrorIs(t, err, ErrTimeout)
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(nil)
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		o := copyOpts()
+		o.PollInterval = 0
+		o.Timeout = 3 * time.Millisecond
+		_, err := CopyItemText(sim, clip, o)
+		require.ErrorIs(t, err, ErrTimeout)
+	})
 }
 
 func TestSimulatorErrorIsReturnedAfterRestoring(t *testing.T) {
-	state := newClipState(new("prev"))
-	clip := statefulClip(t, state)
-	sim := &mockSim{t: t, send: func(Chord) error { return Unsupported("keystroke_injection") }}
-	_, err := CopyItemText(sim, clip, copyOpts(), func(time.Duration) { t.Fatal("must not poll") })
-	assert.ErrorIs(t, err, ErrUnsupported)
-	assert.Equal(t, new("prev"), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("prev"))
+		clip := statefulClip(t, state)
+		sim := &mockSim{t: t, send: func(Chord) error { return Unsupported("keystroke_injection") }}
+		start := time.Now()
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrUnsupported)
+		assert.Zero(t, time.Since(start), "must not poll")
+		assert.Equal(t, new("prev"), state.get())
+	})
 }
 
 // seqText returns the given results in order, failing the test when called more often.
 func seqText(t *testing.T, results ...func() (string, bool, error)) func() (string, bool, error) {
+	t.Helper()
 	i := 0
 	return func() (string, bool, error) {
 		if i >= len(results) {
@@ -233,6 +247,7 @@ func seqText(t *testing.T, results ...func() (string, bool, error)) func() (stri
 }
 
 func seqErr(t *testing.T, name string, results ...error) func() error {
+	t.Helper()
 	i := 0
 	return func() error {
 		if i >= len(results) {
@@ -253,53 +268,60 @@ func textOK(s string) func() (string, bool, error) {
 }
 
 func TestUnreadableClipboardAndFailingRestoreAreTolerated(t *testing.T) {
-	// Sequence: Text (err), Clear (ok), Text (err), Text x2 (item), Clear (err).
-	var ops []string
-	texts := seqText(t, textErr("odd"), textErr("busy"), textOK(copyTestItem), textOK(copyTestItem))
-	clears := seqErr(t, "Clear", nil, Backend("gone"))
-	clip := &mockClip{
-		t:          t,
-		hasNonText: func() bool { return false },
-		text:       func() (string, bool, error) { ops = append(ops, "get"); return texts() },
-		clear:      func() error { ops = append(ops, "clear"); return clears() },
-	}
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, []string{"get", "clear", "get", "get", "get", "clear"}, ops)
+	synctest.Test(t, func(t *testing.T) {
+		// Sequence: Text (err), Clear (ok), Text (err), Text x2 (item), Clear (err).
+		var ops []string
+		texts := seqText(t, textErr("odd"), textErr("busy"), textOK(copyTestItem), textOK(copyTestItem))
+		clears := seqErr(t, "Clear", nil, Backend("gone"))
+		clip := &mockClip{
+			t:          t,
+			hasNonText: func() bool { return false },
+			text:       func() (string, bool, error) { ops = append(ops, "get"); return texts() },
+			clear:      func() error { ops = append(ops, "clear"); return clears() },
+		}
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, []string{"get", "clear", "get", "get", "get", "clear"}, ops)
+	})
 }
 
 func TestClearFailureAbortsBeforeSending(t *testing.T) {
-	clip := &mockClip{
-		t:          t,
-		text:       func() (string, bool, error) { return "", false, nil },
-		hasNonText: func() bool { return false },
-		clear:      func() error { return Backend("no clipboard") },
-	}
-	sim := &mockSim{t: t}
-	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	assert.ErrorIs(t, err, ErrBackend)
-	assert.Equal(t, 0, sim.calls)
+	synctest.Test(t, func(t *testing.T) {
+		clip := &mockClip{
+			t:          t,
+			text:       func() (string, bool, error) { return "", false, nil },
+			hasNonText: func() bool { return false },
+			clear:      func() error { return Backend("no clipboard") },
+		}
+		sim := &mockSim{t: t}
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrBackend)
+		assert.Equal(t, 0, sim.calls)
+	})
 }
 
 func TestImageOnClipboardIsNeitherClearedNorRestored(t *testing.T) {
-	item := newClipState(nil)
-	clip := &mockClip{
-		t:          t,
-		text:       func() (string, bool, error) { return textResult(item.get()) },
-		hasNonText: func() bool { return item.get() == nil },
-		// clear and setText nil: never called.
-	}
-	sim := &mockSim{t: t, send: func(Chord) error { item.set(new(copyTestItem)); return nil }}
-	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
+	synctest.Test(t, func(t *testing.T) {
+		item := newClipState(nil)
+		clip := &mockClip{
+			t:          t,
+			text:       func() (string, bool, error) { return textResult(item.get()) },
+			hasNonText: func() bool { return item.get() == nil },
+			// clear and setText nil: never called.
+		}
+		sim := &mockSim{t: t, send: func(Chord) error { item.set(new(copyTestItem)); return nil }}
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+	})
 }
 
 // clipWhereUserCopiesAfter is a clipboard where the user copies user (nil = nothing) on the
 // nthGet-th Text call. Text calls: 1 = previous, 2 = poll (sees the item), 3 = restore check.
 func clipWhereUserCopiesAfter(t *testing.T, s *clipState, nthGet int, user *string) *mockClip {
+	t.Helper()
 	calls := 0
 	clears := 0
 	t.Cleanup(func() { assert.Equal(t, 1, clears, "Clear calls") })
@@ -322,55 +344,63 @@ func clipWhereUserCopiesAfter(t *testing.T, s *clipState, nthGet int, user *stri
 }
 
 func TestUserCopyAfterTheItemIsNotOverwritten(t *testing.T) {
-	state := newClipState(new("previous"))
-	clip := clipWhereUserCopiesAfter(t, state, 3, new("user copy"))
-	sim := &mockSim{t: t, send: func(Chord) error { state.set(new(copyTestItem)); return nil }}
-	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, new("user copy"), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("previous"))
+		clip := clipWhereUserCopiesAfter(t, state, 3, new("user copy"))
+		sim := &mockSim{t: t, send: func(Chord) error { state.set(new(copyTestItem)); return nil }}
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, new("user copy"), state.get())
+	})
 }
 
 func TestUserCopyDuringATimeoutIsKept(t *testing.T) {
-	state := newClipState(new("previous"))
-	// The user copies non-item text while we poll: NoItemText, and their copy stays.
-	clip := clipWhereUserCopiesAfter(t, state, 4, new("user copy"))
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	assert.ErrorIs(t, err, ErrNoItemText)
-	assert.Equal(t, new("user copy"), state.get())
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(new("previous"))
+		// The user copies non-item text while we poll: NoItemText, and their copy stays.
+		clip := clipWhereUserCopiesAfter(t, state, 4, new("user copy"))
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrNoItemText)
+		assert.Equal(t, new("user copy"), state.get())
+	})
 }
 
 func TestImageCopiedByUserDuringCopyIsKept(t *testing.T) {
-	state := newClipState(nil)
-	calls := 0
-	clears := 0
-	clip := &mockClip{
-		t:    t,
-		text: func() (string, bool, error) { return textResult(state.get()) },
-		// First check (before clearing): no image. Restore check: the user copied an image.
-		hasNonText: func() bool { calls++; return calls > 1 },
-		clear:      func() error { clears++; return nil },
-	}
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	_, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	assert.ErrorIs(t, err, ErrTimeout)
-	assert.Equal(t, 1, clears)
+	synctest.Test(t, func(t *testing.T) {
+		state := newClipState(nil)
+		calls := 0
+		clears := 0
+		clip := &mockClip{
+			t:    t,
+			text: func() (string, bool, error) { return textResult(state.get()) },
+			// First check (before clearing): no image. Restore check: the user copied an image.
+			hasNonText: func() bool { calls++; return calls > 1 },
+			clear:      func() error { clears++; return nil },
+		}
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		_, err := CopyItemText(sim, clip, copyOpts())
+		require.ErrorIs(t, err, ErrTimeout)
+		assert.Equal(t, 1, clears)
+	})
 }
 
 func TestUnreadableClipboardAtRestoreTimeIsLeftAlone(t *testing.T) {
-	var ops []string
-	texts := seqText(t, textOK("prev"), textOK(copyTestItem), textErr("busy"))
-	clears := seqErr(t, "Clear", nil)
-	clip := &mockClip{
-		t:          t,
-		hasNonText: func() bool { return false },
-		text:       func() (string, bool, error) { ops = append(ops, "get"); return texts() },
-		clear:      func() error { ops = append(ops, "clear"); return clears() },
-	}
-	sim := &mockSim{t: t, send: func(Chord) error { return nil }}
-	text, err := CopyItemText(sim, clip, copyOpts(), noSleep)
-	require.NoError(t, err)
-	assert.Equal(t, copyTestItem, text)
-	assert.Equal(t, []string{"get", "clear", "get", "get"}, ops)
+	synctest.Test(t, func(t *testing.T) {
+		var ops []string
+		texts := seqText(t, textOK("prev"), textOK(copyTestItem), textErr("busy"))
+		clears := seqErr(t, "Clear", nil)
+		clip := &mockClip{
+			t:          t,
+			hasNonText: func() bool { return false },
+			text:       func() (string, bool, error) { ops = append(ops, "get"); return texts() },
+			clear:      func() error { ops = append(ops, "clear"); return clears() },
+		}
+		sim := &mockSim{t: t, send: func(Chord) error { return nil }}
+		text, err := CopyItemText(sim, clip, copyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, copyTestItem, text)
+		assert.Equal(t, []string{"get", "clear", "get", "get"}, ops)
+	})
 }

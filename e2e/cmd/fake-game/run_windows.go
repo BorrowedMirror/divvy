@@ -115,6 +115,7 @@ var winGame struct {
 	hwnd windows.HWND
 }
 
+//nolint:gochecknoinits // only init runs on the main OS thread, which Win32 windows need
 func init() { runtime.LockOSThread() }
 
 func run(g *game, w, h uint32) error {
@@ -136,7 +137,7 @@ func run(g *game, w, h uint32) error {
 	if r, _, err := procRegisterClassExW.Call(uintptr(unsafe.Pointer(&wc))); r == 0 {
 		return fmt.Errorf("RegisterClassExW: %w", err)
 	}
-	// The requested size is the client area, like winit's inner size.
+	// The requested size is the client area.
 	rc := rect{right: int32(w), bottom: int32(h)}
 	procAdjustWindowRect.Call(uintptr(unsafe.Pointer(&rc)), wsOverlappedWindow, 0, 0)
 	hwnd, _, err := procCreateWindowExW.Call(0, uintptr(unsafe.Pointer(className)), uintptr(unsafe.Pointer(titleW)),
@@ -222,7 +223,7 @@ func wndProc(hwnd windows.HWND, message uint32, wParam, lParam uintptr) uintptr 
 	return r
 }
 
-// vkName is winit's KeyCode name for a virtual key, as far as the tests care.
+// vkName is the W3C KeyboardEvent.code name for a virtual key, as far as the tests care.
 func vkName(vk uintptr) string {
 	if n := charCode(rune(vk)); n != "" && (vk < 'a' || vk > 'z') {
 		return n

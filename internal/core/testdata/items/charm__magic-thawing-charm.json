@@ -1,0 +1,83 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Thawing Charm of the Hare",
+  "category": "charm",
+  "class": {
+    "type": "charm"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 66,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "Used when you become Frozen",
+      "text": "Used when you become Frozen",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Duration",
+      "text": "24% increased Duration",
+      "values": [
+        24
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Lasts 3.40 (augmented) Seconds",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Consumes 40 of 80 Charges on use",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Currently has 80 Charges",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Grants Immunity to Freeze",
+      "value": ""
+    }
+  ],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 24,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

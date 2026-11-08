@@ -1,0 +1,93 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Plated Buckler",
+  "category": "equipment",
+  "class": {
+    "type": "buckler"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 72,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Parry",
+      "text": "Grants Skill: Parry",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Evasion Rating",
+      "text": "64% increased Evasion Rating",
+      "values": [
+        64
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+51 to maximum Life",
+      "values": [
+        51
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+27% to Fire Resistance",
+      "values": [
+        27
+      ]
+    }
+  ],
+  "name": "Hate Guard",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Block chance",
+      "value": "20%"
+    },
+    {
+      "augmented": true,
+      "name": "Evasion Rating",
+      "value": "181"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 78,
+    "int": null,
+    "level": 45,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": 20,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": 181,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

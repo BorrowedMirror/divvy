@@ -7,21 +7,16 @@ package app
 import (
 	"encoding/json/v2"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 )
 
-// MaxFilterMemoryPerCategory is the most stat choices kept per category, so the file stays
+// maxFilterMemoryPerCategory is the most stat choices kept per category, so the file stays
 // small.
-const MaxFilterMemoryPerCategory = 300
+const maxFilterMemoryPerCategory = 300
 
-// FilterMemoryFileName is the file name in the cache directory (shared with the Rust build).
-const FilterMemoryFileName = "filter-memory.json"
-
-// FilterMemory is the remembered stat choices.
-type FilterMemory struct {
+// filterMemory is the remembered stat choices. It is not safe for concurrent use.
+type filterMemory struct {
 	// Categories maps category -> stat id -> enabled.
 	Categories map[string]map[string]bool `json:"categories"`
 }
@@ -37,46 +32,35 @@ func filterCategory(filters *core.FilterSet) (string, bool) {
 	return *filters.Category, true
 }
 
-// LoadFilterMemory reads the file, or starts empty when it is missing or unreadable.
-func LoadFilterMemory(path string) FilterMemory {
+// loadFilterMemory reads the file, or starts empty when it is missing or unreadable.
+func loadFilterMemory(path string) filterMemory {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return FilterMemory{}
+		return filterMemory{}
 	}
-	// `categories` is required, as in the serde struct: anything else means "start empty".
+	// `categories` is required: anything else means "start empty".
 	var raw struct {
 		Categories *map[string]map[string]bool `json:"categories"`
 	}
 	if err := json.Unmarshal(b, &raw); err != nil || raw.Categories == nil {
-		return FilterMemory{}
+		return filterMemory{}
 	}
 	for _, prefs := range *raw.Categories {
 		if prefs == nil {
-			return FilterMemory{}
+			return filterMemory{}
 		}
 	}
-	return FilterMemory{Categories: *raw.Categories}
+	return filterMemory{Categories: *raw.Categories}
 }
 
-// Save writes atomically (temp file + rename).
-func (m *FilterMemory) Save(path string) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o777); err != nil {
-		return err
-	}
-	b, err := core.MarshalSerde(m)
-	if err != nil {
-		return err
-	}
-	tmp := strings.TrimSuffix(path, filepath.Ext(path)) + ".json.tmp"
-	if err := os.WriteFile(tmp, b, 0o666); err != nil {
-		return err
-	}
-	return os.Rename(tmp, path)
+// marshal encodes the memory with sorted keys.
+func (m *filterMemory) marshal() ([]byte, error) {
+	return json.Marshal(m, json.Deterministic(true))
 }
 
-// Record remembers the on/off state of every stat in a search the user ran. It reports whether
+// record remembers the on/off state of every stat in a search the user ran. It reports whether
 // anything changed.
-func (m *FilterMemory) Record(filters *core.FilterSet) bool {
+func (m *filterMemory) record(filters *core.FilterSet) bool {
 	cat, ok := filterCategory(filters)
 	if !ok {
 		return false
@@ -92,7 +76,7 @@ func (m *FilterMemory) Record(filters *core.FilterSet) bool {
 	changed := false
 	for _, s := range filters.Stats {
 		prev, known := entry[s.StatID]
-		if len(entry) >= MaxFilterMemoryPerCategory && !known {
+		if len(entry) >= maxFilterMemoryPerCategory && !known {
 			continue
 		}
 		entry[s.StatID] = s.Enabled
@@ -103,8 +87,8 @@ func (m *FilterMemory) Record(filters *core.FilterSet) bool {
 	return changed
 }
 
-// Apply turns stats on or off as the user last had them for this category.
-func (m *FilterMemory) Apply(filters *core.FilterSet) {
+// apply turns stats on or off as the user last had them for this category.
+func (m *filterMemory) apply(filters *core.FilterSet) {
 	cat, ok := filterCategory(filters)
 	if !ok {
 		return

@@ -1,10 +1,11 @@
 package x11
 
 import (
-	"reflect"
-	"slices"
 	"testing"
+	"testing/synctest"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
@@ -24,8 +25,8 @@ func testModMap() modifierMap {
 	return modifierMapFromReply([]uint8{kcShiftL, kcShiftR, 66, 0, kcCtrlL, 105, kcAltL, 0, kcNumLock, 0, 0, 0, kcSuperL, 0, 92, 0})
 }
 
-func keysDown(down ...uint8) Keymap {
-	var k Keymap
+func keysDown(down ...uint8) keymap {
+	var k keymap
 	for _, c := range down {
 		k[c/8] |= 1 << (c % 8)
 	}
@@ -34,91 +35,63 @@ func keysDown(down ...uint8) Keymap {
 
 func TestModifierMapParsesRows(t *testing.T) {
 	m := testModMap()
-	if !m.isModifier(kcShiftR) || !m.isModifier(kcNumLock) || !m.isModifier(92) {
-		t.Fatal("modifiers not recognised")
-	}
-	if m.isModifier(kcD) {
-		t.Fatal("D is not a modifier")
-	}
-	if m.isModifier(0) {
-		t.Fatal("unused slots are dropped")
-	}
-	if !reflect.DeepEqual(modifierMapFromReply(nil), modifierMap{}) {
-		t.Fatal("empty reply")
-	}
+	assert.True(t, m.isModifier(kcShiftR) && m.isModifier(kcNumLock) && m.isModifier(92), "modifiers recognised")
+	assert.False(t, m.isModifier(kcD), "D is not a modifier")
+	assert.False(t, m.isModifier(0), "unused slots are dropped")
+	assert.Equal(t, modifierMap{}, modifierMapFromReply(nil))
 	k := keysDown(255)
-	if !isDown(&k, 255) {
-		t.Fatal("keycode 255")
-	}
+	assert.True(t, isDown(&k, 255))
 }
 
 func TestHeldModifiersAndKeys(t *testing.T) {
 	m := testModMap()
 	k := keysDown(kcCtrlL, kcShiftR, kcD, kcNumLock)
-	if got := m.held(&k); !slices.Equal(got, []platform.KeyModifier{platform.Ctrl, platform.Shift}) {
-		t.Fatalf("held = %v", got)
-	}
-	if got := m.heldKeycodes(platform.Shift, &k); !slices.Equal(got, []uint8{kcShiftR}) {
-		t.Fatalf("shift keycodes = %v", got)
-	}
-	if !m.nonModifierDown(&k) {
-		t.Fatal("D is down")
-	}
-	if k2 := keysDown(kcCtrlL, kcNumLock); m.nonModifierDown(&k2) {
-		t.Fatal("only modifiers are down")
-	}
-	if k3 := keysDown(kcAltL, kcSuperL); !slices.Equal(m.held(&k3), []platform.KeyModifier{platform.Alt, platform.Meta}) {
-		t.Fatalf("alt+super = %v", m.held(&k3))
-	}
+	assert.Equal(t, []platform.KeyModifier{platform.Ctrl, platform.Shift}, m.held(&k))
+	assert.Equal(t, []uint8{kcShiftR}, m.heldKeycodes(platform.Shift, &k))
+	assert.True(t, m.nonModifierDown(&k), "D is down")
+	onlyMods := keysDown(kcCtrlL, kcNumLock)
+	assert.False(t, m.nonModifierDown(&onlyMods))
+	altSuper := keysDown(kcAltL, kcSuperL)
+	assert.Equal(t, []platform.KeyModifier{platform.Alt, platform.Meta}, m.held(&altSuper))
 
 	h := heldStateFromKeymap(&m, &k)
-	if !slices.Equal(h.modifiers, []platform.KeyModifier{platform.Ctrl, platform.Shift}) {
-		t.Fatalf("modifiers = %v", h.modifiers)
-	}
-	if !slices.Equal(h.keycodesOf(platform.Shift), []uint8{kcShiftR}) {
-		t.Fatalf("shift = %v", h.keycodesOf(platform.Shift))
-	}
-	if len(h.keycodesOf(platform.Alt)) != 0 {
-		t.Fatal("alt not held")
-	}
+	assert.Equal(t, []platform.KeyModifier{platform.Ctrl, platform.Shift}, h.modifiers)
+	assert.Equal(t, []uint8{kcShiftR}, h.keycodesOf(platform.Shift))
+	assert.Empty(t, h.keycodesOf(platform.Alt))
 }
 
 func TestWaitsUntilTheHotkeyKeyIsReleased(t *testing.T) {
-	m := testModMap()
-	polls := 0
-	got, ok := waitForRelease(&m, time.Minute, func() (Keymap, bool) {
-		polls++
-		if polls < 4 {
-			return keysDown(kcCtrlL, kcD), true
-		}
-		return keysDown(kcCtrlL), true
-	}, func(d time.Duration) {
-		if d != releasePoll {
-			t.Fatalf("slept %v", d)
-		}
+	synctest.Test(t, func(t *testing.T) {
+		m := testModMap()
+		polls := 0
+		start := time.Now()
+		got, ok := waitForRelease(&m, time.Minute, func() (keymap, bool) {
+			polls++
+			if polls < 4 {
+				return keysDown(kcCtrlL, kcD), true
+			}
+			return keysDown(kcCtrlL), true
+		})
+		assert.True(t, ok)
+		assert.Equal(t, keysDown(kcCtrlL), got)
+		assert.Equal(t, 4, polls)
+		assert.Equal(t, 3*releasePoll, time.Since(start))
 	})
-	if !ok || got != keysDown(kcCtrlL) {
-		t.Fatalf("got %v %v", got, ok)
-	}
-	if polls != 4 {
-		t.Fatalf("polls = %d", polls)
-	}
 }
 
 func TestWaitIsCappedAndToleratesQueryFailure(t *testing.T) {
-	m := testModMap()
-	polls := 0
-	got, ok := waitForRelease(&m, 20*time.Millisecond, func() (Keymap, bool) {
-		polls++
-		return keysDown(kcD), true
-	}, func(time.Duration) {})
-	if !ok || got != keysDown(kcD) {
-		t.Fatal("sends anyway after the cap")
-	}
-	if polls != 5 {
-		t.Fatalf("20ms / 5ms poll + initial query: polls = %d", polls)
-	}
-	if _, ok := waitForRelease(&m, 20*time.Millisecond, func() (Keymap, bool) { return Keymap{}, false }, func(time.Duration) {}); ok {
-		t.Fatal("query failure")
-	}
+	synctest.Test(t, func(t *testing.T) {
+		m := testModMap()
+		polls := 0
+		got, ok := waitForRelease(&m, 20*time.Millisecond, func() (keymap, bool) {
+			polls++
+			return keysDown(kcD), true
+		})
+		assert.True(t, ok, "sends anyway after the cap")
+		assert.Equal(t, keysDown(kcD), got)
+		assert.Equal(t, 5, polls, "20ms / 5ms poll + initial query")
+
+		_, ok = waitForRelease(&m, 20*time.Millisecond, func() (keymap, bool) { return keymap{}, false })
+		assert.False(t, ok, "query failure")
+	})
 }

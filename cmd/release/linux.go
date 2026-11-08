@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ var linuxArch = map[string]string{"amd64": "x86_64", "arm64": "aarch64"}
 // linux builds the AppImage with Wails' generator (`wails3 generate appimage`): it copies the
 // WebKitGTK helper processes into the AppDir and runs linuxdeploy with its GTK plugin, which it
 // downloads into target/go/appimage/ on first use.
-func (p packager) linux() error {
+func (p packager) linux(ctx context.Context) error {
 	if runtime.GOOS != "linux" {
 		return fmt.Errorf("package linux runs on Linux (this is %s)", runtime.GOOS)
 	}
@@ -21,11 +22,11 @@ func (p packager) linux() error {
 	if !ok {
 		return fmt.Errorf("package linux: unsupported architecture %s", runtime.GOARCH)
 	}
-	if err := requireTools([][2]string{
-		{"ldd", "libc (glibc)"},
-		{"file", "file (linuxdeploy needs it)"},
-		{"readelf", "binutils"},
-	}); err != nil {
+	if err := requireTools(
+		tool{"ldd", "libc (glibc)"},
+		tool{"file", "file (linuxdeploy needs it)"},
+		tool{"readelf", "binutils"},
+	); err != nil {
 		return err
 	}
 	if err := requireWebDist(p.root); err != nil {
@@ -38,7 +39,7 @@ func (p packager) linux() error {
 	s := sh{dir: p.root}
 
 	bin := filepath.Join(work, binaryName)
-	if err := s.with("CGO_ENABLED=1").run("go", "build", "-tags", "gtk3,production", "-trimpath",
+	if err := s.with("CGO_ENABLED=1").run(ctx, "go", "build", "-tags", "gtk3,production", "-trimpath",
 		"-ldflags", ldflags(p.version), "-o", bin, "./cmd/rkl"); err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func (p packager) linux() error {
 	if err := os.MkdirAll(build, 0o755); err != nil {
 		return err
 	}
-	if err := wails3(s, p.root, "generate", "appimage", "-binary", bin, "-icon", icon, "-desktopfile", desktop,
+	if err := wails3(ctx, s, p.root, "generate", "appimage", "-binary", bin, "-icon", icon, "-desktopfile", desktop,
 		"-outputdir", work, "-builddir", build); err != nil {
 		return err
 	}

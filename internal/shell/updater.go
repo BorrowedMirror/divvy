@@ -18,8 +18,8 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
 )
 
-// Linked in by release builds with -ldflags -X. Without a public key the updater stays off, so
-// dev builds and forks never check for updates (as with the Tauri build's updater pubkey).
+// Set by the linker in release builds (-ldflags -X, see cmd/release). Without a public key the
+// updater stays off, so dev builds and forks never check for updates.
 var (
 	// UpdaterPublicKey is the base64 raw ed25519 public key every update must be signed with.
 	UpdaterPublicKey = ""
@@ -44,66 +44,75 @@ type Updater struct {
 	pending *updater.Release
 }
 
-// PublicKey decodes UpdaterPublicKey; ok is false when this build has none.
-func PublicKey() (key []byte, ok bool, err error) {
+// publicKey decodes UpdaterPublicKey; it is nil when this build has none.
+func publicKey() ([]byte, error) {
 	s := strings.TrimSpace(UpdaterPublicKey)
 	if s == "" {
-		return nil, false, nil
+		return nil, nil
 	}
-	key, err = base64.StdEncoding.DecodeString(s)
+	key, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		return nil, false, fmt.Errorf("updater public key: %w", err)
+		return nil, fmt.Errorf("updater public key: %w", err)
 	}
-	return key, true, nil
+	return key, nil
 }
 
-// StartUpdater configures Wails' updater and starts the periodic check, if this build
-// enables updates. It returns nil when it does not.
-func StartUpdater(a *application.App, st *app.State, emit func(string, any)) *Updater {
-	key, ok, err := PublicKey()
+// StartUpdater configures Wails' updater and, until ctx is done, checks for updates in the
+// background, if this build enables updates. It returns nil when it does not.
+func StartUpdater(ctx context.Context, a *application.App, st *app.State, emit func(string, any)) *Updater {
+	key, err := publicKey()
 	if err != nil {
-		st.RecordError(err)
+		st.RecordError("updater unavailable", err)
 		return nil
 	}
-	if !ok {
+	if key == nil {
 		slog.Debug("updater disabled: no public key in this build")
 		return nil
 	}
 	provider, err := endpoint.New(endpoint.Config{URL: UpdateManifestURL})
 	if err != nil {
-		st.RecordError(fmt.Sprintf("updater unavailable: %v", err))
+		st.RecordError("updater unavailable", err)
 		return nil
 	}
 	if err := a.Updater.Init(updater.Config{
 		CurrentVersion: app.Version,
 		Providers:      []updater.Provider{provider},
 		PublicKey:      key,
-		// The settings window's update banner is the UI, as before.
+		// The settings window's update banner is the UI.
 		Window: updater.WindowNone,
 	}); err != nil {
-		st.RecordError(fmt.Sprintf("updater unavailable: %v", err))
+		st.RecordError("updater unavailable", err)
 		return nil
 	}
 	up := &Updater{u: a.Updater, st: st, emit: emit}
-	go up.loop()
+	go up.loop(ctx)
 	return up
 }
 
-func (up *Updater) loop() {
-	time.Sleep(firstCheckDelay)
+// loop checks after firstCheckDelay and then every checkInterval, while the user has update
+// checks on, until ctx is done.
+func (up *Updater) loop(ctx context.Context) {
+	timer := time.NewTimer(firstCheckDelay)
+	defer timer.Stop()
 	for {
-		if up.st.Settings().UI.CheckUpdates {
-			up.checkAndNotify(context.Background())
+		select {
+		case <-ctx.Done():
+			return
+		case <-timer.C:
 		}
-		time.Sleep(checkInterval)
+		if up.st.Settings().UI.CheckUpdates {
+			up.checkAndNotify(ctx)
+		}
+		timer.Reset(checkInterval)
 	}
 }
 
 func (up *Updater) checkAndNotify(ctx context.Context) {
 	rel, err := up.u.Check(ctx)
 	if err != nil {
-		slog.Warn("update check failed", "err", err)
-		up.st.RecordError(fmt.Sprintf("update check failed: %v", err))
+		if ctx.Err() == nil {
+			up.st.RecordError("update check failed", err)
+		}
 		return
 	}
 	if rel == nil {
@@ -114,11 +123,11 @@ func (up *Updater) checkAndNotify(ctx context.Context) {
 	up.mu.Lock()
 	up.pending = rel
 	up.mu.Unlock()
-	up.emit(ipc.EventUpdateAvailable, Announcement(rel))
+	up.emit(ipc.EventUpdateAvailable, announcement(rel))
 }
 
-// Announcement is the `update-available` payload for a release.
-func Announcement(rel *updater.Release) ipc.UpdateAvailable {
+// announcement is the `update-available` payload for a release.
+func announcement(rel *updater.Release) ipc.UpdateAvailable {
 	a := ipc.UpdateAvailable{Version: rel.Version}
 	if notes := strings.TrimSpace(rel.Notes); notes != "" {
 		a.Notes = new(rel.Notes)
@@ -135,16 +144,16 @@ func (up *Updater) InstallUpdate(ctx context.Context) error {
 	pending := up.pending
 	up.mu.Unlock()
 	if pending == nil {
-		return ipc.NewError("update", "no update is available")
+		return ipc.NewError(ipc.KindUpdate, "no update is available")
 	}
 	if err := up.u.DownloadAndInstall(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		return ipc.Errorf("update", "update failed: %v", err)
+		return ipc.Errorf(ipc.KindUpdate, "update failed: %w", err)
 	}
 	if err := up.u.Restart(ctx); err != nil {
-		return ipc.Errorf("update", "restart into the update: %v", err)
+		return ipc.Errorf(ipc.KindUpdate, "restart into the update: %w", err)
 	}
 	return nil
 }

@@ -1,0 +1,91 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Wooden Club",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "One Hand Maces"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 21,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "68% increased Physical Damage",
+      "values": [
+        68
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Strength",
+      "text": "+12 to Strength",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Leeches #% of Physical Damage as Life",
+      "text": "Leeches 6.41% of Physical Damage as Life",
+      "values": [
+        6.41
+      ]
+    }
+  ],
+  "name": "Skull Knell",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "24-42"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.45"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 12,
+    "str": 24
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.45,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 47.85,
+    "spirit": null,
+    "total_dps": 47.85
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

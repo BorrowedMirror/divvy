@@ -1,15 +1,16 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
@@ -17,9 +18,7 @@ import (
 
 func TestLoadMissingFileYieldsDefaults(t *testing.T) {
 	s, err := Load(Under(t.TempDir()))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, s, DefaultSettings())
 }
 
@@ -28,42 +27,29 @@ func TestSaveThenLoadRoundtripsAndCreatesDirs(t *testing.T) {
 	s := DefaultSettings()
 	s.UI.Language = "de"
 	s.Trade.Contact = new("me@example.com")
-	if err := Save(paths, &s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Save(paths, &s))
 	got, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, got, s)
 
 	// Overwrite in place; no temp files left behind.
 	s.Overlay.Opacity = 0.5
-	if err := Save(paths, &s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Save(paths, &s))
 	got, err = Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, got, s)
 	entries, err := os.ReadDir(paths.ConfigDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(entries) != 1 || entries[0].Name() != "settings.toml" {
-		t.Fatalf("entries: %v", entries)
-	}
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	assert.Equal(t, "settings.toml", entries[0].Name())
 }
 
 func TestSaveRejectsInvalidSettingsWithoutWriting(t *testing.T) {
 	paths := Under(t.TempDir())
 	s := DefaultSettings()
 	s.Overlay.Opacity = 0.0
-	assertInvalid(t, Save(paths, &s), "overlay.opacity")
-	if _, err := os.Stat(paths.SettingsFile); !errors.Is(err, os.ErrNotExist) {
-		t.Fatal("settings file written")
-	}
+	requireInvalid(t, Save(paths, &s), "overlay.opacity")
+	assert.NoFileExists(t, paths.SettingsFile)
 }
 
 func TestSaveToBareRelativeFilename(t *testing.T) {
@@ -71,81 +57,51 @@ func TestSaveToBareRelativeFilename(t *testing.T) {
 	paths := Under(dir)
 	paths.SettingsFile = filepath.Join(dir, "flat.toml")
 	s := DefaultSettings()
-	if err := Save(paths, &s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Save(paths, &s))
 	got, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, got, DefaultSettings())
 
 	// A bare file name resolves against the working directory.
 	t.Chdir(dir)
 	bare := Paths{SettingsFile: "bare.toml"}
-	if err := Save(bare, &s); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(filepath.Join(dir, "bare.toml")); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Save(bare, &s))
+	assert.FileExists(t, filepath.Join(dir, "bare.toml"))
 }
 
 func TestSaveFailsWhenConfigDirIsAFile(t *testing.T) {
 	paths := Under(t.TempDir())
-	if err := os.WriteFile(paths.ConfigDir, []byte("not a dir"), 0o644); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.WriteFile(paths.ConfigDir, []byte("not a dir"), 0o644))
 	s := DefaultSettings()
-	err := Save(paths, &s)
-	var ioe *IoError
-	if !errors.As(err, &ioe) || ioe.Path != paths.ConfigDir {
-		t.Fatalf("%v", err)
-	}
+	requireIOError(t, Save(paths, &s), paths.ConfigDir)
 }
 
 func TestSaveFailsWhenTargetIsADirectory(t *testing.T) {
 	paths := Under(t.TempDir())
-	if err := os.MkdirAll(filepath.Join(paths.SettingsFile, "occupied"), 0o755); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.MkdirAll(filepath.Join(paths.SettingsFile, "occupied"), 0o755))
 	s := DefaultSettings()
-	err := Save(paths, &s)
-	var ioe *IoError
-	if !errors.As(err, &ioe) || ioe.Path != paths.SettingsFile {
-		t.Fatalf("%v", err)
-	}
+	requireIOError(t, Save(paths, &s), paths.SettingsFile)
 	// The temp file was cleaned up.
 	entries, _ := os.ReadDir(paths.ConfigDir)
-	assertEqual(t, len(entries), 1)
+	assert.Len(t, entries, 1)
 }
 
-func TestLoadUnreadablePathIsIoError(t *testing.T) {
+func TestLoadUnreadablePathIsIOError(t *testing.T) {
 	paths := Under(t.TempDir())
-	if err := os.MkdirAll(paths.SettingsFile, 0o755); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.MkdirAll(paths.SettingsFile, 0o755))
 	_, err := Load(paths)
-	var ioe *IoError
-	if !errors.As(err, &ioe) || ioe.Path != paths.SettingsFile {
-		t.Fatalf("%v", err)
-	}
-	if !strings.Contains(err.Error(), "settings.toml") {
-		t.Fatal(err)
-	}
+	requireIOError(t, err, paths.SettingsFile)
+	assert.ErrorContains(t, err, "settings.toml")
 }
 
 func TestLoadBadTOMLIsParseError(t *testing.T) {
 	paths := Under(t.TempDir())
-	var pe *ParseError
 	writeSettings(t, paths, "version = = 1")
-	if _, err := Load(paths); !errors.As(err, &pe) {
-		t.Fatalf("%v", err)
-	}
+	_, err := Load(paths)
+	require.ErrorAs(t, err, new(*ParseError))
 	writeSettings(t, paths, "version = 1\n[overlay]\nopacity = \"high\"\n")
-	if _, err := Load(paths); !errors.As(err, &pe) {
-		t.Fatalf("%v", err)
-	}
+	_, err = Load(paths)
+	require.ErrorAs(t, err, new(*ParseError))
 }
 
 func TestLoadTooNewIsRejected(t *testing.T) {
@@ -153,35 +109,30 @@ func TestLoadTooNewIsRejected(t *testing.T) {
 	writeSettings(t, paths, "version = 99\n")
 	_, err := Load(paths)
 	var tooNew *TooNewError
-	if !errors.As(err, &tooNew) || tooNew.Found != 99 {
-		t.Fatalf("%v", err)
-	}
+	require.ErrorAs(t, err, &tooNew)
+	assert.Equal(t, uint32(99), tooNew.Found)
 }
 
 func TestLoadRunsValidation(t *testing.T) {
 	paths := Under(t.TempDir())
 	writeSettings(t, paths, "version = 1\n[overlay]\nauto_hide_ms = 60000\n")
 	_, err := Load(paths)
-	if _, ok := errors.AsType[*InvalidError](err); !ok {
-		t.Fatalf("%v", err)
-	}
+	require.ErrorAs(t, err, new(*InvalidError))
 }
 
 func TestLoadMigratesLegacyFile(t *testing.T) {
 	paths := Under(t.TempDir())
 	writeSettings(t, paths, fixture(t, "v0_full.toml"))
 	s, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, s.Version, SettingsVersion)
-	assertEqual(t, *s.League.League, "Rise of the Abyssal")
-	assertEqual(t, s.Trade.Sellers, core.StatusAny)
+	require.NoError(t, err)
+	assert.Equal(t, SettingsVersion, s.Version)
+	assert.Equal(t, "Rise of the Abyssal", *s.League.League)
+	assert.Equal(t, core.StatusAny, s.Trade.Sellers)
 }
 
 // ---------------------------------------------------------------- property test
 
-// randomSettings mirrors the Rust proptest strategy.
+// randomSettings returns random settings, valid or not.
 func randomSettings(r *rand.Rand) Settings {
 	pick := func(chars string, n int) string {
 		b := make([]rune, n)
@@ -230,7 +181,7 @@ func randomSettings(r *rand.Rand) Settings {
 	s.Trade.Contact = opt(func() string {
 		return pick(lower+digits+".+", 1+r.IntN(8)) + "@" + pick(lower, 1+r.IntN(8)) + "." + pick(lower, 2+r.IntN(3))
 	})
-	s.Trade.Poesessid = opt(func() string {
+	s.Trade.POESESSID = opt(func() string {
 		// Any printable characters, as `\PC{0,32}`.
 		n := r.IntN(33)
 		b := make([]rune, n)
@@ -245,7 +196,7 @@ func randomSettings(r *rand.Rand) Settings {
 		}
 		return string(b)
 	})
-	s.Overlay.AutoHideMs = uint32(r.IntN(10_001))
+	s.Overlay.AutoHideMS = uint32(r.IntN(10_001))
 	s.Overlay.Opacity = 0.1 + r.Float64()*0.9
 	s.Overlay.Side = []OverlaySide{SideCursor, SideLeft, SideRight}[r.IntN(3)]
 	s.UI.Language = pick(lower, 2)
@@ -256,7 +207,7 @@ func randomSettings(r *rand.Rand) Settings {
 	s.UI.StartMinimised, s.UI.CheckUpdates, s.UI.OnboardingDone = r.IntN(2) == 0, r.IntN(2) == 0, r.IntN(2) == 0
 	if r.IntN(2) == 0 {
 		s.Platform.BackendOverride = new([]platform.BackendKind{
-			platform.BackendWindows, platform.BackendMacos, platform.BackendX11, platform.BackendWayland, platform.BackendFake,
+			platform.BackendWindows, platform.BackendMacOS, platform.BackendX11, platform.BackendWayland, platform.BackendFake,
 		}[r.IntN(5)])
 	}
 	return s
@@ -271,13 +222,9 @@ func TestAnyValidSettingsRoundtripThroughSaveLoad(t *testing.T) {
 		}
 		cases++
 		paths := Under(t.TempDir())
-		if err := Save(paths, &s); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, Save(paths, &s))
 		got, err := Load(paths)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		assertSettings(t, got, s)
 	}
 }
@@ -286,24 +233,17 @@ func TestSaveNormalisesVersionAndRestrictsPermissions(t *testing.T) {
 	paths := Under(t.TempDir())
 	s := DefaultSettings()
 	s.Version = 0
-	if err := Save(paths, &s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Save(paths, &s))
 	got, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, got.Version, SettingsVersion)
-	text, _ := os.ReadFile(paths.SettingsFile)
-	if !strings.Contains(string(text), fmt.Sprintf("version = %d", SettingsVersion)) {
-		t.Fatalf("no version in\n%s", text)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, SettingsVersion, got.Version)
+	text, err := os.ReadFile(paths.SettingsFile)
+	require.NoError(t, err)
+	assert.Contains(t, string(text), fmt.Sprintf("version = %d", SettingsVersion))
 	if runtime.GOOS != "windows" {
 		info, err := os.Stat(paths.SettingsFile)
-		if err != nil {
-			t.Fatal(err)
-		}
-		assertEqual(t, info.Mode().Perm(), os.FileMode(0o600))
+		require.NoError(t, err)
+		assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
 	}
 }
 
@@ -325,40 +265,27 @@ func TestConcurrentSavesNeverCorrupt(t *testing.T) {
 	wg.Wait()
 	close(errs)
 	for err := range errs {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
-	if _, err := Load(paths); err != nil {
-		t.Fatal(err)
-	}
+	_, err := Load(paths)
+	require.NoError(t, err)
 }
 
 func TestHotkeysCanBeClearedAndStayCleared(t *testing.T) {
 	paths := Under(t.TempDir())
 	s := DefaultSettings()
-	assertEqual(t, s.Hotkeys.OpenSettings, chord("Space", platform.Ctrl))
+	assert.Equal(t, chord("Space", platform.Ctrl), s.Hotkeys.OpenSettings)
 	s.Hotkeys.OpenSettings = platform.UnboundChord()
 	s.Hotkeys.PriceCheckPinned = platform.UnboundChord() // two cleared hotkeys are not duplicates
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
-	if err := Save(paths, &s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
+	require.NoError(t, Save(paths, &s))
 	loaded, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !loaded.Hotkeys.OpenSettings.IsUnbound() {
-		t.Fatal("cleared hotkey must not reset to the default")
-	}
-	if !loaded.Hotkeys.PriceCheckPinned.IsUnbound() {
-		t.Fatal("cleared hotkey must not reset to the default")
-	}
+	require.NoError(t, err)
+	require.True(t, loaded.Hotkeys.OpenSettings.IsUnbound(), "cleared hotkey must not reset to the default")
+	require.True(t, loaded.Hotkeys.PriceCheckPinned.IsUnbound(), "cleared hotkey must not reset to the default")
 	// Modifiers without a key are still rejected.
 	s.Hotkeys.OpenSettings = platform.Chord{Modifiers: []platform.KeyModifier{platform.Ctrl}}
-	if Validate(&s) == nil {
-		t.Fatal("modifiers without a key accepted")
-	}
+	require.Error(t, Validate(&s), "modifiers without a key accepted")
 }
 
 func TestLegacyKalandraSettingsAreAdoptedOnce(t *testing.T) {
@@ -368,51 +295,33 @@ func TestLegacyKalandraSettingsAreAdoptedOnce(t *testing.T) {
 	adopt := func() bool {
 		t.Helper()
 		ok, err := AdoptLegacySettings(paths, legacy)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		return ok
 	}
 	widen := func() float64 {
 		t.Helper()
 		s, err := Load(paths)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		return s.Trade.WidenPct
 	}
-	if adopt() {
-		t.Fatal("no legacy file")
-	}
-	if err := os.MkdirAll(filepath.Dir(legacy), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(legacy, []byte("version = 1\n\n[trade]\nwiden_pct = 17.0\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if !adopt() {
-		t.Fatal("legacy file not adopted")
-	}
-	assertEqual(t, widen(), 17.0)
-	if _, err := os.Stat(legacy); err != nil {
-		t.Fatal("old file is kept")
-	}
+	require.False(t, adopt(), "no legacy file")
+	require.NoError(t, os.MkdirAll(filepath.Dir(legacy), 0o755))
+	require.NoError(t, os.WriteFile(legacy, []byte("version = 1\n\n[trade]\nwiden_pct = 17.0\n"), 0o644))
+	require.True(t, adopt(), "legacy file not adopted")
+	assert.InDelta(t, 17.0, widen(), 0)
+	assert.FileExists(t, legacy, "the old file is kept")
 	// Never overwrites settings that already exist at the new location.
-	if err := os.WriteFile(legacy, []byte("version = 1\n\n[trade]\nwiden_pct = 3.0\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if adopt() {
-		t.Fatal("adopted twice")
-	}
-	assertEqual(t, widen(), 17.0)
-	if ok, err := AdoptLegacySettings(paths, ""); ok || err != nil {
-		t.Fatal("adopted from no legacy file")
-	}
-	if p, ok := LegacySettingsFile(); ok && filepath.Base(p) != "settings.toml" {
-		t.Fatal(p)
+	require.NoError(t, os.WriteFile(legacy, []byte("version = 1\n\n[trade]\nwiden_pct = 3.0\n"), 0o644))
+	require.False(t, adopt(), "adopted twice")
+	assert.InDelta(t, 17.0, widen(), 0)
+	ok, err := AdoptLegacySettings(paths, "")
+	require.NoError(t, err)
+	assert.False(t, ok, "adopted from no legacy file")
+	if p, ok := LegacySettingsFile(); ok {
+		assert.Equal(t, "settings.toml", filepath.Base(p))
 	}
 	// A directory is not a legacy file.
-	if ok, _ := AdoptLegacySettings(Under(filepath.Join(dir, "other")), filepath.Dir(legacy)); ok {
-		t.Fatal("adopted a directory")
-	}
+	ok, err = AdoptLegacySettings(Under(filepath.Join(dir, "other")), filepath.Dir(legacy))
+	require.NoError(t, err)
+	assert.False(t, ok, "adopted a directory")
 }

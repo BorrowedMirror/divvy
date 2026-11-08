@@ -12,6 +12,7 @@ package x11
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -31,6 +33,7 @@ import (
 )
 
 func repoRoot(t *testing.T) string {
+	t.Helper()
 	_, file, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(file)
 	for {
@@ -67,6 +70,7 @@ func waitUntil(t *testing.T, what string, timeout time.Duration, f func() bool) 
 
 // xserver starts Xvfb (and openbox) on a free display, or uses RKL_X11TEST_DISPLAY.
 func xserver(t *testing.T) string {
+	t.Helper()
 	if d := os.Getenv("RKL_X11TEST_DISPLAY"); d != "" {
 		return d
 	}
@@ -124,6 +128,7 @@ func xenv(display string) []string {
 }
 
 func internAtom(t *testing.T, c *xgb.Conn, name string) xproto.Atom {
+	t.Helper()
 	r, err := xproto.InternAtom(c, false, uint16(len(name)), name).Reply()
 	if err != nil {
 		t.Fatal(err)
@@ -161,6 +166,7 @@ func clipboard(display string) string {
 
 // fakeGame starts the fake game and waits for READY; lines gets its later stdout lines.
 func fakeGame(t *testing.T, display string) (cmd *exec.Cmd, lines <-chan string, item string) {
+	t.Helper()
 	root := repoRoot(t)
 	bin := os.Getenv("RKL_FAKE_GAME")
 	if bin == "" {
@@ -173,7 +179,7 @@ func fakeGame(t *testing.T, display string) (cmd *exec.Cmd, lines <-chan string,
 	if _, err := os.Stat(bin); err != nil {
 		t.Skipf("fake game not built: %v", err)
 	}
-	corpus := filepath.Join(root, "internal/testkit/testdata/corpus")
+	corpus := filepath.Join(root, "internal/core/testdata/corpus")
 	b, err := os.ReadFile(filepath.Join(corpus, "currency/chaos-orb.txt"))
 	if err != nil {
 		t.Fatal(err)
@@ -238,11 +244,12 @@ func fakeKey(t *testing.T, x *xConn, keycode uint8, down bool) {
 }
 
 func keyIsDown(t *testing.T, x *xConn, keycode uint8) bool {
+	t.Helper()
 	r, err := xproto.QueryKeymap(x.c).Reply()
 	if err != nil {
 		t.Fatal(err)
 	}
-	k := Keymap(r.Keys[:32])
+	k := keymap(r.Keys[:32])
 	return isDown(&k, keycode)
 }
 
@@ -257,8 +264,8 @@ func TestX11EndToEnd(t *testing.T) {
 	if parts.Kind != platform.BackendX11 || !c.WindowTracking || !c.OverlayAlwaysOnTop || !c.OverlayClickThrough || !c.PassiveHook || !c.KeystrokeInjection {
 		t.Fatalf("capabilities %+v", c)
 	}
-	tracker := parts.WindowTracker.(*Tracker)
-	t.Cleanup(tracker.Close)
+	tracker := parts.WindowTracker.(*tracker)
+	t.Cleanup(tracker.close)
 	x, err := connect(display, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -274,11 +281,11 @@ func TestX11EndToEnd(t *testing.T) {
 	if tracker.IsGameFocused() {
 		t.Fatal("no game to focus")
 	}
-	events, err := tracker.Subscribe()
+	events, err := tracker.Subscribe(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := tracker.Subscribe(); !errors.Is(err, platform.ErrAlreadyStarted) {
+	if _, err := tracker.Subscribe(t.Context()); !errors.Is(err, platform.ErrAlreadyStarted) {
 		t.Fatalf("second Subscribe: %v", err)
 	}
 
@@ -287,7 +294,7 @@ func TestX11EndToEnd(t *testing.T) {
 	if found.Info.Title != platform.GameWindowTitle || found.Info.Rect.Width != 640 || found.Info.Rect.Height != 480 {
 		t.Fatalf("found %+v", found.Info)
 	}
-	gameID := fmt.Sprint(found.Info.NativeID)
+	gameID := strconv.FormatUint(found.Info.NativeID, 10)
 	t.Logf("tracker found the fake game: %+v", found.Info)
 
 	t.Run("tracker follows moves and focus", func(t *testing.T) {
@@ -305,17 +312,18 @@ func TestX11EndToEnd(t *testing.T) {
 		if !w.Focused {
 			t.Fatal("GameWindow().Focused")
 		}
-		if id, ok, err := ActiveWindow(display); err != nil || (ok && id != found.Info.NativeID) {
+		if id, ok, err := activeWindow(display); err != nil || (ok && id != found.Info.NativeID) {
 			t.Fatalf("ActiveWindow = %d %v %v", id, ok, err)
 		}
 	})
 
 	t.Run("record hook sees xdotool keys", func(t *testing.T) {
-		input, err := parts.InputListener.Start()
+		hookCtx, stopHook := context.WithCancel(t.Context())
+		input, err := parts.InputListener.Start(hookCtx)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err := parts.InputListener.Start(); !errors.Is(err, platform.ErrAlreadyStarted) {
+		if _, err := parts.InputListener.Start(t.Context()); !errors.Is(err, platform.ErrAlreadyStarted) {
 			t.Fatalf("second Start: %v", err)
 		}
 		run(t, display, "xdotool", "key", "F5")
@@ -340,7 +348,7 @@ func TestX11EndToEnd(t *testing.T) {
 		case <-time.After(200 * time.Millisecond):
 		}
 		// Stopping frees the process-wide hook for a mouse-recording one.
-		parts.InputListener.(*Listener).Stop()
+		stopHook()
 		waitUntil(t, "hook closed", 5*time.Second, func() bool {
 			select {
 			case _, ok := <-input:
@@ -349,12 +357,10 @@ func TestX11EndToEnd(t *testing.T) {
 				return false
 			}
 		})
-		mouse := NewListener(display, true)
-		input, err = mouse.Start()
+		input, err = newListener(display, true).Start(t.Context())
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer mouse.Stop()
 		run(t, display, "xdotool", "click", "5")
 		deadline = time.After(5 * time.Second)
 		for {
@@ -446,11 +452,11 @@ func TestX11EndToEnd(t *testing.T) {
 		if err := xproto.CreateWindowChecked(x.c, 0, win, x.root, 0, 0, 640, 480, 0, xproto.WindowClassInputOutput, 0, 0, nil).Check(); err != nil {
 			t.Fatal(err)
 		}
-		ov, err := NewOverlay(display, uint32(win))
+		ov, err := newOverlay(display, uint32(win))
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer ov.Close()
+		defer ov.close()
 		if err := ov.Prepare(); err != nil {
 			t.Fatal(err)
 		}
@@ -489,13 +495,13 @@ func TestX11EndToEnd(t *testing.T) {
 		}
 
 		owner := found.Info.NativeID
-		if err := ov.RaiseAbove(&owner); err != nil {
+		if err := ov.RaiseAbove(owner); err != nil {
 			t.Fatal(err)
 		}
 		if tf := x.property32(win, xproto.AtomWmTransientFor, xproto.AtomWindow, 1); len(tf) != 1 || uint64(tf[0]) != owner {
 			t.Fatalf("WM_TRANSIENT_FOR = %v", tf)
 		}
-		if err := ov.RaiseAbove(nil); err != nil {
+		if err := ov.RaiseAbove(0); err != nil {
 			t.Fatal(err)
 		}
 		if err := ov.Activate(); err != nil {
@@ -554,4 +560,24 @@ func TestX11EndToEnd(t *testing.T) {
 	if _, ok := tracker.GameWindow(); ok {
 		t.Fatal("game is gone")
 	}
+}
+
+// Test-only helpers.
+
+// close releases the overlay's connection.
+func (o *overlay) close() { o.conn.close() }
+
+// close closes the connection GameWindow and IsGameFocused use.
+func (t *tracker) close() { t.conn.close() }
+
+// activeWindow is the window the WM reports as active (_NET_ACTIVE_WINDOW), if any.
+func activeWindow(display string) (uint64, bool, error) {
+	var id uint64
+	err := withShared(display, func(x *xConn) error {
+		if v := x.property32(x.root, x.atoms.netActiveWindow, xproto.AtomWindow, 1); len(v) > 0 {
+			id = uint64(v[0])
+		}
+		return nil
+	})
+	return id, err == nil && id != 0, err
 }

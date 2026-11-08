@@ -12,34 +12,31 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// ---------------------------------------------------------------- serde
+// ---------------------------------------------------------------- TOML
 
-// Go's TOML differs in layout from the Rust snapshot (keys sorted, literal strings), so the
-// snapshot is a Go golden file; the Rust snapshot itself is checked to load as the defaults
-// in TestRustDefaultFileLoadsAsDefaults. Regenerate with UPDATE_GOLDEN=1.
+// The TOML written for the defaults is pinned by a golden file; a defaults file written by
+// earlier releases (different layout) is checked to load as the defaults in
+// TestEarlierDefaultFileLoadsAsDefaults. Regenerate with UPDATE_GOLDEN=1.
 func TestDefaultSettingsTOMLSnapshot(t *testing.T) {
 	got := toTOML(t, DefaultSettings())
 	golden := filepath.Join("testdata", "go_default.toml")
 	if os.Getenv("UPDATE_GOLDEN") != "" {
-		if err := os.WriteFile(golden, []byte(got), 0o644); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, os.WriteFile(golden, []byte(got), 0o644))
 	}
-	if want := fixture(t, "go_default.toml"); got != want {
-		t.Fatalf("default TOML changed:\n%s", got)
-	}
+	require.Equal(t, fixture(t, "go_default.toml"), got, "default TOML changed")
 	assertSettings(t, mustFromTOML(t, got), DefaultSettings())
 }
 
 func TestDefaultSettingsAreValid(t *testing.T) {
 	s := DefaultSettings()
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 }
 
 func TestSettingsRoundtripThroughTOML(t *testing.T) {
@@ -49,92 +46,78 @@ func TestSettingsRoundtripThroughTOML(t *testing.T) {
 	s.Hotkeys.OpenSettings = chord("F5", platform.Meta)
 	s.Trade.Source = core.SourcePoe2Scout
 	s.Trade.Contact = new("exile@example.com")
-	s.Trade.Poesessid = new("abc123")
+	s.Trade.POESESSID = new("abc123")
 	s.Overlay.Side = SideLeft
 	s.UI.Theme = ThemeLight
-	s.Platform.BackendOverride = ptr(platform.BackendWayland)
+	s.Platform.BackendOverride = new(platform.BackendWayland)
 	assertSettings(t, mustFromTOML(t, toTOML(t, s)), s)
 }
 
 func TestOnboardingDoneDefaultsToFalseAndRoundtrips(t *testing.T) {
-	if DefaultSettings().UI.OnboardingDone {
-		t.Fatal("onboarding_done defaults to true")
-	}
+	require.False(t, DefaultSettings().UI.OnboardingDone, "onboarding_done defaults to true")
 	old := mustFromTOML(t, "version = 1\n[ui]\nlanguage = \"de\"\nstart_minimised = false\n")
-	if old.UI.OnboardingDone {
-		t.Fatal("old file has onboarding_done")
-	}
-	assertEqual(t, old.UI.Language, "de")
+	require.False(t, old.UI.OnboardingDone, "old file has onboarding_done")
+	assert.Equal(t, "de", old.UI.Language)
 	s := DefaultSettings()
 	s.UI.OnboardingDone = true
-	if !mustFromTOML(t, toTOML(t, s)).UI.OnboardingDone {
-		t.Fatal("onboarding_done lost")
-	}
+	require.True(t, mustFromTOML(t, toTOML(t, s)).UI.OnboardingDone, "onboarding_done lost")
 }
 
 func TestPartialDocumentFillsDefaults(t *testing.T) {
 	s := mustFromTOML(t, "version = 1\n[overlay]\nopacity = 0.5\n")
-	assertEqual(t, s.Overlay.Opacity, 0.5)
-	assertEqual(t, s.Overlay.AutoHideMs, DefaultSettings().Overlay.AutoHideMs)
-	assertEqual(t, s.Trade, DefaultSettings().Trade)
+	assert.InDelta(t, 0.5, s.Overlay.Opacity, 0)
+	assert.Equal(t, DefaultSettings().Overlay.AutoHideMS, s.Overlay.AutoHideMS)
+	assert.Equal(t, DefaultSettings().Trade, s.Trade)
 }
 
 func TestCheckUpdatesDefaultsOnAndSurvivesOlderFiles(t *testing.T) {
-	if !DefaultSettings().UI.CheckUpdates {
-		t.Fatal("check_updates defaults off")
-	}
+	require.True(t, DefaultSettings().UI.CheckUpdates, "check_updates defaults off")
 	s := mustFromTOML(t, "version = 1\n[ui]\nlanguage = \"de\"\n")
-	if !s.UI.CheckUpdates {
-		t.Fatal("files written before the field existed keep updates on")
-	}
+	require.True(t, s.UI.CheckUpdates, "files written before the field existed keep updates on")
 	off := mustFromTOML(t, "version = 1\n[ui]\ncheck_updates = false\n")
-	if off.UI.CheckUpdates {
-		t.Fatal("check_updates = false ignored")
-	}
-	if err := Validate(&off); err != nil {
-		t.Fatal(err)
-	}
+	require.False(t, off.UI.CheckUpdates, "check_updates = false ignored")
+	require.NoError(t, Validate(&off))
 }
 
-// ---------------------------------------------------------------- serde semantics on koanf
+// ---------------------------------------------------------------- documents over the defaults
 
-func TestSerdeDefaultSemantics(t *testing.T) {
+func TestDocumentOverDefaults(t *testing.T) {
 	t.Run("waystone flags table replaces the defaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n\"Monsters fire # additional Projectiles\" = \"warn\"\n")
-		assertEqual(t, s.Waystone.Flags, map[string]ModFlag{"Monsters fire # additional Projectiles": FlagWarn})
+		assert.Equal(t, map[string]ModFlag{"Monsters fire # additional Projectiles": FlagWarn}, s.Waystone.Flags)
 	})
 	t.Run("empty waystone flags table means none", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n")
-		assertEqual(t, len(s.Waystone.Flags), 0)
+		assert.Empty(t, s.Waystone.Flags)
 		s = mustFromTOML(t, "[waystone]\nflags = {}\n")
-		assertEqual(t, len(s.Waystone.Flags), 0)
+		assert.Empty(t, s.Waystone.Flags)
 	})
 	t.Run("flag keys with dots", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n\"1.5x Pack.Size\" = \"good\"\n")
-		assertEqual(t, s.Waystone.Flags, map[string]ModFlag{"1.5x Pack.Size": FlagGood})
+		assert.Equal(t, map[string]ModFlag{"1.5x Pack.Size": FlagGood}, s.Waystone.Flags)
 	})
 	t.Run("empty waystone section keeps the defaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone]\n")
-		assertEqual(t, s.Waystone, DefaultSettings().Waystone)
+		assert.Equal(t, DefaultSettings().Waystone, s.Waystone)
 	})
 	t.Run("chat commands replace the defaults wholesale", func(t *testing.T) {
 		s := mustFromTOML(t, "[[chat.commands]]\ntext = \"/exit\"\nsend = false\n[chat.commands.chord]\nmodifiers = []\nkey = \"F9\"\n")
-		assertEqual(t, s.Chat.Commands, []ChatCommand{{Chord: chord("F9"), Text: "/exit"}})
-		assertEqual(t, s.Chat.GameLog, "")
+		assert.Equal(t, []ChatCommand{{Chord: chord("F9"), Text: "/exit"}}, s.Chat.Commands)
+		assert.Empty(t, s.Chat.GameLog)
 		s = mustFromTOML(t, "[chat]\ncommands = []\n")
-		assertEqual(t, len(s.Chat.Commands), 0)
+		assert.Empty(t, s.Chat.Commands)
 	})
 	t.Run("listing columns replace the defaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[overlay]\nlisting_columns = [\"stock\"]\n")
-		assertEqual(t, s.Overlay.ListingColumns, []ListingColumn{ColumnStock})
+		assert.Equal(t, []ListingColumn{ColumnStock}, s.Overlay.ListingColumns)
 	})
 	t.Run("links fill per field", func(t *testing.T) {
 		s := mustFromTOML(t, "[overlay.links]\nwiki = false\n")
-		assertEqual(t, s.Overlay.Links, LinkSettings{Poe2db: true, Wiki: false, CraftOfExile: true})
+		assert.Equal(t, LinkSettings{Poe2db: true, Wiki: false, CraftOfExile: true}, s.Overlay.Links)
 	})
 	t.Run("integers are accepted for floats", func(t *testing.T) {
 		s := mustFromTOML(t, "[trade]\nwiden_pct = 25\n")
-		assertEqual(t, s.Trade.WidenPct, 25.0)
+		assert.InDelta(t, 25.0, s.Trade.WidenPct, 0)
 	})
 	t.Run("unknown keys are ignored", func(t *testing.T) {
 		s := mustFromTOML(t, "future = 1\n[trade]\nnew_thing = \"x\"\n")
@@ -146,13 +129,14 @@ func TestSerdeDefaultSemantics(t *testing.T) {
 		{"chat command without send", "[[chat.commands]]\ntext = \"/exit\"\nchord = { modifiers = [], key = \"\" }\n", "missing field `send`"},
 		{"chat command without chord", "[[chat.commands]]\ntext = \"/exit\"\nsend = true\n", "missing field `chord`"},
 		{"stash search without text", "[[stash.searches]]\nchord = { modifiers = [], key = \"\" }\n", "missing field `text`"},
-		{"unknown enum variant", "[ui]\ntheme = \"blue\"\n", "unknown variant `blue`"},
+		{"unknown enum value", "[ui]\ntheme = \"blue\"\n", "unknown variant `blue`"},
 		{"unknown modifier", "[hotkeys.price_check]\nmodifiers = [\"hyper\"]\nkey = \"KeyD\"\n", "unknown variant `hyper`"},
 		{"unknown backend", "[platform]\nbackend_override = \"beos\"\n", "unknown variant `beos`"},
 		{"unknown flag", "[waystone.flags]\nx = \"meh\"\n", "unknown variant `meh`"},
-		{"negative u32", "[overlay]\nauto_hide_ms = -1\n", "expected u32"},
-		{"u32 overflow", "[trade]\nlisting_count = 4294967296\n", "expected u32"},
-		{"float for u32", "[trade]\nlisting_count = 20.0\n", "expected u32"},
+		{"negative uint32", "[overlay]\nauto_hide_ms = -1\n", "out of range for uint32"},
+		{"uint32 overflow", "[trade]\nlisting_count = 4294967296\n", "out of range for uint32"},
+		{"float for uint32", "[trade]\nlisting_count = 20.0\n", "expected uint32"},
+		{"string for enum", "[platform]\nbackend_override = 3\n", "expected a string"},
 		{"string for float", "[overlay]\nopacity = \"high\"\n", "opacity"},
 		{"string for bool", "[ui]\nautostart = \"yes\"\n", "autostart"},
 		{"int for string", "[ui]\nlanguage = 3\n", "language"},
@@ -161,30 +145,24 @@ func TestSerdeDefaultSemantics(t *testing.T) {
 	for _, c := range rejects {
 		t.Run(c.name, func(t *testing.T) {
 			_, err := fromTOML(c.text)
-			if err == nil || !strings.Contains(err.Error(), c.want) {
-				t.Fatalf("want error containing %q, got %v", c.want, err)
-			}
+			require.ErrorContains(t, err, c.want)
 		})
 	}
 }
 
-func TestRustDefaultFileLoadsAsDefaults(t *testing.T) {
+func TestEarlierDefaultFileLoadsAsDefaults(t *testing.T) {
 	paths := Under(t.TempDir())
-	writeSettings(t, paths, fixture(t, "rust_default.toml"))
+	writeSettings(t, paths, fixture(t, "v1_default.toml"))
 	s, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, s, DefaultSettings())
 }
 
-func TestRustCustomFileLoads(t *testing.T) {
+func TestEarlierCustomFileLoads(t *testing.T) {
 	paths := Under(t.TempDir())
-	writeSettings(t, paths, fixture(t, "rust_custom.toml"))
+	writeSettings(t, paths, fixture(t, "v1_custom.toml"))
 	got, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	want := Settings{
 		Version: 1,
 		League:  LeagueSettings{AutoDetect: false, League: new(`Hardcore "Quoted"`)},
@@ -198,10 +176,10 @@ func TestRustCustomFileLoads(t *testing.T) {
 		Trade: TradeSettings{
 			Source: core.SourcePoe2Scout, Sellers: core.StatusSecurable, WidenPct: 25.5,
 			EnableAllStats: true, ListingCount: 40, ConvertPrices: false, RememberFilters: false,
-			Contact: new("exile@example.com"), Poesessid: new("abc123"),
+			Contact: new("exile@example.com"), POESESSID: new("abc123"),
 		},
 		Overlay: OverlaySettings{
-			AutoHideMs: 1500, Opacity: 0.8, Side: SideLast, GroupBySeller: false,
+			AutoHideMS: 1500, Opacity: 0.8, Side: SideLast, GroupBySeller: false,
 			ListingColumns: []ListingColumn{ColumnItemLevel, ColumnStock, ColumnSeller},
 			Scale:          1.25, BackdropDim: 0, ClosePinnedOnGameFocus: true,
 			Links:   LinkSettings{Poe2db: false, Wiki: true, CraftOfExile: false},
@@ -226,36 +204,31 @@ func TestRustCustomFileLoads(t *testing.T) {
 			Language: "de", Theme: ThemeLight, StartMinimised: false, CheckUpdates: false,
 			OnboardingDone: true, Autostart: true,
 		},
-		Platform: PlatformSettings{BackendOverride: ptr(platform.BackendWayland)},
+		Platform: PlatformSettings{BackendOverride: new(platform.BackendWayland)},
 	}
 	assertSettings(t, got, want)
 
-	// What Go writes back loads to the same settings.
-	if err := Save(paths, &got); err != nil {
-		t.Fatal(err)
-	}
+	// What Save writes back loads to the same settings.
+	require.NoError(t, Save(paths, &got))
 	again, err := Load(paths)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	assertSettings(t, again, want)
 }
 
 // ---------------------------------------------------------------- JSON
 
-// defaultSettingsJSON is serde_json's output for `Settings::default()`, derived from the
-// Rust serde definitions: declaration order, snake_case enums, None as null, f64 always
-// with a fraction, BTreeMap keys sorted.
+// defaultSettingsJSON is the JSON the frontend gets for [DefaultSettings]: snake_case keys
+// and enum values, unset options as null.
 const defaultSettingsJSON = `{"version":1,` +
 	`"league":{"auto_detect":true,"league":null},` +
 	`"hotkeys":{"price_check":{"modifiers":["ctrl"],"key":"KeyD"},` +
 	`"price_check_pinned":{"modifiers":["ctrl","alt"],"key":"KeyD"},` +
 	`"open_settings":{"modifiers":["ctrl"],"key":"Space"},` +
 	`"open_trade":{"modifiers":[],"key":""},"advanced_copy":true},` +
-	`"trade":{"source":"trade","sellers":"any","widen_pct":10.0,"enable_all_stats":false,` +
+	`"trade":{"source":"trade","sellers":"any","widen_pct":10,"enable_all_stats":false,` +
 	`"listing_count":20,"convert_prices":true,"remember_filters":true,"contact":null,"poesessid":null},` +
 	`"overlay":{"auto_hide_ms":400,"opacity":0.95,"side":"cursor","group_by_seller":true,` +
-	`"listing_columns":["seller","listed"],"scale":1.0,"backdrop_dim":0.6,` +
+	`"listing_columns":["seller","listed"],"scale":1,"backdrop_dim":0.6,` +
 	`"close_pinned_on_game_focus":false,"links":{"poe2db":true,"wiki":true,"craft_of_exile":true},` +
 	`"results":"below"},` +
 	`"waystone":{"flags":{"Monsters fire # additional Projectiles":"danger",` +
@@ -274,39 +247,28 @@ const defaultSettingsJSON = `{"version":1,` +
 	`"onboarding_done":false,"autostart":false},` +
 	`"platform":{"backend_override":null}}`
 
-func TestDefaultSettingsJSONMatchesSerde(t *testing.T) {
+func TestDefaultSettingsJSON(t *testing.T) {
 	got, err := DefaultSettings().MarshalJSON()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(got) != defaultSettingsJSON {
-		t.Fatalf("JSON differs from serde\n got: %s\nwant: %s", got, defaultSettingsJSON)
-	}
-	// Through encoding/json too (the shape Wails sends). json.Marshal re-escapes `&` as
-	// \u0026 (same JSON value); an Encoder without HTML escaping gives serde's exact bytes.
+	require.NoError(t, err)
+	assert.JSONEq(t, defaultSettingsJSON, string(got))
+	// Through encoding/json too (the shape Wails sends).
 	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	if err := enc.Encode(DefaultSettings()); err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, strings.TrimSuffix(buf.String(), "\n"), defaultSettingsJSON)
+	require.NoError(t, json.NewEncoder(&buf).Encode(DefaultSettings()))
+	assert.JSONEq(t, defaultSettingsJSON, buf.String())
 }
 
 func TestSettingsJSONShapeOfSetOptionsAndNilLists(t *testing.T) {
 	s := DefaultSettings()
 	s.League.League = new("Standard")
 	s.Trade.Contact = new("me@example.com")
-	s.Platform.BackendOverride = ptr(platform.BackendX11)
+	s.Platform.BackendOverride = new(platform.BackendX11)
 	s.Trade.WidenPct = 12.5
 	s.Overlay.ListingColumns = nil
 	s.Stash.Searches = nil
 	s.Waystone.Flags = nil
 	s.Hotkeys.OpenTrade = platform.Chord{}
 	b, err := s.MarshalJSON()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	for _, want := range []string{
 		`"league":{"auto_detect":true,"league":"Standard"}`,
 		`"contact":"me@example.com","poesessid":null`,
@@ -317,32 +279,24 @@ func TestSettingsJSONShapeOfSetOptionsAndNilLists(t *testing.T) {
 		`"waystone":{"flags":{}}`,
 		`"open_trade":{"modifiers":[],"key":""}`,
 	} {
-		if !strings.Contains(string(b), want) {
-			t.Errorf("missing %s in %s", want, b)
-		}
+		assert.Contains(t, string(b), want)
 	}
 }
 
-func TestSettingsJSONRoundtripAndSerdeDefaults(t *testing.T) {
+func TestSettingsJSONRoundtripAndDefaults(t *testing.T) {
 	s := DefaultSettings()
 	s.League.League = new("Standard")
-	s.Platform.BackendOverride = ptr(platform.BackendWayland)
+	s.Platform.BackendOverride = new(platform.BackendWayland)
 	s.Stash.Searches = []StashSearch{{Chord: chord("Digit1", platform.Alt), Text: "x"}}
 	b, err := json.Marshal(s)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	var back Settings
-	if err := json.Unmarshal(b, &back); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(b, &back))
 	assertSettings(t, back, s)
 
-	// Missing fields take defaults; null Options are None; flags replace the defaults.
+	// Missing fields take defaults; null clears an option; flags replace the defaults.
 	var partial Settings
-	if err := json.Unmarshal([]byte(`{"trade":{"widen_pct":5,"contact":null},"waystone":{"flags":{"a.b":"good"}}}`), &partial); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal([]byte(`{"trade":{"widen_pct":5,"contact":null},"waystone":{"flags":{"a.b":"good"}}}`), &partial))
 	want := DefaultSettings()
 	want.Trade.WidenPct = 5
 	want.Waystone.Flags = map[string]ModFlag{"a.b": FlagGood}
@@ -350,6 +304,7 @@ func TestSettingsJSONRoundtripAndSerdeDefaults(t *testing.T) {
 
 	for _, bad := range []string{
 		`[]`,
+		`{} {}`,
 		`{"ui":{"theme":"blue"}}`,
 		`{"overlay":{"opacity":null}}`,
 		`{"overlay":{"auto_hide_ms":1.5}}`,
@@ -358,9 +313,7 @@ func TestSettingsJSONRoundtripAndSerdeDefaults(t *testing.T) {
 		`{"hotkeys":{"price_check":{"key":"KeyD"}}}`,
 	} {
 		var s Settings
-		if err := json.Unmarshal([]byte(bad), &s); err == nil {
-			t.Errorf("%s: accepted", bad)
-		}
+		assert.Error(t, json.Unmarshal([]byte(bad), &s), bad)
 	}
 }
 
@@ -379,9 +332,8 @@ func TestJSONAndKoanfTagsAgree(t *testing.T) {
 		for f := range rt.Fields() {
 			j, _, _ := strings.Cut(f.Tag.Get("json"), ",")
 			k, _, _ := strings.Cut(f.Tag.Get("koanf"), ",")
-			if j == "" || j != k {
-				t.Errorf("%s.%s: json %q, koanf %q", rt.Name(), f.Name, j, k)
-			}
+			assert.NotEmpty(t, j, "%s.%s", rt.Name(), f.Name)
+			assert.Equal(t, j, k, "%s.%s", rt.Name(), f.Name)
 			walk(f.Type)
 		}
 	}
@@ -392,9 +344,7 @@ func TestJSONAndKoanfTagsAgree(t *testing.T) {
 
 func TestMigrateV0FullFixture(t *testing.T) {
 	doc, err := migrated(fixture(t, "v0_full.toml"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := table(t, `
         version = 1
         [league]
@@ -408,82 +358,61 @@ func TestMigrateV0FullFixture(t *testing.T) {
         [ui]
         theme = "dark"
         `)
-	assertEqual(t, doc, expected)
+	assert.Equal(t, expected, doc)
 	s, err := decodeDocument(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, s.Hotkeys.PriceCheck, chord("KeyD", platform.Ctrl, platform.Shift))
-	assertEqual(t, s.UI.Theme, ThemeDark)
+	require.NoError(t, err)
+	require.NoError(t, Validate(&s))
+	assert.Equal(t, chord("KeyD", platform.Ctrl, platform.Shift), s.Hotkeys.PriceCheck)
+	assert.Equal(t, ThemeDark, s.UI.Theme)
 }
 
 func TestMigrateV0EmptyLeagueMeansAutoDetect(t *testing.T) {
 	doc, err := migrated(fixture(t, "v0_auto_league.toml"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	s, err := decodeDocument(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !s.League.AutoDetect || s.League.League != nil {
-		t.Fatalf("league: %+v", s.League)
-	}
-	assertEqual(t, s.Hotkeys.PriceCheck, chord("f5", platform.Alt))
-	assertEqual(t, s.Trade.Sellers, core.StatusAny) // absent online_only keeps the default
+	require.NoError(t, err)
+	assert.True(t, s.League.AutoDetect)
+	assert.Nil(t, s.League.League)
+	assert.Equal(t, chord("f5", platform.Alt), s.Hotkeys.PriceCheck)
+	assert.Equal(t, core.StatusAny, s.Trade.Sellers) // absent online_only keeps the default
 }
 
 func TestMigrateV0AlreadySectioned(t *testing.T) {
 	doc, err := migrated(fixture(t, "v0_sectioned.toml"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, doc["version"], any(int64(1)))
+	require.NoError(t, err)
+	assert.Equal(t, any(int64(1)), doc["version"])
 	s, err := decodeDocument(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if s.League.AutoDetect || s.League.League == nil || *s.League.League != "Standard" {
-		t.Fatalf("league: %+v", s.League)
-	}
-	assertEqual(t, s.Trade.WidenPct, 25.0)
+	require.NoError(t, err)
+	assert.False(t, s.League.AutoDetect)
+	assert.Equal(t, new("Standard"), s.League.League)
+	assert.InDelta(t, 25.0, s.Trade.WidenPct, 0)
 }
 
 func TestMigrateEmptyDocumentGetsCurrentVersion(t *testing.T) {
 	doc, err := migrated("")
-	if err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, doc["version"], any(int64(SettingsVersion)))
+	require.NoError(t, err)
+	assert.Equal(t, any(int64(SettingsVersion)), doc["version"])
 }
 
 func TestMigrateCurrentVersionIsIdentity(t *testing.T) {
 	text := "version = 1\n[ui]\nlanguage = \"de\"\n"
 	doc, err := migrated(text)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assertEqual(t, doc, table(t, text))
+	require.NoError(t, err)
+	assert.Equal(t, table(t, text), doc)
 }
 
 func TestMigrateRejectsNewerVersion(t *testing.T) {
 	_, err := migrated("version = 2")
-	var tooNew *TooNewError
-	if !errors.As(err, &tooNew) || tooNew.Found != 2 {
-		t.Fatalf("%v", err)
-	}
-	if !strings.Contains(err.Error(), "newer") {
-		t.Fatal(err)
-	}
+	tooNew, ok := errors.AsType[*TooNewError](err)
+	require.True(t, ok, "%v", err)
+	assert.Equal(t, uint32(2), tooNew.Found)
+	assert.ErrorContains(t, err, "newer")
 }
 
 func TestMigrateRejectsBadVersionValues(t *testing.T) {
 	for _, text := range []string{"version = -1", "version = 4294967296", "version = \"1\""} {
 		_, err := migrated(text)
-		assertInvalid(t, err, "version")
+		requireInvalid(t, err, "version")
 	}
 }
 
@@ -497,7 +426,7 @@ func TestMigrateV0RejectsMalformedLegacyKeys(t *testing.T) {
 	}
 	for _, c := range cases {
 		_, err := migrated(c.text)
-		assertInvalid(t, err, c.field)
+		requireInvalid(t, err, c.field)
 	}
 }
 
@@ -518,10 +447,8 @@ func TestMigrateV0Steps(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got, err := migrated(c.in)
-			if err != nil {
-				t.Fatal(err)
-			}
-			assertEqual(t, got, table(t, c.want))
+			require.NoError(t, err)
+			assert.Equal(t, table(t, c.want), got)
 		})
 	}
 }
@@ -533,56 +460,48 @@ func TestValidateRanges(t *testing.T) {
 		t.Helper()
 		s := DefaultSettings()
 		f(&s)
-		assertInvalid(t, Validate(&s), field)
+		requireInvalid(t, Validate(&s), field)
 	}
 	check(func(s *Settings) { s.Trade.WidenPct = -0.1 }, "trade.widen_pct")
 	check(func(s *Settings) { s.Trade.WidenPct = 100.5 }, "trade.widen_pct")
 	check(func(s *Settings) { s.Trade.WidenPct = math.NaN() }, "trade.widen_pct")
 	check(func(s *Settings) { s.Overlay.Opacity = 0.05 }, "overlay.opacity")
 	check(func(s *Settings) { s.Overlay.Opacity = 1.01 }, "overlay.opacity")
-	check(func(s *Settings) { s.Overlay.AutoHideMs = 10_001 }, "overlay.auto_hide_ms")
+	check(func(s *Settings) { s.Overlay.AutoHideMS = 10_001 }, "overlay.auto_hide_ms")
 
 	s := DefaultSettings()
 	s.Trade.WidenPct = 100.0
 	s.Overlay.Opacity = 0.1
-	s.Overlay.AutoHideMs = 10_000
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	s.Overlay.AutoHideMS = 10_000
+	require.NoError(t, Validate(&s))
 }
 
 func TestValidateLeagueRequiredWithoutAutoDetect(t *testing.T) {
 	s := DefaultSettings()
 	s.League.AutoDetect = false
-	assertInvalid(t, Validate(&s), "league.league")
+	requireInvalid(t, Validate(&s), "league.league")
 	s.League.League = new("   ")
-	assertInvalid(t, Validate(&s), "league.league")
+	requireInvalid(t, Validate(&s), "league.league")
 	s.League.League = new("Standard")
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 }
 
 func TestValidateHotkeysDistinctIgnoringModifierOrder(t *testing.T) {
 	s := DefaultSettings()
 	s.Hotkeys.OpenSettings = chord("KeyD", platform.Alt, platform.Ctrl)
-	err := Validate(&s)
-	var inv *InvalidError
-	if !errors.As(err, &inv) || inv.Field != "hotkeys.open_settings" || !strings.Contains(inv.Reason, "price_check_pinned") {
-		t.Fatalf("%v", err)
-	}
-	assertEqual(t, inv.Reason, "`Alt+Ctrl+D` is already bound to hotkeys.price_check_pinned")
+	inv := requireInvalid(t, Validate(&s), "hotkeys.open_settings")
+	assert.Equal(t, "`Alt+Ctrl+D` is already bound to hotkeys.price_check_pinned", inv.Reason)
 
 	s = DefaultSettings()
 	s.Hotkeys.PriceCheckPinned = cloneChord(s.Hotkeys.PriceCheck)
-	assertInvalid(t, Validate(&s), "hotkeys.price_check_pinned")
+	requireInvalid(t, Validate(&s), "hotkeys.price_check_pinned")
 }
 
 func TestValidateChordNeedsNonModifierKey(t *testing.T) {
 	for _, key := range []string{"", "  ", "ShiftLeft", "control", "MetaRight"} {
 		s := DefaultSettings()
 		s.Hotkeys.PriceCheck = chord(key, platform.Ctrl)
-		assertInvalid(t, Validate(&s), "hotkeys.price_check")
+		requireInvalid(t, Validate(&s), "hotkeys.price_check")
 	}
 }
 
@@ -590,81 +509,62 @@ func TestValidateContactEmail(t *testing.T) {
 	for _, bad := range []string{"", "exile", "@example.com", "exile@", "exile@localhost", "a@b@c.com", "ex ile@a.com", "e@a..com"} {
 		s := DefaultSettings()
 		s.Trade.Contact = new(bad)
-		assertInvalid(t, Validate(&s), "trade.contact")
+		requireInvalid(t, Validate(&s), "trade.contact")
 	}
 	s := DefaultSettings()
 	s.Trade.Contact = new("exile.42+poe@mail.example.org")
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 }
 
 func TestValidateRejectsFutureVersion(t *testing.T) {
 	s := DefaultSettings()
 	s.Version = SettingsVersion + 1
-	if _, ok := errors.AsType[*TooNewError](Validate(&s)); !ok {
-		t.Fatal("future version accepted")
-	}
+	assert.ErrorAs(t, Validate(&s), new(*TooNewError))
 }
 
 func TestRejectsHeaderUnsafeSecretsAndContacts(t *testing.T) {
 	s := DefaultSettings()
-	s.Trade.Poesessid = new("abc;def")
-	assertInvalid(t, Validate(&s), "trade.poesessid")
-	s.Trade.Poesessid = new("0123abcdef")
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	s.Trade.POESESSID = new("abc;def")
+	requireInvalid(t, Validate(&s), "trade.poesessid")
+	s.Trade.POESESSID = new("0123abcdef")
+	require.NoError(t, Validate(&s))
 	s.Trade.Contact = new("me@example.com;x")
-	assertInvalid(t, Validate(&s), "trade.contact")
+	requireInvalid(t, Validate(&s), "trade.contact")
 	s.Trade.Contact = new("me@exa\u0007mple.com")
-	if Validate(&s) == nil {
-		t.Fatal("control character accepted")
-	}
+	require.Error(t, Validate(&s), "control character accepted")
 }
 
 func TestSellersDefaultToAny(t *testing.T) {
-	assertEqual(t, DefaultSettings().Trade.Sellers, core.StatusAny)
+	assert.Equal(t, core.StatusAny, DefaultSettings().Trade.Sellers)
 	s := mustFromTOML(t, "version = 1\n[trade]\nsellers = \"securable\"\n")
-	assertEqual(t, s.Trade.Sellers, core.StatusSecurable)
+	assert.Equal(t, core.StatusSecurable, s.Trade.Sellers)
 }
 
 func TestListingCountAndColumnsAreValidated(t *testing.T) {
 	s := DefaultSettings()
-	assertEqual(t, [3]any{s.Trade.ListingCount, s.Trade.ConvertPrices, s.Overlay.GroupBySeller}, [3]any{uint32(20), true, true})
-	if !s.Hotkeys.OpenTrade.IsUnbound() {
-		t.Fatal("open_trade bound by default")
-	}
+	assert.Equal(t, [3]any{uint32(20), true, true}, [3]any{s.Trade.ListingCount, s.Trade.ConvertPrices, s.Overlay.GroupBySeller})
+	require.True(t, s.Hotkeys.OpenTrade.IsUnbound(), "open_trade bound by default")
 	for _, ok := range []uint32{10, 40, 100} {
 		s.Trade.ListingCount = ok
-		if err := Validate(&s); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, Validate(&s))
 	}
 	for _, bad := range []uint32{0, 5, 25, 110} {
 		s.Trade.ListingCount = bad
-		if Validate(&s) == nil {
-			t.Fatalf("%d accepted", bad)
-		}
+		require.Error(t, Validate(&s), bad)
 	}
 	s.Trade.ListingCount = 20
 	s.Overlay.ListingColumns = []ListingColumn{ColumnSeller, ColumnSeller}
-	if Validate(&s) == nil {
-		t.Fatal("duplicate column accepted")
-	}
+	require.Error(t, Validate(&s), "duplicate column accepted")
 	s.Overlay.ListingColumns = []ListingColumn{}
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 }
 
 func TestPanelScaleAndBackdropDimAreValidated(t *testing.T) {
 	s := DefaultSettings()
-	assertEqual(t, s.Overlay.Scale, 1.0)
-	assertEqual(t, s.Overlay.BackdropDim, 0.6)
-	if s.UI.Autostart || s.Overlay.ClosePinnedOnGameFocus {
-		t.Fatal("autostart / close_pinned_on_game_focus on by default")
-	}
+	assert.InDelta(t, 1.0, s.Overlay.Scale, 0)
+	assert.InDelta(t, 0.6, s.Overlay.BackdropDim, 0)
+	assert.False(t, s.UI.Autostart)
+	assert.False(t, s.Overlay.ClosePinnedOnGameFocus)
 	for _, c := range []struct {
 		scale, dim float64
 		ok         bool
@@ -677,56 +577,42 @@ func TestPanelScaleAndBackdropDimAreValidated(t *testing.T) {
 		{1.0, -0.1, false},
 	} {
 		s.Overlay.Scale, s.Overlay.BackdropDim = c.scale, c.dim
-		if got := Validate(&s) == nil; got != c.ok {
-			t.Errorf("scale %v dim %v: ok = %v", c.scale, c.dim, got)
-		}
+		assert.Equal(t, c.ok, Validate(&s) == nil, "scale %v dim %v", c.scale, c.dim)
 	}
 }
 
 func TestWaystoneFlagsDefaultAndValidate(t *testing.T) {
 	s := DefaultSettings()
-	assertEqual(t, s.Waystone.Flags["Monsters fire # additional Projectiles"], FlagDanger)
-	assertEqual(t, len(s.Waystone.Flags), len(DefaultDangerousWaystoneMods))
+	assert.Equal(t, FlagDanger, s.Waystone.Flags["Monsters fire # additional Projectiles"])
+	assert.Len(t, s.Waystone.Flags, len(DefaultDangerousWaystoneMods))
 	s.Waystone.Flags["#% increased Pack Size in Map"] = FlagGood
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 	back := mustFromTOML(t, toTOML(t, s))
-	assertEqual(t, back.Waystone, s.Waystone) // round-trips through TOML
+	assert.Equal(t, s.Waystone, back.Waystone) // round-trips through TOML
 	s.Waystone.Flags["  "] = FlagWarn
-	if Validate(&s) == nil {
-		t.Fatal("blank flag key accepted")
-	}
+	require.Error(t, Validate(&s), "blank flag key accepted")
 }
 
 func TestChatCommandsAndStashSearchesValidate(t *testing.T) {
 	s := DefaultSettings()
-	assertEqual(t, s.Chat.Commands[0].Text, "/hideout")
-	assertEqual(t, s.Chat.Commands[0].Chord, chord("F5"))
-	if len(s.Stash.Searches) != 0 || s.Stash.CtrlScrollTabs {
-		t.Fatal("stash defaults")
-	}
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	assert.Equal(t, "/hideout", s.Chat.Commands[0].Text)
+	assert.Equal(t, chord("F5"), s.Chat.Commands[0].Chord)
+	assert.Empty(t, s.Stash.Searches)
+	assert.False(t, s.Stash.CtrlScrollTabs)
+	require.NoError(t, Validate(&s))
 	s.Stash.Searches = append(s.Stash.Searches, StashSearch{Chord: chord("F5"), Text: `"Rarity: Rare"`})
-	err := Validate(&s)
-	if err == nil || !strings.Contains(err.Error(), "already bound") {
-		t.Fatalf("F5 is used twice: %v", err)
-	}
+	require.ErrorContains(t, Validate(&s), "already bound", "F5 is used twice")
 	s.Stash.Searches[0].Chord = chord("Digit1", platform.Alt)
-	if err := Validate(&s); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, Validate(&s))
 	s.Chat.Commands[1].Text = "a\nb"
-	if Validate(&s) == nil {
-		t.Fatal("one line only")
-	}
+	require.Error(t, Validate(&s), "one line only")
 	s.Chat.Commands[1].Text = "/kingsmarch"
 	for i := range 20 {
 		s.Chat.Commands = append(s.Chat.Commands, ChatCommand{Chord: platform.UnboundChord(), Text: fmt.Sprintf("/c%d", i), Send: true})
 	}
-	if Validate(&s) == nil {
-		t.Fatal("too many")
-	}
+	require.Error(t, Validate(&s), "too many")
+}
+
+func TestOneMigrationStepPerVersion(t *testing.T) {
+	assert.Len(t, migrations, int(SettingsVersion))
 }

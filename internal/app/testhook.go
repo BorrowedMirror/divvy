@@ -4,7 +4,9 @@ package app
 
 import (
 	"bufio"
-	"encoding/json"
+	"context"
+	"crypto/subtle"
+	"encoding/json/v2"
 	"fmt"
 	"log/slog"
 	"net"
@@ -19,11 +21,11 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
 )
 
-// TestHookPort is the RKL_TEST_HOOK port, when set.
-func TestHookPort() (int, bool) {
-	p, err := strconv.Atoi(os.Getenv("RKL_TEST_HOOK"))
-	return p, err == nil && p >= 0 && p <= 65535
-}
+// The e2e test hook: a line protocol on 127.0.0.1 that drives the flow and reports its state
+// (CONTRACTS.md#test-hook). Only test-hook builds have it.
+
+// testHookTokenEnv optionally requires `auth <token>` as the first line of each connection.
+const testHookTokenEnv = "RKL_TEST_HOOK_TOKEN"
 
 // HookActions are what the hook drives outside the flow.
 type HookActions struct {
@@ -37,64 +39,79 @@ type HookActions struct {
 	// DOM asks the web view of window (`overlay` or `settings`) about the first element
 	// matching a CSS selector and returns its JSON reply,
 	// `{"exists":bool,"visible":bool,"text":string}`. Read-only.
-	DOM func(window, selector string) (string, error)
+	DOM func(ctx context.Context, window, selector string) (string, error)
 }
 
-// DOMWindows are the windows `dom` can query.
-var DOMWindows = []string{"overlay", "settings"}
+// domWindows are the windows `dom` can query.
+var domWindows = []string{"overlay", "settings"}
 
-// StartTestHook serves the e2e line protocol on 127.0.0.1:port (0 picks a port) and returns
-// the bound port. One command per line, one reply line each.
-func (f *Flow) StartTestHook(port int, actions HookActions) (int, error) {
-	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+// StartTestHook serves the e2e line protocol on 127.0.0.1:port (0 picks a port) until ctx is
+// done, and returns the bound port. One command per line, one reply line each.
+func (f *Flow) StartTestHook(ctx context.Context, port int, actions HookActions) (int, error) {
+	var lc net.ListenConfig
+	ln, err := lc.Listen(ctx, "tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
 	if err != nil {
 		return 0, err
 	}
-	bound := ln.Addr().(*net.TCPAddr).Port
+	context.AfterFunc(ctx, func() { ln.Close() })
+	addr, _ := ln.Addr().(*net.TCPAddr)
 	go func() {
 		for {
 			conn, err := ln.Accept()
 			if err != nil {
 				return
 			}
-			go f.serveHook(conn, actions)
+			go f.serveHook(ctx, conn, actions)
 		}
 	}()
-	slog.Info("test hook listening", "addr", ln.Addr().String())
-	return bound, nil
+	slog.Info("test hook listening", "addr", addr.String())
+	return addr.Port, nil
 }
 
-func (f *Flow) serveHook(conn net.Conn, actions HookActions) {
+func (f *Flow) serveHook(ctx context.Context, conn net.Conn, actions HookActions) {
 	defer conn.Close()
-	var token *string
-	if t, ok := os.LookupEnv(TestHookTokenEnv); ok {
-		token = &t
-	}
-	authed := token == nil
+	stop := context.AfterFunc(ctx, func() { conn.Close() })
+	defer stop()
+	token, required := os.LookupEnv(testHookTokenEnv)
+	authed := !required
 	sc := bufio.NewScanner(conn)
 	sc.Buffer(make([]byte, 0, 64*1024), 4<<20)
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
-		if IsHTTPRequest(line) {
+		if isHTTPRequest(line) {
 			return
 		}
 		if !authed {
-			if Authorised(line, token) {
+			if authorised(line, token) {
 				authed = true
 				continue
 			}
 			fmt.Fprintln(conn, "err unauthorised")
 			return
 		}
-		if _, err := fmt.Fprintln(conn, f.HandleHookLine(line, actions)); err != nil {
+		if _, err := fmt.Fprintln(conn, f.handleHookLine(ctx, line, actions)); err != nil {
 			return
 		}
 	}
 }
 
-// HandleHookLine runs one hook command and returns its reply.
-func (f *Flow) HandleHookLine(line string, actions HookActions) string {
-	st := f.st
+// isHTTPRequest reports a line that starts an HTTP request: the hook speaks a line protocol on
+// 127.0.0.1, and a browser page must not be able to drive it with a fetch.
+func isHTTPRequest(line string) bool {
+	first, _, _ := strings.Cut(strings.TrimSpace(line), " ")
+	return slices.ContainsFunc([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH", "CONNECT", "TRACE"},
+		func(m string) bool { return strings.EqualFold(first, m) })
+}
+
+// authorised reports whether line (`auth <token>`) unlocks a connection that requires token. An
+// empty token unlocks nothing.
+func authorised(line, token string) bool {
+	got, ok := strings.CutPrefix(line, "auth ")
+	return ok && token != "" && subtle.ConstantTimeCompare([]byte(strings.TrimSpace(got)), []byte(token)) == 1
+}
+
+// handleHookLine runs one hook command and returns its reply.
+func (f *Flow) handleHookLine(ctx context.Context, line string, actions HookActions) string {
 	cmd, arg, _ := strings.Cut(line, " ")
 	arg = strings.TrimSpace(arg)
 	switch cmd {
@@ -106,15 +123,14 @@ func (f *Flow) HandleHookLine(line string, actions HookActions) string {
 		if err := json.Unmarshal([]byte(arg), &text); err != nil {
 			return "err " + err.Error()
 		}
-		if _, _, err := f.HandleItemText(text, false); err != nil {
+		if _, _, err := f.handleItemText(text, false); err != nil {
 			return "err " + ipc.From(err).Error()
 		}
 		return "ok"
 	case "state":
 		return f.hookState(actions)
 	case "settings":
-		s := st.Settings()
-		b, err := core.MarshalSerde(s)
+		b, err := json.Marshal(f.st.Settings(), json.Deterministic(true))
 		if err != nil {
 			return "err " + err.Error()
 		}
@@ -124,58 +140,58 @@ func (f *Flow) HandleHookLine(line string, actions HookActions) string {
 		if err := json.Unmarshal([]byte(arg), &s); err != nil {
 			return "err " + err.Error()
 		}
-		if _, err := f.ApplySettings(s); err != nil {
+		if _, err := f.applySettings(s); err != nil {
 			return "err " + ipc.From(err).Error()
 		}
 		return "ok"
 	case "tray":
-		switch arg {
-		case "open_settings", "open_diagnostics", "price_check", "quit":
-		default:
-			return fmt.Sprintf("err unknown tray item `%s`", arg)
-		}
-		if actions.Tray == nil {
-			return "err tray is not available"
-		}
-		ok, err := actions.Tray(arg)
-		if !ok {
-			return "err tray is not available"
-		}
-		if err != nil {
-			return "err " + err.Error()
-		}
-		return "ok"
+		return hookTray(arg, actions)
 	case "dom":
-		return hookDOM(arg, actions)
+		return hookDOM(ctx, arg, actions)
 	case "hide":
-		if err := f.HideOverlay(); err != nil {
-			return "err " + err.Error()
-		}
+		f.hideOverlay()
 		return "ok"
 	case "quit":
-		st.Quitting.Store(true)
 		if actions.Quit != nil {
-			go func() {
-				time.Sleep(50 * time.Millisecond)
-				actions.Quit()
-			}()
+			// After the reply has gone out.
+			time.AfterFunc(50*time.Millisecond, actions.Quit)
 		}
 		return "ok"
 	}
 	return fmt.Sprintf("err unknown command `%s`", cmd)
 }
 
+// hookTray runs `tray <item>`.
+func hookTray(item string, actions HookActions) string {
+	switch item {
+	case "open_settings", "open_diagnostics", "price_check", "quit":
+	default:
+		return fmt.Sprintf("err unknown tray item `%s`", item)
+	}
+	if actions.Tray == nil {
+		return "err tray is not available"
+	}
+	ok, err := actions.Tray(item)
+	switch {
+	case !ok:
+		return "err tray is not available"
+	case err != nil:
+		return "err " + err.Error()
+	}
+	return "ok"
+}
+
 // hookDOM runs `dom <window> <css selector>`; the selector is the rest of the line.
-func hookDOM(arg string, actions HookActions) string {
+func hookDOM(ctx context.Context, arg string, actions HookActions) string {
 	window, selector, _ := strings.Cut(arg, " ")
 	selector = strings.TrimSpace(selector)
-	if !slices.Contains(DOMWindows, window) || selector == "" {
-		return "err usage: dom <" + strings.Join(DOMWindows, "|") + "> <css selector>"
+	if !slices.Contains(domWindows, window) || selector == "" {
+		return "err usage: dom <" + strings.Join(domWindows, "|") + "> <css selector>"
 	}
 	if actions.DOM == nil {
 		return "err dom is not available"
 	}
-	reply, err := actions.DOM(window, selector)
+	reply, err := actions.DOM(ctx, window, selector)
 	if err != nil {
 		return "err " + err.Error()
 	}
@@ -185,16 +201,11 @@ func hookDOM(arg string, actions HookActions) string {
 func (f *Flow) hookState(actions HookActions) string {
 	st := f.st
 	var lastItem *string
-	if last, ok := st.LastItem(); ok {
-		lastItem = new(last.Item.BaseType)
+	if last, ok := st.lastItem(); ok {
+		lastItem = &last.item.BaseType
 	}
-	st.mu.Lock()
-	lastPrice := st.lastPrice
-	st.mu.Unlock()
-	card, height := st.Card()
-	present := actions.TrayPresent != nil && actions.TrayPresent()
-	layout := st.OverlayLayout()
-	b, err := core.MarshalSerde(struct {
+	card, height := st.cardPosition()
+	b, err := json.Marshal(struct {
 		OverlayVisible  bool               `json:"overlay_visible"`
 		OverlayPinned   bool               `json:"overlay_pinned"`
 		SettingsVisible bool               `json:"settings_visible"`
@@ -204,13 +215,13 @@ func (f *Flow) hookState(actions HookActions) string {
 		OverlayLayout   ipc.OverlayLayout  `json:"overlay_layout"`
 		OverlayCard     [2]any             `json:"overlay_card"`
 	}{
-		OverlayVisible:  st.OverlayVisible.Load(),
-		OverlayPinned:   st.IsPinned(),
+		OverlayVisible:  st.overlayVisible.Load(),
+		OverlayPinned:   st.pinned.Load(),
 		SettingsVisible: f.d.Settings().IsVisible(),
-		TrayPresent:     present,
+		TrayPresent:     actions.TrayPresent != nil && actions.TrayPresent(),
 		LastItem:        lastItem,
-		LastPrice:       lastPrice,
-		OverlayLayout:   layout,
+		LastPrice:       st.lastPriceSummary(),
+		OverlayLayout:   st.layout(),
 		OverlayCard:     [2]any{[2]int32{card.X, card.Y}, height},
 	})
 	if err != nil {

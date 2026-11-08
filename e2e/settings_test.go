@@ -15,7 +15,7 @@ import (
 
 // Settings are saved to RKL_CONFIG_DIR, survive a restart, and the settings page renders.
 func TestSettings(t *testing.T) {
-	session := NewSession(t)
+	session := newSession(t)
 	app := session.Start(t)
 
 	steps(t,
@@ -45,15 +45,15 @@ func TestSettings(t *testing.T) {
 		}},
 		step{"renders the settings page", func(t *testing.T) {
 			app.OK(t, "tray open_settings")
-			app.WaitState(t, "the settings window", 10*time.Second, func(s State) bool { return s.SettingsVisible })
+			app.WaitState(t, "the settings window", 10*time.Second, func(s appState) bool { return s.SettingsVisible })
 			app.WaitDOM(t, "settings", `main[data-route="settings"] [data-testid="settings-shell"]`, 10*time.Second,
-				func(d DOM) bool { return d.Visible })
+				func(d domReply) bool { return d.Visible })
 			title := app.WaitDOM(t, "settings", `main[data-route="settings"] h1`, 10*time.Second,
-				func(d DOM) bool { return d.Visible && strings.TrimSpace(d.Text) != "" })
+				func(d domReply) bool { return d.Visible && strings.TrimSpace(d.Text) != "" })
 			t.Logf("settings title: %q", title.Text)
 			missing, err := app.DOM("settings", `[data-testid="no-such-element"]`)
 			require.NoError(t, err)
-			assert.Equal(t, DOM{}, missing)
+			assert.Equal(t, domReply{}, missing)
 		}},
 		step{"quits cleanly", func(t *testing.T) { app.Quit(t) }},
 	)

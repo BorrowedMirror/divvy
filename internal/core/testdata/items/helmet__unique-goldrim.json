@@ -1,0 +1,90 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Felt Cap",
+  "category": "unique",
+  "class": {
+    "type": "helmet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 12,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Evasion Rating",
+      "text": "+34 to Evasion Rating",
+      "values": [
+        34
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Rarity of Items found",
+      "text": "10% increased Rarity of Items found",
+      "values": [
+        10
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to all Elemental Resistances",
+      "text": "+32% to all Elemental Resistances",
+      "values": [
+        32
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Reflects # Physical Damage to Melee Attackers",
+      "text": "Reflects 4 Physical Damage to Melee Attackers",
+      "values": [
+        4
+      ]
+    }
+  ],
+  "name": "Goldrim",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Evasion Rating",
+      "value": "41"
+    }
+  ],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": 41,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

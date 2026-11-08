@@ -1,8 +1,8 @@
 package config
 
 import (
+	"cmp"
 	"fmt"
-	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,26 +19,6 @@ var modifierKeyCodes = []string{
 	"Meta", "MetaLeft", "MetaRight", "OSLeft", "OSRight", "Cmd", "Super", "Win",
 }
 
-// asciiEqualFold is `str::eq_ignore_ascii_case`.
-func asciiEqualFold(a, b string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := 0; i < len(a); i++ {
-		x, y := a[i], b[i]
-		if 'A' <= x && x <= 'Z' {
-			x += 'a' - 'A'
-		}
-		if 'A' <= y && y <= 'Z' {
-			y += 'a' - 'A'
-		}
-		if x != y {
-			return false
-		}
-	}
-	return true
-}
-
 func validateChord(field string, chord platform.Chord) error {
 	key := strings.TrimSpace(chord.Key)
 	if key == "" {
@@ -49,33 +29,31 @@ func validateChord(field string, chord platform.Chord) error {
 		return invalid(field, "chord has no key")
 	}
 	for _, m := range modifierKeyCodes {
-		if asciiEqualFold(m, key) {
+		if strings.EqualFold(m, key) {
 			return invalidf(field, "`%s` is a modifier; a chord needs a non-modifier key", key)
 		}
 	}
 	return nil
 }
 
-// modifierOrder is the Rust enum discriminant of each modifier.
-func modifierOrder(m platform.KeyModifier) int {
-	switch m {
-	case platform.Ctrl:
-		return 0
-	case platform.Alt:
-		return 1
-	case platform.Shift:
-		return 2
-	case platform.Meta:
-		return 3
+// modifierOrder is the canonical order of chord modifiers.
+var modifierOrder = []platform.KeyModifier{platform.Ctrl, platform.Alt, platform.Shift, platform.Meta}
+
+// rank is m's position in [modifierOrder]; unknown modifiers sort last.
+func rank(m platform.KeyModifier) int {
+	if i := slices.Index(modifierOrder, m); i >= 0 {
+		return i
 	}
-	return 4
+	return len(modifierOrder)
 }
 
 // chordKey is the canonical form for comparing chords: modifier order and duplicates don't
 // matter.
 func chordKey(chord platform.Chord) string {
 	mods := slices.Clone(chord.Modifiers)
-	slices.SortStableFunc(mods, func(a, b platform.KeyModifier) int { return modifierOrder(a) - modifierOrder(b) })
+	slices.SortStableFunc(mods, func(a, b platform.KeyModifier) int {
+		return cmp.Compare(rank(a), rank(b))
+	})
 	mods = slices.Compact(mods)
 	var b strings.Builder
 	for _, m := range mods {
@@ -176,28 +154,28 @@ func Validate(s *Settings) error {
 		}
 	}
 	if !(s.Overlay.Scale >= 0.75 && s.Overlay.Scale <= 1.5) {
-		return invalidf("overlay.scale", "%s is not within 0.75..=1.5", rustFloat(s.Overlay.Scale))
+		return invalidf("overlay.scale", "%s is not within 0.75..=1.5", formatFloat(s.Overlay.Scale))
 	}
 	if !(s.Overlay.BackdropDim >= 0 && s.Overlay.BackdropDim <= 0.9) {
-		return invalidf("overlay.backdrop_dim", "%s is not within 0..=0.9", rustFloat(s.Overlay.BackdropDim))
+		return invalidf("overlay.backdrop_dim", "%s is not within 0..=0.9", formatFloat(s.Overlay.BackdropDim))
 	}
 	if n := s.Trade.ListingCount; n < 10 || n > 100 || n%10 != 0 {
 		return invalidf("trade.listing_count", "%d is not 10, 20, ... 100", n)
 	}
 	cols := s.Overlay.ListingColumns
-	for i := 1; i < len(cols); i++ {
-		if slices.Contains(cols[:i], cols[i]) {
+	for i, col := range cols {
+		if slices.Contains(cols[:i], col) {
 			return invalid("overlay.listing_columns", "a column is listed twice")
 		}
 	}
 	if !(s.Trade.WidenPct >= 0 && s.Trade.WidenPct <= 100) {
-		return invalidf("trade.widen_pct", "%s is not within 0..=100", rustFloat(s.Trade.WidenPct))
+		return invalidf("trade.widen_pct", "%s is not within 0..=100", formatFloat(s.Trade.WidenPct))
 	}
 	if c := s.Trade.Contact; c != nil && !looksLikeEmail(*c) {
 		return invalidf("trade.contact", "`%s` does not look like an e-mail address", *c)
 	}
 
-	if sid := s.Trade.Poesessid; sid != nil && *sid != "" {
+	if sid := s.Trade.POESESSID; sid != nil && *sid != "" {
 		for _, c := range *sid {
 			if !isASCIIAlphanumeric(c) {
 				return invalid("trade.poesessid", "must contain only ASCII letters and digits")
@@ -206,24 +184,14 @@ func Validate(s *Settings) error {
 	}
 
 	if !(s.Overlay.Opacity >= 0.1 && s.Overlay.Opacity <= 1.0) {
-		return invalidf("overlay.opacity", "%s is not within 0.1..=1.0", rustFloat(s.Overlay.Opacity))
+		return invalidf("overlay.opacity", "%s is not within 0.1..=1.0", formatFloat(s.Overlay.Opacity))
 	}
-	if s.Overlay.AutoHideMs > 10_000 {
-		return invalidf("overlay.auto_hide_ms", "%d exceeds 10000", s.Overlay.AutoHideMs)
+	if s.Overlay.AutoHideMS > 10_000 {
+		return invalidf("overlay.auto_hide_ms", "%d exceeds 10000", s.Overlay.AutoHideMS)
 	}
 	return nil
 }
 
-// rustFloat formats like Rust's `Display` for f64 (shortest round-trip, never an
-// exponent).
-func rustFloat(f float64) string {
-	switch {
-	case math.IsNaN(f):
-		return "NaN"
-	case math.IsInf(f, 1):
-		return "inf"
-	case math.IsInf(f, -1):
-		return "-inf"
-	}
-	return strconv.FormatFloat(f, 'f', -1, 64)
-}
+// formatFloat formats f for an error message: the shortest decimal that round-trips,
+// never an exponent.
+func formatFloat(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) }

@@ -7,10 +7,25 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/product"
 )
 
 //go:embed assets
 var assets embed.FS
+
+// Product metadata shared by the installers.
+const (
+	productName  = product.Name
+	binaryName   = product.Binary
+	identifier   = product.ID
+	publisher    = "RKL contributors"
+	description  = product.Description
+	copyrightMsg = "Copyright (c) 2026 RKL contributors. Apache-2.0."
+)
+
+// outDir is where packaging writes, relative to the module root (gitignored via target/).
+const outDir = "target/go"
 
 // macOSMin is the oldest macOS the bundle declares (LSMinimumSystemVersion and the cgo target).
 const macOSMin = "12.0"
@@ -83,4 +98,16 @@ func (p packager) done(path string) error {
 	}
 	fmt.Fprintf(os.Stderr, "\nwrote %s (%.1f MiB)\n", path, float64(st.Size())/(1<<20))
 	return nil
+}
+
+// copyFile copies src to dst with the permission bits mode, creating dst's directory.
+func copyFile(src, dst string, mode os.FileMode) error {
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(dst, b, mode)
 }

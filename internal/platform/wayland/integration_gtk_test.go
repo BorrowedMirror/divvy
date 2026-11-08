@@ -30,6 +30,7 @@ func waitFor(t *testing.T, what string, cond func() bool) {
 // inTree reports whether sway lists a window titled title as a toplevel (layer surfaces are not
 // in the tree).
 func inTree(t *testing.T, title string) bool {
+	t.Helper()
 	gtkTestIterate()
 	return strings.Contains(swaymsg(t, "get_tree"), `"name": "`+title+`"`)
 }
@@ -37,6 +38,7 @@ func inTree(t *testing.T, title string) bool {
 // layerShellScenario turns GTK windows into layer surfaces, both before realisation (a Wails
 // window created hidden) and after (one already shown: hide + unrealise first).
 func layerShellScenario(t *testing.T, parts platform.Parts) {
+	t.Helper()
 	require.True(t, gtkTestInit(), "gtk_init on the headless sway display")
 
 	// Control: a plain toplevel shows up in sway's tree.
@@ -76,7 +78,7 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	anchorer, ok := w.(platform.LayerAnchorer)
 	require.True(t, ok)
 	require.NoError(t, anchorer.AnchorLayer(false, 10, 20))
-	require.NoError(t, w.RaiseAbove(nil))
+	require.NoError(t, w.RaiseAbove(0))
 	require.NoError(t, w.Activate())
 	require.NoError(t, w.Hide())
 	waitFor(t, "layer surface unmapped", func() bool { return !lo.isMapped() })

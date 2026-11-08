@@ -1,12 +1,12 @@
-// Package core is RKL's pure domain logic, ported from the Rust crate rkl-core. No I/O, no
-// platform, no network.
+// Package core is RKL's pure domain logic: no I/O, no platform, no network.
 //
 // Pipeline: clipboard text --[ParseItem]--> [ParsedItem]
-// --[StatMatcher.MatchItem]--> matched stat ids
+// --[MatchStats]--> matched stat ids
 // --[BuildFilters]--> [FilterSet] (user-editable)
-// --[FilterSet.ToTradeQuery]--> [TradeQuery] (trade2 JSON body)
+// --[FilterSet.ToTradeQuery]--> [TradeQuery] (trade2 search body)
 // and listings --[Summarise]--> [PriceSummary].
 //
-// Every type that crosses to the frontend encodes byte-identically to the Rust serde
-// derives (see [MarshalSerde]).
+// The types that reach the frontend carry `json` tags naming the keys of its TypeScript
+// types (web/src/bindings.ts). String enums reject unknown values when decoded; how nil
+// slices and maps are written on the wire is decided by internal/ipc.
 package core

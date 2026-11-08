@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -15,23 +16,33 @@ import (
 // backend for X11/XWayland (window positions are global there) and at Wayland for
 // Wayland-native, and moves WebKitGTK's garbage-collector signal off SIGUSR1, which it would
 // otherwise take over, crashing the app on the first `pkill -USR1 rkl`.
-func preInit(kind platform.BackendKind, errs *[]string) {
-	wayland.MoveJSCSignal()
-	if err := x11.PreInit(kind); err != nil {
-		*errs = append(*errs, fmt.Sprintf("GDK backend: %v", err))
+func preInit(kind platform.BackendKind) error {
+	platform.MoveJSCSignal()
+	if err := platform.SetGDKBackend(kind); err != nil {
+		return fmt.Errorf("GDK backend: %w", err)
 	}
+	return nil
 }
 
 // newParts builds the X11 or Wayland-native backend. The X11 hook records the wheel only when
 // Ctrl + wheel stash tab switching is on.
 func newParts(kind platform.BackendKind, wheel bool) (platform.Parts, error) {
 	if kind == platform.BackendWayland {
-		return wayland.New(
-			wayland.WithProbe(platform.EnvProbeFromEnv()),
-			wayland.WithMainThread(func(f func()) { application.InvokeSync(f) }),
-		)
+		return wayland.New(wayland.Options{
+			Probe:      platform.EnvProbeFromEnv(),
+			MainThread: func(f func()) { application.InvokeSync(f) },
+		})
 	}
-	return x11.New(x11.Options{HookMouse: wheel})
+	return x11.New(x11.Options{HookMouse: wheel, Probe: platform.EnvProbeFromEnv()})
+}
+
+// globalHotkeys is whether Wails' global shortcuts work: on Wayland-native only through the
+// GlobalShortcuts portal, whose absence also adds the signal-trigger note.
+func globalHotkeys(ctx context.Context, kind platform.BackendKind) (bool, []string) {
+	if kind == platform.BackendWayland {
+		return wayland.GlobalHotkeys(ctx)
+	}
+	return true, nil
 }
 
 // permissionProbe: Linux needs no OS permissions; the report lists degradation notes only.

@@ -1,0 +1,115 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Expert Hunter Hood",
+  "category": "equipment",
+  "class": {
+    "type": "helmet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 79,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "rune",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+12% to Cold Resistance",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+81 to maximum Life",
+      "values": [
+        81
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Evasion Rating",
+      "text": "74% increased Evasion Rating",
+      "values": [
+        74
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+34% to Fire Resistance",
+      "values": [
+        34
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Chaos Resistance",
+      "text": "+19% to Chaos Resistance",
+      "values": [
+        19
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+92 to Accuracy Rating",
+      "values": [
+        92
+      ]
+    }
+  ],
+  "name": "Doom Visor",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": true,
+      "name": "Evasion Rating",
+      "value": "532"
+    }
+  ],
+  "quality": 20,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 87,
+    "int": null,
+    "level": 65,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 1,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": 532,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

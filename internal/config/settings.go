@@ -1,14 +1,9 @@
-// Package config is the settings schema (`settings.toml`), its migrations and validation,
-// and the per-OS paths RKL keeps its files under. It is a port of the Rust crate
-// `rkl-config`: the TOML keys and the JSON sent to the frontend match the Rust serde
-// definitions, so files written by the Rust app load unchanged.
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"maps"
-	"reflect"
 	"slices"
 	"strings"
 
@@ -24,10 +19,10 @@ const SettingsVersion uint32 = 1
 const MaxMacros = 20
 
 // Every field carries the same `json` and `koanf` name: the JSON goes to the frontend, the
-// koanf name is the TOML key. Both are the Rust field names.
+// koanf name is the TOML key.
 
-// Settings is the whole settings document. Missing sections and fields take their
-// defaults (Rust `#[serde(default)]`).
+// Settings is the whole settings document. Sections and fields missing from a document
+// take their defaults ([DefaultSettings]).
 type Settings struct {
 	Version  uint32           `json:"version" koanf:"version"`
 	League   LeagueSettings   `json:"league" koanf:"league"`
@@ -78,14 +73,14 @@ type TradeSettings struct {
 	RememberFilters bool `json:"remember_filters" koanf:"remember_filters"`
 	// Contact is an optional e-mail appended to the User-Agent, as GGG requests.
 	Contact *string `json:"contact" koanf:"contact,omitempty"`
-	// Poesessid is an optional POESESSID; stored in plain text, so off by default.
-	Poesessid *string `json:"poesessid" koanf:"poesessid,omitempty"`
+	// POESESSID is an optional session cookie; stored in plain text, so off by default.
+	POESESSID *string `json:"poesessid" koanf:"poesessid,omitempty"`
 }
 
 // OverlaySettings configure the price panel.
 type OverlaySettings struct {
-	// AutoHideMs auto-hides after the mouse leaves (ms); pinned panels ignore this.
-	AutoHideMs uint32      `json:"auto_hide_ms" koanf:"auto_hide_ms"`
+	// AutoHideMS auto-hides after the mouse leaves (ms); pinned panels ignore this.
+	AutoHideMS uint32      `json:"auto_hide_ms" koanf:"auto_hide_ms"`
 	Opacity    float64     `json:"opacity" koanf:"opacity"`
 	Side       OverlaySide `json:"side" koanf:"side"`
 	// GroupBySeller shows one row per seller (their cheapest listing, with a count).
@@ -110,6 +105,7 @@ type OverlaySettings struct {
 // ResultsLayout is the placement of the results (prices and listings) in the price panel.
 type ResultsLayout string
 
+// ResultsLayout values.
 const (
 	// ResultsBelow is under the Search button (one narrow column).
 	ResultsBelow ResultsLayout = "below"
@@ -132,6 +128,7 @@ type LinkSettings struct {
 // shown).
 type ListingColumn string
 
+// ListingColumn values.
 const (
 	ColumnSeller    ListingColumn = "seller"
 	ColumnItemLevel ListingColumn = "item_level"
@@ -142,6 +139,7 @@ const (
 // OverlaySide is where the price panel opens.
 type OverlaySide string
 
+// OverlaySide values.
 const (
 	// SideCursor is beside the cursor, flipping when near the screen edge.
 	SideCursor OverlaySide = "cursor"
@@ -154,7 +152,7 @@ const (
 
 // ChatCommand is a chat command sent with one hotkey: Enter, the text, and (with Send)
 // Enter again. `&&` chains several lines in one key press; `@last` and `@area` are filled
-// from the game log. All fields are required in the TOML (no serde default).
+// from the game log. A document that has a chat command must set all its fields.
 type ChatCommand struct {
 	Chord platform.Chord `json:"chord" koanf:"chord"`
 	Text  string         `json:"text" koanf:"text"`
@@ -171,7 +169,7 @@ type ChatSettings struct {
 }
 
 // StashSearch is a saved stash search: the hotkey fills the stash (or vendor) search box
-// with Text. All fields are required in the TOML (no serde default).
+// with Text. A document that has a stash search must set all its fields.
 type StashSearch struct {
 	Chord platform.Chord `json:"chord" koanf:"chord"`
 	Text  string         `json:"text" koanf:"text"`
@@ -188,6 +186,7 @@ type StashSettings struct {
 // ModFlag is how a waystone mod is flagged in the panel.
 type ModFlag string
 
+// ModFlag values.
 const (
 	FlagDanger ModFlag = "danger"
 	FlagWarn   ModFlag = "warn"
@@ -196,7 +195,7 @@ const (
 
 // WaystoneSettings is the waystone mod check: flags per mod, keyed by the mod's template as
 // the game copies it (rolled numbers as `#`, e.g. `Monsters fire # additional Projectiles`).
-// Serialised with sorted keys, like Rust's BTreeMap.
+// Written with sorted keys.
 type WaystoneSettings struct {
 	Flags map[string]ModFlag `json:"flags" koanf:"flags"`
 }
@@ -228,6 +227,7 @@ type UISettings struct {
 // Theme is the UI colour scheme.
 type Theme string
 
+// Theme values.
 const (
 	ThemeSystem Theme = "system"
 	ThemeDark   Theme = "dark"
@@ -239,7 +239,7 @@ type PlatformSettings struct {
 	BackendOverride *platform.BackendKind `json:"backend_override" koanf:"backend_override,omitempty"`
 }
 
-// DefaultSettings returns the out-of-the-box settings (Rust `Settings::default()`).
+// DefaultSettings returns the out-of-the-box settings.
 func DefaultSettings() Settings {
 	cmd := func(chord platform.Chord, text string) ChatCommand {
 		return ChatCommand{Chord: chord, Text: text, Send: true}
@@ -267,7 +267,7 @@ func DefaultSettings() Settings {
 			RememberFilters: true,
 		},
 		Overlay: OverlaySettings{
-			AutoHideMs:     400,
+			AutoHideMS:     400,
 			Opacity:        0.95,
 			Side:           SideCursor,
 			GroupBySeller:  true,
@@ -299,16 +299,26 @@ func DefaultSettings() Settings {
 	}
 }
 
-// Clone returns a deep copy (Rust `Clone`).
+// Clone returns a deep copy, so the copy can be changed (or handed to another goroutine)
+// without touching s.
 func (s Settings) Clone() Settings {
 	c := s
-	c.League.League = clonePtr(s.League.League)
+	if p := s.League.League; p != nil {
+		c.League.League = new(*p)
+	}
+	if p := s.Trade.Contact; p != nil {
+		c.Trade.Contact = new(*p)
+	}
+	if p := s.Trade.POESESSID; p != nil {
+		c.Trade.POESESSID = new(*p)
+	}
+	if p := s.Platform.BackendOverride; p != nil {
+		c.Platform.BackendOverride = new(*p)
+	}
 	c.Hotkeys.PriceCheck = cloneChord(s.Hotkeys.PriceCheck)
 	c.Hotkeys.PriceCheckPinned = cloneChord(s.Hotkeys.PriceCheckPinned)
 	c.Hotkeys.OpenSettings = cloneChord(s.Hotkeys.OpenSettings)
 	c.Hotkeys.OpenTrade = cloneChord(s.Hotkeys.OpenTrade)
-	c.Trade.Contact = clonePtr(s.Trade.Contact)
-	c.Trade.Poesessid = clonePtr(s.Trade.Poesessid)
 	c.Overlay.ListingColumns = slices.Clone(s.Overlay.ListingColumns)
 	c.Waystone.Flags = maps.Clone(s.Waystone.Flags)
 	c.Chat.Commands = slices.Clone(s.Chat.Commands)
@@ -319,34 +329,25 @@ func (s Settings) Clone() Settings {
 	for i := range c.Stash.Searches {
 		c.Stash.Searches[i].Chord = cloneChord(c.Stash.Searches[i].Chord)
 	}
-	c.Platform.BackendOverride = clonePtr(s.Platform.BackendOverride)
 	return c
-}
-
-func clonePtr[T any](p *T) *T {
-	if p == nil {
-		return nil
-	}
-	v := *p
-	return &v
 }
 
 func cloneChord(c platform.Chord) platform.Chord {
 	return platform.Chord{Modifiers: slices.Clone(c.Modifiers), Key: c.Key}
 }
 
-// MarshalJSON writes the settings exactly as serde_json writes the Rust struct: fields in
-// declaration order, None as null, floats with a fraction (`10.0`), empty lists as `[]`,
-// map keys sorted.
+// MarshalJSON writes the settings for the frontend: unset options as null, nil lists and
+// maps as [] and {}, map keys sorted.
 func (s Settings) MarshalJSON() ([]byte, error) {
 	type plain Settings
-	return core.MarshalSerde(plain(s))
+	return json.Marshal(plain(s), json.Deterministic(true))
 }
 
-// UnmarshalJSON reads settings the way serde_json reads the Rust struct: missing fields
-// take their defaults, unknown fields are ignored, and wrong types, unknown enum variants
-// and missing required fields (chat command / stash search / chord fields) are errors.
-// Migrations and validation do not run (callers validate, as in Rust).
+// UnmarshalJSON reads settings sent by the frontend with the same rules as a settings
+// file: missing fields take their defaults, unknown fields are ignored, and wrong types,
+// unknown enum values, missing required fields (chat command / stash search / chord
+// fields) and null outside the optional fields are errors. Migrations and validation do
+// not run; callers validate.
 func (s *Settings) UnmarshalJSON(b []byte) error {
 	doc, err := decodeJSONDocument(b)
 	if err != nil {
@@ -360,73 +361,50 @@ func (s *Settings) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// enumValues lists the serde variant names of every string enum in the schema; decoding
-// rejects anything else, as serde does.
-var enumValues = map[reflect.Type][]string{}
-
-func registerEnum[T ~string](variants ...T) {
-	names := make([]string, len(variants))
-	for i, v := range variants {
-		names[i] = string(v)
-	}
-	enumValues[reflect.TypeFor[T]()] = names
+// UnmarshalText accepts only the [ResultsLayout] values.
+func (v *ResultsLayout) UnmarshalText(b []byte) error {
+	return setEnum(v, b, ResultsBelow, ResultsLeft, ResultsRight, ResultsAuto)
 }
 
-func init() {
-	registerEnum(ResultsBelow, ResultsLeft, ResultsRight, ResultsAuto)
-	registerEnum(ColumnSeller, ColumnItemLevel, ColumnStock, ColumnListed)
-	registerEnum(SideCursor, SideLeft, SideRight, SideLast)
-	registerEnum(FlagDanger, FlagWarn, FlagGood)
-	registerEnum(ThemeSystem, ThemeDark, ThemeLight)
-	registerEnum(core.SourceTrade, core.SourcePoeNinja, core.SourcePoe2Scout)
-	registerEnum(core.StatusSecurable, core.StatusOnline, core.StatusAny)
-	registerEnum(platform.Ctrl, platform.Alt, platform.Shift, platform.Meta)
-	registerEnum(platform.BackendWindows, platform.BackendMacos, platform.BackendX11,
-		platform.BackendWayland, platform.BackendFake)
+// UnmarshalText accepts only the [ListingColumn] values.
+func (v *ListingColumn) UnmarshalText(b []byte) error {
+	return setEnum(v, b, ColumnSeller, ColumnItemLevel, ColumnStock, ColumnListed)
 }
 
-func unmarshalEnum[T ~string](b []byte, dst *T) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
+// UnmarshalText accepts only the [OverlaySide] values.
+func (v *OverlaySide) UnmarshalText(b []byte) error {
+	return setEnum(v, b, SideCursor, SideLeft, SideRight, SideLast)
+}
+
+// UnmarshalText accepts only the [ModFlag] values.
+func (v *ModFlag) UnmarshalText(b []byte) error {
+	return setEnum(v, b, FlagDanger, FlagWarn, FlagGood)
+}
+
+// UnmarshalText accepts only the [Theme] values.
+func (v *Theme) UnmarshalText(b []byte) error {
+	return setEnum(v, b, ThemeSystem, ThemeDark, ThemeLight)
+}
+
+// setEnum stores text in dst if it is one of values.
+func setEnum[T ~string](dst *T, text []byte, values ...T) error {
+	if err := oneOf(values...)(string(text)); err != nil {
 		return err
 	}
-	if err := checkEnum(reflect.TypeFor[T](), s); err != nil {
-		return err
-	}
-	*dst = T(s)
+	*dst = T(text)
 	return nil
 }
 
-// UnmarshalJSON accepts only the serde variant names.
-func (v *ResultsLayout) UnmarshalJSON(b []byte) error { return unmarshalEnum(b, v) }
-
-// UnmarshalJSON accepts only the serde variant names.
-func (v *ListingColumn) UnmarshalJSON(b []byte) error { return unmarshalEnum(b, v) }
-
-// UnmarshalJSON accepts only the serde variant names.
-func (v *OverlaySide) UnmarshalJSON(b []byte) error { return unmarshalEnum(b, v) }
-
-// UnmarshalJSON accepts only the serde variant names.
-func (v *ModFlag) UnmarshalJSON(b []byte) error { return unmarshalEnum(b, v) }
-
-// UnmarshalJSON accepts only the serde variant names.
-func (v *Theme) UnmarshalJSON(b []byte) error { return unmarshalEnum(b, v) }
-
-func checkEnum(key reflect.Type, s string) error {
-	names := enumValues[key]
-	if slices.Contains(names, s) {
-		return nil
-	}
-	return fmt.Errorf("unknown variant `%s`, expected one of %s", s, quoteList(names))
-}
-
-func quoteList(names []string) string {
-	var out strings.Builder
-	for i, n := range names {
-		if i > 0 {
-			out.WriteString(", ")
+// oneOf returns a check that a string is one of values.
+func oneOf[T ~string](values ...T) func(string) error {
+	return func(s string) error {
+		if slices.Contains(values, T(s)) {
+			return nil
 		}
-		out.WriteString("`" + n + "`")
+		quoted := make([]string, len(values))
+		for i, v := range values {
+			quoted[i] = "`" + string(v) + "`"
+		}
+		return fmt.Errorf("unknown variant `%s`, expected one of %s", s, strings.Join(quoted, ", "))
 	}
-	return out.String()
 }

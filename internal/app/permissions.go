@@ -4,103 +4,51 @@ package app
 //
 // On macOS the report comes from live TCC checks (supplied by the platform backend as a
 // [PermissionProbe]); on every other platform it is derived from the backend's
-// [platform.Capabilities]. The web onboarding view polls `recheck_permissions` (every 2 s, only
-// while that view is visible) and [PermissionsChanged] is emitted whenever the answer changes.
-//
-// The IPC commands (`get_permissions`, `request_permission`, `recheck_permissions`) and the
-// start-up hook that opens `#/onboarding` belong to the shell; they wrap [Permissions].
+// [platform.Capabilities]. The web onboarding view polls [Service.RecheckPermissions] (every
+// 2 s, only while that view is visible), and [ipc.PermissionsChanged] is emitted whenever the
+// answer changes. At start-up, [NeedsOnboarding] decides whether settings open on
+// `#/onboarding`.
 
 import (
 	"fmt"
 	"slices"
 	"sync"
 
+	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// Permission kinds.
+// Permission kinds, as [platform.Permission] names them.
 const (
-	PermAccessibility   = "accessibility"
-	PermScreenRecording = "screen_recording"
-	PermInputMonitoring = "input_monitoring"
+	permAccessibility   = string(platform.PermissionAccessibility)
+	permScreenRecording = string(platform.PermissionScreenRecording)
+	permInputMonitoring = string(platform.PermissionInputMonitoring)
 )
 
-// macosPermission is a macOS permission with its "required" flag and System Settings deep link.
+// macosPermission is a macOS permission with its "required" flag.
 type macosPermission struct {
-	kind     string
+	kind     platform.Permission
 	required bool
-	url      string
 }
 
 // macosPermissions lists the macOS permissions in the order the onboarding shows them (see
 // docs/research/macos.md).
 var macosPermissions = [...]macosPermission{
-	{PermAccessibility, true, "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"},
-	{PermScreenRecording, true, "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"},
-	{PermInputMonitoring, false, "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"},
+	{platform.PermissionAccessibility, true},
+	{platform.PermissionScreenRecording, true},
+	{platform.PermissionInputMonitoring, false},
 }
 
 // Degradation notes.
 const (
-	NoteWaylandPortal     = "Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it"
-	NoteWaylandTrigger    = "Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor"
-	NoteWaylandLayerShell = "Wayland-native: the overlay is anchored to the output with layer-shell, not to the game window"
-	NoteGNOME             = "GNOME: only X11/XWayland is supported; run the game under XWayland"
+	noteWaylandPortal     = "Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it"
+	noteWaylandTrigger    = "Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor"
+	noteWaylandLayerShell = "Wayland-native: the overlay is anchored to the output with layer-shell, not to the game window"
+	noteGNOME             = "GNOME: only X11/XWayland is supported; run the game under XWayland"
 )
 
-// PermissionInfo is one OS permission and whether it is currently granted.
-type PermissionInfo struct {
-	// Kind is `accessibility`, `screen_recording` or `input_monitoring`.
-	Kind    string `json:"kind"`
-	Granted bool   `json:"granted"`
-	// Required means the core price-check flow does not work without it.
-	Required bool `json:"required"`
-	// SettingsURL is the System Settings deep link, if the OS has one.
-	SettingsURL *string `json:"settings_url"`
-}
-
-func (p PermissionInfo) equal(o PermissionInfo) bool {
-	return p.Kind == o.Kind && p.Granted == o.Granted && p.Required == o.Required &&
-		(p.SettingsURL == nil) == (o.SettingsURL == nil) &&
-		(p.SettingsURL == nil || *p.SettingsURL == *o.SettingsURL)
-}
-
-// PermissionReport is what the onboarding view shows.
-type PermissionReport struct {
-	Platform platform.BackendKind `json:"platform"`
-	// Missing is every permission relevant on this platform (granted ones included, so the UI
-	// can tick them off live). Empty where the OS has no permission model (Windows, Linux).
-	Missing []PermissionInfo `json:"missing"`
-	// Notes are degradation notes (English, for the details list / bug reports).
-	Notes []string `json:"notes"`
-	// GNOME is set when running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports
-	// X11/XWayland.
-	GNOME bool `json:"gnome"`
-}
-
-// Blocked reports whether a required permission is still missing.
-func (r PermissionReport) Blocked() bool {
-	return slices.ContainsFunc(r.Missing, func(p PermissionInfo) bool { return p.Required && !p.Granted })
-}
-
-// Equal compares reports by value (nil and empty lists are equal).
-func (r PermissionReport) Equal(o PermissionReport) bool {
-	return r.Platform == o.Platform && r.GNOME == o.GNOME && slices.Equal(r.Notes, o.Notes) &&
-		slices.EqualFunc(r.Missing, o.Missing, PermissionInfo.equal)
-}
-
-// PermissionsChanged is pushed (event `permissions-changed`) when a recheck finds the
-// permission state changed.
-type PermissionsChanged struct {
-	Report PermissionReport `json:"report"`
-}
-
-// PermissionsChangedEvent is the frontend event name of [PermissionsChanged].
-const PermissionsChangedEvent = "permissions-changed"
-
 // PermissionProbe is the source of live permission state. On macOS the platform backend
-// implements it with TCC checks (`recheck_permissions` / `open_permission_settings` in the Rust
-// backend); elsewhere [StaticProbe] repeats the capability list.
+// implements it with TCC checks; elsewhere the capability list is repeated.
 type PermissionProbe interface {
 	// Missing returns the permission kinds currently missing.
 	Missing() []string
@@ -108,67 +56,69 @@ type PermissionProbe interface {
 	OpenSettings(kind string)
 }
 
-// StaticProbe just repeats the backend's start-up capability report.
-type StaticProbe []string
+// staticProbe just repeats the backend's start-up capability report.
+type staticProbe []string
 
-// Missing returns the static list.
-func (p StaticProbe) Missing() []string { return slices.Clone(p) }
+func (p staticProbe) Missing() []string { return slices.Clone(p) }
 
-// OpenSettings does nothing.
-func (StaticProbe) OpenSettings(string) {}
+func (staticProbe) OpenSettings(string) {}
 
-// BuildPermissionReport is the pure report builder (unit-tested without a backend).
-func BuildPermissionReport(kind platform.BackendKind, missing, capsNotes []string, gnome bool) PermissionReport {
-	permissions := []PermissionInfo{}
-	if kind == platform.BackendMacos {
+// buildPermissionReport builds the report from the missing permission kinds and the
+// capability notes.
+func buildPermissionReport(kind platform.BackendKind, missing, capsNotes []string, gnome bool) ipc.PermissionReport {
+	permissions := []ipc.PermissionInfo{}
+	if kind == platform.BackendMacOS {
 		for _, p := range macosPermissions {
-			permissions = append(permissions, PermissionInfo{
-				Kind:        p.kind,
-				Granted:     !slices.Contains(missing, p.kind),
+			url, _ := p.kind.SettingsURL()
+			permissions = append(permissions, ipc.PermissionInfo{
+				Kind:        string(p.kind),
+				Granted:     !slices.Contains(missing, string(p.kind)),
 				Required:    p.required,
-				SettingsURL: new(p.url),
+				SettingsURL: new(url),
 			})
 		}
 	} else {
 		for _, m := range missing {
-			permissions = append(permissions, PermissionInfo{Kind: m})
+			permissions = append(permissions, ipc.PermissionInfo{Kind: m})
 		}
 	}
 	notes := []string{}
 	if kind == platform.BackendWayland {
-		notes = append(notes, NoteWaylandPortal, NoteWaylandTrigger, NoteWaylandLayerShell)
+		notes = append(notes, noteWaylandPortal, noteWaylandTrigger, noteWaylandLayerShell)
 	}
 	if gnome {
-		notes = append(notes, NoteGNOME)
+		notes = append(notes, noteGNOME)
 	}
 	for _, n := range capsNotes {
 		if !slices.Contains(notes, n) {
 			notes = append(notes, n)
 		}
 	}
-	return PermissionReport{Platform: kind, Missing: permissions, Notes: notes, GNOME: gnome}
+	return ipc.PermissionReport{Platform: kind, Missing: permissions, Notes: notes, GNOME: gnome}
 }
 
 // NeedsOnboarding reports whether the settings window should open on `#/onboarding` at
-// start-up.
-func NeedsOnboarding(onboardingDone bool, report PermissionReport) bool {
+// start-up: on first run, or while a required permission is missing.
+func NeedsOnboarding(onboardingDone bool, report ipc.PermissionReport) bool {
 	return !onboardingDone || report.Blocked()
 }
 
-// PermissionRequestError is returned by [Permissions.Request] for a kind that is not a
-// permission on this platform. The IPC layer reports it with error kind [PermissionRequestError.IPCKind].
-type PermissionRequestError struct {
-	Permission string
+// permissionRequestError is returned by [Permissions.request] for a kind that is not a
+// permission on this platform. The IPC layer reports it with error kind `platform`.
+type permissionRequestError struct {
+	permission string
 }
 
-func (e *PermissionRequestError) Error() string {
-	return fmt.Sprintf("permission `%s` cannot be requested on this platform", e.Permission)
+func (e *permissionRequestError) Error() string {
+	return fmt.Sprintf("permission `%s` cannot be requested on this platform", e.permission)
 }
 
-// IPCKind is the frontend error kind (`IpcError.kind`): `platform`.
-func (*PermissionRequestError) IPCKind() string { return "platform" }
+var _ ipc.KindedError = (*permissionRequestError)(nil)
 
-// Permissions is the shell's permission state: the probe plus the last report seen (for change
+// IPCKind is the frontend error kind: [ipc.KindPlatform].
+func (*permissionRequestError) IPCKind() ipc.Kind { return ipc.KindPlatform }
+
+// Permissions is the permission state: the probe plus the last report seen (for change
 // events). Safe for concurrent use.
 type Permissions struct {
 	platform platform.BackendKind
@@ -177,36 +127,30 @@ type Permissions struct {
 	probe    PermissionProbe
 
 	mu   sync.Mutex
-	last *PermissionReport
+	last *ipc.PermissionReport // nil until the first report
 }
 
-// NewPermissions builds the state from an explicit probe.
-func NewPermissions(kind platform.BackendKind, caps platform.Capabilities, gnome bool, probe PermissionProbe) *Permissions {
+func newPermissions(kind platform.BackendKind, caps platform.Capabilities, gnome bool, probe PermissionProbe) *Permissions {
 	return &Permissions{platform: kind, gnome: gnome, caps: caps, probe: probe}
 }
 
 // PermissionsForBackend picks the probe for the running platform: live (the backend's TCC
-// checks) on macOS when supplied, otherwise a [StaticProbe] of the capability report. gnome is
-// [platform.EnvProbe.IsGNOME] of the environment.
+// checks) on macOS when supplied, otherwise the capability report's missing permissions.
+// gnome is [platform.EnvProbe.IsGNOME] of the environment.
 func PermissionsForBackend(kind platform.BackendKind, caps platform.Capabilities, gnome bool, live PermissionProbe) *Permissions {
-	var probe PermissionProbe = StaticProbe(slices.Clone(caps.MissingPermissions))
-	if kind == platform.BackendMacos && live != nil {
+	var probe PermissionProbe = staticProbe(slices.Clone(caps.MissingPermissions))
+	if kind == platform.BackendMacOS && live != nil {
 		probe = live
 	}
-	return NewPermissions(kind, caps, gnome, probe)
+	return newPermissions(kind, caps, gnome, probe)
 }
 
-// String identifies the state in logs.
-func (p *Permissions) String() string {
-	return fmt.Sprintf("Permissions{platform: %s, ..}", p.platform)
+func (p *Permissions) report() ipc.PermissionReport {
+	return buildPermissionReport(p.platform, p.probe.Missing(), p.caps.Notes, p.gnome)
 }
 
-func (p *Permissions) report() PermissionReport {
-	return BuildPermissionReport(p.platform, p.probe.Missing(), p.caps.Notes, p.gnome)
-}
-
-// Current returns the current report and remembers it as the baseline for [Permissions.Recheck].
-func (p *Permissions) Current() PermissionReport {
+// Current returns the current report and remembers it as the baseline for later rechecks.
+func (p *Permissions) Current() ipc.PermissionReport {
 	report := p.report()
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -214,9 +158,9 @@ func (p *Permissions) Current() PermissionReport {
 	return report
 }
 
-// Recheck re-queries the probe. It returns the report and whether it differs from the previous
+// recheck re-queries the probe. It returns the report and whether it differs from the previous
 // one (never on the first call, which only sets the baseline).
-func (p *Permissions) Recheck() (PermissionReport, bool) {
+func (p *Permissions) recheck() (ipc.PermissionReport, bool) {
 	report := p.report()
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -225,12 +169,12 @@ func (p *Permissions) Recheck() (PermissionReport, bool) {
 	return report, changed
 }
 
-// Request opens the settings pane for kind if it is a permission on this platform.
-func (p *Permissions) Request(kind string) error {
-	known := p.platform == platform.BackendMacos &&
-		slices.ContainsFunc(macosPermissions[:], func(m macosPermission) bool { return m.kind == kind })
+// request opens the settings pane for kind if it is a permission on this platform.
+func (p *Permissions) request(kind string) error {
+	known := p.platform == platform.BackendMacOS &&
+		slices.ContainsFunc(macosPermissions[:], func(m macosPermission) bool { return string(m.kind) == kind })
 	if !known {
-		return &PermissionRequestError{Permission: kind}
+		return &permissionRequestError{permission: kind}
 	}
 	p.probe.OpenSettings(kind)
 	return nil

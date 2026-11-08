@@ -1,0 +1,59 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Martial Tempo",
+  "category": "gem",
+  "class": {
+    "type": "support_gem"
+  },
+  "corrupted": false,
+  "gem_level": 1,
+  "item_level": null,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Support, Attack",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Level",
+      "value": "1"
+    },
+    {
+      "augmented": false,
+      "name": "Cost Multiplier",
+      "value": "120%"
+    }
+  ],
+  "quality": null,
+  "rarity": "gem",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 1,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

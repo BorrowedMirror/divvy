@@ -14,7 +14,7 @@ import (
 // Tray menu. Tray hosts are not scriptable in CI, so items are run through the test hook
 // (`tray <item>`), which calls the same handlers as a click.
 func TestTray(t *testing.T) {
-	app := NewSession(t).Start(t)
+	app := newSession(t).Start(t)
 
 	steps(t,
 		step{"installs a tray icon", func(t *testing.T) {
@@ -29,7 +29,7 @@ func TestTray(t *testing.T) {
 		}},
 		step{"'Settings' opens the settings window", func(t *testing.T) {
 			app.OK(t, "tray open_settings")
-			app.WaitState(t, "the settings window", 10*time.Second, func(s State) bool { return s.SettingsVisible })
+			app.WaitState(t, "the settings window", 10*time.Second, func(s appState) bool { return s.SettingsVisible })
 		}},
 		// Last: the app is gone afterwards.
 		step{"'Quit' exits the app", func(t *testing.T) {

@@ -12,6 +12,8 @@ package wailsproto
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"image/png"
 	"log/slog"
@@ -102,7 +104,7 @@ func TestWailsOverlayIsALayerSurface(t *testing.T) {
 	if p := os.Getenv("RKL_PROTO_LOG"); p != "" {
 		_ = os.WriteFile(p, out.Bytes(), 0o600)
 	}
-	for _, line := range strings.Split(out.String(), "\n") {
+	for line := range strings.SplitSeq(out.String(), "\n") {
 		if strings.HasPrefix(line, "PROTO ") {
 			t.Log(line)
 		}
@@ -136,9 +138,9 @@ func tail(s string, n int) string {
 // child runs the Wails app on the main goroutine; the scenario runs once it has started.
 func child() int {
 	// First thing, as the shell should: an unhandled SIGUSR1 would kill us.
-	triggers, _ := wayland.SignalTriggers()
+	triggers := platform.SignalTriggers(context.Background())
 	if os.Getenv("RKL_PROTO_JSCSIG") != "keep" {
-		wayland.MoveJSCSignal()
+		platform.MoveJSCSignal()
 	}
 	var logs bytes.Buffer
 	var logMu sync.Mutex
@@ -216,11 +218,11 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	deadline := time.Now().Add(10 * time.Second)
 	for overlay.NativeWindow() == nil {
 		if time.Now().After(deadline) {
-			return fmt.Errorf("overlay never got a native window")
+			return errors.New("overlay never got a native window")
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	parts, err := wayland.New(wayland.WithMainThread(application.InvokeSync))
+	parts, err := wayland.New(wayland.Options{Probe: platform.EnvProbeFromEnv(), MainThread: application.InvokeSync})
 	if err != nil {
 		return err
 	}
@@ -233,7 +235,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 		time.Sleep(3 * time.Second)
 		shot, _ := exec.Command("grim", "-t", "png", "-").Output()
 		_ = os.WriteFile(os.Getenv("RKL_PROTO_SHOT"), shot, 0o600)
-		return fmt.Errorf("control run without Prepare")
+		return errors.New("control run without Prepare")
 	}
 	if err := ov.Prepare(); err != nil {
 		return fmt.Errorf("prepare: %w", err)
@@ -269,7 +271,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 		return err
 	}
 	if strings.Contains(string(tree), `"name": "rkl-`) {
-		return fmt.Errorf("overlay is an xdg toplevel, not a layer surface")
+		return errors.New("overlay is an xdg toplevel, not a layer surface")
 	}
 	fmt.Println("PROTO overlay absent from sway's toplevel tree (layer surface)")
 
@@ -290,7 +292,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	r, g, bl, _ := img.At(x, y).RGBA()
 	fmt.Printf("PROTO output %dx%d, pixel at (%d,%d) = rgb(%d,%d,%d)\n", b.Dx(), b.Dy(), x, y, r>>8, g>>8, bl>>8)
 	if r>>8 < 200 || g>>8 > 60 || bl>>8 > 60 {
-		return fmt.Errorf("web view content not visible at the anchored spot")
+		return errors.New("web view content not visible at the anchored spot")
 	}
 	r, g, bl, _ = img.At(b.Max.X/4, b.Max.Y/2).RGBA()
 	if r>>8 > 60 || bl>>8 < 200 {
@@ -314,7 +316,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	r, _, _, _ = img.At(50+150, 150).RGBA()
 	fmt.Printf("PROTO after re-anchoring left: red=%d at (200,150)\n", r>>8)
 	if r>>8 < 200 {
-		return fmt.Errorf("re-anchored surface not on the left")
+		return errors.New("re-anchored surface not on the left")
 	}
 	_ = app
 	return nil

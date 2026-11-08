@@ -22,19 +22,20 @@ func TestLogLevelFromRKLLog(t *testing.T) {
 func TestLoggerWritesToStderrAndTheFileOnceAttached(t *testing.T) {
 	var stderr bytes.Buffer
 	var file LogFile
-	t.Setenv("RKL_LOG", "info")
-	prev := slog.Default()
-	defer slog.SetDefault(prev)
-	logger := NewLogger(&stderr, &file)
+	logger := NewLogger(slog.LevelInfo, &stderr, &file)
 	logger.Info("before attach")
 	path, err := file.Attach(t.TempDir())
 	require.NoError(t, err)
 	logger.Info("after attach")
 	logger.Debug("hidden at info")
+	require.NoError(t, file.Close())
+	logger.Info("after close")
+
 	b, err := os.ReadFile(path)
 	require.NoError(t, err)
 	assert.NotContains(t, string(b), "before attach")
 	assert.Contains(t, string(b), "after attach")
+	assert.NotContains(t, string(b), "after close")
 	assert.Contains(t, stderr.String(), "before attach")
 	assert.NotContains(t, stderr.String(), "hidden at info")
 	info, err := os.Stat(path)

@@ -1,0 +1,150 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Waystone (Tier 16)",
+  "category": "waystone",
+  "class": {
+    "type": "waystone"
+  },
+  "corrupted": true,
+  "gem_level": null,
+  "item_level": 82,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Searing",
+        "ranges": [
+          {
+            "max": 35,
+            "min": 25
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters deal #% of Damage as Extra Fire",
+      "text": "Monsters deal 32% of Damage as Extra Fire",
+      "values": [
+        32
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Hulking",
+        "ranges": [
+          {
+            "max": 49,
+            "min": 40
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters have #% increased Life",
+      "text": "Monsters have 41% increased Life",
+      "values": [
+        41
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Exposure",
+        "ranges": [],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Players have -#% to all maximum Resistances",
+      "text": "Players have -20% to all maximum Resistances",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Frenzy",
+        "ranges": [
+          {
+            "max": 20,
+            "min": 15
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters have #% increased Attack, Cast and Movement Speed",
+      "text": "Monsters have 18% increased Attack, Cast and Movement Speed",
+      "values": [
+        18
+      ]
+    }
+  ],
+  "name": "Twisted Barrens",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Waystone Tier",
+      "value": "16"
+    },
+    {
+      "augmented": true,
+      "name": "Revives Available",
+      "value": "0"
+    },
+    {
+      "augmented": true,
+      "name": "Pack Size",
+      "value": "+12%"
+    },
+    {
+      "augmented": true,
+      "name": "Rare Monsters",
+      "value": "+41%"
+    },
+    {
+      "augmented": true,
+      "name": "Item Rarity",
+      "value": "+62%"
+    },
+    {
+      "augmented": true,
+      "name": "Waystone Drop Chance",
+      "value": "+255%"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": 16
+}

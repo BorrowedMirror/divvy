@@ -13,13 +13,15 @@ package main
 // run this after `refresh`.
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -150,7 +152,7 @@ const l10nSource = "PoE2 client: ClientStrings, ItemClasses, BaseItemTypes, Word
 var (
 	markupPair = regexp.MustCompile(`\[[^\]|]*\|([^\]]*)\]`)
 	markupOne  = regexp.MustCompile(`\[([^\]|]*)\]`)
-	// `\d` is Unicode-aware in Rust's regex, as in internal/core.
+	// Digits in any script (\p{Nd}), as in internal/core.
 	numOrHash   = regexp.MustCompile(`[+-]?(?:#|\p{Nd}+(?:\.\p{Nd}+)?)`)
 	placeholder = regexp.MustCompile(`[+-]?\{\p{Nd}+(?::[^}]*)?\}`)
 )
@@ -167,8 +169,11 @@ func shape(text string) string {
 	return numOrHash.ReplaceAllLiteralString(placeholder.ReplaceAllLiteralString(text, "#"), "#")
 }
 
+// tableColumns is the column count of every table the extract writes (id and text).
+const tableColumns = 2
+
 // table returns the rows of a table in folder, failing when the extract lacks it.
-func (r *rawGame) table(folder, name string, columns int) ([][]*string, error) {
+func (r *rawGame) table(folder, name string) ([][]*string, error) {
 	tables, ok := r.Folders[folder]
 	if !ok {
 		return nil, fmt.Errorf("the game extract has no %q data folder", folder)
@@ -178,8 +183,8 @@ func (r *rawGame) table(folder, name string, columns int) ([][]*string, error) {
 		return nil, fmt.Errorf("the game extract has no %s table in %q", name, folder)
 	}
 	for i, row := range rows {
-		if len(row) != columns {
-			return nil, fmt.Errorf("%s/%s row %d has %d columns, expected %d", folder, name, i, len(row), columns)
+		if len(row) != tableColumns {
+			return nil, fmt.Errorf("%s/%s row %d has %d columns, expected %d", folder, name, i, len(row), tableColumns)
 		}
 	}
 	return rows, nil
@@ -189,7 +194,7 @@ func (r *rawGame) table(folder, name string, columns int) ([][]*string, error) {
 func (r *rawGame) clientStrings(folder string) (map[string]string, error) {
 	out := map[string]string{}
 	for _, name := range []string{"clientstrings", "clientstrings2"} {
-		rows, err := r.table(folder, name, 2)
+		rows, err := r.table(folder, name)
 		if err != nil {
 			return nil, err
 		}
@@ -220,28 +225,19 @@ func pick(en, local map[string]string, ids []clientKey, key bool, lang string) [
 		e, okE := en[k.id]
 		l, okL := local[k.id]
 		if !okE || !okL {
-			logf("warning: %s: client string %s is missing", lang, k.id)
+			slog.Warn("client string is missing", "lang", lang, "id", k.id)
 			continue
 		}
 		if e = shown(e, key); e != k.english {
-			logf("warning: client string %s reads %q in English, expected %q; skipped", k.id, e, k.english)
+			slog.Warn("client string differs in English; skipped", "id", k.id, "got", e, "want", k.english)
 			continue
 		}
 		p := [2]string{k.english, shown(l, key)}
-		if p[1] != "" && !containsPair(out, p) {
+		if p[1] != "" && !slices.Contains(out, p) {
 			out = append(out, p)
 		}
 	}
 	return out
-}
-
-func containsPair(pairs [][2]string, p [2]string) bool {
-	for _, q := range pairs {
-		if q == p {
-			return true
-		}
-	}
-	return false
 }
 
 func sameString(a, b *string) bool {
@@ -292,9 +288,9 @@ func quoted(line string) (string, bool) {
 	return strings.ReplaceAll(s, `\n`, "\n"), true
 }
 
-// parseCount parses a variant count like Rust's `str::parse::<usize>`.
+// parseCount parses a variant count: decimal digits with an optional leading `+`.
 func parseCount(s string) (int, bool) {
-	// ParseUint rejects any sign, so only Rust's single optional `+` needs trimming.
+	// ParseUint rejects any sign, so only the optional `+` needs trimming.
 	n, err := strconv.ParseUint(strings.TrimPrefix(s, "+"), 10, 63)
 	if err != nil {
 		return 0, false
@@ -417,15 +413,15 @@ func buildLanguages(raw *rawGame, b *data.Bundle) ([]core.Language, error) {
 	if err != nil {
 		return nil, err
 	}
-	enClasses, err := raw.table("", "itemclasses", 2)
+	enClasses, err := raw.table("", "itemclasses")
 	if err != nil {
 		return nil, err
 	}
-	enBases, err := raw.table("", "baseitemtypes", 2)
+	enBases, err := raw.table("", "baseitemtypes")
 	if err != nil {
 		return nil, err
 	}
-	enWords, err := raw.table("", "words", 2)
+	enWords, err := raw.table("", "words")
 	if err != nil {
 		return nil, err
 	}
@@ -456,7 +452,7 @@ func buildLanguages(raw *rawGame, b *data.Bundle) ([]core.Language, error) {
 			return nil, err
 		}
 		pairTable := func(name string, en [][]*string, idCol, enCol, localCol int, keep func(string) bool) ([][2]string, error) {
-			local, err := raw.table(lang.folder, name, 2)
+			local, err := raw.table(lang.folder, name)
 			if err != nil {
 				return nil, err
 			}
@@ -498,42 +494,42 @@ func buildLanguages(raw *rawGame, b *data.Bundle) ([]core.Language, error) {
 			Uniques:  uniqueNames,
 			Stats:    statPairs(descs, lang.name, searchable),
 		}
-		logf("%s: %d keys, %d classes, %d bases, %d uniques, %d stat lines",
-			lang.name, len(l.Keys), len(l.Classes), len(l.Bases), len(l.Uniques), len(l.Stats))
+		slog.Info("language", "lang", lang.name, "keys", len(l.Keys), "classes", len(l.Classes),
+			"bases", len(l.Bases), "uniques", len(l.Uniques), "stat_lines", len(l.Stats))
 		out = append(out, l)
 	}
 	return out, nil
 }
 
 func runL10n(args []string) error {
-	fs := flag.NewFlagSet("l10n", flag.ContinueOnError)
-	assetsDir := fs.String("assets", "", "asset directory to update (default: internal/data/assets)")
-	fs.Usage = func() {
-		fmt.Fprintln(fs.Output(), "usage: go run ./cmd/datarefresh l10n [-assets dir] <raw.json>")
-		fmt.Fprintln(fs.Output(), "\n<raw.json> is written by: cargo run --manifest-path tools/game-extract/Cargo.toml -- l10n <game_dir> <raw.json>")
-		fs.PrintDefaults()
+	flags := flag.NewFlagSet("l10n", flag.ContinueOnError)
+	assetsDir := flags.String("assets", "", "asset directory to update (default: internal/data/assets)")
+	flags.Usage = func() {
+		fmt.Fprintln(flags.Output(), "usage: go run ./cmd/datarefresh l10n [-assets dir] <raw.json>")
+		fmt.Fprintln(flags.Output(), "\n<raw.json> is written by: cargo run --manifest-path tools/game-extract/Cargo.toml -- l10n <game_dir> <raw.json>")
+		flags.PrintDefaults()
 	}
-	if err := fs.Parse(args); err != nil {
+	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() != 1 {
-		fs.Usage()
+	if flags.NArg() != 1 {
+		flags.Usage()
 		return errors.New("l10n: name the game extract (raw.json)")
 	}
 	if *assetsDir == "" {
-		root, err := repoRoot()
+		root, err := moduleRoot()
 		if err != nil {
 			return err
 		}
 		*assetsDir = filepath.Join(root, "internal", "data", "assets")
 	}
-	b, err := os.ReadFile(fs.Arg(0))
+	b, err := os.ReadFile(flags.Arg(0))
 	if err != nil {
 		return err
 	}
 	var raw rawGame
 	if err := json.Unmarshal(b, &raw); err != nil {
-		return fmt.Errorf("parse %s: %w", fs.Arg(0), err)
+		return fmt.Errorf("parse %s: %w", flags.Arg(0), err)
 	}
 	return l10n(&raw, *assetsDir)
 }
@@ -567,6 +563,6 @@ func l10n(raw *rawGame, assetsDir string) error {
 	if manifest.L10n != nil {
 		n = manifest.L10n.Records
 	}
-	logf("wrote %s (%d languages)", filepath.Join(assetsDir, "l10n.json.zst"), n)
+	slog.Info("wrote translations", "file", filepath.Join(assetsDir, "l10n.json.zst"), "languages", n)
 	return nil
 }

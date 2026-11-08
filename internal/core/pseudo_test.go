@@ -11,7 +11,7 @@ import (
 
 func pm(template string, v float64, kind ModKind) Modifier {
 	return Modifier{
-		Text:     strings.ReplaceAll(template, "#", formatF64Display(v)),
+		Text:     strings.ReplaceAll(template, "#", formatNumber(v)),
 		Template: template,
 		Kind:     kind,
 		Values:   []float64{v},
@@ -32,14 +32,14 @@ func TestSumsResistancesLifeAndAttributes(t *testing.T) {
 		pm("+# to maximum Energy Shield", 40, ModExplicit),
 		pm("Grants Skill: Level # Something", 18, ModSkill),
 	}
-	rows, covered := PseudoFilters(mods, ClassRing.Class(), 10)
+	rows, covered := pseudoFilters(mods, ClassRing.Class(), 10)
 	get := func(id string) *StatFilter {
 		i := slices.IndexFunc(rows, func(r StatFilter) bool { return r.StatID == id })
 		require.GreaterOrEqual(t, i, 0, id)
 		return &rows[i]
 	}
 	ele := get("pseudo.pseudo_total_elemental_resistance")
-	assert.Equal(t, 80.0, ele.ItemValues[0])
+	assert.InDelta(t, 80.0, ele.ItemValues[0], 0)
 	assert.Equal(t, "+80% total Elemental Resistance", ele.Text)
 	assert.True(t, ele.Enabled)
 	assert.Equal(t, new(72.0), ele.Min)
@@ -58,8 +58,8 @@ func TestLocalEnergyShieldAndUnrelatedModsAddNothing(t *testing.T) {
 		pm("+# to maximum Energy Shield", 40, ModExplicit),
 		pm("#% increased Spirit", 30, ModExplicit),
 	}
-	rows, covered := PseudoFilters(mods, ClassHelmet.Class(), 10)
+	rows, covered := pseudoFilters(mods, ClassHelmet.Class(), 10)
 	assert.True(t, len(rows) == 0 && len(covered) == 0)
-	rows, _ = PseudoFilters([]Modifier{pm("#% increased Movement Speed", -10, ModExplicit)}, ClassBoots.Class(), 10)
+	rows, _ = pseudoFilters([]Modifier{pm("#% increased Movement Speed", -10, ModExplicit)}, ClassBoots.Class(), 10)
 	assert.Empty(t, rows, "no pseudo row for a movement speed penalty")
 }

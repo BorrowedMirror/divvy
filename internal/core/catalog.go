@@ -11,21 +11,15 @@ type StatDef struct {
 	// `explicit`, `implicit`, `rune`, `enchant`, `pseudo`, ...
 	Kind string `json:"kind"`
 	// Alternative templates that map to the same stat (e.g. "reduced" vs "increased").
-	// Optional when decoding (`#[serde(default)]`).
+	// May be missing when decoding.
 	Aliases []StatAlias `json:"aliases"`
 }
-
-// MarshalJSON writes serde-compatible JSON.
-func (s StatDef) MarshalJSON() ([]byte, error) { return marshalStruct(s) }
 
 // StatAlias is an alternative wording; Negate means the values must be multiplied by -1.
 type StatAlias struct {
 	Text   string `json:"text"`
 	Negate bool   `json:"negate"`
 }
-
-// MarshalJSON writes serde-compatible JSON.
-func (s StatAlias) MarshalJSON() ([]byte, error) { return marshalStruct(s) }
 
 // BaseDef is an item base as exposed by `/api/trade2/data/items` plus export data.
 type BaseDef struct {
@@ -35,17 +29,11 @@ type BaseDef struct {
 	ItemClass string `json:"item_class"`
 }
 
-// MarshalJSON writes serde-compatible JSON.
-func (b BaseDef) MarshalJSON() ([]byte, error) { return marshalStruct(b) }
-
 // UniqueDef is a unique item and its base.
 type UniqueDef struct {
 	Name     string `json:"name"`
 	BaseType string `json:"base_type"`
 }
-
-// MarshalJSON writes serde-compatible JSON.
-func (u UniqueDef) MarshalJSON() ([]byte, error) { return marshalStruct(u) }
 
 // StaticDef is a static currency / exchange-able item (`/api/trade2/data/static`).
 type StaticDef struct {
@@ -56,9 +44,6 @@ type StaticDef struct {
 	Image *string `json:"image"`
 }
 
-// MarshalJSON writes serde-compatible JSON.
-func (s StaticDef) MarshalJSON() ([]byte, error) { return marshalStruct(s) }
-
 // StatMatch is one result of [Catalog.StatsByTemplate]: the stat, and whether the
 // template was an alias whose values must be negated.
 type StatMatch struct {
@@ -67,7 +52,7 @@ type StatMatch struct {
 }
 
 // Catalog is a read-only view over bundled game data. Implementations must be safe for
-// concurrent use (Rust: `Send + Sync`).
+// concurrent use.
 type Catalog interface {
 	// StatsByTemplate returns the stats whose template (or alias) equals template for the
 	// given modifier kind.
@@ -79,16 +64,6 @@ type Catalog interface {
 	BaseInMagicName(fullName string) *BaseDef
 	// Unique looks a unique up by name.
 	Unique(name string) *UniqueDef
-	// UniquesByBase returns every unique that uses baseType (for pricing unidentified
-	// uniques). Embed [NoUniquesByBase] for the Rust trait's default (none).
-	UniquesByBase(baseType string) []*UniqueDef
 	// StaticItem looks a static (exchange) item up by its text.
 	StaticItem(text string) *StaticDef
 }
-
-// NoUniquesByBase provides the default [Catalog.UniquesByBase] (no uniques); embed it in
-// catalogs that do not index uniques by base.
-type NoUniquesByBase struct{}
-
-// UniquesByBase returns nil.
-func (NoUniquesByBase) UniquesByBase(string) []*UniqueDef { return nil }

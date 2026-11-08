@@ -1,0 +1,115 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Vile Robe",
+  "category": "equipment",
+  "class": {
+    "type": "body_armour"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "rune",
+      "stat_id": null,
+      "template": "+#% to Lightning Resistance",
+      "text": "+14% to Lightning Resistance",
+      "values": [
+        14
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Energy Shield",
+      "text": "92% increased Energy Shield",
+      "values": [
+        92
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Energy Shield",
+      "text": "+71 to maximum Energy Shield",
+      "values": [
+        71
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+89 to maximum Life",
+      "values": [
+        89
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+37% to Cold Resistance",
+      "values": [
+        37
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Mana Regeneration Rate",
+      "text": "18% increased Mana Regeneration Rate",
+      "values": [
+        18
+      ]
+    }
+  ],
+  "name": "Soul Shroud",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": true,
+      "name": "Energy Shield",
+      "value": "412"
+    }
+  ],
+  "quality": 20,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 121,
+    "level": 65,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 2,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": 412,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

@@ -1,6 +1,3 @@
-// Package shell builds the Wails application: the two web views (price panel overlay and
-// settings), the tray and single-instance handling. Business logic lives in the other internal
-// packages; this package only wires them to Wails.
 package shell
 
 import (
@@ -10,17 +7,16 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/product"
 )
 
 // Window names, matching the routes the frontend reads from the URL hash.
 const (
-	Overlay  = "overlay"
-	Settings = "settings"
+	overlayWindow  = "overlay"
+	settingsWindow = "settings"
 )
-
-// AppID is the identifier the Tauri build used ("app.rkl"); single-instance locking and the
-// GTK application id use it so both builds behave as the same app.
-const AppID = "app.rkl"
 
 // Icons the shell needs.
 type Icons struct {
@@ -56,14 +52,14 @@ type Shell struct {
 	trayActions TrayActions
 }
 
-// New creates the application and its windows. Both windows start hidden, as in the Tauri
-// build; the flow shows them when needed.
+// New creates the application and its windows. Both windows start hidden; the flow shows
+// them when needed.
 func New(opts Options) *Shell {
 	s := &Shell{}
 	var single *application.SingleInstanceOptions
 	if opts.SingleInstance {
 		single = &application.SingleInstanceOptions{
-			UniqueID: AppID,
+			UniqueID: product.ID,
 			OnSecondInstanceLaunch: func(d application.SecondInstanceData) {
 				if opts.OnSecondInstance != nil {
 					opts.OnSecondInstance(d.Args)
@@ -72,8 +68,8 @@ func New(opts Options) *Shell {
 		}
 	}
 	s.App = application.New(application.Options{
-		Name:        "Rust King Ledger",
-		Description: "Path of Exile 2 price-check overlay",
+		Name:        product.Name,
+		Description: product.Description,
 		Icon:        opts.Icons.App,
 		Logger:      opts.Logger,
 		Services:    opts.Services,
@@ -85,13 +81,13 @@ func New(opts Options) *Shell {
 		Assets:         application.AssetOptions{Handler: application.AssetFileServerFS(opts.Assets)},
 		SingleInstance: single,
 		// RKL lives in the tray: closing the settings window must not quit it.
-		Linux:   application.LinuxOptions{DisableQuitOnLastWindowClosed: true, ApplicationID: AppID, ProgramName: "rkl"},
+		Linux:   application.LinuxOptions{DisableQuitOnLastWindowClosed: true, ApplicationID: product.ID, ProgramName: product.Binary},
 		Mac:     application.MacOptions{ApplicationShouldTerminateAfterLastWindowClosed: false, ActivationPolicy: application.ActivationPolicyAccessory},
 		Windows: application.WindowsOptions{DisableQuitOnLastWindowClosed: true},
 	})
 
 	s.Overlay = s.App.Window.NewWithOptions(application.WebviewWindowOptions{
-		Name:             Overlay,
+		Name:             overlayWindow,
 		Title:            "RKL overlay",
 		URL:              "/#/overlay",
 		Width:            420,
@@ -109,7 +105,7 @@ func New(opts Options) *Shell {
 	})
 
 	s.Settings = s.App.Window.NewWithOptions(application.WebviewWindowOptions{
-		Name:             Settings,
+		Name:             settingsWindow,
 		Title:            "RKL settings",
 		URL:              "/#/settings",
 		Width:            900,
@@ -126,25 +122,14 @@ func New(opts Options) *Shell {
 	return s
 }
 
-// TrayLabels are the tray menu's texts, in the user's language.
-type TrayLabels struct {
-	Tooltip, PriceCheck, Settings, Diagnostics, Quit string
-}
-
 // TrayActions are what the tray menu items do.
 type TrayActions struct {
 	PriceCheck, Settings, Diagnostics func()
 }
 
 // BuildTray adds the tray icon and its menu: price check, settings, diagnostics, quit.
-func (s *Shell) BuildTray(icons Icons, labels TrayLabels, actions TrayActions) {
-	menu := s.App.NewMenu()
-	menu.Add(labels.PriceCheck).OnClick(func(*application.Context) { call(actions.PriceCheck) })
-	menu.Add(labels.Settings).OnClick(func(*application.Context) { call(actions.Settings) })
-	menu.Add(labels.Diagnostics).OnClick(func(*application.Context) { call(actions.Diagnostics) })
-	menu.AddSeparator()
-	menu.Add(labels.Quit).OnClick(func(*application.Context) { s.App.Quit() })
-
+func (s *Shell) BuildTray(icons Icons, labels app.TrayLabels, actions TrayActions) {
+	s.trayActions = actions
 	s.Tray = s.App.SystemTray.New()
 	// Dedicated small glyphs: the full app tile is too detailed at tray size. macOS gets the
 	// black template image the menu bar recolours; everywhere else the colour icon. Wails'
@@ -154,16 +139,20 @@ func (s *Shell) BuildTray(icons Icons, labels TrayLabels, actions TrayActions) {
 	} else {
 		s.Tray.SetIcon(icons.Tray)
 	}
-	s.Tray.SetTooltip(labels.Tooltip)
-	s.Tray.SetMenu(menu)
-	s.trayActions = actions
+	s.SetTrayLabels(labels)
 }
 
 // SetTrayLabels relabels the tray menu (the UI language changed).
-func (s *Shell) SetTrayLabels(labels TrayLabels) {
+func (s *Shell) SetTrayLabels(labels app.TrayLabels) {
 	if s.Tray == nil {
 		return
 	}
+	s.Tray.SetMenu(s.trayMenu(labels))
+	s.Tray.SetTooltip(labels.Tooltip)
+}
+
+// trayMenu is the tray menu in labels' language.
+func (s *Shell) trayMenu(labels app.TrayLabels) *application.Menu {
 	a := s.trayActions
 	menu := s.App.NewMenu()
 	menu.Add(labels.PriceCheck).OnClick(func(*application.Context) { call(a.PriceCheck) })
@@ -171,8 +160,7 @@ func (s *Shell) SetTrayLabels(labels TrayLabels) {
 	menu.Add(labels.Diagnostics).OnClick(func(*application.Context) { call(a.Diagnostics) })
 	menu.AddSeparator()
 	menu.Add(labels.Quit).OnClick(func(*application.Context) { s.App.Quit() })
-	s.Tray.SetMenu(menu)
-	s.Tray.SetTooltip(labels.Tooltip)
+	return menu
 }
 
 func call(f func()) {

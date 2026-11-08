@@ -1,0 +1,139 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Heavy Belt",
+  "category": "unique",
+  "class": {
+    "type": "belt"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 83,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "implicit",
+        "name": null,
+        "ranges": [
+          {
+            "max": 30,
+            "min": 20
+          }
+        ],
+        "tier": null
+      },
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "#% increased Stun Threshold",
+      "text": "20% increased Stun Threshold",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": {
+        "affix": null,
+        "name": null,
+        "ranges": [
+          {
+            "max": 55,
+            "min": 40
+          }
+        ],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Strength",
+      "text": "+49 to Strength",
+      "values": [
+        49
+      ]
+    },
+    {
+      "advanced": {
+        "affix": null,
+        "name": null,
+        "ranges": [
+          {
+            "max": 55,
+            "min": 40
+          }
+        ],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Dexterity",
+      "text": "+47 to Dexterity",
+      "values": [
+        47
+      ]
+    },
+    {
+      "advanced": {
+        "affix": null,
+        "name": null,
+        "ranges": [
+          {
+            "max": 70,
+            "min": 50
+          }
+        ],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+66 to maximum Life",
+      "values": [
+        66
+      ]
+    },
+    {
+      "advanced": {
+        "affix": null,
+        "name": null,
+        "ranges": [],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "When you kill a Rare monster, you gain its Modifiers for # seconds",
+      "text": "When you kill a Rare monster, you gain its Modifiers for 20 seconds",
+      "values": [
+        20
+      ]
+    }
+  ],
+  "name": "Headhunter",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 60,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

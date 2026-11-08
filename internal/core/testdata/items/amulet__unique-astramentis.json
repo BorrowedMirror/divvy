@@ -1,0 +1,74 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Stellar Amulet",
+  "category": "unique",
+  "class": {
+    "type": "amulet"
+  },
+  "corrupted": true,
+  "gem_level": null,
+  "item_level": 79,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "+# to all Attributes",
+      "text": "+14 to all Attributes",
+      "values": [
+        14
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to all Attributes",
+      "text": "+94 to all Attributes",
+      "values": [
+        94
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "-# Physical Damage taken from Attack Hits",
+      "text": "-4 Physical Damage taken from Attack Hits",
+      "values": [
+        4
+      ]
+    }
+  ],
+  "name": "Astramentis",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 59,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

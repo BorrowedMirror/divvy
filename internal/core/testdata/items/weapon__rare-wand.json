@@ -1,0 +1,105 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Attuned Wand",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Wands"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Level # Mana Drain",
+      "text": "Grants Skill: Level 19 Mana Drain",
+      "values": [
+        19
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Level of all Lightning Spell Skills",
+      "text": "+3 to Level of all Lightning Spell Skills",
+      "values": [
+        3
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Spell Damage",
+      "text": "98% increased Spell Damage",
+      "values": [
+        98
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Cast Speed",
+      "text": "24% increased Cast Speed",
+      "values": [
+        24
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Gain #% of Damage as Extra Lightning Damage",
+      "text": "Gain 12% of Damage as Extra Lightning Damage",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Mana",
+      "text": "+90 to maximum Mana",
+      "values": [
+        90
+      ]
+    }
+  ],
+  "name": "Spirit Song",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 139,
+    "level": 65,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

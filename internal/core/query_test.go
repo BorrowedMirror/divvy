@@ -1,7 +1,7 @@
 package core
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"math"
 	"testing"
 
@@ -15,9 +15,10 @@ func opts() *QueryOptions {
 }
 
 func rareBow(t *testing.T) *ParsedItem {
+	t.Helper()
 	text := "Item Class: Bows\nRarity: Rare\nHate Thirst\nRecurve Bow\n--------\nItem Level: 80\n--------\n+20% to Fire Resistance (implicit)\n--------\n+42 to maximum Life\n+12% to Fire Resistance\n+31% to Cold Resistance\nAdds 3 to 8 Physical Damage\n10% reduced Movement Speed\n--------\nCorrupted"
 	item := mustParse(t, text)
-	NewStatMatcher(newFakeCatalog()).MatchItem(item)
+	MatchStats(item, newFakeCatalog())
 	return item
 }
 
@@ -32,18 +33,8 @@ func statByText(t *testing.T, f *FilterSet, text string) *StatFilter {
 	return nil
 }
 
-// toValue is `serde_json::to_value`: the serde JSON decoded into generic values.
-func toValue(t testing.TB, v any) any {
-	t.Helper()
-	b, err := MarshalSerde(v)
-	require.NoError(t, err)
-	var out any
-	require.NoError(t, json.Unmarshal(b, &out))
-	return out
-}
-
 // at indexes a generic JSON value by object keys (string) and array indices (int); nil when
-// missing, like serde_json's `Index`.
+// missing.
 func at(v any, path ...any) any {
 	for _, p := range path {
 		switch k := p.(type) {
@@ -113,12 +104,22 @@ func TestRareDefaults(t *testing.T) {
 	assert.Equal(t, StatusAny, all.Status)
 }
 
-func TestRewidenRecomputes(t *testing.T) {
+// rewiden re-applies pct to every stat's min/max from its item values, as the price panel
+// does when the user changes the widening.
+func rewiden(f *FilterSet, pct float64) {
+	f.WidenPct = pct
+	for i := range f.Stats {
+		if s := &f.Stats[i]; len(s.ItemValues) > 0 {
+			s.Min, s.Max = widenBounds(s.ItemValues, pct)
+		}
+	}
+}
+
+func TestWideningRecomputesFromItemValues(t *testing.T) {
 	f := BuildFilters(rareBow(t), opts())
-	f.Rewiden(0)
-	assert.Less(t, math.Abs(f.WidenPct), 2.220446049250313e-16)
+	rewiden(&f, 0)
 	assert.Equal(t, new(42.0), statByText(t, &f, "+42 to maximum Life").Min)
-	f.Rewiden(50)
+	rewiden(&f, 50)
 	assert.Equal(t, new(21.0), statByText(t, &f, "+42 to maximum Life").Min)
 	assert.Equal(t, new(21.0), statByText(t, &f, "+42 total maximum Life").Min, "pseudo rows rewiden too")
 	// Negated stat ("10% reduced ..." -> -10): more negative is better, so it gets an upper
@@ -148,13 +149,13 @@ func TestTradeQueryShape(t *testing.T) {
 		t.Fatalf("no filter %s", id)
 		return nil
 	}
-	assert.Equal(t, 37.0, at(byID("pseudo.pseudo_total_life"), "value", "min"))
+	assert.InDelta(t, 37.0, at(byID("pseudo.pseudo_total_life"), "value", "min"), 0)
 	assert.Equal(t, false, at(byID("pseudo.pseudo_total_life"), "disabled"))
 	assert.Equal(t, true, at(filters[2], "disabled"), "fire total starts off")
 	assert.Equal(t, "weapon.bow", at(q, "query", "filters", "type_filters", "filters", "category", "option"))
 	assert.Equal(t, "true", at(q, "query", "filters", "misc_filters", "filters", "corrupted", "option"))
 	assert.Equal(t, "false", at(q, "query", "filters", "misc_filters", "filters", "identified", "option"))
-	assert.Equal(t, 2.0, at(q, "query", "filters", "equipment_filters", "filters", "rune_sockets", "min"))
+	assert.InDelta(t, 2.0, at(q, "query", "filters", "equipment_filters", "filters", "rune_sockets", "min"), 0)
 	_, hasMap := at(q, "query", "filters").(map[string]any)["map_filters"]
 	assert.False(t, hasMap)
 	assert.Equal(t, "asc", at(q, "sort", "price"))
@@ -162,7 +163,7 @@ func TestTradeQueryShape(t *testing.T) {
 
 func TestUniqueGemWaystoneCurrency(t *testing.T) {
 	unique := mustParse(t, "Item Class: Helmets\nRarity: Unique\nGoldrim\nFelt Cap\n--------\nItem Level: 50\n--------\n+42 to maximum Life")
-	NewStatMatcher(newFakeCatalog()).MatchItem(unique)
+	MatchStats(unique, newFakeCatalog())
 	f := BuildFilters(unique, opts())
 	assert.Equal(t, new("Goldrim"), f.Name)
 	assert.Equal(t, new("Felt Cap"), f.BaseType)
@@ -172,15 +173,15 @@ func TestUniqueGemWaystoneCurrency(t *testing.T) {
 	}
 	assert.Equal(t, new(false), f.Misc.Corrupted)
 	q := f.ToTradeQuery()
-	assert.Equal(t, "Goldrim", at(q.Query, "name"))
+	assert.Equal(t, new("Goldrim"), q.Query.Name)
 
 	gem := mustParse(t, "Item Class: Skill Gems\nRarity: Gem\nFireball\n--------\nLevel: 20 (Max)\nQuality: +20%")
 	f = BuildFilters(gem, opts())
 	assert.True(t, f.Misc.GemLevel.Enabled && f.Misc.Quality.Enabled)
 	assert.Nil(t, f.Rarity)
 	v := toValue(t, f.ToTradeQuery())
-	assert.Equal(t, 20.0, at(v, "query", "filters", "misc_filters", "filters", "gem_level", "min"))
-	assert.Equal(t, 20.0, at(v, "query", "filters", "type_filters", "filters", "quality", "min"))
+	assert.InDelta(t, 20.0, at(v, "query", "filters", "misc_filters", "filters", "gem_level", "min"), 0)
+	assert.InDelta(t, 20.0, at(v, "query", "filters", "type_filters", "filters", "quality", "min"), 0)
 
 	way := mustParse(t, "Item Class: Waystones\nRarity: Normal\nWaystone (Tier 15)")
 	wf := BuildFilters(way, opts())
@@ -196,15 +197,12 @@ func TestUniqueGemWaystoneCurrency(t *testing.T) {
 	assert.True(t, f.Misc.ItemLevel.Enabled)
 }
 
-func TestRangeJSONEdges(t *testing.T) {
-	_, ok := rangeJSON(&RangeFilter{Enabled: true})
-	assert.False(t, ok)
-	_, ok = rangeJSON(&RangeFilter{Enabled: false, Min: new(1.0)})
-	assert.False(t, ok)
-	v, ok := rangeJSON(&RangeFilter{Enabled: true, Max: new(3.0)})
-	assert.True(t, ok)
-	assert.Equal(t, map[string]any{"max": 3.0}, v)
-	minV, maxV := WidenBounds(nil, 10)
+func TestRangeBoundsEdges(t *testing.T) {
+	assert.Nil(t, (&RangeFilter{Enabled: true}).bounds())
+	assert.Nil(t, (&RangeFilter{Enabled: false, Min: new(1.0)}).bounds())
+	b := (&RangeFilter{Enabled: true, Max: new(3.0)}).bounds()
+	assert.JSONEq(t, `{"max":3}`, marshal(t, b))
+	minV, maxV := widenBounds(nil, 10)
 	assert.Nil(t, minV)
 	assert.Nil(t, maxV)
 }
@@ -217,7 +215,7 @@ func TestWidenNeverExceedsValue(t *testing.T) {
 		if integral {
 			v = math.Round(v)
 		}
-		minV := WidenMin(v, pct, integral)
+		minV := widenMin(v, pct, integral)
 		if !(minV <= v) {
 			t.Fatalf("min %v > v %v", minV, v)
 		}
@@ -229,28 +227,28 @@ func TestWidenNeverExceedsValue(t *testing.T) {
 }
 
 func TestReducedStatsGetAnUpperBound(t *testing.T) {
-	minV, maxV := WidenBounds([]float64{-30}, 10)
+	minV, maxV := widenBounds([]float64{-30}, 10)
 	assert.Nil(t, minV)
 	assert.Equal(t, new(-27.0), maxV)
-	minV, maxV = WidenBounds([]float64{55}, 10)
+	minV, maxV = widenBounds([]float64{55}, 10)
 	assert.Equal(t, new(49.0), minV)
 	assert.Nil(t, maxV)
-	minV, maxV = WidenBounds([]float64{}, 10)
+	minV, maxV = widenBounds([]float64{}, 10)
 	assert.Nil(t, minV)
 	assert.Nil(t, maxV)
-	assert.Less(t, math.Abs(WidenMaxNegative(-2.5, 10, false)-(-2.25)), 1e-9)
+	assert.InDelta(t, -2.25, widenMaxNegative(-2.5, 10, false), 1e-9)
 }
 
 func TestDesecratedModsSearchAsExplicit(t *testing.T) {
-	assert.Equal(t, "explicit.stat_1050105434", SearchStatID("desecrated.stat_1050105434"))
-	assert.Equal(t, "fractured.stat_1", SearchStatID("fractured.stat_1"))
+	assert.Equal(t, "explicit.stat_1050105434", searchStatID("desecrated.stat_1050105434"))
+	assert.Equal(t, "fractured.stat_1", searchStatID("fractured.stat_1"))
 }
 
 func TestModsWithTheSameStatMergeIntoOneSummedFilter(t *testing.T) {
-	row := func(id, text string, v float64, enabled bool, tier uint8) templatedRow {
+	row := func(id, text string, v float64, enabled bool, tier int) templatedRow {
 		return templatedRow{
 			row: StatFilter{
-				StatID: id, Text: text, Enabled: enabled, ItemValues: []float64{v}, Tiers: []uint8{tier},
+				StatID: id, Text: text, Enabled: enabled, ItemValues: []float64{v}, Tiers: []int{tier},
 			},
 			template: "#% increased Spirit",
 		}
@@ -265,8 +263,29 @@ func TestModsWithTheSameStatMergeIntoOneSummedFilter(t *testing.T) {
 	assert.Equal(t, []float64{68}, merged[0].ItemValues)
 	assert.Equal(t, new(61.0), merged[0].Min)
 	assert.True(t, merged[0].Enabled)
-	assert.Equal(t, []uint8{3, 7}, merged[0].Tiers, "summed rows keep each tier")
-	assert.Equal(t, []uint8{2}, merged[1].Tiers)
+	assert.Equal(t, []int{3, 7}, merged[0].Tiers, "summed rows keep each tier")
+	assert.Equal(t, []int{2}, merged[1].Tiers)
 	assert.Equal(t, "Adds 1.5 to 3 Damage", renderTemplate("Adds # to # Damage", []float64{1.5, 3}))
 	assert.Equal(t, "1 and #", renderTemplate("# and #", []float64{1}))
+}
+
+func TestStatFilterJSON(t *testing.T) {
+	f := StatFilter{StatID: "a", Text: "b", Tiers: []int{3, 7}}
+	assert.JSONEq(t, `{"stat_id":"a","text":"b","enabled":false,"min":null,"max":null,"item_values":[],"tiers":[3,7]}`, marshal(t, f))
+	var back StatFilter
+	require.NoError(t, json.Unmarshal([]byte(marshal(t, f)), &back))
+	assert.Equal(t, []int{3, 7}, back.Tiers)
+	// `tiers` may be missing.
+	var noTiers StatFilter
+	require.NoError(t, json.Unmarshal([]byte(`{"stat_id":"a","text":"b","enabled":true,"min":1.5,"max":null,"item_values":[1.5]}`), &noTiers))
+	assert.Equal(t, new(1.5), noTiers.Min)
+	assert.Nil(t, noTiers.Tiers)
+	assert.JSONEq(t, `{"league":"Standard","status":"online","widen_pct":10,"enable_all_stats":false}`, marshal(t, opts()))
+}
+
+func TestTradeQueryOmitsEmptyGroups(t *testing.T) {
+	f := FilterSet{Status: "", Stats: nil}
+	assert.JSONEq(t,
+		`{"query":{"status":{"option":"any"},"stats":[{"type":"and","filters":[]}],"filters":{}},"sort":{"price":"asc"}}`,
+		marshal(t, f.ToTradeQuery()))
 }

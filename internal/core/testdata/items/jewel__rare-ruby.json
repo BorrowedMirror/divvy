@@ -1,0 +1,84 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Ruby",
+  "category": "jewel",
+  "class": {
+    "type": "jewel"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Melee Damage",
+      "text": "14% increased Melee Damage",
+      "values": [
+        14
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Armour",
+      "text": "8% increased Armour",
+      "values": [
+        8
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+6% to Fire Resistance",
+      "values": [
+        6
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed with Two Handed Weapons",
+      "text": "3% increased Attack Speed with Two Handed Weapons",
+      "values": [
+        3
+      ]
+    }
+  ],
+  "name": "Chimeric Spark",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

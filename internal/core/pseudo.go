@@ -98,10 +98,10 @@ type pseudoTotal struct {
 	from []int
 }
 
-// PseudoFilters returns pseudo stat rows for mods, plus the indices of the mods they sum
+// pseudoFilters returns pseudo stat rows for mods, plus the indices of the mods they sum
 // (which the caller turns off by default when the pseudo row that covers them starts
 // enabled).
-func PseudoFilters(mods []Modifier, class ItemClass, widenPct float64) ([]StatFilter, []int) {
+func pseudoFilters(mods []Modifier, class ItemClass, widenPct float64) ([]StatFilter, []int) {
 	var totals []*pseudoTotal
 	for i, m := range mods {
 		if m.Kind == ModSkill {
@@ -137,21 +137,15 @@ func PseudoFilters(mods []Modifier, class ItemClass, widenPct float64) ([]StatFi
 			covered = append(covered, t.from...)
 		}
 		total := math.Round(t.sum*100) / 100
-		minV, maxV := WidenBounds([]float64{total}, widenPct)
-		var shown string
-		if fract(total) == 0 {
-			shown = formatI64(f64ToI64(total))
-		} else {
-			shown = formatF64Display(total)
-		}
+		minV, maxV := widenBounds([]float64{total}, widenPct)
 		rows = append(rows, StatFilter{
 			StatID:     p.id,
-			Text:       strings.Replace(p.text, "#", shown, 1),
+			Text:       strings.Replace(p.text, "#", formatNumber(total), 1),
 			Enabled:    p.enabled,
 			Min:        minV,
 			Max:        maxV,
 			ItemValues: []float64{total},
-			Tiers:      []uint8{},
+			Tiers:      []int{},
 		})
 	}
 	slices.Sort(covered)

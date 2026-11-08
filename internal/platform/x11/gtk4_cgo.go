@@ -25,21 +25,7 @@ static unsigned long rkl_gtk_xid(void *native) {
 */
 import "C"
 
-import (
-	"unsafe"
+import "unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-)
-
-// xidFromGtk is the X window id of a GtkWindow* (a Wails window's NativeWindow()). It calls
-// GTK, so it must run on the GTK main thread (inside application.InvokeSync).
-func xidFromGtk(native unsafe.Pointer) (uint32, error) {
-	if native == nil {
-		return 0, platform.Unsupported("overlay: no native window")
-	}
-	xid := uint32(C.rkl_gtk_xid(native))
-	if xid == 0 {
-		return 0, platform.Unsupported("overlay: the GTK window is not an X11 window (GDK_BACKEND must be x11)")
-	}
-	return xid, nil
-}
+// gtkXID is the X window id of a GtkWindow*, 0 when GDK is not on X11.
+func gtkXID(native unsafe.Pointer) uint32 { return uint32(C.rkl_gtk_xid(native)) }

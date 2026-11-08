@@ -1,0 +1,92 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Glinting Hooked Claw of Ease",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Claws"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 25,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "Grants # Life per Enemy Hit",
+      "text": "Grants 8 Life per Enemy Hit",
+      "values": [
+        8
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Physical Damage",
+      "text": "Adds 3 to 6 Physical Damage",
+      "values": [
+        3,
+        6
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed",
+      "text": "8% increased Attack Speed",
+      "values": [
+        8
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "12-32"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": true,
+      "name": "Attacks per Second",
+      "value": "1.70"
+    }
+  ],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 32,
+    "int": null,
+    "level": 18,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.7,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 37.4,
+    "spirit": null,
+    "total_dps": 37.4
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

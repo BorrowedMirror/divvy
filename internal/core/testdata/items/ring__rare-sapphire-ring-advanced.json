@@ -1,0 +1,149 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Sapphire Ring",
+  "category": "equipment",
+  "class": {
+    "type": "ring"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 82,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "implicit",
+        "name": null,
+        "ranges": [
+          {
+            "max": 30,
+            "min": 20
+          }
+        ],
+        "tier": null
+      },
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+24% to Cold Resistance",
+      "values": [
+        24
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Fecund",
+        "ranges": [
+          {
+            "max": 99,
+            "min": 85
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+93 to maximum Life",
+      "values": [
+        93
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Glinting",
+        "ranges": [
+          {
+            "max": 8,
+            "min": 5
+          },
+          {
+            "max": 15,
+            "min": 12
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Cold damage to Attacks",
+      "text": "Adds 7 to 14 Cold damage to Attacks",
+      "values": [
+        7,
+        14
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Lightning",
+        "ranges": [
+          {
+            "max": 40,
+            "min": 36
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Lightning Resistance",
+      "text": "+38% to Lightning Resistance",
+      "values": [
+        38
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Tzteosh",
+        "ranges": [
+          {
+            "max": 45,
+            "min": 41
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "fractured",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+44% to Fire Resistance",
+      "values": [
+        44
+      ]
+    }
+  ],
+  "name": "Cataclysm Coil",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 52,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

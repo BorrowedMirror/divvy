@@ -1,10 +1,10 @@
 package x11
 
 import (
-	"slices"
 	"testing"
 
 	"github.com/jezek/xgb/xproto"
+	"github.com/stretchr/testify/assert"
 )
 
 func covered(spans []xproto.Rectangle, x, y int) bool {
@@ -18,14 +18,11 @@ func covered(spans []xproto.Rectangle, x, y int) bool {
 
 func TestRoundedSpansCutTheCornersOnly(t *testing.T) {
 	s := roundedRectSpans(420, 600, 12)
-	if covered(s, 0, 0) || covered(s, 419, 0) || covered(s, 0, 599) || covered(s, 419, 599) {
-		t.Fatal("corners must be cut")
+	for _, p := range [][2]int{{0, 0}, {419, 0}, {0, 599}, {419, 599}} {
+		assert.False(t, covered(s, p[0], p[1]), "corner %v must be cut", p)
 	}
-	if !covered(s, 12, 0) || !covered(s, 0, 12) || !covered(s, 210, 300) || !covered(s, 407, 599) {
-		t.Fatal("inside must be covered")
-	}
-	if !covered(s, 0, 300) || !covered(s, 419, 300) {
-		t.Fatal("straight edges are full")
+	for _, p := range [][2]int{{12, 0}, {0, 12}, {210, 300}, {407, 599}, {0, 300}, {419, 300}} {
+		assert.True(t, covered(s, p[0], p[1]), "%v must be covered", p)
 	}
 	// Every pixel row is covered exactly once.
 	for y := range 600 {
@@ -35,20 +32,12 @@ func TestRoundedSpansCutTheCornersOnly(t *testing.T) {
 				rows++
 			}
 		}
-		if rows != 1 {
-			t.Fatalf("row %d covered %d times", y, rows)
-		}
+		assert.Equal(t, 1, rows, "row %d", y)
 	}
 }
 
 func TestDegenerateSizes(t *testing.T) {
-	if len(roundedRectSpans(0, 10, 4)) != 0 {
-		t.Fatal("zero width")
-	}
-	if got := roundedRectSpans(10, 10, 0); !slices.Equal(got, []xproto.Rectangle{{X: 0, Y: 0, Width: 10, Height: 10}}) {
-		t.Fatalf("radius 0: %v", got)
-	}
-	if tiny := roundedRectSpans(6, 6, 50); len(tiny) != 6 {
-		t.Fatalf("radius clamps to half the size: %v", tiny)
-	}
+	assert.Empty(t, roundedRectSpans(0, 10, 4), "zero width")
+	assert.Equal(t, []xproto.Rectangle{{X: 0, Y: 0, Width: 10, Height: 10}}, roundedRectSpans(10, 10, 0), "radius 0")
+	assert.Len(t, roundedRectSpans(6, 6, 50), 6, "radius clamps to half the size")
 }

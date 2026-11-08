@@ -1,0 +1,59 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Visored Helm",
+  "category": "equipment",
+  "class": {
+    "type": "helmet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 33,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+15%"
+    },
+    {
+      "augmented": true,
+      "name": "Armour",
+      "value": "56"
+    },
+    {
+      "augmented": true,
+      "name": "Evasion Rating",
+      "value": "50"
+    }
+  ],
+  "quality": 15,
+  "rarity": "normal",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 21,
+    "int": null,
+    "level": 22,
+    "str": 21
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": 56,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": 50,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

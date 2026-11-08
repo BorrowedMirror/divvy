@@ -1,7 +1,6 @@
 package wayland
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,7 +24,7 @@ func TestBuildsKeySequence(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"key", "29:1", "56:1", "46:1", "46:0", "56:0", "29:0"}, args)
 	_, err = keyArgs(mustChord(t, "ctrl+Pause"))
-	assert.True(t, errors.Is(err, platform.ErrInvalidChord), err)
+	require.ErrorIs(t, err, platform.ErrInvalidChord)
 	// No held modifiers on Wayland: a bare key is just down/up; duplicates collapse (chordplan).
 	args, err = keyArgs(platform.NewChord("Enter"))
 	require.NoError(t, err)
@@ -68,11 +67,11 @@ func TestRunsAFakeBinary(t *testing.T) {
 	chord := mustChord(t, "ctrl+c")
 	require.NoError(t, (&ydotool{binary: "/bin/true"}).SendChord(chord))
 	err := (&ydotool{binary: "/bin/false"}).SendChord(chord)
-	assert.True(t, errors.Is(err, platform.ErrBackend), err)
+	require.ErrorIs(t, err, platform.ErrBackend)
 	err = (&ydotool{binary: filepath.Join(t.TempDir(), "nope")}).SendChord(chord)
-	assert.True(t, errors.Is(err, platform.ErrBackend), err)
+	require.ErrorIs(t, err, platform.ErrBackend)
 	err = (&ydotool{binary: "/bin/true"}).SendChord(platform.NewChord("NoSuchKey"))
-	assert.True(t, errors.Is(err, platform.ErrInvalidChord), err)
+	require.ErrorIs(t, err, platform.ErrInvalidChord)
 
 	// The fake records its arguments: the exact `ydotool key` command line.
 	dir := t.TempDir()
@@ -84,14 +83,11 @@ func TestRunsAFakeBinary(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "key 29:1 56:1 46:1 46:0 56:0 29:0\n", string(got))
 
-	p, ok := findInPath("ydotool", "/nonexistent"+string(filepath.ListSeparator)+dir)
-	assert.True(t, ok)
-	assert.Equal(t, fake, p)
-	_, ok = findInPath("rkl-no-such-binary", "/bin")
-	assert.False(t, ok)
+	t.Setenv("PATH", "/nonexistent"+string(filepath.ListSeparator)+dir)
+	yd := detectYdotool()
+	require.NotNil(t, yd)
+	assert.Equal(t, fake, yd.binary)
 	// Not executable: skipped.
 	require.NoError(t, os.Chmod(fake, 0o644))
-	_, ok = findInPath("ydotool", dir)
-	assert.False(t, ok)
-	_, _ = detectYdotool()
+	assert.Nil(t, detectYdotool())
 }

@@ -41,7 +41,8 @@ type cgRect struct {
 	Size   cgSize
 }
 
-func init() { runtime.LockOSThread() } // AppKit wants the main thread
+//nolint:gochecknoinits // only init runs on the main OS thread, which AppKit needs
+func init() { runtime.LockOSThread() }
 
 func sel(name string) objc.SEL { return objc.RegisterName(name) }
 

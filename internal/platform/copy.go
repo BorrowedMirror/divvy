@@ -66,7 +66,6 @@ func CopyChord(advanced bool) Chord {
 
 // CopyItemText sends the copy chord and returns the item text. It clears the clipboard first so
 // a stale item is never returned, and restores the prior clipboard text afterwards when asked.
-// sleep is injected so tests run instantly.
 //
 // Clipboard races:
 //   - A clipboard holding non-text content (an image: Text reports no text but
@@ -80,7 +79,7 @@ func CopyChord(advanced bool) Chord {
 // Errors: [ErrTimeout] when nothing arrived, [ErrNoItemText] when the clipboard changed but to
 // something that is not an item; clipboard/simulator errors from clearing or sending the chord
 // are passed through (after restoring).
-func CopyItemText(sim InputSimulator, clip Clipboard, opts CopyOptions, sleep func(time.Duration)) (string, error) {
+func CopyItemText(sim InputSimulator, clip Clipboard, opts CopyOptions) (string, error) {
 	// A clipboard that cannot be read is treated as empty.
 	prevText, prevOK, err := clip.Text()
 	if err != nil {
@@ -88,27 +87,19 @@ func CopyItemText(sim InputSimulator, clip Clipboard, opts CopyOptions, sleep fu
 	}
 	nonText := !prevOK && clip.HasNonText()
 	restore := opts.RestoreClipboard && !nonText
+	err = nil
 	if !nonText {
 		err = clip.Clear()
-	} else {
-		err = nil
 	}
 	var item string
 	if err == nil {
 		err = sim.SendChord(CopyChord(opts.Advanced))
 	}
 	if err == nil {
-		item, err = poll(clip, opts, sleep)
+		item, err = poll(clip, opts)
 	}
 	if restore {
-		var previous, got *string
-		if prevOK {
-			previous = &prevText
-		}
-		if err == nil {
-			got = &item
-		}
-		restoreIfOurs(clip, previous, got)
+		restoreIfOurs(clip, prevText, prevOK, item, err == nil)
 	}
 	if err != nil {
 		return "", err
@@ -116,29 +107,29 @@ func CopyItemText(sim InputSimulator, clip Clipboard, opts CopyOptions, sleep fu
 	return item, nil
 }
 
-// restoreIfOurs puts previous back unless the clipboard moved on since we touched it.
-func restoreIfOurs(clip Clipboard, previous, item *string) {
+// restoreIfOurs puts the previous clipboard text back (or clears it, when hadPrevious is false)
+// unless the clipboard moved on since we touched it: it must still hold the item we read (when
+// gotItem) or nothing.
+func restoreIfOurs(clip Clipboard, previous string, hadPrevious bool, item string, gotItem bool) {
 	now, nowOK, err := clip.Text()
 	if err != nil {
 		slog.Warn("clipboard unreadable; not restoring", "error", err)
 		return
 	}
-	var ours bool
+	ours := gotItem && nowOK && now == item
 	if !nowOK {
 		ours = !clip.HasNonText()
-	} else {
-		ours = item != nil && *item == now
 	}
 	if !ours {
 		slog.Debug("clipboard changed by someone else during copy; not restoring")
 		return
 	}
-	if (previous == nil && !nowOK) || (previous != nil && nowOK && *previous == now) {
+	if nowOK == hadPrevious && (!nowOK || now == previous) {
 		return
 	}
 	var restored error
-	if previous != nil {
-		restored = clip.SetText(*previous)
+	if hadPrevious {
+		restored = clip.SetText(previous)
 	} else {
 		restored = clip.Clear()
 	}
@@ -147,7 +138,9 @@ func restoreIfOurs(clip Clipboard, previous, item *string) {
 	}
 }
 
-func poll(clip Clipboard, opts CopyOptions, sleep func(time.Duration)) (string, error) {
+// poll reads the clipboard every opts.PollInterval until it holds an item or opts.Timeout
+// passed.
+func poll(clip Clipboard, opts CopyOptions) (string, error) {
 	step := max(opts.PollInterval, time.Millisecond)
 	var waited time.Duration
 	sawOtherText := false
@@ -161,11 +154,11 @@ func poll(clip Clipboard, opts CopyOptions, sleep func(time.Duration)) (string, 
 		}
 		if waited >= opts.Timeout {
 			if sawOtherText {
-				return "", &Error{Kind: KindNoItemText}
+				return "", ErrNoItemText
 			}
 			return "", Timeout(opts.Timeout)
 		}
-		sleep(step)
+		time.Sleep(step)
 		waited += step
 	}
 }

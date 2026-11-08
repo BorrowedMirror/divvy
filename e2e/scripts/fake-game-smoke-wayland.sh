@@ -28,7 +28,8 @@ for _ in $(seq 100); do
   sleep 0.1
 done
 [ -n "${sock:-}" ] || { echo "FAIL: sway did not start"; cat "$work/sway.log"; exit 1; }
-export WAYLAND_DISPLAY=$(basename "$sock")
+WAYLAND_DISPLAY=$(basename "$sock")
+export WAYLAND_DISPLAY
 
 FAKE_GAME_DEBUG=${FAKE_GAME_DEBUG:-0} "$bin" --item "$work/n.txt" --advanced-item "$work/a.txt" --exit-after 30 --log-keys >"$work/out" 2>"$work/err" & pids+=($!)
 for _ in $(seq 100); do grep -q READY "$work/out" && break; sleep 0.1; done

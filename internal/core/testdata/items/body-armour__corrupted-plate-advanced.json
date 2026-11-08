@@ -1,0 +1,155 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Conqueror Plate",
+  "category": "equipment",
+  "class": {
+    "type": "body_armour"
+  },
+  "corrupted": true,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "rune",
+      "stat_id": null,
+      "template": "#% increased Armour",
+      "text": "20% increased Armour",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "enchant",
+      "stat_id": null,
+      "template": "+# to Level of all Minion Skills",
+      "text": "+1 to Level of all Minion Skills",
+      "values": [
+        1
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Impenetrable",
+        "ranges": [
+          {
+            "max": 100,
+            "min": 91
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Armour",
+      "text": "95% increased Armour",
+      "values": [
+        95
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Rotund",
+        "ranges": [
+          {
+            "max": 174,
+            "min": 150
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+164 to maximum Life",
+      "values": [
+        164
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Kiln",
+        "ranges": [
+          {
+            "max": 35,
+            "min": 31
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+35% to Fire Resistance",
+      "values": [
+        35
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Ulaman",
+        "ranges": [
+          {
+            "max": 6,
+            "min": 4
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "desecrated",
+      "stat_id": null,
+      "template": "#% of Damage taken Recouped as Life",
+      "text": "5% of Damage taken Recouped as Life",
+      "values": [
+        5
+      ]
+    }
+  ],
+  "name": "Havoc Carapace",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+12%"
+    },
+    {
+      "augmented": true,
+      "name": "Armour",
+      "value": "1104"
+    }
+  ],
+  "quality": 12,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 65,
+    "str": 121
+  },
+  "sanctified": false,
+  "sockets": 3,
+  "stack_size": null,
+  "stats": {
+    "armour": 1104,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

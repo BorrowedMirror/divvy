@@ -1,0 +1,130 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Expert Hunter Hood",
+  "category": "equipment",
+  "class": {
+    "type": "helmet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Hale",
+        "ranges": [
+          {
+            "max": 49,
+            "min": 40
+          }
+        ],
+        "tier": 7
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+42 to maximum Life",
+      "values": [
+        42
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Agile",
+        "ranges": [
+          {
+            "max": 119,
+            "min": 98
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Evasion Rating",
+      "text": "+109 to Evasion Rating",
+      "values": [
+        109
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Kiln",
+        "ranges": [
+          {
+            "max": 30,
+            "min": 26
+          }
+        ],
+        "tier": 4
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+31% to Fire Resistance",
+      "values": [
+        31
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Calamity",
+        "ranges": [
+          {
+            "max": 17,
+            "min": 14
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Chaos Resistance",
+      "text": "+16% to Chaos Resistance",
+      "values": [
+        16
+      ]
+    }
+  ],
+  "name": "Gale Cowl",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Evasion Rating",
+      "value": "402"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 87,
+    "int": null,
+    "level": 65,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": 402,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

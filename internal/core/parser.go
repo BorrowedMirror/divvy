@@ -23,16 +23,19 @@ package core
 // Text and recorded in [AdvancedModInfo.Ranges].
 
 import (
+	"errors"
 	"math"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
-// Separator is the section separator used in clipboard text.
-const Separator = "--------"
+// separator is the section separator used in clipboard text.
+const separator = "--------"
 
-// num is `-?\d+(?:\.\d+)?` with Rust's Unicode `\d`.
+// num is a number with Unicode digits: `-?\d+(?:\.\d+)?`.
 const num = `-?` + reDigit + `+(?:\.` + reDigit + `+)?`
 
 var (
@@ -70,14 +73,11 @@ var hintPrefixes = []string{
 }
 
 // ParseItem parses clipboard text into a [ParsedItem]. Accepts `\r\n` or `\n`. The error
-// is always a [ParseError].
+// is [ErrEmpty], [ErrNotAnItem], an *[UnknownRarityError] or a *[MalformedError].
 func ParseItem(text string) (*ParsedItem, error) {
-	if trimSpace(text) == "" {
-		return nil, ParseError{Kind: ParseErrEmpty}
-	}
 	sections := splitSections(text)
 	if len(sections) == 0 {
-		return nil, ParseError{Kind: ParseErrEmpty}
+		return nil, ErrEmpty
 	}
 	item, err := parseHeader(sections[0], text)
 	if err != nil {
@@ -94,16 +94,16 @@ func ParseItem(text string) (*ParsedItem, error) {
 // LooksLikeItem is the cheap check used by the clipboard poller to decide whether text
 // looks like an item.
 func LooksLikeItem(text string) bool {
-	t := strings.TrimLeftFunc(text, isSpaceRune)
+	t := strings.TrimLeftFunc(text, unicode.IsSpace)
 	return strings.HasPrefix(t, "Item Class:") || strings.HasPrefix(t, "Rarity: Gem")
 }
 
 // splitSections returns sections as trimmed, non-empty lines.
 func splitSections(text string) [][]string {
 	out := [][]string{nil}
-	for _, line := range rustLines(text) {
-		line = trimSpace(line)
-		if len(line) >= len(Separator) && strings.Trim(line, "-") == "" {
+	for line := range strings.Lines(text) {
+		line = strings.TrimSpace(line)
+		if len(line) >= len(separator) && strings.Trim(line, "-") == "" {
 			out = append(out, nil)
 		} else if line != "" {
 			out[len(out)-1] = append(out[len(out)-1], line)
@@ -121,42 +121,44 @@ func stripKey(line, key string) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	return trimSpace(rest), true
+	return strings.TrimSpace(rest), true
 }
 
 func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 	i := 0
-	var class *ItemClass
-	if v, ok := stripKey(lines[0], "Item Class"); ok {
+	classValue, hasClass := stripKey(lines[0], "Item Class")
+	if hasClass {
 		i++
-		class = new(ItemClassFromHeader(v))
 	}
 	if i >= len(lines) {
-		return nil, ParseError{Kind: ParseErrNotAnItem}
+		return nil, ErrNotAnItem
 	}
 	rarityLine := lines[i]
 	i++
 	rarityValue, ok := stripKey(rarityLine, "Rarity")
 	if !ok {
-		return nil, ParseError{Kind: ParseErrNotAnItem}
+		return nil, ErrNotAnItem
 	}
-	rarity, ok := RarityFromHeader(rarityValue)
+	rarity, ok := rarityFromHeader(rarityValue)
 	if !ok {
-		return nil, ParseError{Kind: ParseErrUnknownRarity, Value: rarityValue}
+		return nil, &UnknownRarityError{Value: rarityValue}
 	}
-	if class == nil {
-		if rarity != RarityGem {
-			return nil, ParseError{Kind: ParseErrNotAnItem}
-		}
+	var class ItemClass
+	switch {
+	case hasClass:
+		class = itemClassFromHeader(classValue)
+	case rarity == RarityGem:
 		// Meta gems are the only items copied without an `Item Class:` line.
-		class = new(OtherClass("Meta Gems"))
+		class = OtherClass("Meta Gems")
+	default:
+		return nil, ErrNotAnItem
 	}
 	names := lines[i:]
 	var name *string
 	var baseType string
 	switch {
 	case len(names) == 0:
-		return nil, ParseError{Kind: ParseErrMalformed, Section: "header", Reason: "missing item name"}
+		return nil, &MalformedError{Section: "header", Reason: "missing item name"}
 	case (rarity == RarityRare || rarity == RarityUnique) && len(names) >= 2:
 		name, baseType = new(names[0]), names[1]
 	default:
@@ -165,7 +167,7 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 	if rarity == RarityNormal {
 		baseType = strings.TrimPrefix(baseType, "Superior ")
 	}
-	c := refineClass(*class, baseType)
+	c := refineClass(class, baseType)
 	item := &ParsedItem{
 		Class:      c,
 		Category:   c.Category(rarity),
@@ -177,11 +179,10 @@ func parseHeader(lines []string, raw string) (*ParsedItem, error) {
 		Raw:        raw,
 	}
 	if m := baseTier.FindStringSubmatch(item.BaseType); m != nil {
-		if n, ok := parseU32(m[1]); ok {
-			switch item.Class.Kind {
-			case ClassWaystone:
+		if n, ok := parseUint32(m[1]); ok {
+			if item.Class.Kind == ClassWaystone {
 				item.WaystoneTier = new(n)
-			case ClassUncutGem:
+			} else if item.Class.Kind == ClassUncutGem {
 				item.GemLevel = new(n)
 			}
 		}
@@ -209,6 +210,8 @@ func refineClass(class ItemClass, base string) ItemClass {
 		case strings.HasPrefix(base, "Omen of"):
 			return ClassOmen.Class()
 		}
+	default:
+		// Other classes name one kind each.
 	}
 	return class
 }
@@ -221,7 +224,6 @@ type advancedState struct {
 type parserState struct {
 	propertiesDone bool
 	explicitsDone  bool
-	advanced       *advancedState
 }
 
 var flags = []string{
@@ -291,7 +293,7 @@ func parseSection(item *ParsedItem, state *parserState, lines []string) {
 func parseRequirementLine(req *Requirements, line string) {
 	clean := stripParenSuffixes(line)
 	set := func(key string, n uint32) {
-		switch asciiLower(key) {
+		switch strings.ToLower(key) {
 		case "level":
 			req.Level = new(n)
 		case "str", "strength":
@@ -311,20 +313,20 @@ func parseRequirementLine(req *Requirements, line string) {
 			words := strings.Fields(token)
 			switch len(words) {
 			case 2:
-				if n, ok := parseU32(words[0]); ok {
+				if n, ok := parseUint32(words[0]); ok {
 					set(words[1], n)
-				} else if n, ok := parseU32(words[1]); ok {
+				} else if n, ok := parseUint32(words[1]); ok {
 					set(words[0], n)
 				}
 			case 1:
-				if n, ok := parseU32(words[0]); ok {
+				if n, ok := parseUint32(words[0]); ok {
 					req.Level = new(n)
 				}
 			}
 		}
 	} else if k, v, found := strings.Cut(clean, ":"); found {
-		if n, ok := parseU32(trimSpace(v)); ok {
-			set(trimSpace(k), n)
+		if n, ok := parseUint32(strings.TrimSpace(v)); ok {
+			set(strings.TrimSpace(k), n)
 		}
 	}
 }
@@ -348,7 +350,7 @@ func firstNumberStr(s string) (string, bool) {
 
 func firstU32(s string) *uint32 {
 	if m, ok := firstNumberStr(s); ok {
-		if n, ok := parseU32(m); ok {
+		if n, ok := parseUint32(m); ok {
 			return &n
 		}
 	}
@@ -357,7 +359,7 @@ func firstU32(s string) *uint32 {
 
 func firstF64(s string) *float64 {
 	if m, ok := firstNumberStr(s); ok {
-		if n, ok := parseF64(m); ok {
+		if n, ok := parseFloat(m); ok {
 			return &n
 		}
 	}
@@ -366,7 +368,7 @@ func firstF64(s string) *float64 {
 
 // damageAverage is the sum of the averages of every `a-b` damage range in value.
 func damageAverage(value string) float64 {
-	nums := ExtractValues(value)
+	nums := extractValues(value)
 	var total float64
 	for c := range slices.Chunk(nums, 2) {
 		var sum float64
@@ -385,7 +387,7 @@ func parsePropertyLine(item *ParsedItem, line string) {
 		return
 	}
 	augmented := strings.Contains(value, "(augmented)")
-	clean := trimSpace(stripParenSuffixes(value))
+	clean := strings.TrimSpace(stripParenSuffixes(value))
 	s := &item.Stats
 	switch key {
 	case "Item Level":
@@ -461,19 +463,21 @@ func markerKind(marker string) (ModKind, bool) {
 	return "", false
 }
 
-func splitMarker(line string) (string, *ModKind) {
+// splitMarker cuts a ` (implicit)`-style marker off line; the kind is empty when there is
+// none.
+func splitMarker(line string) (string, ModKind) {
 	if open := strings.LastIndex(line, " ("); open >= 0 && strings.HasSuffix(line, ")") {
 		if kind, ok := markerKind(line[open+2 : len(line)-1]); ok {
-			return strings.TrimRightFunc(line[:open], isSpaceRune), &kind
+			return strings.TrimRightFunc(line[:open], unicode.IsSpace), kind
 		}
 	}
-	return line, nil
+	return line, ""
 }
 
-func parseAdvancedHeader(line string) *advancedState {
+func parseAdvancedHeader(line string) (advancedState, bool) {
 	m := advancedHeader.FindStringSubmatchIndex(line)
 	if m == nil {
-		return nil
+		return advancedState{}, false
 	}
 	kindText, _ := group(line, m, advKind)
 	var affix *Affix
@@ -507,11 +511,11 @@ func parseAdvancedHeader(line string) *advancedState {
 		info.Name = new(name)
 	}
 	if tier, ok := group(line, m, advTier); ok {
-		if n, ok := parseU8(tier); ok {
-			info.Tier = &n
+		if n, err := strconv.ParseUint(tier, 10, 8); err == nil {
+			info.Tier = new(uint8(n))
 		}
 	}
-	return &advancedState{info: info, kind: kind}
+	return advancedState{info: info, kind: kind}, true
 }
 
 func parseModSection(item *ParsedItem, state *parserState, lines []string) {
@@ -523,7 +527,7 @@ func parseModSection(item *ParsedItem, state *parserState, lines []string) {
 	advanced := slices.ContainsFunc(lines, func(l string) bool { return strings.HasPrefix(l, "{") })
 	allMarked := !slices.ContainsFunc(lines, func(l string) bool {
 		_, k := splitMarker(l)
-		return !(k != nil || strings.HasPrefix(l, "Grants Skill:"))
+		return k == "" && !strings.HasPrefix(l, "Grants Skill:")
 	})
 	if !advanced && !allMarked {
 		if state.explicitsDone && item.Rarity == RarityUnique {
@@ -535,23 +539,26 @@ func parseModSection(item *ParsedItem, state *parserState, lines []string) {
 		item.Advanced = true
 		state.explicitsDone = true
 	}
-	state.advanced = nil
+	var header *advancedState
 	for _, line := range lines {
 		if strings.HasPrefix(line, "{") {
-			state.advanced = parseAdvancedHeader(line)
+			header = nil
+			if h, ok := parseAdvancedHeader(line); ok {
+				header = &h
+			}
 			continue
 		}
 		if (strings.HasPrefix(line, "(") && strings.HasSuffix(line, ")")) ||
 			line == "Desecrated Prefix" || line == "Desecrated Suffix" || strings.HasPrefix(line, "Unrevealed") {
 			continue // reminder text / unrevealed placeholders
 		}
-		item.Modifiers = append(item.Modifiers, parseModLine(line, state.advanced))
+		item.Modifiers = append(item.Modifiers, parseModLine(line, header))
 	}
 }
 
 func parseModLine(line string, advanced *advancedState) Modifier {
 	if l, ok := strings.CutSuffix(line, "— Unscalable Value"); ok {
-		line = strings.TrimRightFunc(l, isSpaceRune)
+		line = strings.TrimRightFunc(l, unicode.IsSpace)
 	}
 	body, marker := splitMarker(line)
 	ranges := []ValueRange{}
@@ -561,8 +568,8 @@ func parseModLine(line string, advanced *advancedState) Modifier {
 		text = replaceAllSubmatchFunc(rollRange, body, func(idx []int) string {
 			as, _ := group(body, idx, 2)
 			bs, _ := group(body, idx, 3)
-			a, _ := parseF64(as)
-			b, _ := parseF64(bs)
+			a, _ := parseFloat(as)
+			b, _ := parseFloat(bs)
 			ranges = append(ranges, ValueRange{Min: math.Min(a, b), Max: math.Max(a, b)})
 			v, _ := group(body, idx, 1)
 			return v
@@ -572,8 +579,8 @@ func parseModLine(line string, advanced *advancedState) Modifier {
 	switch {
 	case strings.HasPrefix(body, "Grants Skill:"):
 		kind = ModSkill
-	case marker != nil:
-		kind = *marker
+	case marker != "":
+		kind = marker
 	case advanced != nil:
 		kind = advanced.kind
 	default:
@@ -581,11 +588,11 @@ func parseModLine(line string, advanced *advancedState) Modifier {
 	}
 	var adv *AdvancedModInfo
 	if advanced != nil {
-		a := advanced.info.clone()
+		a := advanced.info
 		a.Ranges = ranges
 		adv = &a
 	}
-	return Modifier{Template: Templatize(text), Values: ExtractValues(text), Text: text, Kind: kind, StatID: nil, Advanced: adv}
+	return Modifier{Template: Templatize(text), Values: extractValues(text), Text: text, Kind: kind, StatID: nil, Advanced: adv}
 }
 
 func finish(item *ParsedItem) {
@@ -612,4 +619,17 @@ func finish(item *ParsedItem) {
 		s.ElementalDPS = nil
 		s.TotalDPS = nil
 	}
+}
+
+// parseUint32 parses a decimal number of ASCII digits with an optional `+` sign.
+func parseUint32(s string) (uint32, bool) {
+	n, err := strconv.ParseUint(strings.TrimPrefix(s, "+"), 10, 32)
+	return uint32(n), err == nil
+}
+
+// parseFloat parses a decimal number; values out of range become ±Inf or 0 rather than
+// failing.
+func parseFloat(s string) (float64, bool) {
+	f, err := strconv.ParseFloat(s, 64)
+	return f, err == nil || errors.Is(err, strconv.ErrRange)
 }

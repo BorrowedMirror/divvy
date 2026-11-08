@@ -1,0 +1,49 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Uncut Skill Gem (Level 19)",
+  "category": "gem",
+  "class": {
+    "type": "uncut_gem"
+  },
+  "corrupted": false,
+  "gem_level": 19,
+  "item_level": null,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Level",
+      "value": "19"
+    }
+  ],
+  "quality": null,
+  "rarity": "currency",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

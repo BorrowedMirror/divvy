@@ -32,7 +32,11 @@ type layerOverlay struct {
 	clickThrough bool
 }
 
-var _ platform.LayerAnchorer = (*layerOverlay)(nil)
+var (
+	_ platform.OverlayWindow = (*layerOverlay)(nil)
+	_ platform.LayerAnchorer = (*layerOverlay)(nil)
+	_ platform.Resizer       = (*layerOverlay)(nil)
+)
 
 // newOverlay wraps the GtkWindow* of a Wails window (its NativeWindow()).
 func newOverlay(native unsafe.Pointer, run func(func()), gnome bool) (platform.OverlayWindow, error) {
@@ -101,26 +105,25 @@ func (o *layerOverlay) SetClickThrough(enabled bool) error {
 
 // RaiseAbove is a no-op: the layer surface already sits in the OVERLAY layer, above every
 // toplevel, and Wayland gives clients no stacking control otherwise.
-func (o *layerOverlay) RaiseAbove(*uint64) error { return nil }
+func (*layerOverlay) RaiseAbove(uint64) error { return nil }
 
-// Activate is a no-op, as in the Tauri build: the layer surface takes the keyboard on demand,
-// when the user clicks into it, and Wayland has no focus stealing to request it otherwise.
-func (o *layerOverlay) Activate() error { return nil }
+// Activate is a no-op: the layer surface takes the keyboard on demand, when the user clicks
+// into it, and Wayland has no focus stealing to request it otherwise.
+func (*layerOverlay) Activate() error { return nil }
 
 // AnchorLayer implements [platform.LayerAnchorer]: it places the layer surface against the right
 // (or left) output edge, top and side px in (surface-local, i.e. logical, px). Positions have no
-// effect on layer surfaces. It calls GTK, so it runs through the main-thread dispatcher (the
-// Tauri build hopped to the main thread for it too); with InvokeSync that is safe from any
-// goroutine and from the main thread itself.
+// effect on layer surfaces. It calls GTK, so it runs through the main-thread dispatcher; with
+// InvokeSync that is safe from any goroutine and from the main thread itself.
 func (o *layerOverlay) AnchorLayer(right bool, top, side int32) error {
 	var err error
 	o.run(func() { err = o.anchor(Anchor{Right: right, Top: top, Side: side}) })
 	return err
 }
 
-// Resize sizes the overlay (logical px). A layer surface takes its size from the window's size
-// request, so Wails' SetSize (gtk_window_resize) alone does not resize it: the shell must resize
-// the Wayland overlay through this (type-assert `interface{ Resize(w, h int32) error }`).
+// Resize implements [platform.Resizer]: it sizes the overlay (logical px). A layer surface
+// takes its size from the window's size request, so Wails' SetSize (gtk_window_resize) alone
+// does not resize it.
 func (o *layerOverlay) Resize(width, height int32) error {
 	if width <= 0 || height <= 0 {
 		return nil

@@ -11,7 +11,6 @@ import (
 
 // fakeCatalog is a minimal in-memory catalog for tests.
 type fakeCatalog struct {
-	NoUniquesByBase
 	stats   []StatDef
 	bases   []BaseDef
 	uniques []UniqueDef
@@ -132,9 +131,9 @@ func TestTemplatizeExamples(t *testing.T) {
 }
 
 func TestValuesExamples(t *testing.T) {
-	assert.Equal(t, []float64{10, 1043}, ExtractValues("Adds 10 to 1,043 Physical Damage"))
-	assert.Equal(t, []float64{4.4}, ExtractValues("+4.40% to x"))
-	assert.Empty(t, ExtractValues("none"))
+	assert.Equal(t, []float64{10, 1043}, extractValues("Adds 10 to 1,043 Physical Damage"))
+	assert.Equal(t, []float64{4.4}, extractValues("+4.40% to x"))
+	assert.Empty(t, extractValues("none"))
 }
 
 type modLine struct {
@@ -156,7 +155,7 @@ func itemWith(t *testing.T, class ItemClass, rarity Rarity, base string, lines [
 			Text:     l.text,
 			Template: Templatize(l.text),
 			Kind:     l.kind,
-			Values:   ExtractValues(l.text),
+			Values:   extractValues(l.text),
 		})
 	}
 	return item
@@ -172,8 +171,6 @@ func statIDs(item *ParsedItem) []*string {
 
 func TestMatchesKindsAliasesAndLocals(t *testing.T) {
 	cat := newFakeCatalog()
-	m := NewStatMatcher(cat)
-	assert.Same(t, cat, m.Catalog().(*fakeCatalog))
 	item := itemWith(t, WeaponClass("Bows"), RarityRare, "Recurve Bow", []modLine{
 		{"+42 to maximum Life", ModExplicit},
 		{"+20% to Fire Resistance", ModImplicit},
@@ -188,7 +185,7 @@ func TestMatchesKindsAliasesAndLocals(t *testing.T) {
 		{"+10 to all Attributes", ModExplicit},
 		{"Has a Strange thing", ModExplicit},
 	})
-	out := m.MatchItem(item)
+	MatchStats(item, cat)
 	assert.Equal(t, []*string{
 		new("explicit.stat_3299347043"),
 		new("implicit.stat_3372524247"),
@@ -203,39 +200,35 @@ func TestMatchesKindsAliasesAndLocals(t *testing.T) {
 		new("explicit.stat_attr_b"),
 		nil,
 	}, statIDs(item))
-	assert.Equal(t, MatchOutcome{Kind: Matched, StatID: "explicit.stat_4220027924", Negated: true}, out[4])
+	// `-10% to Cold Resistance` matched the `+#%` stat negated.
 	assert.Equal(t, []float64{-10}, item.Modifiers[4].Values)
 	assert.Equal(t, []float64{-10}, item.Modifiers[5].Values)
-	assert.Equal(t, MatchOutcome{Kind: Unmatched}, out[8])
 	assert.Equal(t, []float64{1}, item.Modifiers[9].Values)
-	assert.Equal(t, MatchOutcome{Kind: Unmatched}, out[11])
 
 	// On jewellery the global variant wins.
 	ring := itemWith(t, ClassRing.Class(), RarityRare, "Ruby Ring", []modLine{
 		{"Adds 3 to 7 Physical Damage", ModExplicit},
 		{"30% increased Spirit", ModExplicit},
 	})
-	m.MatchItem(ring)
+	MatchStats(ring, cat)
 	assert.Equal(t, new("explicit.stat_2223678961"), ring.Modifiers[0].StatID)
 	assert.Equal(t, new("explicit.stat_spirit_b"), ring.Modifiers[1].StatID)
 }
 
 func TestResolvesMagicBase(t *testing.T) {
 	cat := newFakeCatalog()
-	m := NewStatMatcher(cat)
 	item := itemWith(t, ClassHelmet.Class(), RarityMagic, "Hale Expert Hunter Hood of the Kiln", nil)
-	m.MatchItem(item)
+	MatchStats(item, cat)
 	assert.Equal(t, "Expert Hunter Hood", item.BaseType)
 	assert.Equal(t, new("Hale Expert Hunter Hood of the Kiln"), item.Name)
 	// Already a bare base: untouched.
 	bare := itemWith(t, ClassHelmet.Class(), RarityMagic, "Hunter Hood", nil)
-	m.MatchItem(bare)
+	MatchStats(bare, cat)
 	assert.Nil(t, bare.Name)
 	// Exercise the remaining fake-catalog lookups.
 	assert.NotNil(t, cat.Base("Hunter Hood"))
 	assert.NotNil(t, cat.Unique("Goldrim"))
 	assert.NotNil(t, cat.StaticItem("Divine Orb"))
-	assert.Empty(t, cat.UniquesByBase("Felt Cap"), "default UniquesByBase is empty")
 }
 
 func TestPluraliseExamples(t *testing.T) {
@@ -251,12 +244,12 @@ func TestPluraliseExamples(t *testing.T) {
 	assert.False(t, ok)
 }
 
-// Go-only: the hand-rolled Unicode `\b` of the singular pattern.
+// The hand-rolled Unicode word boundaries of the singular pattern.
 func TestPluraliseUnicodeWordBoundaries(t *testing.T) {
 	_, _, ok := pluraliseAdditional("éa Projectile")
-	assert.False(t, ok, "a non-ASCII letter before `a` is a word character in Rust")
+	assert.False(t, ok, "a non-ASCII letter before `a` is a word character")
 	_, _, ok = pluraliseAdditional("fire a Projectileé")
-	assert.False(t, ok, "a non-ASCII letter after the noun is a word character in Rust")
+	assert.False(t, ok, "a non-ASCII letter after the noun is a word character")
 	p, _, ok := pluraliseAdditional("éa x, a Projectile!")
 	assert.True(t, ok)
 	assert.Equal(t, "éa x, # additional Projectiles!", p)

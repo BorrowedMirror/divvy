@@ -15,14 +15,8 @@ import (
 type migrationStep func(doc *koanf.Koanf) error
 
 // migrations are the ordered steps; migrations[i] upgrades vi -> v(i+1). To add v2, append
-// a step and bump [SettingsVersion].
+// a step and bump [SettingsVersion] (a test checks there is one step per version).
 var migrations = []migrationStep{migrateV0ToV1}
-
-func init() {
-	if len(migrations) != int(SettingsVersion) {
-		panic("config: one migration step per version")
-	}
-}
 
 // NewDocument parses settings TOML into a raw koanf document (keys as written, no
 // defaults), the form [Migrate] works on.
@@ -71,7 +65,7 @@ func documentVersion(doc *koanf.Koanf) (uint32, error) {
 	}
 }
 
-// typeStr is toml's `Value::type_str`.
+// typeStr names the TOML type of a parsed document value.
 func typeStr(v any) string {
 	switch v.(type) {
 	case string:
@@ -102,8 +96,8 @@ func section(doc *koanf.Koanf, name string) error {
 	return nil
 }
 
-// set is `Table::insert`: the new value replaces the old one whole (koanf's Set would merge
-// a table into an existing one).
+// set stores v at path, replacing any old value whole (koanf's Set would merge a table
+// into an existing one).
 func set(doc *koanf.Koanf, path string, v any) error {
 	doc.Delete(path)
 	return doc.Set(path, v)

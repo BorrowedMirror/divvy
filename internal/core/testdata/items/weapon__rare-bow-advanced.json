@@ -1,0 +1,154 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Gemini Bow",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Bows"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 82,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "implicit",
+        "name": null,
+        "ranges": [],
+        "tier": null
+      },
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "Bow Attacks fire an additional Arrow",
+      "text": "Bow Attacks fire an additional Arrow",
+      "values": []
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Tyrannical",
+        "ranges": [
+          {
+            "max": 154,
+            "min": 135
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "151% increased Physical Damage",
+      "values": [
+        151
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Gleaming",
+        "ranges": [
+          {
+            "max": 19,
+            "min": 14
+          },
+          {
+            "max": 33,
+            "min": 26
+          }
+        ],
+        "tier": 4
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Physical Damage",
+      "text": "Adds 16 to 28 Physical Damage",
+      "values": [
+        16,
+        28
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Celebration",
+        "ranges": [
+          {
+            "max": 17,
+            "min": 15
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed",
+      "text": "17% increased Attack Speed",
+      "values": [
+        17
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Hunt",
+        "ranges": [],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Level of all Projectile Skills",
+      "text": "+3 to Level of all Projectile Skills",
+      "values": [
+        3
+      ]
+    }
+  ],
+  "name": "Doom Song",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "102-191"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.10"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 138,
+    "int": null,
+    "level": 70,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.1,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 161.15,
+    "spirit": null,
+    "total_dps": 161.15
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

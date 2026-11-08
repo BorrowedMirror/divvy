@@ -6,17 +6,16 @@ package wayland
 //
 //	go test -tags 'waylandtest gtk3' ./internal/platform/wayland/
 //
-// Like the Rust test, the test re-executes itself as a child with a private XDG_RUNTIME_DIR /
+// The test re-executes itself as a child with a private XDG_RUNTIME_DIR /
 // WAYLAND_DISPLAY, no DISPLAY and an unreachable session bus (so the GlobalShortcuts portal is
 // deterministically absent and the signal fallback is reported). Self-skipping without sway.
 
 import (
-	"context"
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"syscall"
@@ -113,27 +112,27 @@ func swaymsg(t *testing.T, kind string) string {
 }
 
 func child(t *testing.T) {
+	t.Helper()
 	// GTK must stay on one OS thread.
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
 	// No DISPLAY: Wayland-native.
-	assert.Equal(t, platform.BackendWayland, platform.Detect(platform.EnvProbeFromEnv(), nil))
+	assert.Equal(t, platform.BackendWayland, platform.Detect(platform.EnvProbeFromEnv(), ""))
 
 	// Signals first, so a stray SIGUSR cannot kill the child.
-	events, stop := SignalTriggers()
-	defer stop()
+	events := platform.SignalTriggers(t.Context())
 
-	parts, err := New()
+	parts, err := New(Options{Probe: platform.EnvProbeFromEnv()})
 	require.NoError(t, err)
 	assert.Equal(t, platform.BackendWayland, parts.Kind)
 	caps := parts.Capabilities
 	assert.False(t, caps.WindowTracking || caps.PassiveHook, "%+v", caps)
 	assert.True(t, caps.OverlayAlwaysOnTop && caps.OverlayClickThrough, "%+v", caps)
-	assert.True(t, slicesContain(caps.Notes, "anchored to the output"), "%+v", caps)
+	assert.True(t, containsText(caps.Notes, "anchored to the output"), "%+v", caps)
 
-	// Keystrokes through our own virtual keyboard: unlike enigo 0.6 it uploads its own keymap,
-	// so it works even on headless sway's keyboard-less seat.
+	// Keystrokes through our own virtual keyboard: it uploads its own keymap, so it works even
+	// on headless sway's keyboard-less seat.
 	assert.True(t, caps.KeystrokeInjection, "%+v", caps)
 	vk, isVK := parts.InputSimulator.(*virtualKeyboard)
 	require.True(t, isVK)
@@ -145,36 +144,44 @@ func child(t *testing.T) {
 		t.Logf("NOTE: virtual keyboard not ready: %v", caps.Notes)
 	}
 	err = parts.InputSimulator.SendChord(platform.NewChord("NoSuchKey"))
-	assert.True(t, errors.Is(err, platform.ErrInvalidChord), err)
+	require.ErrorIs(t, err, platform.ErrInvalidChord)
 
 	// No portal on a dead bus: the signal fallback is reported.
-	ok, notes := GlobalHotkeys(context.Background())
+	ok, notes := GlobalHotkeys(t.Context())
 	assert.False(t, ok)
-	assert.True(t, slicesContain(notes, "--trigger"), notes)
+	assert.True(t, containsText(notes, "--trigger"), notes)
 
 	// Unsupported pieces report themselves.
 	_, found := parts.WindowTracker.GameWindow()
 	assert.False(t, found)
 	assert.True(t, parts.WindowTracker.IsGameFocused())
-	_, err = parts.WindowTracker.Subscribe()
-	assert.True(t, errors.Is(err, platform.ErrUnsupported))
-	_, err = parts.InputListener.Start()
-	assert.True(t, errors.Is(err, platform.ErrUnsupported))
+	_, err = parts.WindowTracker.Subscribe(t.Context())
+	require.ErrorIs(t, err, platform.ErrUnsupported)
+	_, err = parts.InputListener.Start(t.Context())
+	require.ErrorIs(t, err, platform.ErrUnsupported)
 
 	// Signal triggers, as `pkill -USR2 rkl` / `-USR1` would send them.
 	require.NoError(t, exec.Command("kill", "-USR2", strconv.Itoa(os.Getpid())).Run())
-	assert.Equal(t, platform.Action(platform.PriceCheck), recv(t, events).Action)
+	assert.Equal(t, platform.Action(platform.PriceCheck), recvTrigger(t, events).Action)
 	require.NoError(t, syscall.Kill(os.Getpid(), syscall.SIGUSR1))
-	assert.Equal(t, platform.Action(platform.PriceCheckPinned), recv(t, events).Action)
+	assert.Equal(t, platform.Action(platform.PriceCheckPinned), recvTrigger(t, events).Action)
 
 	layerShellScenario(t, parts)
 }
 
-func slicesContain(list []string, sub string) bool {
-	for _, s := range list {
-		if strings.Contains(s, sub) {
-			return true
-		}
+// containsText reports whether any entry of list contains sub.
+func containsText(list []string, sub string) bool {
+	return slices.ContainsFunc(list, func(s string) bool { return strings.Contains(s, sub) })
+}
+
+func recvTrigger(t *testing.T, ch <-chan platform.HotkeyEvent) platform.HotkeyEvent {
+	t.Helper()
+	select {
+	case e, ok := <-ch:
+		require.True(t, ok, "stream closed")
+		return e
+	case <-time.After(5 * time.Second):
+		t.Fatal("no trigger within 5s")
 	}
-	return false
+	return platform.HotkeyEvent{}
 }

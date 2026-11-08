@@ -8,8 +8,7 @@ import (
 )
 
 // keycodeNames maps X keycodes (evdev code + 8, the layout-independent physical key) to W3C
-// KeyboardEvent.code names, as rdev did on X11: its Linux keycode table chained with its W3C
-// table, falling back to the rdev key name for keys W3C has no code for (Pause, Hangul, Hanja).
+// KeyboardEvent.code names. Keys W3C has no code for keep a descriptive name (Hangul, Hanja).
 var keycodeNames = map[uint8]string{
 	9: "Escape", 10: "Digit1", 11: "Digit2", 12: "Digit3", 13: "Digit4", 14: "Digit5",
 	15: "Digit6", 16: "Digit7", 17: "Digit8", 18: "Digit9", 19: "Digit0", 20: "Minus",
@@ -39,7 +38,7 @@ var keycodeNames = map[uint8]string{
 	198: "F20", 199: "F21", 200: "F22", 201: "F23", 202: "F24",
 }
 
-// keyCode is the W3C code name of an X keycode ("Unidentified" for keys rdev did not know).
+// keyCode is the W3C code name of an X keycode ("Unidentified" for keys not in the table).
 func keyCode(keycode uint8) string {
 	if name, ok := keycodeNames[keycode]; ok {
 		return name
@@ -47,14 +46,19 @@ func keyCode(keycode uint8) string {
 	return "Unidentified"
 }
 
+// keycodesByName is the inverse of [keycodeNames].
+var keycodesByName = func() map[string]uint8 {
+	m := make(map[string]uint8, len(keycodeNames))
+	for kc, name := range keycodeNames {
+		m[name] = kc
+	}
+	return m
+}()
+
 // keycodeFor is the inverse of [keyCode].
 func keycodeFor(code string) (uint8, bool) {
-	for kc, name := range keycodeNames {
-		if name == code {
-			return kc, true
-		}
-	}
-	return 0, false
+	kc, ok := keycodesByName[code]
+	return kc, ok
 }
 
 // X keysyms (X11/keysymdef.h).
@@ -87,8 +91,8 @@ var namedKeysyms = map[string]uint32{
 	"PageUp": xkPrior, "PageDown": xkNext,
 }
 
-// chordKeysym maps a chord key (W3C code) to the keysym we inject: letters are lower case,
-// digits and the named keys enigo supported; F1-F12. Anything else is not sendable.
+// chordKeysym maps a chord key (W3C code) to the keysym we inject: letters (lower case),
+// digits, the named keys in [namedKeysyms] and F1-F12. Anything else is not sendable.
 func chordKeysym(code string) (uint32, bool) {
 	if len(code) == 4 && code[:3] == "Key" {
 		c := code[3]
@@ -117,8 +121,8 @@ func chordKeysym(code string) (uint32, bool) {
 	return 0, false
 }
 
-// modifierKeysym is the left-hand key of a modifier (enigo: Control_L, Alt_L, Shift_L,
-// Super_L for Meta).
+// modifierKeysym is the left-hand key of a modifier (Control_L, Alt_L, Shift_L, Super_L for
+// Meta).
 func modifierKeysym(m platform.KeyModifier) uint32 {
 	switch m {
 	case platform.Ctrl:

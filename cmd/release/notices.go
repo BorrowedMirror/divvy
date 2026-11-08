@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"cmp"
+	"context"
 	"crypto/sha256"
 	_ "embed"
 	"errors"
@@ -55,19 +56,19 @@ type noticeGroup struct {
 
 // runNotices writes THIRD-PARTY-NOTICES.html for the release (or only checks the licence
 // policy with -check), from `go-licenses report` over ./cmd/rkl for every target OS.
-func runNotices(root string, args []string) error {
-	fs := flag.NewFlagSet("notices", flag.ContinueOnError)
-	out := fs.String("o", filepath.Join(root, "target", "go", "THIRD-PARTY-NOTICES.html"), "output file")
-	check := fs.Bool("check", false, "only check every licence against the policy")
-	if err := fs.Parse(args); err != nil {
+func runNotices(ctx context.Context, root string, args []string) error {
+	flags := flag.NewFlagSet("notices", flag.ContinueOnError)
+	out := flags.String("o", filepath.Join(root, outDir, "THIRD-PARTY-NOTICES.html"), "output file")
+	check := flags.Bool("check", false, "only check every licence against the policy")
+	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	tool, err := goLicenses(root)
+	tool, err := goLicenses(ctx, root)
 	if err != nil {
 		return err
 	}
-	tmpl := filepath.Join(os.TempDir(), fmt.Sprintf("rkl-licenses-%d.tmpl", os.Getpid()))
-	if err := os.WriteFile(tmpl, []byte(licenseLineTemplate), 0o600); err != nil {
+	tmpl, err := writeTemp("rkl-licenses-*.tmpl", licenseLineTemplate)
+	if err != nil {
 		return err
 	}
 	defer os.Remove(tmpl)
@@ -78,7 +79,7 @@ func runNotices(root string, args []string) error {
 		if t.goos != "linux" {
 			env = append(env, "CGO_ENABLED=0")
 		}
-		report, err := sh{dir: root}.with(env...).output(tool, "report", "./cmd/rkl",
+		report, err := sh{dir: root}.with(env...).output(ctx, tool, "report", "./cmd/rkl",
 			"--template", tmpl, "--ignore", modulePath)
 		if err != nil {
 			return fmt.Errorf("go-licenses (%s): %w", t.goos, err)
@@ -100,10 +101,10 @@ func runNotices(root string, args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(*out), 0o777); err != nil {
+	if err := os.MkdirAll(filepath.Dir(*out), 0o755); err != nil {
 		return err
 	}
-	if err := os.WriteFile(*out, html, 0o666); err != nil {
+	if err := os.WriteFile(*out, html, 0o644); err != nil {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, "wrote", *out)
@@ -112,13 +113,32 @@ func runNotices(root string, args []string) error {
 
 // goLicenses is the host binary of the go-licenses pinned in tools/go.mod (`go tool -n`
 // prints its path), so GOOS in its environment picks what it analyses, not what it runs on.
-func goLicenses(root string) (string, error) {
-	out, err := sh{dir: root}.with("GOOS=", "GOARCH=", "CGO_ENABLED=").output("go", "tool",
+func goLicenses(ctx context.Context, root string) (string, error) {
+	out, err := sh{dir: root}.with("GOOS=", "GOARCH=", "CGO_ENABLED=").output(ctx, "go", "tool",
 		"-modfile="+filepath.Join(root, "tools", "go.mod"), "-n", "go-licenses")
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(out), nil
+}
+
+// writeTemp writes text to a new temporary file named after pattern ([os.CreateTemp]) and
+// returns its path.
+func writeTemp(pattern, text string) (string, error) {
+	f, err := os.CreateTemp("", pattern)
+	if err != nil {
+		return "", err
+	}
+	if _, err := f.WriteString(text); err != nil {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
 }
 
 // parseLicenseReports merges go-licenses reports (licenseLineTemplate lines) into one sorted

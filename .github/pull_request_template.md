@@ -13,4 +13,4 @@
 - [ ] Tests added or updated
 - [ ] `go generate ./...` run if IPC types or `.commit-config.toml` changed (`web/src/bindings.ts` is committed)
 - [ ] User-visible change? Docs updated
-- [ ] Wrong-price fix? The item text was added to `internal/testkit/testdata/corpus/`
+- [ ] Wrong-price fix? The item text was added to `internal/core/testdata/corpus/`

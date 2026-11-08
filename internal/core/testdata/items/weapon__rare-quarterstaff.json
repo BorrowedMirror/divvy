@@ -1,0 +1,102 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Wrapped Quarterstaff",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Quarterstaves"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 78,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "127% increased Physical Damage",
+      "values": [
+        127
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Physical Damage",
+      "text": "Adds 7 to 14 Physical Damage",
+      "values": [
+        7,
+        14
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+68 to Accuracy Rating",
+      "values": [
+        68
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Gain # Life per enemy killed",
+      "text": "Gain 21 Life per enemy killed",
+      "values": [
+        21
+      ]
+    }
+  ],
+  "name": "Gale Pillar",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "112-187"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "11.50%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.40"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 98,
+    "int": 42,
+    "level": 60,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.4,
+    "block_chance": null,
+    "critical_hit_chance": 11.5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 209.3,
+    "spirit": null,
+    "total_dps": 209.3
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

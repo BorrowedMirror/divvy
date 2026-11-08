@@ -1,0 +1,156 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Rattling Sceptre",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Sceptres"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Level # Skeletal Warrior Minion",
+      "text": "Grants Skill: Level 18 Skeletal Warrior Minion",
+      "values": [
+        18
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Duke's",
+        "ranges": [
+          {
+            "max": 55,
+            "min": 51
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Spirit",
+      "text": "55% increased Spirit",
+      "values": [
+        55
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Advisor's",
+        "ranges": [
+          {
+            "max": 14,
+            "min": 10
+          }
+        ],
+        "tier": 7
+      },
+      "kind": "desecrated",
+      "stat_id": null,
+      "template": "#% increased Spirit",
+      "text": "13% increased Spirit",
+      "values": [
+        13
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Advisor's",
+        "ranges": [
+          {
+            "max": 20,
+            "min": 17
+          }
+        ],
+        "tier": 7
+      },
+      "kind": "desecrated",
+      "stat_id": null,
+      "template": "+# to maximum Mana",
+      "text": "+20 to maximum Mana",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Skilled",
+        "ranges": [],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% reduced Attribute Requirements",
+      "text": "30% reduced Attribute Requirements",
+      "values": [
+        30
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Lizard",
+        "ranges": [
+          {
+            "max": 3,
+            "min": 2.1
+          }
+        ],
+        "tier": 9
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Allies in your Presence Regenerate # Life per second",
+      "text": "Allies in your Presence Regenerate 2.2 Life per second",
+      "values": [
+        2.2
+      ]
+    }
+  ],
+  "name": "Bramble Breaker",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Spirit",
+      "value": "168"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 48,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": 168,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

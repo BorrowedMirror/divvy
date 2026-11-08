@@ -1,0 +1,132 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Temple Maul",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Two Hand Maces"
+  },
+  "corrupted": true,
+  "gem_level": null,
+  "item_level": 82,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "rune",
+      "stat_id": null,
+      "template": "Adds # to # Fire Damage",
+      "text": "Adds 31 to 48 Fire Damage",
+      "values": [
+        31,
+        48
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "Causes #% increased Stun Buildup",
+      "text": "Causes 30% increased Stun Buildup",
+      "values": [
+        30
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "162% increased Physical Damage",
+      "values": [
+        162
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+212 to Accuracy Rating",
+      "values": [
+        212
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Critical Damage Bonus",
+      "text": "24% increased Critical Damage Bonus",
+      "values": [
+        24
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Leeches #% of Physical Damage as Life",
+      "text": "Leeches 8.8% of Physical Damage as Life",
+      "values": [
+        8.8
+      ]
+    }
+  ],
+  "name": "Brood Hammer",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "175-298"
+    },
+    {
+      "augmented": false,
+      "name": "Fire Damage",
+      "value": "31-48"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.10"
+    }
+  ],
+  "quality": 20,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 65,
+    "str": 157
+  },
+  "sanctified": false,
+  "sockets": 3,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.1,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": 43.45,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 260.15,
+    "spirit": null,
+    "total_dps": 303.6
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

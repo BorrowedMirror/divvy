@@ -1,5 +1,3 @@
-//go:build darwin
-
 package mac
 
 // Game window tracking.
@@ -11,6 +9,7 @@ package mac
 // low, fixed rate. The thread only pushes into a channel.
 
 import (
+	"context"
 	"log/slog"
 	"runtime"
 	"sync"
@@ -76,6 +75,8 @@ type windowTracker struct {
 	subscribed atomic.Bool
 }
 
+var _ platform.WindowTracker = (*windowTracker)(nil)
+
 func (t *windowTracker) GameWindow() (platform.WindowInfo, bool) {
 	return findGame(snapshot())
 }
@@ -85,72 +86,79 @@ func (t *windowTracker) IsGameFocused() bool {
 	return ok && w.Focused
 }
 
-func (t *windowTracker) Subscribe() (<-chan platform.WindowEvent, error) {
-	if t.subscribed.Swap(true) {
+// Subscribe implements [platform.WindowTracker]. The tracker thread runs until ctx is done.
+func (t *windowTracker) Subscribe(ctx context.Context) (<-chan platform.WindowEvent, error) {
+	if !t.subscribed.CompareAndSwap(false, true) {
 		return nil, platform.ErrAlreadyStarted
 	}
 	ch := make(chan platform.WindowEvent, windowChannelCapacity)
-	go track(ch)
+	go track(ctx, ch)
 	return ch, nil
 }
 
-// track is the tracker thread body. It runs for the life of the process (a Go channel has no
-// "receiver dropped" signal).
-func track(ch chan<- platform.WindowEvent) {
+// track is the tracker thread body. The thread is never unlocked, so it exits with the
+// goroutine and takes its run loop (and any AX observer source left on it) with it.
+func track(ctx context.Context, ch chan<- platform.WindowEvent) {
 	// The AX observer is attached to this thread's run loop.
 	runtime.LockOSThread()
+	defer close(ch)
+	release := stopRunLoopWhenDone(ctx, cfRunLoopGetCurrent())
+	defer release()
 	var prev *platform.WindowInfo
 	var watch *axWatch
-	for {
-		windows := snapshot()
-		var pid *int32
-		if raw := findGameRaw(windows); raw != nil {
-			pid = &raw.PID
+	defer func() {
+		if watch != nil {
+			watch.close()
 		}
+	}()
+	for ctx.Err() == nil {
+		windows := snapshot()
 		var next *platform.WindowInfo
 		if w, ok := findGame(windows); ok {
 			next = &w
 		}
-		for _, ev := range diff(prev, next) {
-			select {
-			case ch <- ev:
-			default:
+		for _, ev := range platform.DiffWindows(prev, next) {
+			if !platform.TrySend(ch, ev) {
 				slog.Warn("window event channel full; dropping event")
 			}
 		}
 		prev = next
 
 		// (Re)attach the AX observer when the game process changes or AX becomes available.
-		if !samePID(watch, pid) {
+		raw := findGameRaw(windows)
+		if !watch.watches(raw) {
 			if watch != nil {
 				watch.close()
 				watch = nil
 			}
-			if pid != nil && accessibility() {
-				watch = newAXWatch(*pid)
+			if raw != nil && accessibility() {
+				watch = newAXWatch(raw.PID)
 			}
 		}
 
 		switch {
 		case watch != nil:
-			watch.wait(axSlice)
+			watch.wait(ctx, axSlice)
 		case prev != nil:
-			time.Sleep(pollTracking)
+			sleep(ctx, pollTracking)
 		default:
-			time.Sleep(pollIdle)
+			sleep(ctx, pollIdle)
 		}
 	}
 }
 
-func samePID(w *axWatch, pid *int32) bool {
-	if w == nil || pid == nil {
-		return w == nil && pid == nil
+// sleep waits for d or until ctx is done.
+func sleep(ctx context.Context, d time.Duration) {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+	case <-t.C:
 	}
-	return w.pid == *pid
 }
 
 // snapshot returns the on-screen windows, front to back, reduced to plain values.
-func snapshot() []RawWindow {
+func snapshot() []rawWindow {
 	if loadSys() != nil {
 		return nil
 	}
@@ -160,30 +168,29 @@ func snapshot() []RawWindow {
 	}
 	defer cfRelease(list)
 	n := cfArrayGetCount(list)
-	out := make([]RawWindow, 0, n)
+	out := make([]rawWindow, 0, n)
 	for i := range n {
-		out = append(out, rawWindow(cfArrayGetValueAtIndex(list, i)))
+		out = append(out, windowFromDict(cfArrayGetValueAtIndex(list, i)))
 	}
 	return out
 }
 
-func rawWindow(dict uintptr) RawWindow {
-	var w RawWindow
+// windowFromDict reads one CGWindowList entry.
+func windowFromDict(dict uintptr) rawWindow {
+	var w rawWindow
 	if dict == 0 {
 		return w
 	}
 	get := func(key uintptr) uintptr { return cfDictionaryGetValue(dict, key) }
 	if b := get(kCGWindowBounds); b != 0 && cfGetTypeID(b) == cfDictionaryGetTypeID() {
 		f := func(key uintptr) float64 {
-			v, _ := numberF64(cfDictionaryGetValue(b, key))
-			return v
+			return numberF64(cfDictionaryGetValue(b, key))
 		}
 		w.X, w.Y, w.Width, w.Height = f(cfStrX), f(cfStrY), f(cfStrWidth), f(cfStrHeight)
 	}
-	number, _ := numberI64(get(kCGWindowNumber))
-	w.Number = uint32(number)
-	w.PID, _ = numberI32(get(kCGWindowOwnerPID))
-	w.Layer, _ = numberI64(get(kCGWindowLayer))
+	w.Number = uint32(numberI64(get(kCGWindowNumber)))
+	w.PID = numberI32(get(kCGWindowOwnerPID))
+	w.Layer = numberI64(get(kCGWindowLayer))
 	if s, ok := goString(get(kCGWindowOwnerName)); ok {
 		w.OwnerName = &s
 	}
@@ -235,11 +242,20 @@ func newAXWatch(pid int32) *axWatch {
 	return &axWatch{pid: pid, runLoop: runLoop, source: source, observer: observer}
 }
 
-// wait blocks until an AX notification arrives or timeout passes.
-func (w *axWatch) wait(timeout time.Duration) {
+// watches reports whether w observes the process owning raw (both nil counts as a match).
+func (w *axWatch) watches(raw *rawWindow) bool {
+	if w == nil || raw == nil {
+		return w == nil && raw == nil
+	}
+	return w.pid == raw.PID
+}
+
+// wait blocks until an AX notification arrives, timeout passes or ctx is done (which stops the
+// run loop).
+func (w *axWatch) wait(ctx context.Context, timeout time.Duration) {
 	if cfRunLoopRunInMode(kCFRunLoopDefaultMode, timeout.Seconds(), true) == cfRunLoopRunFinished {
 		// No sources (should not happen while attached): never spin.
-		time.Sleep(pollTracking)
+		sleep(ctx, pollTracking)
 	}
 }
 

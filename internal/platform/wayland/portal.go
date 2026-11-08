@@ -11,16 +11,15 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// PortalTimeout is how long [GlobalHotkeys] waits for the portal (the Rust backend's connect
-// timeout).
-const PortalTimeout = 3 * time.Second
+// portalTimeout is how long [GlobalHotkeys] waits for the portal.
+const portalTimeout = 3 * time.Second
 
 // probePortal checks that an XDG desktop portal implementing GlobalShortcuts answers on the
 // session bus, by reading the interface's version property.
 func probePortal(ctx context.Context) error {
 	conn, err := dbus.ConnectSessionBus(dbus.WithContext(ctx))
 	if err != nil {
-		return platform.Backend("GlobalShortcuts portal: %v", err)
+		return platform.Backend("GlobalShortcuts portal: %w", err)
 	}
 	defer conn.Close()
 	var version dbus.Variant
@@ -28,18 +27,19 @@ func probePortal(ctx context.Context) error {
 		CallWithContext(ctx, "org.freedesktop.DBus.Properties.Get", 0,
 			"org.freedesktop.portal.GlobalShortcuts", "version").Store(&version)
 	if err != nil {
-		return platform.Backend("GlobalShortcuts portal: %v", err)
+		return platform.Backend("GlobalShortcuts portal: %w", err)
 	}
 	return nil
 }
 
-// GlobalHotkeys is the shell's GlobalHotkeys capability on Wayland-native: whether Wails'
-// global shortcuts can work at all (they go through the XDG GlobalShortcuts portal), plus the
-// matching notes (the signal fallback when there is no portal). Wails itself only logs a
-// missing portal through the app's error handler, so the shell asks here.
+// GlobalHotkeys is the GlobalHotkeys capability on Wayland-native: whether Wails' global
+// shortcuts can work at all (they go through the XDG GlobalShortcuts portal), plus the matching
+// notes (the signal fallback when there is no portal). Wails itself only logs a missing portal
+// through the app's error handler, so the composition root asks here when it completes the
+// capabilities. It waits at most a few seconds for the session bus.
 func GlobalHotkeys(ctx context.Context) (ok bool, notes []string) {
-	ctx, cancel := context.WithTimeout(ctx, PortalTimeout)
+	ctx, cancel := context.WithTimeout(ctx, portalTimeout)
 	defer cancel()
 	ok = probePortal(ctx) == nil
-	return ok, HotkeyNotes(ok)
+	return ok, hotkeyNotes(ok)
 }

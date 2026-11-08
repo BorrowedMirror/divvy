@@ -8,64 +8,50 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// Option configures [New].
-type Option func(*options)
+// Options configures [New].
+type Options struct {
+	// Probe is the environment the backend runs in ([platform.EnvProbeFromEnv]).
+	Probe platform.EnvProbe
+	// MainThread runs the overlay's GTK calls; pass Wails' application.InvokeSync. Without it
+	// the overlay methods must be called on the GTK main thread.
+	MainThread func(func())
 
-type options struct {
-	probe      *platform.EnvProbe
-	mainThread func(func())
-	display    string // virtual keyboard display; "" = $WAYLAND_DISPLAY
-	noYdotool  bool
+	// display is the virtual keyboard's Wayland display ("" = $WAYLAND_DISPLAY) and noYdotool
+	// turns the ydotool fallback off; both for tests.
+	display   string
+	noYdotool bool
 }
 
-// WithProbe uses probe instead of the process environment.
-func WithProbe(probe platform.EnvProbe) Option {
-	return func(o *options) { o.probe = &probe }
-}
-
-// WithMainThread runs the overlay's GTK calls through run; pass Wails' application.InvokeSync.
-// Without it the overlay methods must be called on the GTK main thread.
-func WithMainThread(run func(func())) Option {
-	return func(o *options) { o.mainThread = run }
-}
-
-// New builds the Wayland-native backend. It fails without WAYLAND_DISPLAY.
+// New builds the Wayland-native backend. It fails without WAYLAND_DISPLAY in opts.Probe.
 //
-// GlobalHotkeys and Clipboard are left to the shell (Wails); see [GlobalHotkeys] and
-// [HotkeyNotes] for the hotkey capability and [SignalTriggers] for the signal fallback.
-// Cursor and ActivateWindow stay nil: a Wayland client can neither read the global cursor nor
-// focus another client's window.
-func New(opts ...Option) (platform.Parts, error) {
-	var o options
-	for _, opt := range opts {
-		opt(&o)
-	}
-	probe := platform.EnvProbeFromEnv()
-	if o.probe != nil {
-		probe = *o.probe
-	}
+// GlobalHotkeys and Clipboard are left to the shell (Wails); see [GlobalHotkeys] for the
+// hotkey capability and [platform.SignalTriggers] for the signal fallback. Cursor and
+// ActivateWindow stay nil: a Wayland client can neither read the global cursor nor focus
+// another client's window.
+func New(opts Options) (platform.Parts, error) {
+	probe := opts.Probe
 	if probe.WaylandDisplay == "" {
 		return platform.Parts{}, platform.Unsupported("wayland backend needs WAYLAND_DISPLAY")
 	}
-	run := o.mainThread
+	run := opts.MainThread
 	if run == nil {
 		run = func(f func()) { f() }
 	}
 	gnome := probe.IsGNOME()
 
 	caps := capabilities(probe)
-	vk := &virtualKeyboard{display: o.display}
+	vk := &virtualKeyboard{display: opts.display}
 	eager := vk.ensureReady()
 	var yd *ydotool
-	if !o.noYdotool {
-		yd, _ = detectYdotool()
+	if !opts.noYdotool {
+		yd = detectYdotool()
 	}
 	plan := injectionPlan(eager, yd != nil, virtualKeyboardPlausible(probe))
 	caps.KeystrokeInjection = plan.available
 	if plan.note != "" {
 		caps.Notes = append(caps.Notes, plan.note)
 	}
-	var sim platform.InputSimulator = unsupported("keystroke_injection")
+	var sim platform.InputSimulator = platform.Unavailable("keystroke_injection")
 	if plan.available {
 		if yd != nil {
 			vk.fallback = yd
@@ -73,48 +59,20 @@ func New(opts ...Option) (platform.Parts, error) {
 		sim = vk
 	}
 
-	clip, haveClip := detectWLClipboard()
-	if !haveClip {
-		caps.Notes = append(caps.Notes, "install wl-clipboard (wl-paste, wl-copy): without it the item the game copies is only seen while an RKL window has focus")
-	}
-	var clipboard platform.Clipboard
-	if haveClip {
-		clipboard = clip
-	}
-
-	return platform.Parts{
+	parts := platform.Parts{
 		Kind:           platform.BackendWayland,
-		Clipboard:      clipboard,
 		Capabilities:   caps,
-		WindowTracker:  unsupported("window_tracking"),
-		InputListener:  unsupported("passive_hook"),
+		WindowTracker:  platform.Unavailable("window_tracking"),
+		InputListener:  platform.Unavailable("passive_hook"),
 		InputSimulator: sim,
 		Overlay: func(native unsafe.Pointer) (platform.OverlayWindow, error) {
 			return newOverlay(native, run, gnome)
 		},
-	}, nil
+	}
+	if clip := detectWLClipboard(); clip != nil {
+		parts.Clipboard = clip
+	} else {
+		parts.Capabilities.Notes = append(parts.Capabilities.Notes, "install wl-clipboard (wl-paste, wl-copy): without it the item the game copies is only seen while an RKL window has focus")
+	}
+	return parts, nil
 }
-
-// unsupported stands in for a capability Wayland-native cannot provide; every call fails with
-// [platform.ErrUnsupported] (the matching capability is false).
-type unsupported string
-
-// GameWindow implements [platform.WindowTracker]: never found.
-func (unsupported) GameWindow() (platform.WindowInfo, bool) { return platform.WindowInfo{}, false }
-
-// IsGameFocused implements [platform.WindowTracker]. Without tracking we cannot tell; assume
-// focused so hotkeys still work.
-func (unsupported) IsGameFocused() bool { return true }
-
-// Subscribe implements [platform.WindowTracker].
-func (u unsupported) Subscribe() (<-chan platform.WindowEvent, error) {
-	return nil, platform.Unsupported(string(u))
-}
-
-// Start implements [platform.InputListener].
-func (u unsupported) Start() (<-chan platform.InputEvent, error) {
-	return nil, platform.Unsupported(string(u))
-}
-
-// SendChord implements [platform.InputSimulator].
-func (u unsupported) SendChord(platform.Chord) error { return platform.Unsupported(string(u)) }

@@ -4,6 +4,7 @@ package e2e
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -14,12 +15,21 @@ import (
 
 // TestMockTrade checks the mock itself (no app or display needed).
 func TestMockTrade(t *testing.T) {
-	m := NewMockTrade()
+	m := newMockTrade()
 	defer m.Close()
 
-	get := func(path string) (int, map[string]any) {
-		r, err := http.Get(m.URL() + path)
+	do := func(method, path string, body io.Reader) *http.Response {
+		req, err := http.NewRequestWithContext(t.Context(), method, m.URL()+path, body)
 		require.NoError(t, err)
+		if body != nil {
+			req.Header.Set("Content-Type", "application/json")
+		}
+		r, err := http.DefaultClient.Do(req)
+		require.NoError(t, err)
+		return r
+	}
+	get := func(path string) (int, map[string]any) {
+		r := do(http.MethodGet, path, nil)
 		defer r.Body.Close()
 		var v map[string]any
 		_ = json.NewDecoder(r.Body).Decode(&v)
@@ -31,8 +41,7 @@ func TestMockTrade(t *testing.T) {
 		Total  int      `json:"total"`
 	}
 	search := func() (int, http.Header, searchReply) {
-		r, err := http.Post(m.URL()+"/api/trade2/search/poe2/Standard", "application/json", strings.NewReader("{}"))
-		require.NoError(t, err)
+		r := do(http.MethodPost, "/api/trade2/search/poe2/Standard", strings.NewReader("{}"))
 		defer r.Body.Close()
 		var v searchReply
 		_ = json.NewDecoder(r.Body).Decode(&v)
@@ -54,15 +63,15 @@ func TestMockTrade(t *testing.T) {
 	}
 	assert.Equal(t, []float64{1, 2, 3}, amounts)
 
-	m.Configure(MockConfig{Listings: []MockListing{{Amount: 7, Currency: "exalted"}}, Total: 50})
-	m.RateLimit(EndpointSearch, 1, 4)
+	m.Configure(mockConfig{Listings: []mockListing{{Amount: 7, Currency: "exalted"}}, Total: 50})
+	m.RateLimit(endpointSearch, 1, 4)
 	status, header, _ = search()
 	assert.Equal(t, http.StatusTooManyRequests, status)
 	assert.Equal(t, "4", header.Get("Retry-After"))
 	status, _, s = search()
 	assert.Equal(t, http.StatusOK, status)
 	assert.Equal(t, 50, s.Total)
-	assert.Equal(t, []string{ListingID(0)}, s.Result)
+	assert.Equal(t, []string{listingID(0)}, s.Result)
 
 	searches := 0
 	for _, req := range m.Requests() {

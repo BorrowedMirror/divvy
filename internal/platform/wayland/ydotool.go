@@ -1,13 +1,16 @@
 package wayland
 
 import (
-	"errors"
-	"os"
+	"context"
 	"os/exec"
-	"path/filepath"
+	"time"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
+
+// commandTimeout bounds a helper command (ydotool, wl-clipboard), so a hung daemon or
+// compositor cannot stall a price check.
+const commandTimeout = 5 * time.Second
 
 // ydotool is last-resort keystroke injection through the `ydotool` CLI (uinput; needs
 // `ydotoold`).
@@ -15,24 +18,13 @@ type ydotool struct {
 	binary string
 }
 
-// detectYdotool finds `ydotool` on PATH.
-func detectYdotool() (*ydotool, bool) {
-	bin, ok := findInPath("ydotool", os.Getenv("PATH"))
-	if !ok {
-		return nil, false
+// detectYdotool finds `ydotool` on PATH; nil when it is not installed.
+func detectYdotool() *ydotool {
+	bin, err := exec.LookPath("ydotool")
+	if err != nil {
+		return nil
 	}
-	return &ydotool{binary: bin}, true
-}
-
-// findInPath is the first executable regular file called name in a PATH-style list.
-func findInPath(name, path string) (string, bool) {
-	for _, dir := range filepath.SplitList(path) {
-		p := filepath.Join(dir, name)
-		if fi, err := os.Stat(p); err == nil && fi.Mode().IsRegular() && fi.Mode().Perm()&0o111 != 0 {
-			return p, true
-		}
-	}
-	return "", false
+	return &ydotool{binary: bin}
 }
 
 // SendChord implements [platform.InputSimulator].
@@ -41,12 +33,10 @@ func (y *ydotool) SendChord(chord platform.Chord) error {
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(y.binary, args...)
-	if err := cmd.Run(); err != nil {
-		if exit, ok := errors.AsType[*exec.ExitError](err); ok {
-			return platform.Backend("ydotool exited with %s", exit.ProcessState)
-		}
-		return platform.Backend("ydotool: %v", err)
+	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	defer cancel()
+	if err := exec.CommandContext(ctx, y.binary, args...).Run(); err != nil {
+		return platform.Backend("ydotool: %w", err)
 	}
 	return nil
 }

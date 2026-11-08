@@ -1,0 +1,82 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Glass Shank",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Daggers"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 34,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Physical Damage",
+      "text": "Adds 9 to 17 Physical Damage",
+      "values": [
+        9,
+        17
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Critical Damage Bonus",
+      "text": "23% increased Critical Damage Bonus",
+      "values": [
+        23
+      ]
+    }
+  ],
+  "name": "Viper Edge",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "18-71"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "6.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.50"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 18,
+    "int": 18,
+    "level": 20,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.5,
+    "block_chance": null,
+    "critical_hit_chance": 6,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 66.75,
+    "spirit": null,
+    "total_dps": 66.75
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

@@ -12,9 +12,9 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/web"
 )
 
-// TrayLocales is every language in `web/src/i18n/languages.ts`; each has a
+// trayLocales is every language in `web/src/i18n/languages.ts`; each has a
 // `<code>/translation.json` in [web.Locales].
-var TrayLocales = []string{"en", "de", "fr", "es", "pt-BR", "it", "pl", "ru", "uk", "tr", "ja", "ko", "zh-CN", "zh-TW", "th"}
+var trayLocales = []string{"en", "de", "fr", "es", "pt-BR", "it", "pl", "ru", "uk", "tr", "ja", "ko", "zh-CN", "zh-TW", "th"}
 
 // TrayLabels are the native tray menu's texts.
 type TrayLabels struct {
@@ -34,10 +34,10 @@ var trayFallback = TrayLabels{
 	Tooltip:     "rkl",
 }
 
-// trayTable is the `tray` value of a locale's translation file; ok is false when the language,
-// the file or the key is missing, or the file does not parse.
+// trayTable is the `tray` value of a locale's translation file; ok is false (and the value nil)
+// when the language, the file or the key is missing, or the file does not parse.
 func trayTable(locales fs.FS, code string) (any, bool) {
-	for _, c := range TrayLocales {
+	for _, c := range trayLocales {
 		if !strings.EqualFold(c, code) {
 			continue
 		}
@@ -68,19 +68,15 @@ func trayLabelsFrom(locales fs.FS, code string) TrayLabels {
 	}
 	chosen, ok := trayTable(locales, code)
 	if !ok {
-		chosen, ok = trayTable(locales, base)
-	}
-	var chosenTable any
-	if ok {
-		chosenTable = chosen
+		chosen, _ = trayTable(locales, base)
 	}
 	en, _ := trayTable(locales, "en")
-	return ResolveTrayLabels(chosenTable, en)
+	return resolveTrayLabels(chosen, en)
 }
 
-// ResolveTrayLabels resolves key by key: chosen, then en, then the built-in English; empty
+// resolveTrayLabels resolves key by key: chosen, then en, then the built-in English; empty
 // strings count as missing. chosen and en are decoded `tray` JSON values (nil when absent).
-func ResolveTrayLabels(chosen, en any) TrayLabels {
+func resolveTrayLabels(chosen, en any) TrayLabels {
 	pick := func(key, fallback string) string {
 		for _, t := range []any{chosen, en} {
 			obj, _ := t.(map[string]any)

@@ -5,11 +5,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/exec"
@@ -86,9 +87,11 @@ func fetchAll(ctx context.Context, cacheDir string, fetch fetcher, delay time.Du
 		path := filepath.Join(cacheDir, src.cache)
 		if fetch != nil {
 			if i > 0 {
-				time.Sleep(delay)
+				if err := sleep(ctx, delay); err != nil {
+					return nil, err
+				}
 			}
-			logf("fetch %s", src.url())
+			slog.Info("fetch", "url", src.url())
 			body, err := fetch(ctx, src.url())
 			if err != nil {
 				return nil, err
@@ -108,8 +111,8 @@ func fetchAll(ctx context.Context, cacheDir string, fetch fetcher, delay time.Du
 
 // buildBundle normalises the cached downloads into a bundle (without translations).
 func buildBundle(raw map[string][]byte) (*data.Bundle, error) {
-	var bases map[string]repoeBase
-	if err := json.Unmarshal(raw[repoeBases.cache], &bases); err != nil {
+	bases, err := decodeRepoeBases(raw[repoeBases.cache])
+	if err != nil {
 		return nil, fmt.Errorf("parsing RePoE base_items: %w", err)
 	}
 	var classes map[string]repoeItemClass
@@ -117,7 +120,6 @@ func buildBundle(raw map[string][]byte) (*data.Bundle, error) {
 		return nil, fmt.Errorf("parsing RePoE item_classes: %w", err)
 	}
 	var b data.Bundle
-	var err error
 	if b.Stats, err = normaliseStats(raw[tradeStats.cache]); err != nil {
 		return nil, err
 	}
@@ -142,19 +144,19 @@ func assetSources() data.AssetSources {
 	}
 }
 
-func runRefresh(args []string) error {
-	fs := flag.NewFlagSet("refresh", flag.ContinueOnError)
-	offline := fs.Bool("offline", false, "use the cached downloads in the cache directory instead of the network")
-	cacheDir := fs.String("cache", "", "download cache (default: target/data-cache)")
-	assetsDir := fs.String("assets", "", "asset directory to write (default: internal/data/assets)")
-	check := fs.Bool("check", true, "run the parser corpus tests against the new data afterwards")
-	if err := fs.Parse(args); err != nil {
+func runRefresh(ctx context.Context, args []string) error {
+	flags := flag.NewFlagSet("refresh", flag.ContinueOnError)
+	offline := flags.Bool("offline", false, "use the cached downloads in the cache directory instead of the network")
+	cacheDir := flags.String("cache", "", "download cache (default: target/data-cache)")
+	assetsDir := flags.String("assets", "", "asset directory to write (default: internal/data/assets)")
+	check := flags.Bool("check", true, "run the parser corpus tests against the new data afterwards")
+	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() > 0 {
-		return fmt.Errorf("refresh: unexpected arguments %q", fs.Args())
+	if flags.NArg() > 0 {
+		return fmt.Errorf("refresh: unexpected arguments %q", flags.Args())
 	}
-	root, err := repoRoot()
+	root, err := moduleRoot()
 	if err != nil {
 		return err
 	}
@@ -168,11 +170,11 @@ func runRefresh(args []string) error {
 	if !*offline {
 		fetch = httpFetch(&http.Client{Timeout: 60 * time.Second})
 	}
-	if err := refresh(context.Background(), *cacheDir, *assetsDir, fetch, time.Now()); err != nil {
+	if err := refresh(ctx, *cacheDir, *assetsDir, fetch, time.Now()); err != nil {
 		return err
 	}
 	if *check {
-		corpusCheck(root)
+		corpusCheck(ctx, root)
 	}
 	return nil
 }
@@ -209,27 +211,26 @@ func refresh(ctx context.Context, cacheDir, assetsDir string, fetch fetcher, now
 	if manifest.GameVersion != nil {
 		version = *manifest.GameVersion
 	}
-	logf("wrote %s: %d stats, %d bases, %d uniques, %d statics (game version %s)",
-		assetsDir, manifest.Stats.Records, manifest.Bases.Records, manifest.Uniques.Records, manifest.Statics.Records, version)
+	slog.Info("wrote assets", "dir", assetsDir, "stats", manifest.Stats.Records, "bases", manifest.Bases.Records,
+		"uniques", manifest.Uniques.Records, "statics", manifest.Statics.Records, "game_version", version)
 	return nil
 }
 
 // corpusCheck runs the parser/matcher tests, which embed the assets, against the new data.
 // A failure is reported loudly but does not fail the refresh: review the output before
 // committing regenerated assets.
-func corpusCheck(root string) {
-	logf("running parser corpus check (go test ./internal/core/... ./internal/data/...)")
-	cmd := exec.Command("go", "test", "./internal/core/...", "./internal/data/...")
+func corpusCheck(ctx context.Context, root string) {
+	slog.Info("running parser corpus check (go test ./internal/core/... ./internal/data/...)")
+	cmd := exec.CommandContext(ctx, "go", "test", "./internal/core/...", "./internal/data/...")
 	cmd.Dir = root
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 	if err := cmd.Run(); err != nil {
-		var exit *exec.ExitError
-		if !errors.As(err, &exit) {
-			logf("warning: corpus check skipped: %v", err)
+		if _, ok := errors.AsType[*exec.ExitError](err); !ok {
+			slog.Warn("corpus check skipped", "err", err)
 			return
 		}
-		logf("warning: corpus check FAILED (%v).\nInspect the failures before committing the new assets.", err)
+		slog.Warn("corpus check FAILED; inspect the failures before committing the new assets", "err", err)
 		return
 	}
-	logf("corpus check passed")
+	slog.Info("corpus check passed")
 }

@@ -7,7 +7,26 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
+// letterCodes are the evdev keycodes of KeyA to KeyZ.
 var letterCodes = [26]uint16{30, 48, 46, 32, 18, 33, 34, 35, 23, 36, 37, 38, 50, 49, 24, 25, 16, 19, 31, 20, 22, 47, 17, 45, 21, 44}
+
+// namedEvdev are the evdev keycodes of the named keys a chord may use.
+var namedEvdev = map[string]uint16{
+	"Escape":     1,
+	"Tab":        15,
+	"Enter":      28,
+	"Backspace":  14,
+	"Delete":     111,
+	"Home":       102,
+	"End":        107,
+	"PageUp":     104,
+	"PageDown":   109,
+	"ArrowUp":    103,
+	"ArrowLeft":  105,
+	"ArrowRight": 106,
+	"ArrowDown":  108,
+	"Space":      57,
+}
 
 // evdevCode is the Linux evdev keycode (input-event-codes.h) for a chord key (a W3C
 // KeyboardEvent.code name). Both the virtual keyboard and ydotool send these.
@@ -39,22 +58,7 @@ func evdevCode(key string) (uint16, bool) {
 			return 0, false
 		}
 	}
-	code, ok := map[string]uint16{
-		"Escape":     1,
-		"Tab":        15,
-		"Enter":      28,
-		"Backspace":  14,
-		"Delete":     111,
-		"Home":       102,
-		"End":        107,
-		"PageUp":     104,
-		"PageDown":   109,
-		"ArrowUp":    103,
-		"ArrowLeft":  105,
-		"ArrowRight": 106,
-		"ArrowDown":  108,
-		"Space":      57,
-	}[key]
+	code, ok := namedEvdev[key]
 	return code, ok
 }
 

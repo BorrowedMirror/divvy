@@ -13,7 +13,7 @@ func New(Options) (platform.Parts, error) {
 type TCCProbe struct{}
 
 // Missing returns nothing outside macOS.
-func (TCCProbe) Missing() []string { return []string{} }
+func (TCCProbe) Missing() []string { return nil }
 
 // OpenSettings does nothing outside macOS.
 func (TCCProbe) OpenSettings(string) {}

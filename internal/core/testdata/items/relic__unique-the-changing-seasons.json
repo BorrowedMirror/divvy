@@ -1,0 +1,62 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Seal Relic",
+  "category": "unique",
+  "class": {
+    "type": "relic"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 70,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Your Honour is restored by #% when you defeat a Boss",
+      "text": "Your Honour is restored by 25% when you defeat a Boss",
+      "values": [
+        25
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Rooms with Honour Shrines have an additional Shrine",
+      "text": "Rooms with Honour Shrines have an additional Shrine",
+      "values": []
+    }
+  ],
+  "name": "The Changing Seasons",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

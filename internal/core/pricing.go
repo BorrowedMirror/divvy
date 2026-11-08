@@ -3,9 +3,10 @@ package core
 // Price aggregation over listings.
 
 import (
-	"cmp"
 	"math"
 	"slices"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
 )
 
 // Price is an amount in a trade currency.
@@ -14,9 +15,6 @@ type Price struct {
 	// Trade currency id, e.g. `divine`, `exalted`, `chaos`.
 	Currency string `json:"currency"`
 }
-
-// MarshalJSON writes serde-compatible JSON.
-func (p Price) MarshalJSON() ([]byte, error) { return marshalStruct(p) }
 
 // Listing is one listing from a price source.
 type Listing struct {
@@ -35,9 +33,6 @@ type Listing struct {
 	Equivalent *Price `json:"equivalent"`
 }
 
-// MarshalJSON writes serde-compatible JSON.
-func (l Listing) MarshalJSON() ([]byte, error) { return marshalStruct(l) }
-
 // PriceSourceKind says where a price came from.
 type PriceSourceKind string
 
@@ -48,9 +43,9 @@ const (
 	SourcePoe2Scout PriceSourceKind = "poe2_scout"
 )
 
-// UnmarshalJSON accepts only the known variants, like serde.
-func (k *PriceSourceKind) UnmarshalJSON(data []byte) error {
-	return unmarshalEnum(data, k, "PriceSourceKind", SourceTrade, SourcePoeNinja, SourcePoe2Scout)
+// UnmarshalText accepts only the known sources.
+func (k *PriceSourceKind) UnmarshalText(text []byte) error {
+	return enum.Parse(k, text, SourceTrade, SourcePoeNinja, SourcePoe2Scout)
 }
 
 // PriceSummary is the aggregated result displayed by the overlay.
@@ -67,17 +62,11 @@ type PriceSummary struct {
 	TradeURL *string `json:"trade_url"`
 }
 
-// MarshalJSON writes serde-compatible JSON.
-func (s PriceSummary) MarshalJSON() ([]byte, error) { return marshalStruct(s) }
-
 // ExchangeRates normalise prices into one currency; Rates[c] = value of 1 c in Base.
 type ExchangeRates struct {
 	Base  string             `json:"base"`
 	Rates map[string]float64 `json:"rates"`
 }
-
-// MarshalJSON writes serde-compatible JSON (rates sorted by key, like a BTreeMap).
-func (r ExchangeRates) MarshalJSON() ([]byte, error) { return marshalStruct(r) }
 
 // Rate is the value of one currency in Base (Base itself is 1).
 func (r *ExchangeRates) Rate(currency string) (float64, bool) {
@@ -107,8 +96,8 @@ func (r *ExchangeRates) Convert(amount float64, from, to string) (float64, bool)
 	return amount * rf / rt, true
 }
 
-// TrimMinListings is the minimum number of priced listings before outlier trimming kicks in.
-const TrimMinListings = 4
+// trimMinListings is the minimum number of priced listings before outlier trimming kicks in.
+const trimMinListings = 4
 
 // iqrFence is the Tukey fence multiplier for outlier trimming.
 const iqrFence = 1.5
@@ -120,12 +109,12 @@ func quantile(sorted []float64, q float64) float64 {
 	return sorted[lo] + (sorted[hi]-sorted[lo])*(pos-float64(lo))
 }
 
-// TrimOutliers drops values outside the Tukey fences (`Q1 - 1.5 IQR`, `Q3 + 1.5 IQR`).
+// trimOutliers drops values outside the Tukey fences (`Q1 - 1.5 IQR`, `Q3 + 1.5 IQR`).
 //
 // This removes both price-fixing bait at the low end and absurd asks at the high end
 // while keeping small samples intact.
-func TrimOutliers(sorted []float64) []float64 {
-	if len(sorted) < TrimMinListings {
+func trimOutliers(sorted []float64) []float64 {
+	if len(sorted) < trimMinListings {
 		return slices.Clone(sorted)
 	}
 	q1 := quantile(sorted, 0.25)
@@ -145,38 +134,13 @@ func round2(v float64) float64 { return math.Round(v*100) / 100 }
 
 func isFinite(v float64) bool { return !math.IsInf(v, 0) && !math.IsNaN(v) }
 
-// totalCmp is `f64::total_cmp`.
-func totalCmp(a, b float64) int {
-	key := func(f float64) int64 {
-		bits := int64(math.Float64bits(f))
-		return bits ^ int64(uint64(bits>>63)>>1)
-	}
-	return cmp.Compare(key(a), key(b))
-}
-
-// midpoint is `f64::midpoint`.
-func midpoint(a, b float64) float64 {
-	const lo = 2.2250738585072014e-308 * 2 // f64::MIN_POSITIVE * 2
-	const hi = math.MaxFloat64 / 2
-	absA, absB := math.Abs(a), math.Abs(b)
-	switch {
-	case absA <= hi && absB <= hi:
-		return (a + b) / 2
-	case absA < lo:
-		return a + b/2
-	case absB < lo:
-		return a/2 + b
-	}
-	return a/2 + b/2
-}
-
 // Summarise aggregates listings into a summary. Pure; outlier trimming lives here.
 //
 // Prices are normalised to the most common currency among the listings (ties broken
 // alphabetically). With rates, other currencies are converted; without (nil), listings in
 // other currencies are left out of min/median/max (but stay in Listings). Stack prices are
-// per listing as given by the source. Listings is taken over (and modified) like the Rust
-// by-value argument.
+// per listing as given by the source. The summary holds a copy of listings; with rates each
+// copy gets its [Listing.Equivalent].
 func Summarise(source PriceSourceKind, total uint32, listings []Listing, rates *ExchangeRates) PriceSummary {
 	counts := map[string]int{}
 	for _, l := range listings {
@@ -205,14 +169,14 @@ func Summarise(source PriceSourceKind, total uint32, listings []Listing, rates *
 				}
 			}
 		}
-		slices.SortStableFunc(values, totalCmp)
-		kept := TrimOutliers(values)
+		slices.Sort(values)
+		kept := trimOutliers(values)
 		price := func(amount float64) *Price { return &Price{Amount: round2(amount), Currency: target} }
 		if len(kept) > 0 {
 			mid := len(kept) / 2
 			var median float64
 			if len(kept)%2 == 0 {
-				median = midpoint(kept[mid-1], kept[mid])
+				median = (kept[mid-1] + kept[mid]) / 2
 			} else {
 				median = kept[mid]
 			}
@@ -220,30 +184,28 @@ func Summarise(source PriceSourceKind, total uint32, listings []Listing, rates *
 		}
 	}
 
+	out := make([]Listing, len(listings))
+	copy(out, listings)
 	if rates != nil {
-		for i := range listings {
-			listings[i].Equivalent = Equivalent(&listings[i].Price, rates)
+		for i := range out {
+			out[i].Equivalent = equivalent(&out[i].Price, rates)
 		}
 	}
-	if listings == nil {
-		listings = []Listing{}
-	}
-	return PriceSummary{Source: source, Total: total, Listings: listings, Min: minP, Median: medianP, Max: maxP}
+	return PriceSummary{Source: source, Total: total, Listings: out, Min: minP, Median: medianP, Max: maxP}
 }
 
 // WithRates recomputes a summary's figures with exchange rates (listings in other
 // currencies then count towards min/median/max, and each listing gets its
-// [Listing.Equivalent]).
+// [Listing.Equivalent]). The summary passed in is not changed.
 func WithRates(summary PriceSummary, rates *ExchangeRates) PriceSummary {
-	tradeURL := clonePtr(summary.TradeURL)
 	out := Summarise(summary.Source, summary.Total, summary.Listings, rates)
-	out.TradeURL = tradeURL
+	out.TradeURL = summary.TradeURL
 	return out
 }
 
-// Equivalent is price in divine when worth at least one divine, otherwise in exalted; nil
+// equivalent is price in divine when worth at least one divine, otherwise in exalted; nil
 // when the price is already in that currency or a rate is unknown.
-func Equivalent(price *Price, rates *ExchangeRates) *Price {
+func equivalent(price *Price, rates *ExchangeRates) *Price {
 	if !isFinite(price.Amount) || price.Amount <= 0 {
 		return nil
 	}

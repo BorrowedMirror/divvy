@@ -1,0 +1,90 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Precursor Tablet",
+  "category": "tablet",
+  "class": {
+    "type": "tablet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Quantity of Items found in your Maps",
+      "text": "12% increased Quantity of Items found in your Maps",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Rarity of Items found in your Maps",
+      "text": "19% increased Rarity of Items found in your Maps",
+      "values": [
+        19
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Rare Monsters in your Maps have #% chance to have an additional Modifier",
+      "text": "Rare Monsters in your Maps have 25% chance to have an additional Modifier",
+      "values": [
+        25
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Experience gain in your Maps",
+      "text": "8% increased Experience gain in your Maps",
+      "values": [
+        8
+      ]
+    }
+  ],
+  "name": "Grim Crest",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Uses Remaining",
+      "value": "10"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

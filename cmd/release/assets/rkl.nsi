@@ -1,7 +1,7 @@
-; Per-user NSIS installer for the Go build of Rust King Ledger (`task package:windows`).
+; Per-user NSIS installer for Rust King Ledger (`task package:windows`).
 ;
 ; Installs to %LOCALAPPDATA%\Rust King Ledger without UAC, under the same uninstall and
-; product registry keys as the Tauri installer, so it upgrades a Tauri install in place.
+; product registry keys as earlier releases' installer, so it upgrades those installs in place.
 ;
 ; cmd/release passes these with -D:
 ;   VERSION    app version, e.g. 0.1.0-rc.1

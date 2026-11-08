@@ -4,6 +4,7 @@ package wayland
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"os/exec"
 	"strings"
@@ -14,25 +15,26 @@ import (
 // wlClipboard is the text clipboard through wl-clipboard (`wl-paste`, `wl-copy`), which use the
 // compositor's data-control protocol (wlr / ext data-control). Unlike GTK's clipboard (Wails'),
 // that works while RKL has no focused window: sway, for one, only tells the focused window
-// about clipboard changes, so after the game copies an item GTK would never see it. The Rust
-// build used wlr-data-control directly (through arboard) for the same reason.
+// about clipboard changes, so after the game copies an item GTK would never see it.
 type wlClipboard struct {
 	paste, copy string // binary paths
 	run         func(name string, stdin []byte, args ...string) (stdout []byte, err error)
 }
 
-// detectWLClipboard finds wl-paste and wl-copy on PATH.
-func detectWLClipboard() (*wlClipboard, bool) {
+// detectWLClipboard finds wl-paste and wl-copy on PATH; nil when either is missing.
+func detectWLClipboard() *wlClipboard {
 	paste, err1 := exec.LookPath("wl-paste")
 	cp, err2 := exec.LookPath("wl-copy")
 	if err1 != nil || err2 != nil {
-		return nil, false
+		return nil
 	}
-	return &wlClipboard{paste: paste, copy: cp, run: runCmd}, true
+	return &wlClipboard{paste: paste, copy: cp, run: runCmd}
 }
 
 func runCmd(name string, stdin []byte, args ...string) ([]byte, error) {
-	cmd := exec.Command(name, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, name, args...)
 	if stdin != nil {
 		cmd.Stdin = bytes.NewReader(stdin)
 	}
@@ -60,7 +62,7 @@ func (c *wlClipboard) Text() (string, bool, error) {
 		if isEmptyClipboard(err) {
 			return "", false, nil
 		}
-		return "", false, platform.Backend("wl-paste: %v", err)
+		return "", false, platform.Backend("wl-paste: %w", err)
 	}
 	if len(out) == 0 {
 		return "", false, nil
@@ -72,7 +74,7 @@ func (c *wlClipboard) Text() (string, bool, error) {
 // after it returns, as a clipboard owner must on Wayland.
 func (c *wlClipboard) SetText(text string) error {
 	if _, err := c.run(c.copy, []byte(text), "--type", "text/plain;charset=utf-8"); err != nil {
-		return platform.Backend("wl-copy: %v", err)
+		return platform.Backend("wl-copy: %w", err)
 	}
 	return nil
 }
@@ -80,7 +82,7 @@ func (c *wlClipboard) SetText(text string) error {
 // Clear implements [platform.Clipboard].
 func (c *wlClipboard) Clear() error {
 	if _, err := c.run(c.copy, nil, "--clear"); err != nil {
-		return platform.Backend("wl-copy --clear: %v", err)
+		return platform.Backend("wl-copy --clear: %w", err)
 	}
 	return nil
 }

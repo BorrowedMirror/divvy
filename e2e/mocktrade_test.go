@@ -15,59 +15,61 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 )
 
-// MockListing is one listing the mock serves.
-type MockListing struct {
+// mockListing is one listing the mock serves.
+type mockListing struct {
 	Amount   float64
 	Currency string
 	Account  string // default seller#000n
 	Offline  bool
 }
 
-// MockConfig is what the mock serves. Total defaults to the number of listings.
-type MockConfig struct {
+// mockConfig is what the mock serves. Total defaults to the number of listings.
+type mockConfig struct {
 	Leagues  []string
-	Listings []MockListing
+	Listings []mockListing
 	Total    int
 }
 
-// Endpoint is a trade2 route a 429 can be injected on.
-type Endpoint string
+// mockEndpoint is a trade2 route a 429 can be injected on.
+type mockEndpoint string
 
 const (
-	EndpointLeagues Endpoint = "leagues"
-	EndpointSearch  Endpoint = "search"
-	EndpointFetch   Endpoint = "fetch"
+	endpointLeagues mockEndpoint = "leagues"
+	endpointSearch  mockEndpoint = "search"
+	endpointFetch   mockEndpoint = "fetch"
 )
 
-// RecordedRequest is one request the mock received (control calls are not recorded).
-type RecordedRequest struct {
+// recordedRequest is one request the mock received (control calls are not recorded).
+type recordedRequest struct {
 	Method string
 	Path   string // path and query
 	Body   string
 }
 
 type injection struct {
-	endpoint   Endpoint
+	endpoint   mockEndpoint
 	remaining  int
 	retryAfter int
 }
 
-// MockTrade is the mock trade2 server.
-type MockTrade struct {
+// mockTrade is the mock trade2 server.
+type mockTrade struct {
 	srv *httptest.Server
 
 	mu         sync.Mutex
-	cfg        MockConfig
+	cfg        mockConfig
 	injections []*injection
-	requests   []RecordedRequest
+	requests   []recordedRequest
 }
 
 var (
@@ -75,12 +77,12 @@ var (
 	fetchRoute  = regexp.MustCompile(`^/api/trade2/fetch/[^/]+$`)
 )
 
-// DefaultMockConfig serves Standard and Hardcore and three listings, 1, 2 and 3 divine
+// defaultMockConfig serves Standard and Hardcore and three listings, 1, 2 and 3 divine
 // (median 2 divine).
-func DefaultMockConfig() MockConfig {
-	return MockConfig{
+func defaultMockConfig() mockConfig {
+	return mockConfig{
 		Leagues: []string{"Standard", "Hardcore"},
-		Listings: []MockListing{
+		Listings: []mockListing{
 			{Amount: 1, Currency: "divine"},
 			{Amount: 2, Currency: "divine"},
 			{Amount: 3, Currency: "divine"},
@@ -88,30 +90,30 @@ func DefaultMockConfig() MockConfig {
 	}
 }
 
-// NewMockTrade starts the mock on a free loopback port.
-func NewMockTrade() *MockTrade {
-	m := &MockTrade{cfg: DefaultMockConfig()}
+// newMockTrade starts the mock on a free loopback port.
+func newMockTrade() *mockTrade {
+	m := &mockTrade{cfg: defaultMockConfig()}
 	m.srv = httptest.NewServer(http.HandlerFunc(m.handle))
 	return m
 }
 
 // URL is the base URL, e.g. http://127.0.0.1:41234.
-func (m *MockTrade) URL() string { return m.srv.URL }
+func (m *mockTrade) URL() string { return m.srv.URL }
 
 // Close stops the server.
-func (m *MockTrade) Close() { m.srv.Close() }
+func (m *mockTrade) Close() { m.srv.Close() }
 
 // Reset restores the default config and forgets injections and recorded requests.
-func (m *MockTrade) Reset() {
+func (m *mockTrade) Reset() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.cfg = DefaultMockConfig()
+	m.cfg = defaultMockConfig()
 	m.injections = nil
 	m.requests = nil
 }
 
 // Configure replaces the listings and total; leagues are kept unless cfg sets them.
-func (m *MockTrade) Configure(cfg MockConfig) {
+func (m *mockTrade) Configure(cfg mockConfig) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if cfg.Leagues == nil {
@@ -121,21 +123,21 @@ func (m *MockTrade) Configure(cfg MockConfig) {
 }
 
 // RateLimit makes the next `times` requests to endpoint fail with 429 and Retry-After.
-func (m *MockTrade) RateLimit(endpoint Endpoint, times, retryAfterSecs int) {
+func (m *mockTrade) RateLimit(endpoint mockEndpoint, times, retryAfterSecs int) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.injections = append(m.injections, &injection{endpoint: endpoint, remaining: times, retryAfter: retryAfterSecs})
 }
 
 // Requests returns a copy of the recorded requests.
-func (m *MockTrade) Requests() []RecordedRequest {
+func (m *mockTrade) Requests() []recordedRequest {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return append([]RecordedRequest(nil), m.requests...)
+	return append([]recordedRequest(nil), m.requests...)
 }
 
 // Hit reports whether a request with method and a path starting with prefix was received.
-func (m *MockTrade) Hit(method, prefix string) bool {
+func (m *mockTrade) Hit(method, prefix string) bool {
 	for _, r := range m.Requests() {
 		if r.Method == method && strings.HasPrefix(r.Path, prefix) {
 			return true
@@ -144,10 +146,10 @@ func (m *MockTrade) Hit(method, prefix string) bool {
 	return false
 }
 
-// ListingID is the id of the i-th listing (0-based): 64 hex digits, like trade2's.
-func ListingID(i int) string { return fmt.Sprintf("%064x", i+1) }
+// listingID is the id of the i-th listing (0-based): 64 hex digits, like trade2's.
+func listingID(i int) string { return fmt.Sprintf("%064x", i+1) }
 
-func (m *MockTrade) handle(w http.ResponseWriter, r *http.Request) {
+func (m *mockTrade) handle(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 	path := r.URL.Path
 	pathAndQuery := r.URL.EscapedPath()
@@ -156,15 +158,15 @@ func (m *MockTrade) handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m.mu.Lock()
-	m.requests = append(m.requests, RecordedRequest{Method: r.Method, Path: pathAndQuery, Body: string(body)})
-	var endpoint Endpoint
+	m.requests = append(m.requests, recordedRequest{Method: r.Method, Path: pathAndQuery, Body: string(body)})
+	var endpoint mockEndpoint
 	switch {
 	case r.Method == http.MethodGet && path == "/api/trade2/data/leagues":
-		endpoint = EndpointLeagues
+		endpoint = endpointLeagues
 	case r.Method == http.MethodPost && searchRoute.MatchString(path):
-		endpoint = EndpointSearch
+		endpoint = endpointSearch
 	case r.Method == http.MethodGet && fetchRoute.MatchString(path):
-		endpoint = EndpointFetch
+		endpoint = endpointFetch
 	}
 	var inj *injection
 	if endpoint != "" {
@@ -185,31 +187,31 @@ func (m *MockTrade) handle(w http.ResponseWriter, r *http.Request) {
 	}
 	if inj != nil {
 		send(w, http.StatusTooManyRequests, map[string]any{"error": map[string]any{"code": 3, "message": "Rate limit exceeded"}},
-			rateHeaders("6:10:60,6:60:0", map[string]string{"Retry-After": fmt.Sprint(inj.retryAfter)}))
+			rateHeaders("6:10:60,6:60:0", map[string]string{"Retry-After": strconv.Itoa(inj.retryAfter)}))
 		return
 	}
 	ok := func(v any) { send(w, http.StatusOK, v, rateHeaders("1:10:0,1:60:0", nil)) }
 	switch endpoint {
-	case EndpointLeagues:
+	case endpointLeagues:
 		leagues := make([]map[string]string, 0, len(cfg.Leagues))
 		for _, id := range cfg.Leagues {
 			leagues = append(leagues, map[string]string{"id": id, "realm": "poe2", "text": id})
 		}
 		ok(map[string]any{"result": leagues})
-	case EndpointSearch:
+	case endpointSearch:
 		ids := make([]string, len(cfg.Listings))
 		for i := range cfg.Listings {
-			ids[i] = ListingID(i)
+			ids[i] = listingID(i)
 		}
 		total := cfg.Total
 		if total == 0 {
 			total = len(cfg.Listings)
 		}
 		ok(map[string]any{"id": "rklMock", "complexity": 4, "result": ids, "total": total})
-	case EndpointFetch:
+	case endpointFetch:
 		raw, _ := url.PathUnescape(strings.TrimPrefix(path, "/api/trade2/fetch/"))
 		result := []any{}
-		for _, id := range strings.Split(raw, ",") {
+		for id := range strings.SplitSeq(raw, ",") {
 			if id == "" {
 				continue
 			}
@@ -220,9 +222,9 @@ func (m *MockTrade) handle(w http.ResponseWriter, r *http.Request) {
 }
 
 // fetchResult is one trade2 fetch entry for listing id, or nil when there is none.
-func fetchResult(cfg MockConfig, id string) any {
+func fetchResult(cfg mockConfig, id string) any {
 	for i, l := range cfg.Listings {
-		if ListingID(i) != id {
+		if listingID(i) != id {
 			continue
 		}
 		account := l.Account
@@ -254,9 +256,7 @@ func rateHeaders(state string, extra map[string]string) map[string]string {
 		"X-Rate-Limit-Ip":       "5:10:60,15:60:300",
 		"X-Rate-Limit-Ip-State": state,
 	}
-	for k, v := range extra {
-		h[k] = v
-	}
+	maps.Copy(h, extra)
 	return h
 }
 

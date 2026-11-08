@@ -1,0 +1,59 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Ultimate Mana Flask",
+  "category": "flask",
+  "class": {
+    "type": "mana_flask"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 65,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Recovers 315 Mana over 2.80 Seconds",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Consumes 10 of 75 Charges on use",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Currently has 0 Charges",
+      "value": ""
+    }
+  ],
+  "quality": null,
+  "rarity": "normal",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 50,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

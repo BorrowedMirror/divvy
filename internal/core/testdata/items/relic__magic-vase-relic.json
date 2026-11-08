@@ -1,0 +1,64 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Fortified Vase Relic of Clarity",
+  "category": "relic",
+  "class": {
+    "type": "relic"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 62,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Maximum Honour",
+      "text": "+12% to Maximum Honour",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Honour restored",
+      "text": "14% increased Honour restored",
+      "values": [
+        14
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

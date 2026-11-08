@@ -10,15 +10,16 @@ package win
 import (
 	"math"
 	"sync/atomic"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// gwlExStyle is GWL_EXSTYLE; a variable so the negative index converts to uintptr
-// (sign-extended) at run time.
-var gwlExStyle int32 = -20
+// gwlExStyle is GWL_EXSTYLE (-20), sign-extended to the uintptr GetWindowLongPtrW takes: the
+// two's complement of 20 is ^(20 - 1).
+const gwlExStyle = ^uintptr(20 - 1)
 
 const (
 	swHide           = 0
@@ -34,7 +35,7 @@ const (
 )
 
 // hwndTopmost is HWND_TOPMOST, (HWND)-1.
-const hwndTopmost = ^uintptr(0)
+const hwndTopmost = windows.HWND(^uintptr(0))
 
 type overlay struct {
 	hwnd         windows.HWND
@@ -43,6 +44,14 @@ type overlay struct {
 
 var _ platform.OverlayWindow = (*overlay)(nil)
 
+func newOverlay(native unsafe.Pointer) (platform.OverlayWindow, error) {
+	hwnd, err := hwndFrom(native)
+	if err != nil {
+		return nil, err
+	}
+	return &overlay{hwnd: windows.HWND(hwnd)}, nil
+}
+
 func (o *overlay) window() (windows.HWND, error) {
 	if !windows.IsWindow(o.hwnd) {
 		return 0, platform.Backend("overlay HWND %#x is not a window", uintptr(o.hwnd))
@@ -50,25 +59,23 @@ func (o *overlay) window() (windows.HWND, error) {
 	return o.hwnd, nil
 }
 
+// exStyle reads GWL_EXSTYLE, a 32-bit style mask stored in a LONG_PTR.
 func exStyle(hwnd windows.HWND) uint32 {
-	// SAFETY: hwnd was validated; reading GWL_EXSTYLE has no side effects. The value is a
-	// 32-bit style mask stored in a LONG_PTR.
-	r, _, _ := procGetWindowLongPtrW.Call(uintptr(hwnd), uintptr(gwlExStyle))
+	r, _, _ := procGetWindowLongPtrW.Call(uintptr(hwnd), gwlExStyle)
 	return uint32(r)
 }
 
 func setExStyle(hwnd windows.HWND, style uint32) error {
-	// SAFETY: hwnd is a window of this process; GWL_EXSTYLE takes a style mask. The previous
-	// value is not an error indicator.
-	procSetWindowLongPtrW.Call(uintptr(hwnd), uintptr(gwlExStyle), uintptr(style))
-	// SAFETY: SWP_FRAMECHANGED applies the new styles without moving, sizing or activating.
-	if ok, _, err := procSetWindowPos.Call(uintptr(hwnd), hwndTopmost, 0, 0, 0, 0,
-		swpNoMove|swpNoSize|swpNoActivate|swpFrameChanged); ok == 0 {
-		return platform.Backend("SetWindowPos: %v", err)
+	// The previous value it returns is not an error indicator.
+	procSetWindowLongPtrW.Call(uintptr(hwnd), gwlExStyle, uintptr(style))
+	// SWP_FRAMECHANGED applies the new styles without moving, sizing or activating.
+	if err := setWindowPos(hwnd, hwndTopmost, 0, 0, 0, 0, swpNoMove|swpNoSize|swpNoActivate|swpFrameChanged); err != nil {
+		return platform.Backend("SetWindowPos: %w", err)
 	}
 	return nil
 }
 
+// Prepare implements [platform.OverlayWindow].
 func (o *overlay) Prepare() error {
 	hwnd, err := o.window()
 	if err != nil {
@@ -77,6 +84,8 @@ func (o *overlay) Prepare() error {
 	return setExStyle(hwnd, preparedExStyle(exStyle(hwnd)))
 }
 
+// ShowAt implements [platform.OverlayWindow]: HWND_TOPMOST and SWP_NOACTIVATE keep the game
+// focused.
 func (o *overlay) ShowAt(rect platform.Rect) error {
 	hwnd, err := o.window()
 	if err != nil {
@@ -84,27 +93,24 @@ func (o *overlay) ShowAt(rect platform.Rect) error {
 	}
 	w := int32(min(rect.Width, math.MaxInt32))
 	h := int32(min(rect.Height, math.MaxInt32))
-	// SAFETY: valid HWND; HWND_TOPMOST + SWP_NOACTIVATE keeps the game focused. Signed
-	// coordinates are passed sign-extended, as the C ABI expects for int.
-	if ok, _, err := procSetWindowPos.Call(uintptr(hwnd), hwndTopmost, uintptr(rect.X), uintptr(rect.Y),
-		uintptr(w), uintptr(h), swpNoActivate|swpShowWindow); ok == 0 {
-		return platform.Backend("SetWindowPos: %v", err)
+	if err := setWindowPos(hwnd, hwndTopmost, rect.X, rect.Y, w, h, swpNoActivate|swpShowWindow); err != nil {
+		return platform.Backend("SetWindowPos: %w", err)
 	}
-	// SAFETY: valid HWND. The return value is the previous visibility, not an error.
-	procShowWindow.Call(uintptr(hwnd), swShowNoActivate)
+	showWindow(hwnd, swShowNoActivate) // returns the previous visibility, not an error
 	return nil
 }
 
+// Hide implements [platform.OverlayWindow].
 func (o *overlay) Hide() error {
 	hwnd, err := o.window()
 	if err != nil {
 		return err
 	}
-	// SAFETY: valid HWND. The return value is the previous visibility, not an error.
-	procShowWindow.Call(uintptr(hwnd), swHide)
+	showWindow(hwnd, swHide)
 	return nil
 }
 
+// SetClickThrough implements [platform.OverlayWindow].
 func (o *overlay) SetClickThrough(enabled bool) error {
 	hwnd, err := o.window()
 	if err != nil {
@@ -119,17 +125,17 @@ func (o *overlay) SetClickThrough(enabled bool) error {
 	if enabled && nowAdded && !weAdded {
 		// A freshly layered window is invisible until its attributes are set: full opacity.
 		// Not done when the owner made it layered (it may use UpdateLayeredWindow).
-		// SAFETY: valid HWND that now has WS_EX_LAYERED.
-		if ok, _, err := procSetLayeredWindowAttributes.Call(uintptr(hwnd), 0, 255, lwaAlpha); ok == 0 {
-			return platform.Backend("SetLayeredWindowAttributes: %v", err)
+		if err := setLayeredWindowAttributes(hwnd, 0, 255, lwaAlpha); err != nil {
+			return platform.Backend("SetLayeredWindowAttributes: %w", err)
 		}
 	}
 	return nil
 }
 
 // RaiseAbove is a no-op: the overlay is WS_EX_TOPMOST, which on Windows stays above a focused
-// borderless game (the Rust backend used the trait's no-op default too).
-func (o *overlay) RaiseAbove(*uint64) error { return nil }
+// borderless game.
+func (*overlay) RaiseAbove(uint64) error { return nil }
 
-// Activate is a no-op, as in the Rust backend (the trait's default).
-func (o *overlay) Activate() error { return nil }
+// Activate is a no-op: the shell focuses the window through Wails, and a forced
+// SetForegroundWindow can be refused by the foreground lock.
+func (*overlay) Activate() error { return nil }

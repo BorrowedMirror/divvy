@@ -1,0 +1,99 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Hunting Spear",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Spears"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 66,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Spear Throw",
+      "text": "Grants Skill: Spear Throw",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "104% increased Physical Damage",
+      "values": [
+        104
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed",
+      "text": "12% increased Attack Speed",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+21% to Cold Resistance",
+      "values": [
+        21
+      ]
+    }
+  ],
+  "name": "Grim Lance",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "54-99"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.50"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 52,
+    "int": null,
+    "level": 40,
+    "str": 52
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.5,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 114.75,
+    "spirit": null,
+    "total_dps": 114.75
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

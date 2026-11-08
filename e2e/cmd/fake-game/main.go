@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/testkit"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
 )
 
 const title = "Path of Exile 2"
@@ -128,7 +128,7 @@ func readText(path string) (string, error) {
 func loadItems(o options) (items, error) {
 	dir := o.corpusDir
 	if dir == "" {
-		dir = testkit.CorpusDir()
+		dir = coretest.CorpusDir()
 	}
 	corpus := func(id string) (string, error) { return readText(filepath.Join(dir, id+".txt")) }
 	var it items
@@ -164,7 +164,8 @@ type keyEvent struct {
 	// isC / isV: the key is C / V, physically or in the current layout. Virtual keyboards
 	// (wtype, the app on Wayland) upload their own keymap, so the scancode is arbitrary there.
 	isC, isV bool
-	// code is the key's name for --log-keys (winit's KeyCode names: KeyC, Digit1, Enter, ...).
+	// code is the key's name for --log-keys (W3C KeyboardEvent.code names: KeyC, Digit1,
+	// Enter, ...).
 	code string
 	mods mods
 }
@@ -275,7 +276,7 @@ func (g *game) logKey(ev keyEvent, cb clipboard) {
 	}
 }
 
-// charCode is winit's KeyCode name for a letter or digit key, else "".
+// charCode is the W3C KeyboardEvent.code name for a letter or digit key, else "".
 func charCode(r rune) string {
 	switch {
 	case r >= 'a' && r <= 'z':

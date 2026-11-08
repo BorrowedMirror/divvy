@@ -20,6 +20,7 @@ package main
 import "C"
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -28,14 +29,14 @@ import (
 
 func main() {
 	// C memory: the registry listener keeps a pointer to it, which Go memory must not hand out.
+	// It is never freed: it lives until the process exits.
 	vk := (*C.rkl_vk)(C.calloc(1, C.sizeof_rkl_vk))
 	if rc := C.rkl_vk_open(vk, nil); rc != C.RKL_VK_OK {
 		fmt.Fprintf(os.Stderr, "wl-keyboard: cannot create a virtual keyboard on $WAYLAND_DISPLAY (code %d)\n", int(rc))
 		os.Exit(1)
 	}
 	fmt.Println("READY")
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	lost := make(chan struct{})
 	go func() {
 		// Keep reading the connection so the compositor never sees a stalled client.
@@ -44,9 +45,10 @@ func main() {
 		close(lost)
 	}()
 	select {
-	case <-stop:
+	case <-ctx.Done():
 	case <-lost:
 		fmt.Fprintln(os.Stderr, "wl-keyboard: lost the Wayland connection")
 		os.Exit(1)
 	}
+	stop()
 }

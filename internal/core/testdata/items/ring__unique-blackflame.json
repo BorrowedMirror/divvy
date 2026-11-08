@@ -1,0 +1,72 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Amethyst Ring",
+  "category": "unique",
+  "class": {
+    "type": "ring"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 74,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "+#% to Chaos Resistance",
+      "text": "+11% to Chaos Resistance",
+      "values": [
+        11
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Ignites you inflict deal Chaos Damage instead of Fire Damage",
+      "text": "Ignites you inflict deal Chaos Damage instead of Fire Damage",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+19% to Fire Resistance",
+      "values": [
+        19
+      ]
+    }
+  ],
+  "name": "Blackflame",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "unique",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 40,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

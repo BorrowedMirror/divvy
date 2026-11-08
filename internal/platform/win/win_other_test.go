@@ -11,6 +11,6 @@ import (
 )
 
 func TestNewIsUnsupportedOffWindows(t *testing.T) {
-	_, err := New(WithMouseHook(true))
+	_, err := New(Options{HookMouse: true})
 	assert.ErrorIs(t, err, platform.ErrUnsupported)
 }

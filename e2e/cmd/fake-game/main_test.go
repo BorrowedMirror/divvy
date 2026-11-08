@@ -160,7 +160,7 @@ func TestSizes(t *testing.T) {
 	assert.Equal(t, [2]uint32{640, 480}, [2]uint32{w, h})
 	for _, bad := range []string{"640", "0x5", "ax5", "5xb"} {
 		_, _, err := parseSize(bad)
-		assert.Error(t, err, bad)
+		require.Error(t, err, bad)
 	}
 	o := mustArgs(t, "--exit-after", "1.5")
 	assert.True(t, o.hasExitAfter)

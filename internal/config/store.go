@@ -58,8 +58,9 @@ func MarshalTOML(s Settings) ([]byte, error) {
 // saveSeq makes each save's temp file name unique within the process.
 var saveSeq atomic.Uint64
 
-// Save validates and atomically writes settings: a temp file in the same directory
-// (private to the user on unix, as it may hold a POESESSID), fsync, rename.
+// Save validates and atomically writes settings: a temp file in the same directory, fsync,
+// rename. New directories and the file are private to the user (0o700 / 0o600), as the
+// file may hold a POESESSID.
 func Save(paths Paths, settings *Settings) error {
 	if err := Validate(settings); err != nil {
 		return err
@@ -74,7 +75,7 @@ func Save(paths Paths, settings *Settings) error {
 	}
 	target := paths.SettingsFile
 	dir := filepath.Dir(target)
-	if err := os.MkdirAll(dir, 0o777); err != nil {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return ioErr(dir, err)
 	}
 	name := filepath.Base(target)
@@ -123,33 +124,41 @@ func AdoptLegacySettings(paths Paths, legacy string) (bool, error) {
 	if legacy == "" {
 		return false, nil
 	}
-	// Like Rust's `is_file()`: a legacy file that is missing or unreadable means there is
+	// A legacy file that is missing, unreadable or not a regular file means there is
 	// nothing to adopt, not an error.
-	info, statErr := os.Stat(legacy)
-	isFile := statErr == nil && info.Mode().IsRegular()
-	if !isFile {
+	if !isRegularFile(legacy) {
 		return false, nil
 	}
 	if _, err := os.Stat(paths.SettingsFile); err == nil {
 		return false, nil
 	}
-	if err := os.MkdirAll(paths.ConfigDir, 0o777); err != nil {
+	if err := os.MkdirAll(paths.ConfigDir, 0o700); err != nil {
 		return false, ioErr(paths.ConfigDir, err)
 	}
-	if err := copyFile(legacy, paths.SettingsFile, info.Mode().Perm()); err != nil {
+	if err := copyFile(legacy, paths.SettingsFile); err != nil {
 		return false, ioErr(paths.SettingsFile, err)
 	}
 	return true, nil
 }
 
-// copyFile is `std::fs::copy`: contents and permission bits.
-func copyFile(src, dst string, perm fs.FileMode) error {
+func isRegularFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.Mode().IsRegular()
+}
+
+// copyFile copies src to the new file dst, with src's permission bits (not masked by the
+// umask).
+func copyFile(src, dst string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
 	data, err := os.ReadFile(src)
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(dst, data, perm); err != nil {
+	if err := os.WriteFile(dst, data, info.Mode().Perm()); err != nil {
 		return err
 	}
-	return os.Chmod(dst, perm)
+	return os.Chmod(dst, info.Mode().Perm())
 }

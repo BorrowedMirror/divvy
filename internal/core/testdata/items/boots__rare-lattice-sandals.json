@@ -1,0 +1,95 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Lattice Sandals",
+  "category": "equipment",
+  "class": {
+    "type": "boots"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 75,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Movement Speed",
+      "text": "30% increased Movement Speed",
+      "values": [
+        30
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Energy Shield",
+      "text": "+66 to maximum Energy Shield",
+      "values": [
+        66
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+42% to Fire Resistance",
+      "values": [
+        42
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Intelligence",
+      "text": "+19 to Intelligence",
+      "values": [
+        19
+      ]
+    }
+  ],
+  "name": "Storm Spur",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+8%"
+    },
+    {
+      "augmented": true,
+      "name": "Energy Shield",
+      "value": "98"
+    }
+  ],
+  "quality": 8,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 71,
+    "level": 59,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": 98,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

@@ -82,10 +82,10 @@ func TestAcceleratorRejectsUnknownAndModifierKeys(t *testing.T) {
 		"Numpad0", "NumpadAdd", "Insert", "CapsLock", "PrintScreen", "IntlBackslash", "F25",
 	} {
 		_, err := platform.Accelerator(platform.NewChord(key, platform.Ctrl))
-		assert.ErrorIs(t, err, platform.ErrInvalidChord, "%q", key)
+		require.ErrorIs(t, err, platform.ErrInvalidChord, "%q", key)
 	}
 	_, err := platform.Accelerator(platform.NewChord("KeyD", platform.KeyModifier("hyper")))
-	assert.ErrorIs(t, err, platform.ErrInvalidChord)
+	require.ErrorIs(t, err, platform.ErrInvalidChord)
 	// Wails has no names for these either, so the probe does detect rejection.
 	for _, s := range []string{"ctrl+numpad0", "ctrl+insert", "hyper+d"} {
 		_, ok := wailsCanonical(s)

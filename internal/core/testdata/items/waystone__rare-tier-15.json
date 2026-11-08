@@ -1,0 +1,138 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Waystone (Tier 15)",
+  "category": "waystone",
+  "class": {
+    "type": "waystone"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters deal #% of Damage as Extra Lightning",
+      "text": "Monsters deal 26% of Damage as Extra Lightning",
+      "values": [
+        26
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters have #% increased Area of Effect",
+      "text": "Monsters have 20% increased Area of Effect",
+      "values": [
+        20
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Area has patches of Shocked Ground",
+      "text": "Area has patches of Shocked Ground",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Players have #% less Recovery Rate of Life and Energy Shield",
+      "text": "Players have 40% less Recovery Rate of Life and Energy Shield",
+      "values": [
+        40
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters fire # additional Projectiles",
+      "text": "Monsters fire 2 additional Projectiles",
+      "values": [
+        2
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Monsters have #% increased Freeze Buildup",
+      "text": "Monsters have 70% increased Freeze Buildup",
+      "values": [
+        70
+      ]
+    }
+  ],
+  "name": "Shrouded Halls",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Waystone Tier",
+      "value": "15"
+    },
+    {
+      "augmented": true,
+      "name": "Revives Available",
+      "value": "0"
+    },
+    {
+      "augmented": true,
+      "name": "Pack Size",
+      "value": "+18%"
+    },
+    {
+      "augmented": true,
+      "name": "Magic Monsters",
+      "value": "+35%"
+    },
+    {
+      "augmented": true,
+      "name": "Rare Monsters",
+      "value": "+28%"
+    },
+    {
+      "augmented": true,
+      "name": "Item Rarity",
+      "value": "+46%"
+    },
+    {
+      "augmented": true,
+      "name": "Waystone Drop Chance",
+      "value": "+210%"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": 15
+}

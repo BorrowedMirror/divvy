@@ -1,0 +1,93 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Abundant Greater Life Flask of the Medic",
+  "category": "flask",
+  "class": {
+    "type": "life_flask"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 50,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Abundant",
+        "ranges": [
+          {
+            "max": 17,
+            "min": 14
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Charges",
+      "text": "+15 to maximum Charges",
+      "values": [
+        15
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Medic",
+        "ranges": [],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Removes Bleeding on use",
+      "text": "Removes Bleeding on use",
+      "values": []
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Recovers 465 Life over 3 Seconds",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Consumes 10 of 85 (augmented) Charges on use",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Currently has 85 Charges",
+      "value": ""
+    }
+  ],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 20,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

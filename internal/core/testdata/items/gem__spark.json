@@ -1,0 +1,74 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Spark",
+  "category": "gem",
+  "class": {
+    "type": "skill_gem"
+  },
+  "corrupted": false,
+  "gem_level": 18,
+  "item_level": null,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Lightning, Spell, Projectile, Duration",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Level",
+      "value": "18"
+    },
+    {
+      "augmented": false,
+      "name": "Mana Cost",
+      "value": "31"
+    },
+    {
+      "augmented": false,
+      "name": "Cast Time",
+      "value": "0.70 sec"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "9.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Effectiveness of Added Damage",
+      "value": "80%"
+    }
+  ],
+  "quality": null,
+  "rarity": "gem",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 144,
+    "level": 82,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": 9,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

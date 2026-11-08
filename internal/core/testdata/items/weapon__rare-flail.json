@@ -1,0 +1,81 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Iron Flail",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Flails"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 50,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "84% increased Physical Damage",
+      "values": [
+        84
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Intelligence",
+      "text": "+26 to Intelligence",
+      "values": [
+        26
+      ]
+    }
+  ],
+  "name": "Doom Lash",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "33-62"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "7.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.40"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 45,
+    "level": 35,
+    "str": 45
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.4,
+    "block_chance": null,
+    "critical_hit_chance": 7,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 66.5,
+    "spirit": null,
+    "total_dps": 66.5
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

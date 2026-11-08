@@ -1,16 +1,18 @@
 package trade
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
+	"net/url"
 	"testing"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
 )
 
-// Unit tests (Rust src/ninja.rs).
+// Unit tests.
 
 func TestCandidateMapping(t *testing.T) {
 	unique := func(class core.ItemClass) []ninjaCandidate {
@@ -67,7 +69,7 @@ func TestStashMatchFallsBackToNameOnly(t *testing.T) {
 	it := testItem(core.ClassRing.Class(), core.CategoryUnique, new("Foo"), "Gold Ring")
 	v, n, ok := ov.find(endpointStash, &it)
 	assert.True(t, ok)
-	assert.Equal(t, 2.0, v)
+	assert.InDelta(t, 2.0, v, 0)
 	assert.Equal(t, uint32(1), n)
 	// Non-positive rates are dropped.
 	assert.Empty(t, ov.rates().Rates)
@@ -77,12 +79,20 @@ func TestStashMatchFallsBackToNameOnly(t *testing.T) {
 }
 
 func TestBadBaseURLIsConfigError(t *testing.T) {
-	src := NewPoeNinjaSource(mustURL(t, "data:text/plain,x"), "ua")
-	_, err := src.url(endpointExchange, "L", "Currency")
+	_, err := NewNinjaSource(SourceOptions{BaseURL: mustURL(t, "data:text/plain,x")})
+	assert.Equal(t, KindConfig, asTradeErr(t, err).Kind)
+	_, err = NewScoutSource(SourceOptions{})
 	assert.Equal(t, KindConfig, asTradeErr(t, err).Kind)
 }
 
-// Contract tests against recorded poe.ninja fixtures (Rust tests/ninja.rs).
+func newNinja(t *testing.T, base *url.URL, ttl time.Duration) *NinjaSource {
+	t.Helper()
+	src, err := NewNinjaSource(SourceOptions{BaseURL: base, UserAgent: ninjaUA, CacheTTL: ttl})
+	require.NoError(t, err)
+	return src
+}
+
+// Contract tests against recorded poe.ninja fixtures.
 
 const (
 	ninjaUA       = "rkl-test/1.0 (+ninja)"
@@ -114,15 +124,20 @@ func ninjaUnique(name, base string) *PriceRequest {
 	return ninjaRequest(testItem(core.ClassBelt.Class(), core.CategoryUnique, new(name), base))
 }
 
-func ninjaSourceFor(m *mockServer) *PoeNinjaSource { return NewPoeNinjaSource(m.baseURL(), ninjaUA) }
+func ninjaSourceFor(t *testing.T, m *mockServer) *NinjaSource {
+	t.Helper()
+	return newNinja(t, m.baseURL(), DefaultSourceCacheTTL)
+}
 
 func mountNinjaCurrency(t *testing.T, m *mockServer, expect int) {
+	t.Helper()
 	m.mount(mockSpec{Method: "GET", Path: ninjaExchange, Expect: expect, Match: matchers(
 		queryParam("league", ninjaLeague), queryParam("type", "Currency"), header("User-Agent", ninjaUA))},
 		respond(200, fixtureBytes(t, "ninja/exchange-currency.json")))
 }
 
 func mountNinjaUniques(t *testing.T, m *mockServer, expect int) {
+	t.Helper()
 	m.mount(mockSpec{Method: "GET", Path: ninjaStash, Expect: expect, Match: matchers(
 		queryParam("league", ninjaLeague), queryParam("type", "UniqueAccessories"), header("User-Agent", ninjaUA))},
 		respond(200, fixtureBytes(t, "ninja/stash-unique-accessories.json")))
@@ -138,7 +153,7 @@ func approx(t *testing.T, p *core.Price, amount float64, currency string) {
 func TestNinjaPricesCurrencyWithNormalisation(t *testing.T) {
 	m := newMock(t)
 	mountNinjaCurrency(t, m, 1)
-	src := ninjaSourceFor(m)
+	src := ninjaSourceFor(t, m)
 	assert.Equal(t, core.SourcePoeNinja, src.Kind())
 
 	divine, err := src.Price(t.Context(), ninjaCurrency("Divine Orb"))
@@ -162,7 +177,7 @@ func TestNinjaPricesCurrencyWithNormalisation(t *testing.T) {
 func TestNinjaPricesUniquesInDivineOrExalted(t *testing.T) {
 	m := newMock(t)
 	mountNinjaUniques(t, m, 1)
-	src := ninjaSourceFor(m)
+	src := ninjaSourceFor(t, m)
 
 	mb, err := src.Price(t.Context(), ninjaUnique("Mageblood", "Utility Belt"))
 	require.NoError(t, err)
@@ -180,7 +195,7 @@ func TestNinjaPricesUniquesInDivineOrExalted(t *testing.T) {
 func TestNinjaUnknownItemIsUnsupported(t *testing.T) {
 	m := newMock(t)
 	mountNinjaUniques(t, m, 1)
-	_, err := ninjaSourceFor(m).Price(t.Context(), ninjaUnique("Not A Real Belt", "Utility Belt"))
+	_, err := ninjaSourceFor(t, m).Price(t.Context(), ninjaUnique("Not A Real Belt", "Utility Belt"))
 	te := asTradeErr(t, err)
 	assert.Equal(t, KindUnsupported, te.Kind)
 	assert.Equal(t, "poe.ninja", te.Source)
@@ -195,13 +210,13 @@ func TestNinjaCurrencyFallsThroughTypesUntilFound(t *testing.T) {
 		"items":[{"id":"breach-splinter","name":"Simulacrum"}]}`
 	m.mount(mockSpec{Method: "GET", Path: ninjaExchange, Match: matchers(queryParam("type", "Fragments")), Expect: 1},
 		respond(200, []byte(fragments)))
-	p, err := ninjaSourceFor(m).Price(t.Context(), ninjaCurrency("Simulacrum"))
+	p, err := ninjaSourceFor(t, m).Price(t.Context(), ninjaCurrency("Simulacrum"))
 	require.NoError(t, err)
 	approx(t, p.Median, 2.5, "divine")
 }
 
 func TestNinjaSupportsMatrix(t *testing.T) {
-	src := NewPoeNinjaSource(mustURL(t, "https://poe.ninja"), ninjaUA)
+	src := newNinja(t, mustURL(t, "https://poe.ninja"), DefaultSourceCacheTTL)
 	supports := func(class core.ItemClass, cat core.ItemCategory, name *string, base string) bool {
 		it := testItem(class, cat, name, base)
 		return src.Supports(&it)
@@ -222,17 +237,17 @@ func TestNinjaSupportsMatrix(t *testing.T) {
 func TestNinjaServerErrorMapsToHTTP(t *testing.T) {
 	m := newMock(t)
 	m.mount(mockSpec{Method: "GET", Path: ninjaExchange, Expect: anyHits}, respond(503, []byte("upstream down")))
-	_, err := ninjaSourceFor(m).Price(t.Context(), ninjaCurrency("Divine Orb"))
+	_, err := ninjaSourceFor(t, m).Price(t.Context(), ninjaCurrency("Divine Orb"))
 	te := asTradeErr(t, err)
 	require.Equal(t, KindHTTP, te.Kind, "expected http error, got %v", err)
-	assert.Equal(t, uint16(503), te.Status)
+	assert.Equal(t, 503, te.Status)
 	assert.Equal(t, "upstream down", te.Message)
 }
 
 func TestNinjaBadJSONMapsToDecode(t *testing.T) {
 	m := newMock(t)
 	m.mount(mockSpec{Method: "GET", Path: ninjaStash, Expect: anyHits}, respond(200, []byte(`{"lines":`)))
-	_, err := ninjaSourceFor(m).Price(t.Context(), ninjaUnique("Mageblood", "Utility Belt"))
+	_, err := ninjaSourceFor(t, m).Price(t.Context(), ninjaUnique("Mageblood", "Utility Belt"))
 	te := asTradeErr(t, err)
 	assert.Equal(t, KindDecode, te.Kind)
 	assert.Contains(t, te.Message, "UniqueAccessories")
@@ -241,7 +256,7 @@ func TestNinjaBadJSONMapsToDecode(t *testing.T) {
 func TestNinjaCachesOverviewsPerLeagueAndType(t *testing.T) {
 	m := newMock(t)
 	mountNinjaCurrency(t, m, 1)
-	src := ninjaSourceFor(m).WithCacheTTL(60 * time.Second)
+	src := newNinja(t, m.baseURL(), 60*time.Second)
 	_, err := src.Price(t.Context(), ninjaCurrency("Divine Orb"))
 	require.NoError(t, err)
 	_, err = src.Price(t.Context(), ninjaCurrency("Exalted Orb"))
@@ -256,7 +271,7 @@ func TestNinjaCachesOverviewsPerLeagueAndType(t *testing.T) {
 
 func TestNinjaTransportErrorSurfaces(t *testing.T) {
 	// Nothing listens on this port.
-	src := NewPoeNinjaSource(mustURL(t, "http://127.0.0.1:9"), ninjaUA)
+	src := newNinja(t, mustURL(t, "http://127.0.0.1:9"), DefaultSourceCacheTTL)
 	_, err := src.Rates(t.Context(), ninjaLeague)
 	assert.Equal(t, KindTransport, asTradeErr(t, err).Kind)
 }

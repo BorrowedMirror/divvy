@@ -7,70 +7,49 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/BorrowedMirror/rust-king-ledger/web"
 )
 
 func TestTrayEveryLocaleResolvesNonEmptyLabels(t *testing.T) {
-	if len(TrayLocales) != 15 {
-		t.Fatalf("got %d locales", len(TrayLocales))
-	}
-	for _, code := range TrayLocales {
-		if _, err := fs.Stat(web.Locales(), code+"/translation.json"); err != nil {
-			t.Errorf("%s: %v", code, err)
-		}
+	require.Len(t, trayLocales, 15)
+	for _, code := range trayLocales {
+		_, err := fs.Stat(web.Locales(), code+"/translation.json")
+		require.NoError(t, err, code)
 		l := LoadTrayLabels(code)
 		for _, s := range []string{l.PriceCheck, l.Settings, l.Diagnostics, l.Quit, l.Tooltip} {
-			if strings.TrimSpace(s) == "" {
-				t.Errorf("%s: empty tray label", code)
-			}
+			assert.NotEmpty(t, strings.TrimSpace(s), "%s: empty tray label", code)
 		}
 	}
 }
 
 func TestTrayLocalesMatchEmbeddedFiles(t *testing.T) {
 	dirs, err := fs.Glob(web.Locales(), "*/translation.json")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	var codes []string
 	for _, d := range dirs {
 		codes = append(codes, strings.TrimSuffix(d, "/translation.json"))
 	}
-	want := slices.Sorted(slices.Values(TrayLocales))
-	if !slices.Equal(codes, want) {
-		t.Fatalf("embedded %q, listed %q", codes, want)
-	}
+	assert.Equal(t, slices.Sorted(slices.Values(trayLocales)), codes)
 }
 
 func TestTrayEnglishMatchesTranslationFile(t *testing.T) {
 	l := LoadTrayLabels("en")
-	if l.Settings != "Settings…" {
-		t.Fatalf("settings = %q", l.Settings)
-	}
-	if LoadTrayLabels("xx") != l {
-		t.Fatal("unknown language falls back to en")
-	}
+	assert.Equal(t, "Settings…", l.Settings)
+	assert.Equal(t, l, LoadTrayLabels("xx"), "unknown language falls back to en")
 }
 
 func TestTrayFallsBackKeyByKey(t *testing.T) {
 	chosen := map[string]any{"settings": "Einstellungen…", "quit": ""}
 	en := map[string]any{"settings": "Settings…", "quit": "Quit", "diagnostics": "Diag"}
-	l := ResolveTrayLabels(chosen, en)
-	if l.Settings != "Einstellungen…" {
-		t.Errorf("settings = %q", l.Settings)
-	}
-	if l.Quit != "Quit" {
-		t.Errorf("empty string falls back: %q", l.Quit)
-	}
-	if l.Diagnostics != "Diag" {
-		t.Errorf("diagnostics = %q", l.Diagnostics)
-	}
-	if l.Tooltip != "rkl" {
-		t.Errorf("missing everywhere -> built-in: %q", l.Tooltip)
-	}
-	if got := ResolveTrayLabels(nil, nil).PriceCheck; got != "Price check (pinned)" {
-		t.Errorf("price check = %q", got)
-	}
+	l := resolveTrayLabels(chosen, en)
+	assert.Equal(t, "Einstellungen…", l.Settings)
+	assert.Equal(t, "Quit", l.Quit, "an empty string falls back")
+	assert.Equal(t, "Diag", l.Diagnostics)
+	assert.Equal(t, "rkl", l.Tooltip, "missing everywhere: built-in English")
+	assert.Equal(t, "Price check (pinned)", resolveTrayLabels(nil, nil).PriceCheck)
 }
 
 func TestTrayBaseLanguageAndCaseInsensitiveMatch(t *testing.T) {
@@ -80,13 +59,9 @@ func TestTrayBaseLanguageAndCaseInsensitiveMatch(t *testing.T) {
 		"de/translation.json":    {Data: []byte(`{"tray":{"quit":"Beenden"}}`)},
 		"fr/translation.json":    {Data: []byte(`not json`)},
 	}
-	if got := trayLabelsFrom(locales, "PT-br").Quit; got != "Sair" {
-		t.Errorf("case-insensitive code: %q", got)
-	}
-	if got := trayLabelsFrom(locales, "de_AT"); got.Quit != "Beenden" || got.Settings != "Settings" {
-		t.Errorf("base language: %+v", got)
-	}
-	if got := trayLabelsFrom(locales, "fr").Quit; got != "Quit" {
-		t.Errorf("unparsable file means English: %q", got)
-	}
+	assert.Equal(t, "Sair", trayLabelsFrom(locales, "PT-br").Quit, "case-insensitive code")
+	de := trayLabelsFrom(locales, "de_AT")
+	assert.Equal(t, "Beenden", de.Quit, "base language")
+	assert.Equal(t, "Settings", de.Settings, "base language, English fallback")
+	assert.Equal(t, "Quit", trayLabelsFrom(locales, "fr").Quit, "an unparsable file means English")
 }

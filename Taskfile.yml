@@ -8,14 +8,16 @@ version: "3"
 
 vars:
   TOOL: go tool -modfile=tools/go.mod
-  # GTK3 + webkit2gtk-4.1 on Linux, the same WebKit the Tauri build needed.
+  # Wails' GTK3 + webkit2gtk-4.1 backend on Linux.
   TAGS: '{{if eq OS "linux"}}gtk3{{end}}'
+  # TAGS plus the test-hook build and the e2e tests, so vet covers them too.
+  E2E_TAGS: '{{if eq OS "linux"}}gtk3,{{end}}testhook,e2e'
   OUT: target/go
   VITE_PORT: '{{.WAILS_VITE_PORT | default 5173}}'
   VERSION:
     sh: cat VERSION
   # The version in diagnostics and the trade User-Agent (cmd/release does the same for packages).
-  LDFLAGS: -X github.com/BorrowedMirror/rust-king-ledger/internal/app.Version={{.VERSION}} -X github.com/BorrowedMirror/rust-king-ledger/internal/trade.Version={{.VERSION}}
+  LDFLAGS: -X github.com/BorrowedMirror/rust-king-ledger/internal/app.Version={{.VERSION}}
 
 tasks:
   default:
@@ -82,13 +84,18 @@ tasks:
         if [ -n "$files" ]; then echo "not gofmt-clean:"; echo "$files"; exit 1; fi
 
   vet:
-    desc: go vet for this OS, Windows and macOS (macOS as the cgo-free purego build).
+    desc: go vet for this OS, Windows and macOS (macOS as the cgo-free purego build), with and without the test hook and e2e tests.
     deps: [web]
     cmds:
       - go vet -tags '{{.TAGS}}' ./...
+      - go vet -tags '{{.E2E_TAGS}}' ./...
       - cmd: go vet ./...
         env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
+      - cmd: go vet -tags testhook,e2e ./...
+        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
       - cmd: go vet -tags purego ./...
+        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+      - cmd: go vet -tags purego,testhook,e2e ./...
         env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
 
   lint:

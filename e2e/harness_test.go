@@ -4,6 +4,7 @@ package e2e
 
 import (
 	"bufio"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -24,13 +25,13 @@ import (
 
 // mock is the trade2 mock shared by every test; tests that depend on its listings reset and
 // configure it first.
-var mock *MockTrade
+var mock *mockTrade
 
 // artifacts keeps the app and fake-game logs.
 var artifacts string
 
 func TestMain(m *testing.M) {
-	mock = NewMockTrade()
+	mock = newMockTrade()
 	dir, keep := os.LookupEnv("RKL_E2E_ARTIFACTS")
 	if !keep {
 		var err error
@@ -108,25 +109,30 @@ func isX11() bool {
 // Test hook client
 // ---------------------------------------------------------------------------------------------
 
-// Hook talks to the app's test hook: one connection per command, one reply line each.
-type Hook struct {
+// hookClient talks to the app's test hook: one connection per command, one reply line each.
+type hookClient struct {
 	port  int
 	token string
 }
 
 // Command sends cmd and returns the reply line.
-func (h Hook) Command(cmd string) (string, error) {
+func (h hookClient) Command(cmd string) (string, error) {
 	// `dom` waits up to 5 s for the web view; leave room for that.
 	return h.command(cmd, 10*time.Second)
 }
 
-func (h Hook) command(cmd string, timeout time.Duration) (string, error) {
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(h.port)), 2*time.Second)
+func (h hookClient) command(cmd string, timeout time.Duration) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	dialer := net.Dialer{Timeout: 2 * time.Second}
+	conn, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(h.port)))
 	if err != nil {
 		return "", fmt.Errorf("test hook on 127.0.0.1:%d: %w", h.port, err)
 	}
 	defer conn.Close()
-	_ = conn.SetDeadline(time.Now().Add(timeout))
+	if deadline, ok := ctx.Deadline(); ok {
+		_ = conn.SetDeadline(deadline)
+	}
 	if _, err := fmt.Fprintf(conn, "auth %s\n%s\n", h.token, cmd); err != nil {
 		return "", err
 	}
@@ -145,109 +151,122 @@ func firstWords(s string) string {
 }
 
 // OK sends cmd and fails unless the reply is `ok`.
-func (h Hook) OK(t *testing.T, cmd string) {
+func (h hookClient) OK(t *testing.T, cmd string) {
 	t.Helper()
 	r, err := h.Command(cmd)
 	require.NoError(t, err)
 	require.Equal(t, "ok", r, "test hook %q", firstWords(cmd))
 }
 
-// State is the hook's `state` reply.
-type State struct {
+// appState is the hook's `state` reply.
+type appState struct {
 	OverlayVisible  bool          `json:"overlay_visible"`
 	OverlayPinned   bool          `json:"overlay_pinned"`
 	SettingsVisible bool          `json:"settings_visible"`
 	TrayPresent     bool          `json:"tray_present"`
 	LastItem        *string       `json:"last_item"`
-	LastPrice       *PriceSummary `json:"last_price"`
+	LastPrice       *priceSummary `json:"last_price"`
 }
 
-// PriceSummary is the overlay's price summary.
-type PriceSummary struct {
+// priceSummary is the overlay's price summary.
+type priceSummary struct {
 	Total  int    `json:"total"`
-	Median *Price `json:"median"`
-	Min    *Price `json:"min"`
-	Max    *Price `json:"max"`
+	Median *price `json:"median"`
+	Min    *price `json:"min"`
+	Max    *price `json:"max"`
 }
 
-// Price is an amount of a currency.
-type Price struct {
+// price is an amount of a currency.
+type price struct {
 	Amount   float64 `json:"amount"`
 	Currency string  `json:"currency"`
 }
 
-func (s State) String() string {
+func (s appState) String() string {
 	b, _ := json.Marshal(s)
 	return string(b)
 }
 
 // State fetches `state`.
-func (h Hook) State() (State, error) {
+func (h hookClient) State() (appState, error) {
 	r, err := h.Command("state")
 	if err != nil {
-		return State{}, err
+		return appState{}, err
 	}
-	var s State
+	var s appState
 	if err := json.Unmarshal([]byte(r), &s); err != nil {
-		return State{}, fmt.Errorf("`state` is not JSON: %s", r)
+		return appState{}, fmt.Errorf("`state` is not JSON: %s", r)
 	}
 	return s, nil
 }
 
 // WaitState polls `state` until ok holds.
-func (h Hook) WaitState(t *testing.T, what string, timeout time.Duration, ok func(State) bool) State {
+func (h hookClient) WaitState(t *testing.T, what string, timeout time.Duration, ok func(appState) bool) appState {
 	t.Helper()
-	deadline := time.Now().Add(timeout)
-	var last State
+	var last appState
 	var err error
-	for time.Now().Before(deadline) {
-		if last, err = h.State(); err == nil && ok(last) {
-			return last
-		}
-		time.Sleep(200 * time.Millisecond)
+	if !poll(timeout, 200*time.Millisecond, func() bool {
+		last, err = h.State()
+		return err == nil && ok(last)
+	}) {
+		t.Fatalf("timed out after %s waiting for %s; last state: %s (err %v)", timeout, what, last, err)
 	}
-	t.Fatalf("timed out after %s waiting for %s; last state: %s (err %v)", timeout, what, last, err)
 	return last
 }
 
-// DOM is the reply to `dom`.
-type DOM struct {
+// domReply is the reply to `dom`.
+type domReply struct {
 	Exists  bool   `json:"exists"`
 	Visible bool   `json:"visible"`
 	Text    string `json:"text"`
 }
 
 // DOM asks the web view of window ("overlay" or "settings") about selector.
-func (h Hook) DOM(window, selector string) (DOM, error) {
+func (h hookClient) DOM(window, selector string) (domReply, error) {
 	r, err := h.Command("dom " + window + " " + selector)
 	if err != nil {
-		return DOM{}, err
+		return domReply{}, err
 	}
-	var d DOM
+	var d domReply
 	if err := json.Unmarshal([]byte(r), &d); err != nil {
-		return DOM{}, fmt.Errorf("`dom` replied %s", r)
+		return domReply{}, fmt.Errorf("`dom` replied %s", r)
 	}
 	return d, nil
 }
 
 // WaitDOM polls `dom` until ok holds.
-func (h Hook) WaitDOM(t *testing.T, window, selector string, timeout time.Duration, ok func(DOM) bool) DOM {
+func (h hookClient) WaitDOM(t *testing.T, window, selector string, timeout time.Duration, ok func(domReply) bool) domReply {
 	t.Helper()
-	deadline := time.Now().Add(timeout)
-	var last DOM
+	var last domReply
 	var err error
-	for time.Now().Before(deadline) {
-		if last, err = h.DOM(window, selector); err == nil && ok(last) {
-			return last
-		}
-		time.Sleep(200 * time.Millisecond)
+	if !poll(timeout, 200*time.Millisecond, func() bool {
+		last, err = h.DOM(window, selector)
+		return err == nil && ok(last)
+	}) {
+		t.Fatalf("timed out after %s waiting for %s %q; last: %+v (err %v)", timeout, window, selector, last, err)
 	}
-	t.Fatalf("timed out after %s waiting for %s %q; last: %+v (err %v)", timeout, window, selector, last, err)
 	return last
 }
 
+// poll calls try every interval until it returns true (true) or timeout has passed (false).
+func poll(timeout, interval time.Duration, try func() bool) bool {
+	deadline := time.Now().Add(timeout)
+	for {
+		if try() {
+			return true
+		}
+		if time.Now().After(deadline) {
+			return false
+		}
+		time.Sleep(interval)
+	}
+}
+
+// waitDelay bounds how long Wait waits for a killed child's output pipes to close.
+const waitDelay = 5 * time.Second
+
 // Settings fetches the settings as generic JSON.
-func (h Hook) Settings(t *testing.T) map[string]any {
+func (h hookClient) Settings(t *testing.T) map[string]any {
 	t.Helper()
 	r, err := h.Command("settings")
 	require.NoError(t, err)
@@ -260,61 +279,70 @@ func (h Hook) Settings(t *testing.T) map[string]any {
 // The app
 // ---------------------------------------------------------------------------------------------
 
-// App is one running app process.
-type App struct {
-	Hook
+// appProcess is one running app process.
+type appProcess struct {
+	hookClient
 	cmd    *exec.Cmd
 	exited chan struct{}
 	log    string
+	// lastTrigger is when the previous triggerPriceCheck fired.
+	lastTrigger time.Time
 }
 
-// Session is an isolated settings directory the app can be started in, more than once.
-type Session struct {
+// appSession is an isolated settings directory the app can be started in, more than once.
+type appSession struct {
 	t         *testing.T
 	ConfigDir string
 	starts    int
 }
 
-// NewSession creates a fresh RKL_CONFIG_DIR with onboarding marked done (onboarding has its
+// newSession creates a fresh RKL_CONFIG_DIR with onboarding marked done (onboarding has its
 // own web tests; here it would open the settings window over everything).
-func NewSession(t *testing.T) *Session {
+func newSession(t *testing.T) *appSession {
 	t.Helper()
 	dir := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "config"), 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "config", "settings.toml"),
 		[]byte("version = 1\n\n[ui]\nonboarding_done = true\n"), 0o644))
-	return &Session{t: t, ConfigDir: dir}
+	return &appSession{t: t, ConfigDir: dir}
 }
 
 // SettingsFile is the settings file in this session.
-func (s *Session) SettingsFile() string { return filepath.Join(s.ConfigDir, "config", "settings.toml") }
+func (s *appSession) SettingsFile() string {
+	return filepath.Join(s.ConfigDir, "config", "settings.toml")
+}
 
 // Start launches the app and waits for its test hook. t is the calling (sub)test; the app
 // lives until the session's test ends.
-func (s *Session) Start(t *testing.T) *App {
+func (s *appSession) Start(t *testing.T) *appProcess {
 	t.Helper()
 	bin := appBinary(t)
 	s.starts++
-	port := hookPort(t)
+	port := hookPort()
+	portFile := filepath.Join(t.TempDir(), "hook-port")
 	token := randomToken(t)
 	logPath := filepath.Join(artifacts, fmt.Sprintf("%s-app-%d.log", safeName(t.Name()), s.starts))
 	logFile, err := os.Create(logPath)
 	require.NoError(t, err)
 
-	cmd := exec.Command(bin)
-	cmd.Env = appEnv(map[string]string{
-		"RKL_TEST_HOOK":       strconv.Itoa(port),
-		"RKL_TEST_HOOK_TOKEN": token,
-		"RKL_CONFIG_DIR":      s.ConfigDir,
-		"RKL_TRADE_BASE_URL":  mock.URL(),
-		"RKL_SCOUT_BASE_URL":  mock.URL(),
-		"RKL_NINJA_BASE_URL":  mock.URL(),
-		"RKL_LOG":             envOr("RKL_LOG", "debug"),
-	})
+	// The app lives until the session's test ends, not just the calling subtest.
+	cmd := exec.CommandContext(s.t.Context(), bin)
+	cmd.WaitDelay = waitDelay
+	// Later entries win over the inherited environment.
+	cmd.Env = append(os.Environ(),
+		"RKL_TEST_HOOK="+strconv.Itoa(port),
+		"RKL_TEST_HOOK_PORT_FILE="+portFile,
+		"RKL_TEST_HOOK_TOKEN="+token,
+		"RKL_CONFIG_DIR="+s.ConfigDir,
+		"RKL_TRADE_BASE_URL="+mock.URL(),
+		"RKL_SCOUT_BASE_URL="+mock.URL(),
+		"RKL_NINJA_BASE_URL="+mock.URL(),
+		"RKL_LOG="+envOr("RKL_LOG", "debug"),
+	)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 	require.NoError(t, cmd.Start(), "starting %s", bin)
-	a := &App{Hook: Hook{port: port, token: token}, cmd: cmd, exited: make(chan struct{}), log: logPath}
+	a := &appProcess{port: port, token: token, cmd: cmd, exited: make(chan struct{}), log: logPath}
 	go func() {
 		_ = cmd.Wait()
 		_ = logFile.Close()
@@ -327,22 +355,30 @@ func (s *Session) Start(t *testing.T) *App {
 		}
 	})
 
-	deadline := time.Now().Add(timeout())
-	for {
-		if _, err := a.command("state", 2*time.Second); err == nil {
-			break
-		} else if a.Exited() {
-			t.Fatalf("the app exited before its test hook came up; see %s", logPath)
-		} else if time.Now().After(deadline) {
-			t.Fatalf("test hook not reachable after %s: %v; is %s a test-hook build (-tags testhook)?", timeout(), err, bin)
+	// The app writes the port it bound (port 0: one the OS picked) once the hook listens.
+	var hookErr error
+	up := poll(timeout(), 250*time.Millisecond, func() bool {
+		if a.port == 0 {
+			a.port, hookErr = readPortFile(portFile)
+			if hookErr != nil {
+				return a.Exited()
+			}
 		}
-		time.Sleep(250 * time.Millisecond)
+		_, hookErr = a.command("state", 2*time.Second)
+		return hookErr == nil || a.Exited()
+	})
+	switch {
+	case hookErr == nil:
+	case a.Exited():
+		t.Fatalf("the app exited before its test hook came up; see %s", logPath)
+	case !up:
+		t.Fatalf("test hook not reachable after %s: %v; is %s a test-hook build (-tags testhook)?", timeout(), hookErr, bin)
 	}
 	return a
 }
 
 // Exited reports whether the process has exited.
-func (a *App) Exited() bool {
+func (a *appProcess) Exited() bool {
 	select {
 	case <-a.exited:
 		return true
@@ -352,7 +388,7 @@ func (a *App) Exited() bool {
 }
 
 // WaitExit waits for the process to exit.
-func (a *App) WaitExit(t *testing.T, timeout time.Duration) {
+func (a *appProcess) WaitExit(t *testing.T, timeout time.Duration) {
 	t.Helper()
 	select {
 	case <-a.exited:
@@ -362,14 +398,14 @@ func (a *App) WaitExit(t *testing.T, timeout time.Duration) {
 }
 
 // Quit sends `quit` and waits for the process to exit.
-func (a *App) Quit(t *testing.T) {
+func (a *appProcess) Quit(t *testing.T) {
 	t.Helper()
 	a.OK(t, "quit")
 	a.WaitExit(t, 10*time.Second)
 }
 
 // Kill stops the process if it is still running.
-func (a *App) Kill() {
+func (a *appProcess) Kill() {
 	if !a.Exited() {
 		_ = a.cmd.Process.Kill()
 		<-a.exited
@@ -377,27 +413,13 @@ func (a *App) Kill() {
 }
 
 // Pid is the app's process id.
-func (a *App) Pid() int { return a.cmd.Process.Pid }
+func (a *appProcess) Pid() int { return a.cmd.Process.Pid }
 
 // WaitOverlayLoaded waits until the (hidden) overlay web view has rendered the app, so the
 // first hotkey press is not lost on a cold web view.
-func (a *App) WaitOverlayLoaded(t *testing.T) {
+func (a *appProcess) WaitOverlayLoaded(t *testing.T) {
 	t.Helper()
-	a.WaitDOM(t, "overlay", `main[data-route="overlay"]`, timeout(), func(d DOM) bool { return d.Exists })
-}
-
-func appEnv(set map[string]string) []string {
-	var env []string
-	for _, kv := range os.Environ() {
-		k, _, _ := strings.Cut(kv, "=")
-		if _, ok := set[k]; !ok {
-			env = append(env, kv)
-		}
-	}
-	for k, v := range set {
-		env = append(env, k+"="+v)
-	}
-	return env
+	a.WaitDOM(t, "overlay", `main[data-route="overlay"]`, timeout(), func(d domReply) bool { return d.Exists })
 }
 
 func envOr(key, def string) string {
@@ -407,14 +429,22 @@ func envOr(key, def string) string {
 	return def
 }
 
-func hookPort(t *testing.T) int {
+// hookPort is the fixed hook port from RKL_TEST_HOOK, else 0: the app binds a free port and
+// reports it in RKL_TEST_HOOK_PORT_FILE.
+func hookPort() int {
 	if p, err := strconv.Atoi(os.Getenv("RKL_TEST_HOOK")); err == nil && p > 0 {
 		return p
 	}
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	require.NoError(t, err)
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port
+	return 0
+}
+
+// readPortFile reads the port the app wrote to path.
+func readPortFile(path string) (int, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return 0, fmt.Errorf("waiting for the hook port: %w", err)
+	}
+	return strconv.Atoi(strings.TrimSpace(string(b)))
 }
 
 func randomToken(t *testing.T) string {
@@ -452,8 +482,8 @@ func dumpLog(t *testing.T, what, path string) {
 // Fake game
 // ---------------------------------------------------------------------------------------------
 
-// Game is a running fake game window (e2e/cmd/fake-game).
-type Game struct {
+// gameProcess is a running fake game window (e2e/cmd/fake-game).
+type gameProcess struct {
 	cmd    *exec.Cmd
 	lines  chan string
 	exited chan struct{}
@@ -463,19 +493,20 @@ type Game struct {
 	log    string
 }
 
-// StartGame starts the fake game serving the item text file and waits for READY.
-func StartGame(t *testing.T, item string) *Game {
+// startGame starts the fake game serving the item text file and waits for READY.
+func startGame(t *testing.T, item string) *gameProcess {
 	t.Helper()
 	bin := fakeGameBinary(t)
 	logPath := filepath.Join(artifacts, safeName(t.Name())+"-game.log")
 	logFile, err := os.Create(logPath)
 	require.NoError(t, err)
-	cmd := exec.Command(bin, "--exit-after", "300", "--item", item)
+	cmd := exec.CommandContext(t.Context(), bin, "--exit-after", "300", "--item", item)
+	cmd.WaitDelay = waitDelay
 	cmd.Stderr = logFile
 	out, err := cmd.StdoutPipe()
 	require.NoError(t, err)
 	require.NoError(t, cmd.Start(), "starting %s", bin)
-	g := &Game{cmd: cmd, lines: make(chan string, 64), exited: make(chan struct{}), log: logPath}
+	g := &gameProcess{cmd: cmd, lines: make(chan string, 64), exited: make(chan struct{}), log: logPath}
 	go func() {
 		sc := bufio.NewScanner(out)
 		for sc.Scan() {
@@ -518,27 +549,24 @@ func StartGame(t *testing.T, item string) *Game {
 }
 
 // Copies is how many times the game served the item (the app sent it the copy chord).
-func (g *Game) Copies() int {
+func (g *gameProcess) Copies() int {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	return g.copies
 }
 
-// WaitCopied waits until the game has served at least n copies.
-func (g *Game) WaitCopied(t *testing.T, n int, timeout time.Duration, context func() string) {
+// WaitCopied waits until the game has served at least n copies; describe adds context to
+// the failure.
+func (g *gameProcess) WaitCopied(t *testing.T, n int, timeout time.Duration, describe func() string) {
 	t.Helper()
-	deadline := time.Now().Add(timeout)
-	for g.Copies() < n {
-		if time.Now().After(deadline) {
-			t.Fatalf("fake-game copied %d times, want %d: the app never sent the copy chord to the game "+
-				"(trigger %s; focus? permissions?); %s", g.Copies(), n, triggerMode(), context())
-		}
-		time.Sleep(100 * time.Millisecond)
+	if !poll(timeout, 100*time.Millisecond, func() bool { return g.Copies() >= n }) {
+		t.Fatalf("fake-game copied %d times, want %d: the app never sent the copy chord to the game "+
+			"(trigger %s; focus? permissions?); %s", g.Copies(), n, triggerMode(), describe())
 	}
 }
 
 // Stop ends the game and waits for it.
-func (g *Game) Stop() {
+func (g *gameProcess) Stop() {
 	select {
 	case <-g.exited:
 	default:
@@ -563,8 +591,8 @@ func triggerMode() string {
 	return "hook"
 }
 
-// FocusGame brings the fake game to the front: RKL_E2E_FOCUS_CMD, else xdotool on X11.
-func FocusGame(t *testing.T) {
+// focusGame brings the fake game to the front: RKL_E2E_FOCUS_CMD, else xdotool on X11.
+func focusGame(t *testing.T) {
 	t.Helper()
 	cmd := os.Getenv("RKL_E2E_FOCUS_CMD")
 	if cmd == "" && isX11() {
@@ -575,43 +603,45 @@ func FocusGame(t *testing.T) {
 	}
 	// The compositor can take a moment to manage a window that has just been mapped (sway with
 	// XWayland), so retry while the window is not there yet.
-	deadline := time.Now().Add(5 * time.Second)
-	for {
-		out, err := exec.Command("sh", "-c", cmd).CombinedOutput()
-		if err == nil {
-			return
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("focusing the game: `%s`: %v: %s", cmd, err, out)
-		}
-		time.Sleep(200 * time.Millisecond)
+	var out []byte
+	var err error
+	if !poll(5*time.Second, 200*time.Millisecond, func() bool {
+		out, err = shell(t, cmd).CombinedOutput()
+		return err == nil
+	}) {
+		t.Fatalf("focusing the game: `%s`: %v: %s", cmd, err, out)
 	}
+}
+
+// shell is a `sh -c` command, ended with the test.
+func shell(t *testing.T, cmd string) *exec.Cmd {
+	c := exec.CommandContext(t.Context(), "sh", "-c", cmd)
+	c.WaitDelay = waitDelay
+	return c
 }
 
 // run runs a `sh -c` command.
 func run(t *testing.T, cmd string) {
 	t.Helper()
-	out, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+	out, err := shell(t, cmd).CombinedOutput()
 	require.NoError(t, err, "`%s`: %s", cmd, out)
 }
 
-// lastTrigger is when the previous TriggerPriceCheck fired. The app drops presses that come
-// less than its debounce (150 ms) after the previous price check started, as key bounce; on a
-// fast run (Wayland, no focus delay) a second trigger could land inside it.
-var lastTrigger time.Time
-
-// triggerSpacing is the least time TriggerPriceCheck leaves between two triggers.
+// triggerSpacing is the least time triggerPriceCheck leaves between two triggers of one app.
+// The app drops presses that come less than its debounce (150 ms) after the previous price
+// check started, as key bounce; on a fast run (Wayland, no focus delay) a second trigger
+// could land inside it.
 const triggerSpacing = 300 * time.Millisecond
 
-// TriggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
+// triggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
 // (the app sends its copy chord to whatever has focus, as for a real player).
-func TriggerPriceCheck(t *testing.T, a *App, pinned bool) {
+func triggerPriceCheck(t *testing.T, a *appProcess, pinned bool) {
 	t.Helper()
-	FocusGame(t)
-	if wait := triggerSpacing - time.Since(lastTrigger); wait > 0 {
+	focusGame(t)
+	if wait := triggerSpacing - time.Since(a.lastTrigger); wait > 0 {
 		time.Sleep(wait)
 	}
-	defer func() { lastTrigger = time.Now() }()
+	defer func() { a.lastTrigger = time.Now() }()
 	switch triggerMode() {
 	case "xdotool":
 		// The app grabs its hotkeys only while it sees the game focused (it polls for that);

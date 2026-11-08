@@ -6,7 +6,7 @@ import (
 )
 
 // Chord -> Wails global-shortcut accelerator mapping shared by every backend that registers
-// hotkeys through Wails' GlobalShortcutManager (the Go counterpart of the Rust ghk module).
+// hotkeys through Wails' GlobalShortcutManager.
 //
 // Pure and OS-independent, so its tests run on every host. Chord keys are W3C
 // KeyboardEvent.code names, the same names the input hook reports for key events.

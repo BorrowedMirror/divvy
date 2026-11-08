@@ -1,7 +1,8 @@
 package data
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -92,55 +93,56 @@ func sampleData(t *testing.T) *GameData {
 
 // ---- asset encoding ----
 
+// mustEncode is encodeAsset for records that always encode.
+func mustEncode[T any](t *testing.T, file string, sources []string, records []T) (AssetEntry, []byte) {
+	t.Helper()
+	entry, b, err := encodeAsset(file, sources, records)
+	require.NoError(t, err)
+	return entry, b
+}
+
 func TestEncodeDecodeRoundTrip(t *testing.T) {
 	stats := sample().Stats
-	entry, b := EncodeAsset("stats.json.zst", []string{"u"}, stats)
+	entry, b := mustEncode(t, "stats.json.zst", []string{"u"}, stats)
 	assert.Equal(t, len(stats), entry.Records)
 	assert.Len(t, entry.Sha256, 64)
-	back, err := DecodeAsset[[]core.StatDef](&entry, b)
+	back, err := decodeAsset[[]core.StatDef](&entry, b)
 	require.NoError(t, err)
 	assert.Equal(t, stats, back)
 }
 
 func TestHashIsCaseInsensitive(t *testing.T) {
-	entry, b := EncodeAsset("x", nil, []uint32{1, 2, 3})
+	entry, b := mustEncode(t, "x", nil, []uint32{1, 2, 3})
 	entry.Sha256 = strings.ToUpper(entry.Sha256)
-	back, err := DecodeAsset[[]uint32](&entry, b)
+	back, err := decodeAsset[[]uint32](&entry, b)
 	require.NoError(t, err)
 	assert.Equal(t, []uint32{1, 2, 3}, back)
 }
 
 func TestSha256KnownVector(t *testing.T) {
-	assert.Equal(t, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", Sha256Hex([]byte("abc")))
+	assert.Equal(t, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", sha256Hex([]byte("abc")))
 }
 
 func TestHashMismatchRejected(t *testing.T) {
-	entry, b := EncodeAsset("bases.json.zst", nil, sample().Bases)
+	entry, b := mustEncode(t, "bases.json.zst", nil, sample().Bases)
 	entry.Sha256 = strings.Repeat("0", 64)
-	_, err := DecodeAsset[[]core.BaseDef](&entry, b)
-	var herr *HashError
-	require.ErrorAs(t, err, &herr)
-	assert.Equal(t, "bases.json.zst", herr.File)
-	assert.Contains(t, err.Error(), "hash mismatch")
+	_, err := decodeAsset[[]core.BaseDef](&entry, b)
+	require.ErrorIs(t, err, ErrHashMismatch)
+	assertAssetError(t, err, "bases.json.zst", "verify")
 }
 
 func TestCorruptZstdRejected(t *testing.T) {
-	entry, b := EncodeAsset("stats.json.zst", nil, sample().Stats)
-	_, err := DecodeAsset[[]core.StatDef](&entry, b[:len(b)/2])
-	var derr *DecompressError
-	require.ErrorAs(t, err, &derr, "%v", err)
-	_, err = DecodeAsset[[]core.StatDef](&entry, []byte("not zstd at all"))
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to decompress")
+	entry, b := mustEncode(t, "stats.json.zst", nil, sample().Stats)
+	_, err := decodeAsset[[]core.StatDef](&entry, b[:len(b)/2])
+	assertAssetError(t, err, "stats.json.zst", "decompress")
+	_, err = decodeAsset[[]core.StatDef](&entry, []byte("not zstd at all"))
+	assertAssetError(t, err, "stats.json.zst", "decompress")
 }
 
 func TestWrongShapeJSONRejected(t *testing.T) {
-	entry, b := EncodeAsset("statics.json.zst", nil, []int{1, 2, 3})
-	_, err := DecodeAsset[[]core.StaticDef](&entry, b)
-	var jerr *JSONError
-	require.ErrorAs(t, err, &jerr, "%v", err)
-	assert.Equal(t, "statics.json.zst", jerr.File)
-	assert.Contains(t, err.Error(), "not valid JSON")
+	entry, b := mustEncode(t, "statics.json.zst", nil, []int{1, 2, 3})
+	_, err := decodeAsset[[]core.StaticDef](&entry, b)
+	assertAssetError(t, err, "statics.json.zst", "decode")
 }
 
 // ---- manifest / directories ----
@@ -148,30 +150,28 @@ func TestWrongShapeJSONRejected(t *testing.T) {
 func TestSchemaMismatchRejected(t *testing.T) {
 	dir := t.TempDir()
 	m := writeSample(t, dir)
-	m.SchemaVersion = SchemaVersion + 1
+	m.SchemaVersion = schemaVersion + 1
 	b, err := json.Marshal(m)
 	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(filepath.Join(dir, ManifestFile), b, 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, manifestFile), b, 0o644))
 	_, err = LoadDir(dir)
-	var serr *SchemaError
-	require.ErrorAs(t, err, &serr, "%v", err)
-	assert.Equal(t, SchemaVersion+1, serr.Version)
-	assert.Contains(t, err.Error(), "unsupported schema version")
+	require.ErrorIs(t, err, ErrSchemaVersion)
+	assert.EqualError(t, err, "asset manifest.json: decode: unsupported schema version 2 (expected 1)")
 }
 
 func TestInvalidManifestRejected(t *testing.T) {
-	_, err := ParseManifest([]byte("{}"))
-	var jerr *JSONError
-	require.ErrorAs(t, err, &jerr, "%v", err)
-	assert.Equal(t, ManifestFile, jerr.File)
+	_, err := parseManifest([]byte("not json"))
+	assertAssetError(t, err, manifestFile, "decode")
+	_, err = parseManifest([]byte(`{"schema_version":1}`))
+	assertAssetError(t, err, manifestFile, "decode")
+	_, err = parseManifest([]byte("{}"))
+	require.ErrorIs(t, err, ErrSchemaVersion)
 }
 
 func TestMissingManifestRejected(t *testing.T) {
 	_, err := LoadDir(t.TempDir())
-	var ierr *IOError
-	require.ErrorAs(t, err, &ierr, "%v", err)
-	assert.Equal(t, ManifestFile, ierr.File)
-	assert.Contains(t, err.Error(), "could not be read")
+	assertAssetError(t, err, manifestFile, "read")
+	require.ErrorIs(t, err, fs.ErrNotExist)
 }
 
 func TestMissingAssetFileRejected(t *testing.T) {
@@ -179,19 +179,16 @@ func TestMissingAssetFileRejected(t *testing.T) {
 	writeSample(t, dir)
 	require.NoError(t, os.Remove(filepath.Join(dir, "uniques.json.zst")))
 	_, err := LoadDir(dir)
-	var ierr *IOError
-	require.ErrorAs(t, err, &ierr, "%v", err)
-	assert.Equal(t, "uniques.json.zst", ierr.File)
+	assertAssetError(t, err, "uniques.json.zst", "read")
 }
 
 func TestTamperedAssetFileRejected(t *testing.T) {
 	dir := t.TempDir()
 	writeSample(t, dir)
-	_, other := EncodeAsset("statics.json.zst", nil, []core.StaticDef{})
+	_, other := mustEncode(t, "statics.json.zst", nil, []core.StaticDef{})
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "statics.json.zst"), other, 0o644))
 	_, err := LoadDir(dir)
-	var herr *HashError
-	assert.ErrorAs(t, err, &herr)
+	require.ErrorIs(t, err, ErrHashMismatch)
 }
 
 func TestWriteDirReportsIOErrors(t *testing.T) {
@@ -199,17 +196,16 @@ func TestWriteDirReportsIOErrors(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "not-a-dir")
 	require.NoError(t, os.WriteFile(file, []byte("x"), 0o644))
 	_, err := WriteDir(file, &b, sources(), "", nil)
-	var ierr *IOError
-	require.ErrorAs(t, err, &ierr, "%v", err)
+	assertAssetError(t, err, file, "write")
 	// Directory exists but an asset path is occupied by a directory.
 	dir2 := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(dir2, "stats.json.zst"), 0o755))
 	_, err = WriteDir(dir2, &b, sources(), "", nil)
-	assert.ErrorAs(t, err, &ierr)
+	assertAssetError(t, err, "stats.json.zst", "write")
 	dir3 := t.TempDir()
-	require.NoError(t, os.Mkdir(filepath.Join(dir3, ManifestFile), 0o755))
+	require.NoError(t, os.Mkdir(filepath.Join(dir3, manifestFile), 0o755))
 	_, err = WriteDir(dir3, &b, sources(), "", nil)
-	assert.ErrorAs(t, err, &ierr)
+	assertAssetError(t, err, manifestFile, "write")
 }
 
 func TestLoadDirRoundTrip(t *testing.T) {
@@ -226,15 +222,13 @@ func TestLoadDirRoundTrip(t *testing.T) {
 
 func TestEmbeddedMissingFileRejected(t *testing.T) {
 	sub := fstest.MapFS{}
-	for _, name := range []string{ManifestFile, "stats.json.zst", "bases.json.zst"} {
+	for _, name := range []string{manifestFile, "stats.json.zst", "bases.json.zst"} {
 		b, err := fs.ReadFile(assets.FS, name)
 		require.NoError(t, err)
 		sub[name] = &fstest.MapFile{Data: b}
 	}
 	_, err := loadFS(sub)
-	var ierr *IOError
-	require.ErrorAs(t, err, &ierr, "%v", err)
-	assert.Equal(t, "uniques.json.zst", ierr.File)
+	assertAssetError(t, err, "uniques.json.zst", "read")
 }
 
 // ---- catalog ----
@@ -326,12 +320,6 @@ func TestUniqueAndStaticLookups(t *testing.T) {
 	assert.Nil(t, d.StaticItem("Mirror"))
 }
 
-func TestCloneSharesIndexes(t *testing.T) {
-	d := sampleData(t)
-	c := *d
-	assert.Same(t, d.Bundle(), c.Bundle())
-}
-
 // ---- bundled assets ----
 
 func TestBundledAssetsLoad(t *testing.T) {
@@ -342,7 +330,7 @@ func TestBundledAssetsLoad(t *testing.T) {
 	assert.Greater(t, len(b.Bases), 1000)
 	assert.Greater(t, len(b.Uniques), 300)
 	assert.Greater(t, len(b.Statics), 300)
-	assert.Equal(t, SchemaVersion, d.Manifest.SchemaVersion)
+	assert.Equal(t, schemaVersion, d.Manifest.SchemaVersion)
 	divine := d.StaticItem("Divine Orb")
 	require.NotNil(t, divine)
 	assert.Equal(t, "divine", divine.ID)
@@ -368,59 +356,71 @@ func TestBundledAssetsLoad(t *testing.T) {
 	assert.True(t, has("#% increased Honour restored", core.ModExplicit, "sanctum.stat_1583320325"))
 	assert.True(t, has("#% increased Quantity of Items found in your Maps", core.ModExplicit, "explicit.stat_2390685262"))
 	assert.True(t, has("#% increased Experience gain in your Maps", core.ModExplicit, "explicit.stat_57434274"))
-	// Records are sorted deterministically (Rust `String` order is byte order, like Go's).
+	// Records are sorted deterministically, by byte order.
 	for i := 1; i < len(b.Bases); i++ {
 		assert.Less(t, b.Bases[i-1].Name, b.Bases[i].Name)
 	}
 }
 
-func TestBundledIsCached(t *testing.T) {
-	a := BundledStatic()
-	b := BundledStatic()
-	assert.Same(t, a, b)
-	c, err := Bundled()
-	require.NoError(t, err)
-	assert.Same(t, a.Bundle(), c.Bundle())
-}
-
-// readSnapshot returns the body of an insta snapshot (after the YAML front matter).
-func readSnapshot(t *testing.T, name string) []byte {
+// bundledData is the bundled game data, which this package's tests require to be valid.
+func bundledData(t *testing.T) *GameData {
 	t.Helper()
-	raw, err := os.ReadFile(filepath.Join("testdata", "snapshots", name))
+	d, err := Bundled()
 	require.NoError(t, err)
-	s := strings.ReplaceAll(string(raw), "\r\n", "\n")
-	rest, ok := strings.CutPrefix(s, "---\n")
-	require.True(t, ok, "snapshot has front matter")
-	_, body, ok := strings.Cut(rest, "\n---\n")
-	require.True(t, ok, "snapshot front matter is closed")
-	return []byte(body)
+	return d
 }
 
-func TestBundledManifestSnapshot(t *testing.T) {
-	var want any
-	require.NoError(t, json.Unmarshal(readSnapshot(t, "rkl_data__tests__bundled_manifest_snapshot.snap"), &want))
-	b, err := json.Marshal(BundledStatic().Manifest)
+func TestBundledIsCached(t *testing.T) {
+	first, second := bundledData(t), bundledData(t)
+	assert.Same(t, first, second)
+}
+
+func TestBundledManifestGolden(t *testing.T) {
+	want, err := os.ReadFile(filepath.Join("testdata", "bundled_manifest.json"))
 	require.NoError(t, err)
-	var got map[string]any
-	require.NoError(t, json.Unmarshal(b, &got))
-	// insta redactions: `.generated_at` and `.*.sha256`.
-	got["generated_at"] = "[generated_at]"
-	for _, v := range got {
-		if entry, ok := v.(map[string]any); ok {
-			if _, ok := entry["sha256"]; ok {
-				entry["sha256"] = "[sha256]"
-			}
-		}
+	m := bundledData(t).Manifest
+	require.NotNil(t, m.L10n)
+	l10n := *m.L10n // the cached bundle's entry must not change
+	m.L10n = &l10n
+	// The golden leaves out what changes on every refresh.
+	m.GeneratedAt = "[generated_at]"
+	for _, e := range []*AssetEntry{&m.Stats, &m.Bases, &m.Uniques, &m.Statics, m.L10n} {
+		e.Sha256 = "[sha256]"
 	}
-	assert.Equal(t, want, any(got))
+	got, err := json.Marshal(m)
+	require.NoError(t, err)
+	assert.JSONEq(t, string(want), string(got))
 }
 
-// Go-only: the manifest WriteDir would write for the bundled data is byte-identical to the
-// one serde_json wrote.
-func TestManifestFileFormatMatchesSerde(t *testing.T) {
-	want, err := fs.ReadFile(assets.FS, ManifestFile)
+// WriteDir writes the bundled manifest byte for byte as it is checked in, so a refresh
+// only changes what changed.
+func TestManifestFileFormatIsStable(t *testing.T) {
+	want, err := fs.ReadFile(assets.FS, manifestFile)
 	require.NoError(t, err)
-	assert.Equal(t, string(want), string(manifestPretty(&BundledStatic().Manifest)))
+	got, err := marshalManifest(&bundledData(t).Manifest)
+	require.NoError(t, err)
+	assert.Equal(t, string(want), string(got))
+}
+
+// Re-encoding the bundled records reproduces the checked-in hashes.
+func TestBundledAssetsReencodeToTheSameHashes(t *testing.T) {
+	d := bundledData(t)
+	b := d.Bundle()
+	check := func(want AssetEntry, entry AssetEntry, err error) {
+		t.Helper()
+		require.NoError(t, err)
+		assert.Equal(t, want.Sha256, entry.Sha256, want.File)
+	}
+	e, _, err := encodeAsset(d.Manifest.Stats.File, nil, b.Stats)
+	check(d.Manifest.Stats, e, err)
+	e, _, err = encodeAsset(d.Manifest.Bases.File, nil, b.Bases)
+	check(d.Manifest.Bases, e, err)
+	e, _, err = encodeAsset(d.Manifest.Uniques.File, nil, b.Uniques)
+	check(d.Manifest.Uniques, e, err)
+	e, _, err = encodeAsset(d.Manifest.Statics.File, nil, b.Statics)
+	check(d.Manifest.Statics, e, err)
+	e, _, err = encodeAsset(d.Manifest.L10n.File, nil, b.Languages)
+	check(*d.Manifest.L10n, e, err)
 }
 
 func TestUniquesByBaseListsEveryUniqueForABase(t *testing.T) {
@@ -477,10 +477,21 @@ func TestEveryLanguageTranslatesTheRingFixtureBackToEnglish(t *testing.T) {
 			stat("{0:+d}% to Fire Resistance", "+31"),
 			stat("{0:+d}% to Lightning Resistance", "+12"),
 		}, "\n")
-		out := d.Translate(localized)
-		require.NotNil(t, out, "%s: not detected", lang.Name)
+		out, ok := d.Translate(localized)
+		require.True(t, ok, "%s: not detected", lang.Name)
 		assert.Equal(t, lang.Name, out.Language)
 		assert.Equal(t, english, out.Text, lang.Name)
 	}
-	assert.Nil(t, d.Translate(english), "English text is left alone")
+	_, ok := d.Translate(english)
+	assert.False(t, ok, "English text is left alone")
+}
+
+// assertAssetError checks err is an [*AssetError] for file and op.
+func assertAssetError(t *testing.T, err error, file, op string) {
+	t.Helper()
+	ae, ok := errors.AsType[*AssetError](err)
+	require.True(t, ok, "%v", err)
+	assert.Equal(t, file, ae.File)
+	assert.Equal(t, op, ae.Op)
+	require.Error(t, ae.Unwrap())
 }

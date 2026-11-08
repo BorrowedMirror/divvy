@@ -1,0 +1,104 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Sapphire",
+  "category": "jewel",
+  "class": {
+    "type": "jewel"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 82,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Arcing",
+        "ranges": [
+          {
+            "max": 15,
+            "min": 10
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Lightning Damage",
+      "text": "15% increased Lightning Damage",
+      "values": [
+        15
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Surging",
+        "ranges": [
+          {
+            "max": 4,
+            "min": 2
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Cast Speed",
+      "text": "4% increased Cast Speed",
+      "values": [
+        4
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Focus",
+        "ranges": [
+          {
+            "max": 15,
+            "min": 10
+          }
+        ],
+        "tier": null
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Mana Regeneration Rate",
+      "text": "12% increased Mana Regeneration Rate",
+      "values": [
+        12
+      ]
+    }
+  ],
+  "name": "Dread Glimmer",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

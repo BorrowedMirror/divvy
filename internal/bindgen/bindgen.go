@@ -1,36 +1,26 @@
-// Package bindgen writes web/src/bindings.ts for the Go backend: the same `commands`, `events`
-// and types the frontend imported from the tauri-specta file, now calling Wails.
-//
-// Commands are the exported methods of one bound service. Each becomes
-// `commands.<lowerCamelName>(params...)`, calling the method through `Call.ByName` from
-// `@wailsio/runtime`. A method returning `(T, error)` or just `error` resolves to
-// `{status: "ok", data}` or `{status: "error", error}`, as tauri-specta's typedError did; a
-// method without an error result resolves to its value. A leading `context.Context` parameter
-// is supplied by Wails and is not part of the TypeScript signature.
-//
-// Events become `events.<name>.listen(cb)`, where cb receives `{payload}` like a Tauri event.
-//
-// Types are generated from the Go types by reflection, using their `json` tags. Types whose JSON
-// is written by hand (string enums, serde-style tagged unions) have no Go shape reflection can
-// see: their TypeScript goes in [Spec.Literal]. Doc comments are read from the Go source.
 package bindgen
 
 import (
 	"bytes"
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/doc"
 	"go/parser"
 	"go/token"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 )
 
 // Event is one event the backend emits.
@@ -47,12 +37,18 @@ type Event struct {
 type Spec struct {
 	// Service is the bound service's struct type (not a pointer).
 	Service reflect.Type
+	// Error is the type a failing command's error is marshalled as: the `error` of
+	// `{status: "error"}`.
+	Error reflect.Type
 	// Events are the events the backend emits.
 	Events []Event
-	// Literal holds the TypeScript for types whose JSON reflection cannot describe.
+	// Names gives a Go type a different TypeScript name: the name the frontend imports.
+	Names map[reflect.Type]string
+	// Literal holds the TypeScript for types whose JSON shape reflection cannot see (tagged
+	// unions with a hand-written JSON form).
 	Literal map[reflect.Type]string
-	// ModulePath and ModuleDir map Go package paths to source directories, for doc comments
-	// and parameter names.
+	// ModulePath and ModuleDir map Go package paths to source directories, for doc comments,
+	// parameter names and enum constants.
 	ModulePath, ModuleDir string
 }
 
@@ -166,6 +162,7 @@ type gen struct {
 	methodTable []string
 	named       map[string]reflect.Type // TypeScript name -> Go type, for every named type referenced
 	order       []string
+	clashes     []string // TypeScript names claimed by two Go types
 	docs        map[string]*pkgDocs
 }
 
@@ -189,10 +186,10 @@ func (g *gen) commands() ([]string, error) {
 	}
 	// Every exported method is a command; each needs its source for parameter names.
 	var decls []methodDecl
-	for i := range ptr.NumMethod() {
-		d, ok := byName[ptr.Method(i).Name]
+	for m := range ptr.Methods() {
+		d, ok := byName[m.Name]
 		if !ok {
-			return nil, fmt.Errorf("%s.%s: no source found for the method (parameter names come from it)", svc, ptr.Method(i).Name)
+			return nil, fmt.Errorf("%s.%s: no source found for the method (parameter names come from it)", svc, m.Name)
 		}
 		decls = append(decls, d)
 	}
@@ -202,14 +199,8 @@ func (g *gen) commands() ([]string, error) {
 	var out, table []string
 	for _, d := range decls {
 		m, _ := ptr.MethodByName(d.name)
-		ft := m.Type // receiver is In(0)
-		var params []string
-		var args []string
+		in := slices.Collect(m.Type.Ins())[1:] // In(0) is the receiver
 		names := d.params
-		in := make([]reflect.Type, 0, ft.NumIn()-1)
-		for i := 1; i < ft.NumIn(); i++ {
-			in = append(in, ft.In(i))
-		}
 		if len(in) > 0 && in[0] == contextType {
 			in = in[1:]
 			if len(names) > 0 {
@@ -219,6 +210,7 @@ func (g *gen) commands() ([]string, error) {
 		if len(names) != len(in) {
 			return nil, fmt.Errorf("%s: could not read parameter names from source", d.name)
 		}
+		var params, args []string
 		for i, t := range in {
 			ts, err := g.ref(t, de)
 			if err != nil {
@@ -228,41 +220,29 @@ func (g *gen) commands() ([]string, error) {
 			args = append(args, names[i])
 		}
 
-		var result string
-		fallible := false
-		switch ft.NumOut() {
-		case 0:
-			result = "null"
-		case 1:
-			if ft.Out(0) == errorType {
-				result, fallible = "null", true
-			} else if result, err = g.ref(ft.Out(0), ser); err != nil {
-				return nil, fmt.Errorf("%s result: %w", d.name, err)
-			}
-		case 2:
-			if ft.Out(1) != errorType {
-				return nil, fmt.Errorf("%s: second result must be error", d.name)
-			}
-			fallible = true
-			if result, err = g.ref(ft.Out(0), ser); err != nil {
-				return nil, fmt.Errorf("%s result: %w", d.name, err)
-			}
-		default:
-			return nil, fmt.Errorf("%s: too many results", d.name)
+		result, fallible, err := g.result(m.Type)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", d.name, err)
 		}
-
-		cmd := snake(d.name)
+		cmd := commandName(d.name)
 		call := fmt.Sprintf("invoke<%s>(%q, { %s })", result, cmd, strings.Join(args, ", "))
 		if len(args) == 0 {
 			call = fmt.Sprintf("invoke<%s>(%q, {})", result, cmd)
 		}
 		if fallible {
-			call = fmt.Sprintf("typedError<%s, IpcError_Serialize>(%s)", result, call)
+			if g.spec.Error == nil {
+				return nil, fmt.Errorf("%s returns an error but Spec.Error is not set", d.name)
+			}
+			errTS, err := g.ref(g.spec.Error, ser)
+			if err != nil {
+				return nil, fmt.Errorf("error type: %w", err)
+			}
+			call = fmt.Sprintf("typedError<%s, %s>(%s)", result, errTS, call)
 		}
 		out = append(out, jsdoc(d.doc, "\t")+fmt.Sprintf("\t%s: (%s) => %s,\n", lowerFirst(d.name), strings.Join(params, ", "), call))
 		quoted := make([]string, len(args))
 		for i, a := range args {
-			quoted[i] = fmt.Sprintf("%q", a)
+			quoted[i] = strconv.Quote(a)
 		}
 		table = append(table, fmt.Sprintf("\t%s: [%q, [%s]],\n", cmd, fqn+"."+d.name, strings.Join(quoted, ", ")))
 	}
@@ -270,11 +250,34 @@ func (g *gen) commands() ([]string, error) {
 	return out, nil
 }
 
-// snake turns a Go method name into the Rust-era command name (`GetSettings` -> `get_settings`),
-// which the transport, the test mocks and the browser preview use.
-func snake(name string) string {
+// result is the TypeScript a command resolves to and whether it can fail: a method returns
+// nothing, a value, an error, or a value and an error.
+func (g *gen) result(ft reflect.Type) (ts string, fallible bool, err error) {
+	switch ft.NumOut() {
+	case 0:
+		return "null", false, nil
+	case 1:
+		if ft.Out(0) == errorType {
+			return "null", true, nil
+		}
+		ts, err = g.ref(ft.Out(0), ser)
+		return ts, false, err
+	case 2:
+		if ft.Out(1) != errorType {
+			return "", false, errors.New("second result must be error")
+		}
+		ts, err = g.ref(ft.Out(0), ser)
+		return ts, true, err
+	}
+	return "", false, errors.New("too many results")
+}
+
+// commandName is the command name the frontend calls a method by: the Go method name in
+// snake_case (`GetSettings` -> `get_settings`). The names are part of the frontend contract:
+// the transport, the test mocks and the browser preview are keyed by them.
+func commandName(method string) string {
 	var b strings.Builder
-	r := []rune(name)
+	r := []rune(method)
 	for i, c := range r {
 		if unicode.IsUpper(c) {
 			if i > 0 && (unicode.IsLower(r[i-1]) || (i+1 < len(r) && unicode.IsLower(r[i+1]))) {
@@ -287,13 +290,12 @@ func snake(name string) string {
 	return b.String()
 }
 
-// Variants of a struct type, as tauri-specta named them: what the backend sends
+// Variants of a struct type, a frontend naming contract: what the backend sends
 // (`_Serialize`, used for results and event payloads) and what it accepts (`_Deserialize`,
 // used for parameters). Inside each variant, nested structs use the same variant.
 const (
-	plain = ""
-	ser   = "_Serialize"
-	de    = "_Deserialize"
+	ser = "_Serialize"
+	de  = "_Deserialize"
 )
 
 // ref returns the TypeScript for t where it is used, registering named types for declaration.
@@ -329,12 +331,12 @@ func (g *gen) ref(t reflect.Type, variant string) (string, error) {
 		}
 		return "number", nil
 	case reflect.Float32, reflect.Float64:
-		// The JSON writer emits NaN and infinities as null, as serde_json does (and as the
-		// tauri-specta types said).
+		// The JSON writer emits NaN and infinities as null.
 		return "number | null", nil
 	case reflect.String:
 		if t.PkgPath() != "" {
-			return "", fmt.Errorf("%s: string enum needs a Literal entry", t)
+			// A string enum: declared as the union of its constants.
+			return g.use(t), nil
 		}
 		return "string", nil
 	case reflect.Interface:
@@ -344,17 +346,26 @@ func (g *gen) ref(t reflect.Type, variant string) (string, error) {
 			return "", fmt.Errorf("anonymous struct %s: give it a name", t)
 		}
 		return g.use(t) + variant, nil
+	default:
+		return "", fmt.Errorf("unsupported type %s", t)
 	}
-	return "", fmt.Errorf("unsupported type %s", t)
+}
+
+// tsName is the TypeScript name of a named Go type.
+func (g *gen) tsName(t reflect.Type) string {
+	if n, ok := g.spec.Names[t]; ok {
+		return n
+	}
+	return t.Name()
 }
 
 // use registers a named type and returns its TypeScript name.
 func (g *gen) use(t reflect.Type) string {
-	name := t.Name()
+	name := g.tsName(t)
 	if prev, ok := g.named[name]; ok {
-		if prev != t {
-			// Reported by declarations(); keep going so all clashes show up at once.
-			g.named[name+"\x00"+t.PkgPath()] = t
+		if prev != t && !slices.Contains(g.clashes, name) {
+			// Reported by declarations(), so every clash shows up at once.
+			g.clashes = append(g.clashes, fmt.Sprintf("two Go types are both called %s (%s and %s)", name, prev, t))
 		}
 		return name
 	}
@@ -367,55 +378,59 @@ func (g *gen) use(t reflect.Type) string {
 // more types, so this loops until nothing new appears.
 func (g *gen) declarations() (string, error) {
 	done := map[string]string{}
-	for {
-		var pending []string
+	for len(done) < len(g.order) {
 		for _, n := range g.order {
-			if _, ok := done[n]; !ok {
-				pending = append(pending, n)
+			if _, ok := done[n]; ok {
+				continue
 			}
-		}
-		if len(pending) == 0 {
-			break
-		}
-		for _, n := range pending {
-			decl, err := g.declare(g.named[n])
+			decl, err := g.declare(n, g.named[n])
 			if err != nil {
 				return "", err
 			}
 			done[n] = decl
 		}
 	}
-	for k, t := range g.named {
-		if strings.Contains(k, "\x00") {
-			return "", fmt.Errorf("two Go types are both called %s (%s and %s)", t.Name(), g.named[t.Name()].PkgPath(), t.PkgPath())
-		}
+	if len(g.clashes) > 0 {
+		return "", fmt.Errorf("%s", strings.Join(g.clashes, "; "))
 	}
-	names := make([]string, 0, len(done))
-	for n := range done {
-		names = append(names, n)
-	}
-	slices.Sort(names)
 	var b strings.Builder
-	for _, n := range names {
+	for _, n := range slices.Sorted(maps.Keys(done)) {
 		b.WriteString(done[n])
 		b.WriteString("\n")
 	}
 	return b.String(), nil
 }
 
-// declare renders one named type. Structs get the plain name plus tauri-specta's
-// `_Serialize`/`_Deserialize` names, which the views import; in the `_Deserialize` form,
-// fields the backend fills in when missing (pointers, `ts:"optional"`) are optional.
-func (g *gen) declare(t reflect.Type) (string, error) {
+// declare renders one named type. A struct gets its plain name plus the `_Serialize` and
+// `_Deserialize` names the views import; in the `_Deserialize` form, fields the backend fills
+// in when missing (pointers, `ts:"optional"`) are optional. A string type is the union of its
+// constants.
+func (g *gen) declare(name string, t reflect.Type) (string, error) {
 	typeDoc := g.typeDoc(t)
+	if goName := t.Name(); goName != name {
+		// The doc comment starts with the Go name; the frontend knows the type by its own.
+		if rest, ok := strings.CutPrefix(typeDoc, goName+" "); ok {
+			typeDoc = name + " " + rest
+		}
+	}
 	if lit, ok := g.spec.Literal[t]; ok {
-		return fmt.Sprintf("%sexport type %s = %s;\n", jsdoc(typeDoc, ""), t.Name(), lit), nil
+		return fmt.Sprintf("%sexport type %s = %s;\n", jsdoc(typeDoc, ""), name, lit), nil
+	}
+	if t.Kind() == reflect.String {
+		union, err := g.enum(t)
+		if err != nil {
+			return "", err
+		}
+		sep := " "
+		if strings.HasPrefix(union, "\n") {
+			sep = "" // one member per line
+		}
+		return fmt.Sprintf("%sexport type %s =%s%s;\n", jsdoc(typeDoc, ""), name, sep, union), nil
 	}
 	fields, err := g.fields(t)
 	if err != nil {
 		return "", err
 	}
-	name := t.Name()
 	ser := object(fields, false)
 	de := object(fields, true)
 	var b strings.Builder
@@ -429,6 +444,54 @@ func (g *gen) declare(t reflect.Type) (string, error) {
 		fmt.Fprintf(&b, "export type %s_Deserialize = %s;\n", name, de)
 	}
 	return b.String(), nil
+}
+
+// enum renders a string type as the union of the constants declared with it, in source order.
+// A constant's doc comment documents its member, without the leading "<Name> is".
+func (g *gen) enum(t reflect.Type) (string, error) {
+	pd, err := g.pkg(t.PkgPath())
+	if err != nil {
+		return "", err
+	}
+	values := pd.enums[t.Name()]
+	if len(values) == 0 {
+		return "", fmt.Errorf("%s: a string type needs constants (its values) or a Literal entry", t)
+	}
+	docs := make([]string, len(values))
+	documented := false
+	for i, v := range values {
+		docs[i] = memberDoc(v.name, v.doc)
+		documented = documented || docs[i] != ""
+	}
+	if !documented {
+		parts := make([]string, len(values))
+		for i, v := range values {
+			parts[i] = strconv.Quote(v.value)
+		}
+		return strings.Join(parts, " | "), nil
+	}
+	// One member per line, each under its doc comment: "\n\t/** doc */\n\t| \"value\"".
+	var b strings.Builder
+	for i, v := range values {
+		b.WriteString("\n")
+		if docs[i] != "" {
+			b.WriteString("\t/** " + strings.ReplaceAll(docs[i], "*/", "*\\/") + " */\n")
+		}
+		b.WriteString("\t| " + strconv.Quote(v.value))
+	}
+	return b.String(), nil
+}
+
+// memberDoc turns a constant's doc comment ("RarityOther is quest items ...") into its union
+// member's ("Quest items ..."), on one line.
+func memberDoc(name, comment string) string {
+	comment = strings.Join(strings.Fields(comment), " ")
+	rest, ok := strings.CutPrefix(comment, name+" is ")
+	if !ok {
+		return comment
+	}
+	r, size := utf8.DecodeRuneInString(rest)
+	return string(unicode.ToUpper(r)) + rest[size:]
 }
 
 type field struct {
@@ -459,11 +522,10 @@ func object(fields []field, deserialize bool) string {
 }
 
 // fields lists a struct's JSON fields, flattening embedded structs without a json name as
-// encoding/json does.
+// encoding/json does. A `ts:"type=..."` tag gives a field's TypeScript type outright.
 func (g *gen) fields(t reflect.Type) ([]field, error) {
 	var out []field
-	for i := range t.NumField() {
-		sf := t.Field(i)
+	for sf := range t.Fields() {
 		tag := sf.Tag.Get("json")
 		if tag == "-" {
 			continue
@@ -491,20 +553,20 @@ func (g *gen) fields(t reflect.Type) ([]field, error) {
 		if name == "" {
 			name = sf.Name
 		}
-		tsSer, err := g.ref(sf.Type, ser)
-		if err != nil {
-			return nil, fmt.Errorf("%s.%s: %w", t.Name(), sf.Name, err)
-		}
-		tsDe, err := g.ref(sf.Type, de)
-		if err != nil {
-			return nil, fmt.Errorf("%s.%s: %w", t.Name(), sf.Name, err)
-		}
-		if strings.Contains(opts, "string") {
-			tsSer, tsDe = "string", "string"
-		}
 		tsTag := sf.Tag.Get("ts")
+		var tsSer, tsDe string
 		if over, ok := strings.CutPrefix(tsTag, "type="); ok {
 			tsSer, tsDe = over, over
+		} else if strings.Contains(opts, "string") {
+			tsSer, tsDe = "string", "string"
+		} else {
+			var err error
+			if tsSer, err = g.ref(sf.Type, ser); err != nil {
+				return nil, fmt.Errorf("%s.%s: %w", t.Name(), sf.Name, err)
+			}
+			if tsDe, err = g.ref(sf.Type, de); err != nil {
+				return nil, fmt.Errorf("%s.%s: %w", t.Name(), sf.Name, err)
+			}
 		}
 		out = append(out, field{
 			name:     name,
@@ -517,7 +579,7 @@ func (g *gen) fields(t reflect.Type) ([]field, error) {
 	return out, nil
 }
 
-// --- doc comments and parameter names from source ---
+// --- doc comments, parameter names and enum constants from source ---
 
 type methodDecl struct {
 	name   string
@@ -526,17 +588,28 @@ type methodDecl struct {
 	pos    token.Pos
 }
 
+// enumValue is one constant of a string type.
+type enumValue struct {
+	name, value, doc string
+}
+
 type pkgDocs struct {
 	types   map[string]string            // type name -> doc
 	fields  map[string]map[string]string // type name -> field name -> doc
 	methods map[string][]methodDecl      // receiver type name -> methods
+	enums   map[string][]enumValue       // type name -> its string constants, in source order
 }
 
+// pkg reads the source of the package at path: the files a default build compiles, so
+// methods behind build tags (the test hook) are never commands.
 func (g *gen) pkg(path string) (*pkgDocs, error) {
 	if pd, ok := g.docs[path]; ok {
 		return pd, nil
 	}
-	pd := &pkgDocs{types: map[string]string{}, fields: map[string]map[string]string{}, methods: map[string][]methodDecl{}}
+	pd := &pkgDocs{
+		types: map[string]string{}, fields: map[string]map[string]string{},
+		methods: map[string][]methodDecl{}, enums: map[string][]enumValue{},
+	}
 	g.docs[path] = pd
 	rel, ok := strings.CutPrefix(path, g.spec.ModulePath)
 	if g.spec.ModulePath == "" || !ok || (rel != "" && !strings.HasPrefix(rel, "/")) {
@@ -554,36 +627,31 @@ func (g *gen) pkg(path string) (*pkgDocs, error) {
 		if e.IsDir() || !strings.HasSuffix(n, ".go") || strings.HasSuffix(n, "_test.go") {
 			continue
 		}
+		if match, err := build.Default.MatchFile(dir, n); err != nil {
+			return nil, err
+		} else if !match {
+			continue
+		}
 		f, err := parser.ParseFile(fset, filepath.Join(dir, n), nil, parser.ParseComments)
 		if err != nil {
 			return nil, err
 		}
 		files = append(files, f)
 		for _, d := range f.Decls {
-			fd, ok := d.(*ast.FuncDecl)
-			if !ok || fd.Recv == nil || len(fd.Recv.List) != 1 {
-				continue
-			}
-			recv := fd.Recv.List[0].Type
-			if star, ok := recv.(*ast.StarExpr); ok {
-				recv = star.X
-			}
-			id, ok := recv.(*ast.Ident)
-			if !ok {
-				continue
-			}
-			var params []string
-			for _, p := range fd.Type.Params.List {
-				if len(p.Names) == 0 {
-					params = append(params, "_")
+			switch d := d.(type) {
+			case *ast.FuncDecl:
+				if recv, ok := receiver(d); ok {
+					pd.methods[recv] = append(pd.methods[recv], methodDecl{
+						name: d.Name.Name, params: paramNames(d), doc: d.Doc.Text(), pos: d.Pos(),
+					})
 				}
-				for _, n := range p.Names {
-					params = append(params, n.Name)
+			case *ast.GenDecl:
+				if d.Tok == token.CONST {
+					if err := pd.addConsts(d); err != nil {
+						return nil, fmt.Errorf("%s: %w", fset.Position(d.Pos()), err)
+					}
 				}
 			}
-			pd.methods[id.Name] = append(pd.methods[id.Name], methodDecl{
-				name: fd.Name.Name, params: params, doc: fd.Doc.Text(), pos: fd.Pos(),
-			})
 		}
 	}
 	if len(files) == 0 {
@@ -597,10 +665,7 @@ func (g *gen) pkg(path string) (*pkgDocs, error) {
 		pd.types[dt.Name] = dt.Doc
 		for _, spec := range dt.Decl.Specs {
 			ts, ok := spec.(*ast.TypeSpec)
-			if !ok {
-				continue
-			}
-			if ts.Name.Name != dt.Name {
+			if !ok || ts.Name.Name != dt.Name {
 				continue
 			}
 			st, ok := ts.Type.(*ast.StructType)
@@ -617,6 +682,66 @@ func (g *gen) pkg(path string) (*pkgDocs, error) {
 		}
 	}
 	return pd, nil
+}
+
+// receiver is the receiver type name of a method declaration.
+func receiver(fd *ast.FuncDecl) (string, bool) {
+	if fd.Recv == nil || len(fd.Recv.List) != 1 {
+		return "", false
+	}
+	recv := fd.Recv.List[0].Type
+	if star, ok := recv.(*ast.StarExpr); ok {
+		recv = star.X
+	}
+	id, ok := recv.(*ast.Ident)
+	if !ok {
+		return "", false
+	}
+	return id.Name, true
+}
+
+// paramNames lists a function's parameter names, `_` for unnamed ones.
+func paramNames(fd *ast.FuncDecl) []string {
+	var params []string
+	for _, p := range fd.Type.Params.List {
+		if len(p.Names) == 0 {
+			params = append(params, "_")
+		}
+		for _, n := range p.Names {
+			params = append(params, n.Name)
+		}
+	}
+	return params
+}
+
+// addConsts records the typed string constants of a const declaration.
+func (pd *pkgDocs) addConsts(d *ast.GenDecl) error {
+	for _, spec := range d.Specs {
+		vs, ok := spec.(*ast.ValueSpec)
+		if !ok {
+			continue
+		}
+		typ, ok := vs.Type.(*ast.Ident)
+		if !ok || len(vs.Values) != len(vs.Names) {
+			continue
+		}
+		comment := vs.Doc.Text()
+		if comment == "" && !d.Lparen.IsValid() {
+			comment = d.Doc.Text() // `const X T = "x"` with the comment on the declaration
+		}
+		for i, n := range vs.Names {
+			lit, ok := vs.Values[i].(*ast.BasicLit)
+			if !ok || lit.Kind != token.STRING {
+				continue
+			}
+			v, err := strconv.Unquote(lit.Value)
+			if err != nil {
+				return err
+			}
+			pd.enums[typ.Name] = append(pd.enums[typ.Name], enumValue{name: n.Name, value: v, doc: comment})
+		}
+	}
+	return nil
 }
 
 func (g *gen) typeDoc(t reflect.Type) string {

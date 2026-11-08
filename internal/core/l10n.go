@@ -4,7 +4,7 @@ package core
 // parser and matcher understand. Trade searches use language-neutral stat ids and English
 // names, so everything after this step works unchanged.
 //
-// The tables come from the game's own data (`cargo xtask data l10n`): keywords from its
+// The tables come from the game's own data (`go run ./cmd/datarefresh l10n`): keywords from its
 // client strings, item class, base and unique names by row, and every wording of every stat
 // from its stat descriptions, where each language lists its variants in the same order as
 // English.
@@ -12,12 +12,13 @@ package core
 import (
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
 
-// Language is one game language's tables, as (English, localized) pairs. Each pair
-// serialises as a two-element JSON array, like a Rust `(String, String)`.
+// Language is one game language's tables, as (English, localized) pairs; each pair is a
+// two-element JSON array.
 type Language struct {
 	// The game's name for the language, e.g. `German`.
 	Name string `json:"name"`
@@ -42,18 +43,12 @@ type Language struct {
 	Stats [][2]string `json:"stats"`
 }
 
-// MarshalJSON writes serde-compatible JSON.
-func (l Language) MarshalJSON() ([]byte, error) { return marshalStruct(l) }
-
 // Translated is a text that was translated, and from which language.
 type Translated struct {
 	Text string
 	// [Language.Name] of the client the text came from.
 	Language string
 }
-
-// l10nSeparator: lines starting with this are section separators.
-const l10nSeparator = "--------"
 
 const l10nNum = `[+-]?` + reDigit + `+(?:[.,]` + reDigit + `+)?`
 
@@ -92,7 +87,7 @@ func templateShape(template string) (string, []slot) {
 	shape := replaceAllSubmatchFunc(placeholder, template, func(idx []int) string {
 		s := -1
 		if g, ok := group(template, idx, 1); ok {
-			if n, ok := parseUsize(g); ok {
+			if n, err := strconv.Atoi(g); err == nil {
 				s = n
 			}
 		}
@@ -116,8 +111,8 @@ func englishSegments(template string) []seg {
 		if !ok {
 			continue
 		}
-		index, ok := parseUsize(g)
-		if !ok {
+		index, err := strconv.Atoi(g)
+		if err != nil {
 			continue
 		}
 		out = append(out, seg{text: template[last:idx[0]]})
@@ -160,8 +155,10 @@ type compiled struct {
 	basesLongest [][2]string
 	uniques      map[string]string
 	stats        map[string]statPair
-	classKey     *string
-	rarityKey    *string
+	// classKey and rarityKey are this language's `Item Class` and `Rarity` keys ("" when
+	// unknown).
+	classKey  string
+	rarityKey string
 }
 
 func invert(pairs [][2]string) map[string]string {
@@ -212,13 +209,13 @@ func newCompiled(lang *Language) *compiled {
 	slices.SortStableFunc(basesLongest, func(a, b [2]string) int {
 		return utf8.RuneCountInString(b[0]) - utf8.RuneCountInString(a[0])
 	})
-	key := func(en string) *string {
+	key := func(en string) string {
 		for _, p := range lang.Keys {
 			if p[0] == en {
-				return new(p[1])
+				return p[1]
 			}
 		}
-		return nil
+		return ""
 	}
 	var patterns []compiledPattern
 	for _, p := range lang.Patterns {
@@ -308,11 +305,11 @@ func (c *compiled) header(line string) (string, bool) {
 			return "", false
 		}
 	}
-	en, ok := c.keys[trimSpace(key)]
+	en, ok := c.keys[strings.TrimSpace(key)]
 	if !ok {
 		return "", false
 	}
-	value = trimSpace(value)
+	value = strings.TrimSpace(value)
 	switch en {
 	case "Item Class":
 		if v, ok := c.classes[value]; ok {
@@ -371,7 +368,7 @@ func (c *compiled) line(line string) string {
 
 func (c *compiled) translate(text string) string {
 	var out []string
-	var rarity *string
+	var rarity string
 	// Name lines: after the header, before the first separator.
 	inNames := false
 	var names []string
@@ -382,7 +379,7 @@ func (c *compiled) translate(text string) string {
 			var ok bool
 			if i+1 == n {
 				en, ok = c.base(name)
-			} else if rarity != nil && *rarity == "Unique" {
+			} else if rarity == "Unique" {
 				en, ok = c.uniques[name]
 			}
 			if !ok {
@@ -392,9 +389,9 @@ func (c *compiled) translate(text string) string {
 		}
 		names = names[:0]
 	}
-	for _, raw := range rustLines(text) {
-		line := trimSpace(raw)
-		if strings.HasPrefix(line, l10nSeparator) {
+	for raw := range strings.Lines(text) {
+		line := strings.TrimSpace(raw)
+		if strings.HasPrefix(line, separator) {
 			if inNames {
 				flush()
 				inNames = false
@@ -410,7 +407,7 @@ func (c *compiled) translate(text string) string {
 		}
 		translated := c.line(line)
 		if r, ok := strings.CutPrefix(translated, "Rarity: "); ok {
-			rarity = new(r)
+			rarity = r
 			inNames = true
 		}
 		out = append(out, translated)
@@ -423,7 +420,7 @@ func (c *compiled) translate(text string) string {
 
 // detects: the first line's key is this language's `Item Class` (or `Rarity`, for gems).
 func (c *compiled) detects(firstKey string) bool {
-	return (c.classKey != nil && *c.classKey == firstKey) || (c.rarityKey != nil && *c.rarityKey == firstKey)
+	return firstKey != "" && (c.classKey == firstKey || c.rarityKey == firstKey)
 }
 
 // Translator translates item text from any of the languages it was built with. The zero
@@ -442,36 +439,28 @@ func NewTranslator(languages []Language) *Translator {
 }
 
 // Translate returns the text in English, when it came from one of the known non-English
-// clients; nil for English (or unrecognised) text.
-func (t *Translator) Translate(text string) *Translated {
+// clients; false for English (or unrecognised) text.
+func (t *Translator) Translate(text string) (Translated, bool) {
 	var first string
-	found := false
-	for _, l := range rustLines(text) {
-		if l = trimSpace(l); l != "" {
-			first, found = l, true
+	for l := range strings.Lines(text) {
+		if first = strings.TrimSpace(l); first != "" {
 			break
 		}
-	}
-	if !found {
-		return nil
 	}
 	key, _, ok := strings.Cut(first, ":")
 	if !ok {
 		if key, _, ok = strings.Cut(first, "："); !ok {
-			return nil
+			return Translated{}, false
 		}
 	}
-	key = trimSpace(key)
+	key = strings.TrimSpace(key)
 	if key == "Item Class" || key == "Rarity" {
-		return nil
+		return Translated{}, false
 	}
 	for _, lang := range t.languages {
 		if lang.detects(key) {
-			return &Translated{Text: lang.translate(text), Language: lang.name}
+			return Translated{Text: lang.translate(text), Language: lang.name}, true
 		}
 	}
-	return nil
+	return Translated{}, false
 }
-
-// IsEmpty reports whether no languages are known.
-func (t *Translator) IsEmpty() bool { return len(t.languages) == 0 }

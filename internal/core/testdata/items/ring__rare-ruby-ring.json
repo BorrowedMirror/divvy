@@ -1,0 +1,105 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Ruby Ring",
+  "category": "equipment",
+  "class": {
+    "type": "ring"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 79,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "+#% to Fire Resistance",
+      "text": "+25% to Fire Resistance",
+      "values": [
+        25
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+61 to maximum Life",
+      "values": [
+        61
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+35% to Cold Resistance",
+      "values": [
+        35
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Lightning Resistance",
+      "text": "+29% to Lightning Resistance",
+      "values": [
+        29
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Accuracy Rating",
+      "text": "+136 to Accuracy Rating",
+      "values": [
+        136
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Adds # to # Physical Damage to Attacks",
+      "text": "Adds 6 to 13 Physical Damage to Attacks",
+      "values": [
+        6,
+        13
+      ]
+    }
+  ],
+  "name": "Rapture Loop",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 44,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

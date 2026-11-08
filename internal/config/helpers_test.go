@@ -1,11 +1,12 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
@@ -13,19 +14,15 @@ import (
 func fixture(t *testing.T, name string) string {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("testdata", name))
-	if err != nil {
-		t.Fatalf("%s: %v", name, err)
-	}
+	require.NoError(t, err)
 	return string(b)
 }
 
-// table parses TOML into a raw document (Rust `toml::from_str::<toml::Table>`).
+// table parses TOML into a raw document.
 func table(t *testing.T, text string) map[string]any {
 	t.Helper()
 	doc, err := NewDocument([]byte(text))
-	if err != nil {
-		t.Fatalf("valid toml: %v", err)
-	}
+	require.NoError(t, err)
 	return doc.Raw()
 }
 
@@ -41,7 +38,7 @@ func migrated(text string) (map[string]any, error) {
 	return doc.Raw(), nil
 }
 
-// fromTOML is `toml::from_str::<Settings>` (no migration, no validation).
+// fromTOML decodes TOML over the defaults, without migrating or validating.
 func fromTOML(text string) (Settings, error) {
 	doc, err := NewDocument([]byte(text))
 	if err != nil {
@@ -53,66 +50,45 @@ func fromTOML(text string) (Settings, error) {
 func mustFromTOML(t *testing.T, text string) Settings {
 	t.Helper()
 	s, err := fromTOML(text)
-	if err != nil {
-		t.Fatalf("from toml: %v", err)
-	}
+	require.NoError(t, err)
 	return s
 }
 
-// toTOML is `toml::to_string`.
 func toTOML(t *testing.T, s Settings) string {
 	t.Helper()
 	b, err := MarshalTOML(s)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	return string(b)
 }
 
 func writeSettings(t *testing.T, paths Paths, text string) {
 	t.Helper()
-	if err := os.MkdirAll(paths.ConfigDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(paths.SettingsFile, []byte(text), 0o644); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.MkdirAll(paths.ConfigDir, 0o755))
+	require.NoError(t, os.WriteFile(paths.SettingsFile, []byte(text), 0o644))
 }
 
-func assertInvalid(t *testing.T, err error, field string) {
+// requireInvalid requires err to be an [InvalidError] for field and returns it.
+func requireInvalid(t *testing.T, err error, field string) *InvalidError {
 	t.Helper()
 	var inv *InvalidError
-	if !errors.As(err, &inv) {
-		t.Fatalf("expected Invalid(%s), got %v", field, err)
-	}
-	if inv.Field != field {
-		t.Fatalf("expected Invalid(%s), got Invalid(%s): %s", field, inv.Field, inv.Reason)
-	}
+	require.ErrorAs(t, err, &inv)
+	require.Equal(t, field, inv.Field, inv.Reason)
+	return inv
 }
 
-func assertEqual[T any](t *testing.T, got, want T) {
+// requireIOError requires err to be an [IOError] at path.
+func requireIOError(t *testing.T, err error, path string) {
 	t.Helper()
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("not equal\n got: %#v\nwant: %#v", got, want)
-	}
+	var ioe *IOError
+	require.ErrorAs(t, err, &ioe)
+	assert.Equal(t, path, ioe.Path)
 }
 
+// assertSettings compares settings, treating nil and empty lists and maps as equal.
 func assertSettings(t *testing.T, got, want Settings) {
 	t.Helper()
-	if !settingsEqual(got, want) {
-		gj, _ := got.MarshalJSON()
-		wj, _ := want.MarshalJSON()
-		t.Fatalf("settings differ\n got: %s\nwant: %s", gj, wj)
-	}
+	assert.Equal(t, normalised(want), normalised(got))
 }
-
-// settingsEqual is Rust's derived PartialEq: an empty list equals a nil one.
-func settingsEqual(a, b Settings) bool {
-	return reflect.DeepEqual(normalised(a), normalised(b))
-}
-
-//go:fix inline
-func ptr[T any](v T) *T { return new(v) }
 
 func chord(key string, mods ...platform.KeyModifier) platform.Chord {
 	return platform.NewChord(key, mods...)

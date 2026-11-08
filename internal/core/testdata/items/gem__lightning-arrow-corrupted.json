@@ -1,0 +1,74 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Lightning Arrow",
+  "category": "gem",
+  "class": {
+    "type": "skill_gem"
+  },
+  "corrupted": true,
+  "gem_level": 21,
+  "item_level": null,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Attack, AoE, Projectile, Lightning, Chaining, Bow",
+      "value": ""
+    },
+    {
+      "augmented": false,
+      "name": "Level",
+      "value": "21 (Max)"
+    },
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+23%"
+    },
+    {
+      "augmented": false,
+      "name": "Cost",
+      "value": "18 Mana"
+    },
+    {
+      "augmented": false,
+      "name": "Attack Speed",
+      "value": "100% of base"
+    },
+    {
+      "augmented": false,
+      "name": "Attack Damage",
+      "value": "141% of base"
+    }
+  ],
+  "quality": 23,
+  "rarity": "gem",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 129,
+    "int": null,
+    "level": 90,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

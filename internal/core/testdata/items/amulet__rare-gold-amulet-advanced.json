@@ -1,0 +1,144 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Gold Amulet",
+  "category": "equipment",
+  "class": {
+    "type": "amulet"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "implicit",
+        "name": null,
+        "ranges": [
+          {
+            "max": 20,
+            "min": 12
+          }
+        ],
+        "tier": null
+      },
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "#% increased Rarity of Items found",
+      "text": "15% increased Rarity of Items found",
+      "values": [
+        15
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Prosperous",
+        "ranges": [
+          {
+            "max": 18,
+            "min": 13
+          }
+        ],
+        "tier": 2
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Rarity of Items found",
+      "text": "14% increased Rarity of Items found",
+      "values": [
+        14
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Virile",
+        "ranges": [
+          {
+            "max": 84,
+            "min": 70
+          }
+        ],
+        "tier": 4
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+74 to maximum Life",
+      "values": [
+        74
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Ice",
+        "ranges": [
+          {
+            "max": 30,
+            "min": 26
+          }
+        ],
+        "tier": 5
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+28% to Cold Resistance",
+      "values": [
+        28
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Bear",
+        "ranges": [
+          {
+            "max": 24,
+            "min": 17
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Strength",
+      "text": "+21 to Strength",
+      "values": [
+        21
+      ]
+    }
+  ],
+  "name": "Golem Talisman",
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 48,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

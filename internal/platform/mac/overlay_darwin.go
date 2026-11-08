@@ -1,14 +1,11 @@
-//go:build darwin
-
 package mac
 
 // macOS overlay styling. Wails already creates the overlay as a non-activating NSPanel
-// (MacWindowClassPanel + NonActivating); this adds what the Rust tauri-nspanel setup added on
-// top: status window level, all Spaces + full-screen auxiliary collection behaviour, a floating
+// (MacWindowClassPanel + NonActivating); this adds the rest of the overlay styling: status
+// window level, all Spaces + full-screen auxiliary collection behaviour, a floating
 // panel that only becomes key when needed, no shadow. Every AppKit call runs on the main thread.
 
 import (
-	"errors"
 	"unsafe"
 
 	"github.com/ebitengine/purego/objc"
@@ -32,16 +29,18 @@ type overlay struct {
 	win objc.ID
 }
 
+var _ platform.OverlayWindow = (*overlay)(nil)
+
 // newOverlay wraps a Wails window's NativeWindow() (an NSWindow*).
 func newOverlay(native unsafe.Pointer) (platform.OverlayWindow, error) {
 	if native == nil {
 		return nil, platform.Backend("overlay: nil NSWindow")
 	}
 	if err := loadSys(); err != nil {
-		return nil, platform.Backend("overlay: %v", err)
+		return nil, platform.Backend("overlay: %w", err)
 	}
 	if err := loadAppKit(); err != nil {
-		return nil, platform.Backend("overlay: %v", err)
+		return nil, platform.Backend("overlay: %w", err)
 	}
 	return &overlay{win: objc.ID(uintptr(native))}, nil
 }
@@ -72,16 +71,13 @@ func (o *overlay) Prepare() error {
 			o.send("setBecomesKeyOnlyIfNeeded:", true)
 			o.send("setWorksWhenModal:", true)
 		} else {
-			err = errors.New("overlay is not an NSPanel; create it with MacWindowClassPanel")
+			err = platform.Backend("overlay is not an NSPanel; create it with MacWindowClassPanel")
 		}
 		o.keepOnTop()
 		o.send("setCollectionBehavior:", overlayCollectionBehavior)
 		o.send("setHidesOnDeactivate:", false)
 	})
-	if err != nil {
-		return platform.Backend("%v", err)
-	}
-	return nil
+	return err
 }
 
 // ShowAt places the overlay at rect, given in points with a top-left global origin (the space
@@ -117,7 +113,7 @@ func (o *overlay) SetClickThrough(enabled bool) error {
 
 // RaiseAbove keeps the overlay at the status level in front; on macOS that already stacks it
 // over a full-screen game, so owner is not needed.
-func (o *overlay) RaiseAbove(*uint64) error {
+func (o *overlay) RaiseAbove(uint64) error {
 	runOnMain(func() {
 		o.keepOnTop()
 		o.send("orderFrontRegardless")
@@ -125,8 +121,8 @@ func (o *overlay) RaiseAbove(*uint64) error {
 	return nil
 }
 
-// Activate gives the overlay keyboard focus as Tauri's set_focus did: activate the app, then
-// make the window key and order it front.
+// Activate gives the overlay keyboard focus: activate the app, then make the window key and
+// order it front.
 func (o *overlay) Activate() error {
 	runOnMain(func() {
 		app := class("NSApplication").Send(sel("sharedApplication"))

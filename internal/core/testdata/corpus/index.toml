@@ -1,0 +1,566 @@
+[[item]]
+id = "currency/divine-orb"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "phase-1 seed"
+
+[[item]]
+id = "currency/exalted-orb"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/exalted-orb-crlf"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "CRLF variant of currency/exalted-orb (Windows clipboard)"
+
+[[item]]
+id = "currency/chaos-orb"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/orb-of-alchemy"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/regal-orb-noted"
+class = "stackable_currency"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/greater-essence-of-the-body"
+class = "essence"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/distilled-ire"
+class = "distilled_emotion"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/breach-splinter"
+class = "splinter"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "currency/flesh-catalyst"
+class = "catalyst"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "omen/omen-of-whittling"
+class = "omen"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "socketable/soul-core-of-tacati"
+class = "soul_core"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "socketable/greater-desert-rune"
+class = "rune"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/spark"
+class = "skill_gem"
+rarity = "gem"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/lightning-arrow-corrupted"
+class = "skill_gem"
+rarity = "gem"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/martial-tempo-support"
+class = "support_gem"
+rarity = "gem"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/uncut-skill-gem"
+class = "uncut_gem"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/uncut-support-gem"
+class = "uncut_gem"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gem/uncut-spirit-gem"
+class = "uncut_gem"
+rarity = "currency"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "waystone/rare-tier-15"
+class = "waystone"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "waystone/normal-tier-10"
+class = "waystone"
+rarity = "normal"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "waystone/unidentified-tier-12"
+class = "waystone"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "waystone/corrupted-tier-16-advanced"
+class = "waystone"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "tablet/breach-precursor-tablet"
+class = "tablet"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "tablet/rare-precursor-tablet"
+class = "tablet"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "jewel/rare-ruby"
+class = "jewel"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "jewel/magic-emerald"
+class = "jewel"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "jewel/sapphire-advanced"
+class = "jewel"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "jewel/unique-megalomaniac"
+class = "jewel"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "flask/magic-ultimate-life-flask"
+class = "life_flask"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "flask/normal-ultimate-mana-flask"
+class = "mana_flask"
+rarity = "normal"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "flask/magic-life-flask-advanced"
+class = "life_flask"
+rarity = "magic"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "charm/magic-thawing-charm"
+class = "charm"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "relic/magic-vase-relic"
+class = "relic"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "relic/unique-the-changing-seasons"
+class = "relic"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "amulet/rare-stellar-amulet"
+class = "amulet"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "amulet/unique-astramentis"
+class = "amulet"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "amulet/rare-gold-amulet-advanced"
+class = "amulet"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "ring/rare-ruby-ring"
+class = "ring"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "ring/unique-blackflame"
+class = "ring"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "ring/rare-sapphire-ring-advanced"
+class = "ring"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "ring/unidentified-topaz-ring"
+class = "ring"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "belt/rare-heavy-belt"
+class = "belt"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "belt/unique-headhunter"
+class = "belt"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "belt/unique-headhunter-advanced"
+class = "belt"
+rarity = "unique"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "body-armour/rare-vile-robe"
+class = "body_armour"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "body-armour/unique-tabula-rasa"
+class = "body_armour"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "body-armour/corrupted-plate-advanced"
+class = "body_armour"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "helmet/rare-expert-hunter-hood"
+class = "helmet"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "helmet/unique-goldrim"
+class = "helmet"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "helmet/normal-quality-helm"
+class = "helmet"
+rarity = "normal"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "helmet/rare-hunter-hood-advanced"
+class = "helmet"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gloves/rare-stocky-mitts"
+class = "gloves"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gloves/magic-gloves"
+class = "gloves"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "gloves/rare-gloves-advanced"
+class = "gloves"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "boots/rare-lattice-sandals"
+class = "boots"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "boots/unique-wanderlust"
+class = "boots"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "boots/rare-boots-advanced"
+class = "boots"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "shield/rare-tower-shield"
+class = "shield"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "buckler/rare-plated-buckler"
+class = "buckler"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "focus/rare-crystal-focus"
+class = "focus"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "quiver/rare-primed-quiver"
+class = "quiver"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-recurve-bow"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-bow-advanced"
+class = "weapon"
+rarity = "rare"
+advanced = true
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-bombard-crossbow"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/normal-withered-wand"
+class = "weapon"
+rarity = "normal"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-wand"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-ashen-staff"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-quarterstaff"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-wooden-club"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-temple-maul-sockets"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/unique-sceptre-skill"
+class = "weapon"
+rarity = "unique"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-hunting-spear"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-flail"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-glass-shank"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/magic-hooked-claw"
+class = "weapon"
+rarity = "magic"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-talisman"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-shortsword"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/normal-two-hand-axe"
+class = "weapon"
+rarity = "normal"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/unidentified-rare-crossbow"
+class = "weapon"
+rarity = "rare"
+advanced = false
+source = "hand-written from PoE2 0.3 copy formats"
+
+[[item]]
+id = "weapon/rare-sceptre-spirit-advanced"
+class = "weapon"
+rarity = "rare"
+advanced = true
+source = "real PoE2 Ctrl+Alt+C copy (user report): local Spirit, desecrated mods, reduced requirements"

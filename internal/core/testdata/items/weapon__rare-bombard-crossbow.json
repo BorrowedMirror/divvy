@@ -1,0 +1,112 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Bombard Crossbow",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Crossbows"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 80,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "implicit",
+      "stat_id": null,
+      "template": "Grenade Skills Fire an additional Projectile",
+      "text": "Grenade Skills Fire an additional Projectile",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Physical Damage",
+      "text": "121% increased Physical Damage",
+      "values": [
+        121
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Strength",
+      "text": "+15 to Strength",
+      "values": [
+        15
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Level of all Projectile Skills",
+      "text": "+3 to Level of all Projectile Skills",
+      "values": [
+        3
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "Loads an additional bolt",
+      "text": "Loads an additional bolt",
+      "values": []
+    }
+  ],
+  "name": "Grim Bolt",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "77-312"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.65"
+    },
+    {
+      "augmented": false,
+      "name": "Reload Time",
+      "value": "0.85"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": 89,
+    "int": null,
+    "level": 70,
+    "str": 89
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.65,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 320.92,
+    "spirit": null,
+    "total_dps": 320.92
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

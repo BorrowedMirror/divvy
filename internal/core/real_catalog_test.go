@@ -1,26 +1,19 @@
-// Port of crates/core/tests/real_catalog.rs: matches corpus items against the real bundled
-// trade2 catalog from internal/data (the Go port of rkl-data). It uses this internal/data API:
-//
-//	data.Bundled() (*data.GameData, error)      // GameData implements core.Catalog
-//	(*data.GameData).Translate(string) *core.Translated
-//	(*data.GameData).Bundle().Languages []core.Language
-//
-// It is an external test package because internal/data imports core.
+// Matches corpus items against the real bundled trade2 catalog from internal/data. It is an
+// external test package because internal/data imports core.
 package core_test
 
 import (
 	"os"
-	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/pelletier/go-toml/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
 	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
 )
 
@@ -29,20 +22,11 @@ type idText struct{ id, text string }
 // corpusTexts returns every corpus item's id and raw text.
 func corpusTexts(t *testing.T) []idText {
 	t.Helper()
-	dir := "../../internal/testkit/testdata/corpus"
-	raw, err := os.ReadFile(filepath.Join(dir, "index.toml"))
+	items, err := coretest.LoadCorpus()
 	require.NoError(t, err)
-	var index struct {
-		Item []struct {
-			ID string `toml:"id"`
-		} `toml:"item"`
-	}
-	require.NoError(t, toml.Unmarshal(raw, &index))
-	var out []idText
-	for _, e := range index.Item {
-		text, err := os.ReadFile(filepath.Join(dir, e.ID+".txt"))
-		require.NoError(t, err)
-		out = append(out, idText{e.ID, string(text)})
+	out := make([]idText, len(items))
+	for i, it := range items {
+		out[i] = idText{it.Entry.ID, it.Text}
 	}
 	return out
 }
@@ -53,6 +37,7 @@ type idItem struct {
 }
 
 func corpus(t *testing.T) []idItem {
+	t.Helper()
 	var out []idItem
 	for _, it := range corpusTexts(t) {
 		item, err := core.ParseItem(it.text)
@@ -70,10 +55,11 @@ func bundled(t *testing.T) *data.GameData {
 }
 
 func matched(t *testing.T, id string) *core.ParsedItem {
+	t.Helper()
 	d := bundled(t)
 	for _, c := range corpus(t) {
 		if c.id == id {
-			core.NewStatMatcher(d).MatchItem(c.item)
+			core.MatchStats(c.item, d)
 			return c.item
 		}
 	}
@@ -90,7 +76,6 @@ func statOf(item *core.ParsedItem, text string) *string {
 	return nil
 }
 
-//go:fix inline
 func TestLocalArmourOnGloves(t *testing.T) {
 	gloves := matched(t, "gloves/rare-gloves-advanced")
 	assert.Equal(t, new("explicit.stat_3484657501"), statOf(gloves, "+98 to Armour"))
@@ -110,11 +95,11 @@ func TestBowAdditionalArrowMatchesPluralStat(t *testing.T) {
 }
 
 func TestCorpusMatchRateFloor(t *testing.T) {
-	matcher := core.NewStatMatcher(bundled(t))
+	d := bundled(t)
 	total, hits := 0, 0
 	var misses []string
 	for _, c := range corpus(t) {
-		matcher.MatchItem(c.item)
+		core.MatchStats(c.item, d)
 		for _, m := range c.item.Modifiers {
 			if m.Kind != core.ModExplicit && m.Kind != core.ModImplicit {
 				continue
@@ -153,7 +138,7 @@ func TestSceptreSpiritSearchMatchesTradeListings(t *testing.T) {
 	require.Len(t, spirit, 1, "one summed Spirit filter: %+v", f.Stats)
 	assert.Equal(t, "explicit.stat_3984865854", spirit[0].StatID)
 	assert.Equal(t, []float64{68}, spirit[0].ItemValues)
-	assert.Equal(t, 61.0, *spirit[0].Min)
+	assert.InDelta(t, 61.0, *spirit[0].Min, 0)
 	assert.Equal(t, "68% increased Spirit", spirit[0].Text)
 	for _, s := range f.Stats {
 		assert.False(t, strings.HasPrefix(s.StatID, "desecrated."), "%+v", f.Stats)
@@ -161,7 +146,7 @@ func TestSceptreSpiritSearchMatchesTradeListings(t *testing.T) {
 	i := slices.IndexFunc(f.Stats, func(s core.StatFilter) bool { return s.Text == "30% reduced Attribute Requirements" })
 	require.GreaterOrEqual(t, i, 0)
 	assert.Nil(t, f.Stats[i].Min)
-	assert.Equal(t, -27.0, *f.Stats[i].Max)
+	assert.InDelta(t, -27.0, *f.Stats[i].Max, 0)
 }
 
 func TestGlobalSpiritOnAmuletsStaysGlobal(t *testing.T) {
@@ -174,14 +159,14 @@ func TestGlobalSpiritOnAmuletsStaysGlobal(t *testing.T) {
 	text := "Item Class: Amulets\nRarity: Rare\nGale Charm\nGold Amulet\n--------\nItem Level: 80\n--------\n20% increased Spirit\n"
 	amulet, err := core.ParseItem(text)
 	require.NoError(t, err)
-	core.NewStatMatcher(d).MatchItem(amulet)
+	core.MatchStats(amulet, d)
 	assert.Equal(t, new("explicit.stat_1416406066"), statOf(amulet, "20% increased Spirit"))
 }
 
 func TestStatFiltersCarryModTiersFromAdvancedCopies(t *testing.T) {
 	sceptre := matched(t, "weapon/rare-sceptre-spirit-advanced")
 	f := core.BuildFilters(sceptre, stdOpts(core.StatusAny))
-	tier := func(text string) []uint8 {
+	tier := func(text string) []int {
 		for _, s := range f.Stats {
 			if s.Text == text {
 				return s.Tiers
@@ -189,9 +174,9 @@ func TestStatFiltersCarryModTiersFromAdvancedCopies(t *testing.T) {
 		}
 		return nil
 	}
-	assert.Equal(t, []uint8{2}, tier("30% reduced Attribute Requirements"))
-	assert.Equal(t, []uint8{9}, tier("Allies in your Presence Regenerate 2.2 Life per second"))
-	assert.Equal(t, []uint8{3, 7}, tier("68% increased Spirit"), "summed prefix + desecrated row")
+	assert.Equal(t, []int{2}, tier("30% reduced Attribute Requirements"))
+	assert.Equal(t, []int{9}, tier("Allies in your Presence Regenerate 2.2 Life per second"))
+	assert.Equal(t, []int{3, 7}, tier("68% increased Spirit"), "summed prefix + desecrated row")
 }
 
 // The waystone mod check keys flags by template: the templates the parser produces for real
@@ -217,9 +202,8 @@ func TestWaystoneTemplatesMatchTheDefaultDangerFlags(t *testing.T) {
 // matches exactly the same trade stats as the English copy.
 func TestLocalizedCorpusMatchesLikeEnglish(t *testing.T) {
 	d := bundled(t)
-	matcher := core.NewStatMatcher(d)
 	texts := corpusTexts(t)
-	// `\d` is spelled `\p{Nd}` to keep Rust regex's Unicode semantics.
+	// `\p{Nd}` is a Unicode digit (Go's `\d` is ASCII-only).
 	const n = `[+-]?\p{Nd}+(?:\.\p{Nd}+)?`
 	number := regexp.MustCompile(n + `(?:\(` + n + `-` + n + `\))?`)
 	slot := regexp.MustCompile(`[+-]?\{(\p{Nd}+)(?::[^}]*)?\}|` + n)
@@ -227,7 +211,7 @@ func TestLocalizedCorpusMatchesLikeEnglish(t *testing.T) {
 	statIDs := func(text string) []*string {
 		item, err := core.ParseItem(text)
 		require.NoError(t, err)
-		matcher.MatchItem(item)
+		core.MatchStats(item, d)
 		var out []*string
 		for _, m := range item.Modifiers {
 			out = append(out, m.StatID)
@@ -332,8 +316,8 @@ func TestLocalizedCorpusMatchesLikeEnglish(t *testing.T) {
 				}
 				out = append(out, line)
 			}
-			translated := d.Translate(strings.Join(out, "\n"))
-			require.NotNil(t, translated, "%s: %s not detected", lang.Name, it.id)
+			translated, ok := d.Translate(strings.Join(out, "\n"))
+			require.True(t, ok, "%s: %s not detected", lang.Name, it.id)
 			// A magic item's name wraps its base; compare the base the catalog resolves.
 			base := func(item *core.ParsedItem) string {
 				if b := d.Base(item.BaseType); b != nil {

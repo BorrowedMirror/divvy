@@ -16,12 +16,13 @@ import (
 	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
 )
 
-// Keymap is a QueryKeymap bit vector: bit k set = keycode k is down.
-type Keymap [32]byte
+// keymap is a QueryKeymap bit vector: bit k set = keycode k is down.
+type keymap [32]byte
 
+// releasePoll is how often [waitForRelease] queries the keymap.
 const releasePoll = 5 * time.Millisecond
 
-func isDown(keys *Keymap, keycode uint8) bool {
+func isDown(keys *keymap, keycode uint8) bool {
 	return keys[keycode/8]&(1<<(keycode%8)) != 0
 }
 
@@ -57,7 +58,7 @@ func modifierMapFromReply(keycodes []uint8) modifierMap {
 		return m
 	}
 	for i := range m.rows {
-		row := []uint8{}
+		var row []uint8
 		for _, k := range keycodes[i*per : (i+1)*per] {
 			if k != 0 {
 				row = append(row, k)
@@ -80,7 +81,7 @@ func (m *modifierMap) isModifier(keycode uint8) bool {
 }
 
 // heldKeycodes are the keycodes of mod that are down.
-func (m *modifierMap) heldKeycodes(mod platform.KeyModifier, keys *Keymap) []uint8 {
+func (m *modifierMap) heldKeycodes(mod platform.KeyModifier, keys *keymap) []uint8 {
 	var out []uint8
 	for _, k := range m.rows[modifierRow(mod)] {
 		if isDown(keys, k) {
@@ -91,7 +92,7 @@ func (m *modifierMap) heldKeycodes(mod platform.KeyModifier, keys *Keymap) []uin
 }
 
 // held are the modifiers with at least one key down.
-func (m *modifierMap) held(keys *Keymap) []platform.KeyModifier {
+func (m *modifierMap) held(keys *keymap) []platform.KeyModifier {
 	var out []platform.KeyModifier
 	for _, mod := range allModifiers {
 		if len(m.heldKeycodes(mod, keys)) > 0 {
@@ -103,9 +104,9 @@ func (m *modifierMap) held(keys *Keymap) []platform.KeyModifier {
 
 // nonModifierDown reports whether any key that is not a modifier is down (e.g. the D of
 // Ctrl+D).
-func (m *modifierMap) nonModifierDown(keys *Keymap) bool {
-	for k := 8; k <= 255; k++ {
-		if isDown(keys, uint8(k)) && !m.isModifier(uint8(k)) {
+func (m *modifierMap) nonModifierDown(keys *keymap) bool {
+	for k := range 248 {
+		if kc := uint8(k + 8); isDown(keys, kc) && !m.isModifier(kc) {
 			return true
 		}
 	}
@@ -113,20 +114,18 @@ func (m *modifierMap) nonModifierDown(keys *Keymap) bool {
 }
 
 // waitForRelease polls query until no non-modifier key is down or limit elapsed, and returns
-// the last keymap; ok is false when the query failed. sleep is injected for tests.
-func waitForRelease(m *modifierMap, limit time.Duration, query func() (Keymap, bool), sleep func(time.Duration)) (Keymap, bool) {
+// the last keymap; ok is false when the query failed.
+func waitForRelease(m *modifierMap, limit time.Duration, query func() (keymap, bool)) (keymap, bool) {
 	start := time.Now()
-	var waited time.Duration
 	for {
 		keys, ok := query()
 		if !ok {
-			return Keymap{}, false
+			return keymap{}, false
 		}
-		if !m.nonModifierDown(&keys) || waited >= limit || time.Since(start) >= limit {
+		if !m.nonModifierDown(&keys) || time.Since(start) >= limit {
 			return keys, true
 		}
-		sleep(releasePoll)
-		waited += releasePoll
+		time.Sleep(releasePoll)
 	}
 }
 
@@ -138,7 +137,7 @@ type heldState struct {
 	keycodes map[platform.KeyModifier][]uint8
 }
 
-func heldStateFromKeymap(m *modifierMap, keys *Keymap) heldState {
+func heldStateFromKeymap(m *modifierMap, keys *keymap) heldState {
 	h := heldState{modifiers: m.held(keys), keycodes: map[platform.KeyModifier][]uint8{}}
 	for _, mod := range h.modifiers {
 		h.keycodes[mod] = m.heldKeycodes(mod, keys)

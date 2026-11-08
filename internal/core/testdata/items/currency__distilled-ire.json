@@ -1,0 +1,52 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Distilled Ire",
+  "category": "currency",
+  "class": {
+    "type": "distilled_emotion"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": null,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Stack Size",
+      "value": "4/10"
+    }
+  ],
+  "quality": null,
+  "rarity": "currency",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": {
+    "current": 4,
+    "max": 10
+  },
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

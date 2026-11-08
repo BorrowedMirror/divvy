@@ -6,9 +6,9 @@ package main
 // re-running the refresh on identical inputs produces byte-identical assets.
 
 import (
-	"bytes"
 	"cmp"
-	"encoding/json"
+	"encoding/json/v2"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -19,37 +19,52 @@ import (
 // imageHost serves the relative `image` paths of `/api/trade2/data/static`.
 const imageHost = "https://web.poecdn.com"
 
-// decodeRequired decodes the JSON object b into v, failing like serde when one of keys is
-// missing or null.
-func decodeRequired(b []byte, v any, keys ...string) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if raw == nil {
-		return fmt.Errorf("invalid type: null, expected an object with %s", strings.Join(keys, ", "))
-	}
-	for _, k := range keys {
-		val, ok := raw[k]
-		if !ok {
-			return fmt.Errorf("missing field `%s`", k)
-		}
-		if string(bytes.TrimSpace(val)) == "null" {
-			return fmt.Errorf("invalid type: null for field `%s`", k)
-		}
-	}
-	return json.Unmarshal(b, v)
-}
+// The upstream JSON is decoded into the records below. Each has a check that the fields the
+// normalisation needs are there, so an upstream format change fails the refresh instead of
+// producing empty data. A field that may legitimately be empty is a pointer: nil means
+// missing (or null).
 
-// envelope is the `{"result": [group, ...]}` shape shared by the trade2 data endpoints.
-func envelope[G any](raw []byte, what string) ([]G, error) {
+// envelope decodes the `{"result": [group, ...]}` shape shared by the trade2 data endpoints,
+// checking every group.
+func envelope[G interface{ check() error }](raw []byte, what string) ([]G, error) {
 	var env struct {
 		Result []G `json:"result"`
 	}
-	if err := decodeRequired(raw, &env, "result"); err != nil {
+	if err := json.Unmarshal(raw, &env); err != nil {
 		return nil, fmt.Errorf("parsing %s: %w", what, err)
 	}
+	if env.Result == nil {
+		return nil, fmt.Errorf("parsing %s: missing field `result`", what)
+	}
+	for i, g := range env.Result {
+		if err := g.check(); err != nil {
+			return nil, fmt.Errorf("parsing %s: result[%d]: %w", what, i, err)
+		}
+	}
 	return env.Result, nil
+}
+
+// required fails with the name of the first empty field among name/value pairs.
+func required(fields ...string) error {
+	for i := 0; i+1 < len(fields); i += 2 {
+		if fields[i+1] == "" {
+			return fmt.Errorf("missing field `%s`", fields[i])
+		}
+	}
+	return nil
+}
+
+// checkEach checks every entry of a group.
+func checkEach[E interface{ check() error }](entries []E) error {
+	if entries == nil {
+		return errors.New("missing field `entries`")
+	}
+	for i, e := range entries {
+		if err := e.check(); err != nil {
+			return fmt.Errorf("entries[%d]: %w", i, err)
+		}
+	}
+	return nil
 }
 
 type statGroup struct {
@@ -57,9 +72,11 @@ type statGroup struct {
 	Entries []statEntry `json:"entries"`
 }
 
-func (g *statGroup) UnmarshalJSON(b []byte) error {
-	type plain statGroup
-	return decodeRequired(b, (*plain)(g), "id", "entries")
+func (g statGroup) check() error {
+	if err := required("id", g.ID); err != nil {
+		return err
+	}
+	return checkEach(g.Entries)
 }
 
 type statEntry struct {
@@ -67,10 +84,7 @@ type statEntry struct {
 	Text string `json:"text"`
 }
 
-func (e *statEntry) UnmarshalJSON(b []byte) error {
-	type plain statEntry
-	return decodeRequired(b, (*plain)(e), "id", "text")
-}
+func (e statEntry) check() error { return required("id", e.ID, "text", e.Text) }
 
 type itemGroup struct {
 	ID      string      `json:"id"`
@@ -78,9 +92,11 @@ type itemGroup struct {
 	Entries []itemEntry `json:"entries"`
 }
 
-func (g *itemGroup) UnmarshalJSON(b []byte) error {
-	type plain itemGroup
-	return decodeRequired(b, (*plain)(g), "id", "label", "entries")
+func (g itemGroup) check() error {
+	if err := required("id", g.ID, "label", g.Label); err != nil {
+		return err
+	}
+	return checkEach(g.Entries)
 }
 
 type itemEntry struct {
@@ -92,42 +108,57 @@ type itemEntry struct {
 	} `json:"flags"`
 }
 
-func (e *itemEntry) UnmarshalJSON(b []byte) error {
-	type plain itemEntry
-	return decodeRequired(b, (*plain)(e), "type")
-}
+func (e itemEntry) check() error { return required("type", e.BaseType) }
 
 type staticGroup struct {
 	ID      string        `json:"id"`
 	Entries []staticEntry `json:"entries"`
 }
 
-func (g *staticGroup) UnmarshalJSON(b []byte) error {
-	type plain staticGroup
-	return decodeRequired(b, (*plain)(g), "id", "entries")
+func (g staticGroup) check() error {
+	if err := required("id", g.ID); err != nil {
+		return err
+	}
+	return checkEach(g.Entries)
 }
 
 type staticEntry struct {
-	ID    string  `json:"id"`
-	Text  string  `json:"text"`
+	ID string `json:"id"`
+	// Text is empty for separators.
+	Text  *string `json:"text"`
 	Image *string `json:"image"`
 }
 
-func (e *staticEntry) UnmarshalJSON(b []byte) error {
-	type plain staticEntry
-	return decodeRequired(b, (*plain)(e), "id", "text")
+func (e staticEntry) check() error {
+	if e.Text == nil {
+		return errors.New("missing field `text`")
+	}
+	return required("id", e.ID)
 }
 
 // repoeBase is a RePoE `base_items.json` value (keyed by metadata path).
 type repoeBase struct {
-	Name         string `json:"name"`
-	ItemClass    string `json:"item_class"`
-	ReleaseState string `json:"release_state"`
+	// Name is empty for some internal bases.
+	Name         *string `json:"name"`
+	ItemClass    string  `json:"item_class"`
+	ReleaseState string  `json:"release_state"`
 }
 
-func (r *repoeBase) UnmarshalJSON(b []byte) error {
-	type plain repoeBase
-	return decodeRequired(b, (*plain)(r), "name", "item_class")
+// decodeRepoeBases decodes RePoE's `base_items.json`.
+func decodeRepoeBases(raw []byte) (map[string]repoeBase, error) {
+	var bases map[string]repoeBase
+	if err := json.Unmarshal(raw, &bases); err != nil {
+		return nil, err
+	}
+	for path, b := range bases {
+		if b.Name == nil {
+			return nil, fmt.Errorf("%s: missing field `name`", path)
+		}
+		if err := required("item_class", b.ItemClass); err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+	}
+	return bases, nil
 }
 
 // repoeItemClass is a RePoE `item_classes.json` value (keyed by item class id).
@@ -188,12 +219,12 @@ func wordingVariants(text string) []string {
 	if stripped, ok := stripSuffix(text); ok {
 		push(stripped)
 	}
-	for i := range len(out) {
+	for i := range out {
 		if maps, ok := inYourMaps(out[i]); ok {
 			push(maps)
 		}
 	}
-	for i := range len(out) {
+	for i := range out {
 		rest, isSkill := strings.CutPrefix(out[i], "Grants Skill: Level # ")
 		push(core.Templatize(out[i]))
 		if isSkill {
@@ -266,11 +297,11 @@ func normaliseStats(raw []byte) ([]core.StatDef, error) {
 		}
 	}
 	keys := make([]key, 0, len(texts))
-	real := map[[2]string]bool{}
+	isStat := map[[2]string]bool{}
 	for k, ts := range texts {
 		keys = append(keys, k)
 		for _, t := range ts {
-			real[[2]string{k.kind, t}] = true
+			isStat[[2]string{k.kind, t}] = true
 		}
 	}
 	slices.SortFunc(keys, func(a, b key) int { return cmp.Or(cmp.Compare(a.kind, b.kind), cmp.Compare(a.id, b.id)) })
@@ -296,7 +327,7 @@ func normaliseStats(raw []byte) ([]core.StatDef, error) {
 		}
 		for _, w := range append([]string{primary}, wordings...) {
 			for _, a := range statAliases(w) {
-				if !real[[2]string{k.kind, a.Text}] {
+				if !isStat[[2]string{k.kind, a.Text}] {
 					push(a)
 				}
 			}
@@ -383,8 +414,8 @@ func normaliseBases(itemsRaw []byte, repoeBases map[string]repoeBase, repoeClass
 	for path, b := range repoeBases {
 		_, known := tradeCategories[b.ItemClass]
 		r := rank{b.ReleaseState != "released", !known, path, b.ItemClass}
-		if cur, ok := classOf[b.Name]; !ok || less(r, cur) {
-			classOf[b.Name] = r
+		if cur, ok := classOf[*b.Name]; !ok || less(r, cur) {
+			classOf[*b.Name] = r
 		}
 	}
 	byName := map[string]core.BaseDef{}
@@ -453,7 +484,7 @@ func normaliseStatics(raw []byte) ([]core.StaticDef, error) {
 	for _, g := range groups {
 		for _, e := range g.Entries {
 			k := key{g.ID, e.ID}
-			if e.ID == "sep" || e.Text == "" {
+			if e.ID == "sep" || *e.Text == "" {
 				continue
 			}
 			if _, ok := byKey[k]; ok {
@@ -464,7 +495,7 @@ func normaliseStatics(raw []byte) ([]core.StaticDef, error) {
 				abs := imageHost + *image
 				image = &abs
 			}
-			byKey[k] = core.StaticDef{ID: e.ID, Text: e.Text, Group: g.ID, Image: image}
+			byKey[k] = core.StaticDef{ID: e.ID, Text: *e.Text, Group: g.ID, Image: image}
 		}
 	}
 	keys := make([]key, 0, len(byKey))
@@ -482,12 +513,10 @@ func normaliseStatics(raw []byte) ([]core.StaticDef, error) {
 // gameVersion reads the game version from the RePoE index page title
 // (`RePoE - PoE2 version 0.5.5.5`).
 func gameVersion(indexHTML string) *string {
-	const marker = "PoE2 version "
-	at := strings.Index(indexHTML, marker)
-	if at < 0 {
+	_, rest, ok := strings.Cut(indexHTML, "PoE2 version ")
+	if !ok {
 		return nil
 	}
-	rest := indexHTML[at+len(marker):]
 	end := 0
 	for end < len(rest) && (rest[end] == '.' || ('0' <= rest[end] && rest[end] <= '9')) {
 		end++

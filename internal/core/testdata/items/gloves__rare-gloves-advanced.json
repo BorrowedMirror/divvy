@@ -1,0 +1,140 @@
+{
+  "advanced": true,
+  "area_level": null,
+  "base_type": "Gold Gauntlets",
+  "category": "equipment",
+  "class": {
+    "type": "gloves"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 81,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Exuberant",
+        "ranges": [
+          {
+            "max": 110,
+            "min": 91
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to Armour",
+      "text": "+98 to Armour",
+      "values": [
+        98
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "prefix",
+        "name": "Exuberant",
+        "ranges": [
+          {
+            "max": 41,
+            "min": 36
+          }
+        ],
+        "tier": 3
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+38 to maximum Life",
+      "values": [
+        38
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of Grandmastery",
+        "ranges": [
+          {
+            "max": 16,
+            "min": 14
+          }
+        ],
+        "tier": 1
+      },
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed",
+      "text": "16% increased Attack Speed",
+      "values": [
+        16
+      ]
+    },
+    {
+      "advanced": {
+        "affix": "suffix",
+        "name": "of the Essence",
+        "ranges": [
+          {
+            "max": 30,
+            "min": 26
+          }
+        ],
+        "tier": null
+      },
+      "kind": "crafted",
+      "stat_id": null,
+      "template": "+#% to Lightning Resistance",
+      "text": "+28% to Lightning Resistance",
+      "values": [
+        28
+      ]
+    }
+  ],
+  "name": "Kraken Hold",
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+20%"
+    },
+    {
+      "augmented": true,
+      "name": "Armour",
+      "value": "281"
+    },
+    {
+      "augmented": true,
+      "name": "Energy Shield",
+      "value": "98"
+    }
+  ],
+  "quality": 20,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": 57,
+    "level": 70,
+    "str": 57
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": 281,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": 98,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

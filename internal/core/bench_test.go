@@ -1,11 +1,9 @@
 package core
 
-// Port of crates/core/benches/pipeline.rs: clipboard text -> parsed item -> matched stats ->
-// trade query.
+// Benchmarks of the pipeline: clipboard text -> parsed item -> matched stats -> trade query.
 //
-// The Rust benches match against the real bundled catalog from rkl-data; until its Go port
-// exists they use the synthetic corpus catalog of corpus_test.go (every corpus template
-// known), which exercises the same code paths with cheaper lookups.
+// They match against the synthetic corpus catalog of corpus_test.go (every corpus template
+// known), which exercises the same code paths as the bundled catalog with cheaper lookups.
 // BenchmarkPipelineP95 reports the per-item p50/p95/p99 of the full pipeline so the
 // "< 1 ms p95" budget can be checked directly.
 
@@ -13,10 +11,12 @@ import (
 	"slices"
 	"testing"
 	"time"
+
+	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
 )
 
 type benchFixture struct {
-	corpus  []corpusItem
+	corpus  []coretest.CorpusItem
 	catalog Catalog
 	opts    *QueryOptions
 	parsed  []*ParsedItem
@@ -24,18 +24,19 @@ type benchFixture struct {
 }
 
 func newBenchFixture(b *testing.B) *benchFixture {
+	b.Helper()
 	corpus := loadCorpus(b)
 	f := &benchFixture{
 		corpus: corpus,
 		opts:   &QueryOptions{League: "Standard", Status: StatusOnline, WidenPct: 10, EnableAllStats: false},
 	}
 	for _, it := range corpus {
-		f.parsed = append(f.parsed, mustParse(b, it.text))
+		f.parsed = append(f.parsed, mustParse(b, it.Text))
 	}
 	f.catalog = newCorpusCatalog(f.parsed)
 	for _, item := range f.parsed {
-		m := item.Clone()
-		NewStatMatcher(f.catalog).MatchItem(m)
+		m := cloneItem(item)
+		MatchStats(m, f.catalog)
 		f.matched = append(f.matched, m)
 	}
 	return f
@@ -48,16 +49,16 @@ func (f *benchFixture) pipeline(text string) {
 	if err != nil {
 		panic(err)
 	}
-	outcomes := NewStatMatcher(f.catalog).MatchItem(item)
+	MatchStats(item, f.catalog)
 	filters := BuildFilters(item, f.opts)
-	sink = []any{outcomes, filters.ToTradeQuery()}
+	sink = filters.ToTradeQuery()
 }
 
 func BenchmarkParseItemCorpus(b *testing.B) {
 	f := newBenchFixture(b)
 	for b.Loop() {
 		for _, it := range f.corpus {
-			item, err := ParseItem(it.text)
+			item, err := ParseItem(it.Text)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -78,13 +79,13 @@ func BenchmarkMatchItemCorpus(b *testing.B) {
 		b.StopTimer()
 		items := make([]*ParsedItem, len(f.parsed))
 		for i, it := range f.parsed {
-			items[i] = it.Clone()
+			items[i] = cloneItem(it)
 		}
 		b.StartTimer()
-		matcher := NewStatMatcher(f.catalog)
 		for _, item := range items {
-			sink = matcher.MatchItem(item)
+			MatchStats(item, f.catalog)
 		}
+		sink = items
 	}
 }
 
@@ -102,7 +103,7 @@ func BenchmarkPipelineCorpus(b *testing.B) {
 	f := newBenchFixture(b)
 	for b.Loop() {
 		for _, it := range f.corpus {
-			f.pipeline(it.text)
+			f.pipeline(it.Text)
 		}
 	}
 }
@@ -121,8 +122,8 @@ func BenchmarkPipelineP95(b *testing.B) {
 		for range 200 {
 			for _, it := range f.corpus {
 				start := time.Now()
-				f.pipeline(it.text)
-				samples = append(samples, sample{time.Since(start), it.entry.ID})
+				f.pipeline(it.Text)
+				samples = append(samples, sample{time.Since(start), it.Entry.ID})
 			}
 		}
 	}

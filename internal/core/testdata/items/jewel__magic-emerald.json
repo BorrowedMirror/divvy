@@ -1,0 +1,64 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Sharpshooter's Emerald of Celerity",
+  "category": "jewel",
+  "class": {
+    "type": "jewel"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 74,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Projectile Damage",
+      "text": "12% increased Projectile Damage",
+      "values": [
+        12
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Attack Speed",
+      "text": "4% increased Attack Speed",
+      "values": [
+        4
+      ]
+    }
+  ],
+  "name": null,
+  "note": null,
+  "properties": [],
+  "quality": null,
+  "rarity": "magic",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": null,
+    "str": null
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": null,
+    "block_chance": null,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

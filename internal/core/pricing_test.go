@@ -9,7 +9,7 @@ import (
 
 func listing(amount float64, currency string) Listing {
 	return Listing{
-		ID:     formatF64Display(amount) + currency,
+		ID:     formatNumber(amount) + currency,
 		Price:  Price{Amount: amount, Currency: currency},
 		Online: true,
 	}
@@ -108,11 +108,11 @@ func TestSummaryIsOrdered(t *testing.T) {
 
 func TestEquivalentsAndRatesInSummaries(t *testing.T) {
 	rates := &ExchangeRates{Base: "exalted", Rates: map[string]float64{"divine": 200, "chaos": 10}}
-	assert.Equal(t, pp(2, "divine"), Equivalent(pp(40, "chaos"), rates))
-	assert.Equal(t, pp(50, "exalted"), Equivalent(pp(5, "chaos"), rates))
-	assert.Nil(t, Equivalent(pp(30, "exalted"), rates), "already exalted")
-	assert.Nil(t, Equivalent(pp(2, "divine"), rates), "already divine")
-	assert.Nil(t, Equivalent(pp(1, "mirror"), rates), "unknown rate")
+	assert.Equal(t, pp(2, "divine"), equivalent(pp(40, "chaos"), rates))
+	assert.Equal(t, pp(50, "exalted"), equivalent(pp(5, "chaos"), rates))
+	assert.Nil(t, equivalent(pp(30, "exalted"), rates), "already exalted")
+	assert.Nil(t, equivalent(pp(2, "divine"), rates), "already divine")
+	assert.Nil(t, equivalent(pp(1, "mirror"), rates), "unknown rate")
 	s := Summarise(SourceTrade, 3, []Listing{listing(1, "chaos"), listing(2, "chaos"), listing(20, "exalted")}, nil)
 	assert.Equal(t, pp(2, "chaos"), s.Max, "without rates the exalted listing is left out")
 	s.TradeURL = new("u")
@@ -121,4 +121,29 @@ func TestEquivalentsAndRatesInSummaries(t *testing.T) {
 	assert.Nil(t, s.Listings[2].Equivalent, "20 ex is under a divine and already exalted")
 	assert.Equal(t, pp(10, "exalted"), s.Listings[0].Equivalent)
 	assert.Equal(t, new("u"), s.TradeURL)
+}
+
+func TestSummariseAndWithRatesKeepTheirInputs(t *testing.T) {
+	rates := &ExchangeRates{Base: "exalted", Rates: map[string]float64{"divine": 200}}
+	in := []Listing{listing(300, "exalted"), listing(1, "divine")}
+	s := Summarise(SourceTrade, 2, in, rates)
+	assert.Nil(t, in[0].Equivalent, "input listings are not changed")
+	assert.Equal(t, pp(1.5, "divine"), s.Listings[0].Equivalent)
+
+	plain := Summarise(SourceTrade, 2, in, nil)
+	plain.TradeURL = new("https://example.invalid")
+	converted := WithRates(plain, rates)
+	assert.Nil(t, plain.Listings[0].Equivalent, "the summary passed in is not changed")
+	assert.Equal(t, plain.TradeURL, converted.TradeURL)
+	assert.Equal(t, pp(1.5, "divine"), converted.Listings[0].Equivalent)
+}
+
+func TestPricingJSON(t *testing.T) {
+	l := Listing{ID: "x", Price: Price{Amount: 2, Currency: "divine"}, Online: true, ItemLevel: new(uint32(80))}
+	assert.JSONEq(t, `{"id":"x","price":{"amount":2,"currency":"divine"},"seller":null,"online":true,"indexed":null,"item_level":80,"stack_size":null,"whisper":null,"equivalent":null}`, marshal(t, l))
+	r := ExchangeRates{Base: "exalted", Rates: map[string]float64{"divine": 200, "annul": 0.5}}
+	assert.JSONEq(t, `{"base":"exalted","rates":{"annul":0.5,"divine":200}}`, marshal(t, r))
+	assert.JSONEq(t, `{"source":"trade","total":0,"listings":[],"min":null,"median":null,"max":null,"trade_url":null}`,
+		marshal(t, Summarise(SourceTrade, 0, nil, nil)))
+	assert.NotNil(t, Summarise(SourceTrade, 0, nil, nil).Listings, "listings are never nil")
 }

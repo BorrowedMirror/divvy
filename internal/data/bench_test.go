@@ -3,11 +3,11 @@ package data
 // Startup cost of the bundled game data: zstd decode + sha256 + JSON + index build.
 //
 // Bundled caches in a process-wide sync.OnceValues, so these benchmarks measure the same
-// work through the decode/index API, which bypasses the cache. (Rust's bench also printed
-// the cold first Bundled call; BenchmarkDecodeIndex is that cost, minus the cache.)
+// work through the decode/index API, which bypasses the cache (BenchmarkDecodeIndex is the
+// cold first Bundled call).
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"io/fs"
 	"testing"
 
@@ -24,10 +24,10 @@ func benchFile(b *testing.B, name string) []byte {
 	return data
 }
 
-// benchDecode decodes the four English assets (no l10n), like the Rust bench.
+// benchDecode decodes the four English assets (no l10n).
 func benchDecode(b *testing.B) (Manifest, Bundle) {
 	b.Helper()
-	m, err := ParseManifest(benchFile(b, ManifestFile))
+	m, err := parseManifest(benchFile(b, manifestFile))
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -37,25 +37,25 @@ func benchDecode(b *testing.B) (Manifest, Bundle) {
 			b.Fatal(err)
 		}
 	}
-	bundle.Stats, err = DecodeAsset[[]core.StatDef](&m.Stats, benchFile(b, m.Stats.File))
+	bundle.Stats, err = decodeAsset[[]core.StatDef](&m.Stats, benchFile(b, m.Stats.File))
 	must(err)
-	bundle.Bases, err = DecodeAsset[[]core.BaseDef](&m.Bases, benchFile(b, m.Bases.File))
+	bundle.Bases, err = decodeAsset[[]core.BaseDef](&m.Bases, benchFile(b, m.Bases.File))
 	must(err)
-	bundle.Uniques, err = DecodeAsset[[]core.UniqueDef](&m.Uniques, benchFile(b, m.Uniques.File))
+	bundle.Uniques, err = decodeAsset[[]core.UniqueDef](&m.Uniques, benchFile(b, m.Uniques.File))
 	must(err)
-	bundle.Statics, err = DecodeAsset[[]core.StaticDef](&m.Statics, benchFile(b, m.Statics.File))
+	bundle.Statics, err = decodeAsset[[]core.StaticDef](&m.Statics, benchFile(b, m.Statics.File))
 	must(err)
 	return m, bundle
 }
 
 func BenchmarkDecodeAssetStats(b *testing.B) {
-	m, err := ParseManifest(benchFile(b, ManifestFile))
+	m, err := parseManifest(benchFile(b, manifestFile))
 	if err != nil {
 		b.Fatal(err)
 	}
 	stats := benchFile(b, m.Stats.File)
 	for b.Loop() {
-		if _, err := DecodeAsset[[]core.StatDef](&m.Stats, stats); err != nil {
+		if _, err := decodeAsset[[]core.StatDef](&m.Stats, stats); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -76,7 +76,7 @@ func BenchmarkSha256Stats(b *testing.B) {
 		b.Fatal(err)
 	}
 	for b.Loop() {
-		Sha256Hex(raw)
+		sha256Hex(raw)
 	}
 }
 
@@ -102,14 +102,14 @@ func BenchmarkDecodeAssetAll(b *testing.B) {
 func BenchmarkIndexBuild(b *testing.B) {
 	m, bundle := benchDecode(b)
 	for b.Loop() {
-		FromBundle(m, bundle)
+		newGameData(m, bundle)
 	}
 }
 
 func BenchmarkDecodeIndex(b *testing.B) {
 	for b.Loop() {
 		m, bundle := benchDecode(b)
-		FromBundle(m, bundle)
+		newGameData(m, bundle)
 	}
 }
 

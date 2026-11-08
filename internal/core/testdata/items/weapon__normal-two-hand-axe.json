@@ -1,0 +1,65 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Splitting Greataxe",
+  "category": "equipment",
+  "class": {
+    "type": "weapon",
+    "value": "Two Hand Axes"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 10,
+  "mirrored": false,
+  "modifiers": [],
+  "name": null,
+  "note": null,
+  "properties": [
+    {
+      "augmented": true,
+      "name": "Quality",
+      "value": "+10%"
+    },
+    {
+      "augmented": true,
+      "name": "Physical Damage",
+      "value": "22-39"
+    },
+    {
+      "augmented": false,
+      "name": "Critical Hit Chance",
+      "value": "5.00%"
+    },
+    {
+      "augmented": false,
+      "name": "Attacks per Second",
+      "value": "1.10"
+    }
+  ],
+  "quality": 10,
+  "rarity": "normal",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 6,
+    "str": 15
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": null,
+    "attacks_per_second": 1.1,
+    "block_chance": null,
+    "critical_hit_chance": 5,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": 33.55,
+    "spirit": null,
+    "total_dps": 33.55
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

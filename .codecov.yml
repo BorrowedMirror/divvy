@@ -69,7 +69,8 @@ ignore:
   - "e2e/**"
   - "web/src/bindings.ts"
   - "**/testdata/**"
-  - "internal/testkit/**"
+  - "internal/platform/platformtest/**"
+  - "internal/core/coretest/**"
 
 comment:
   layout: "condensed_header, diff, flags, files"

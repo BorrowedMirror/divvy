@@ -1,0 +1,103 @@
+{
+  "advanced": false,
+  "area_level": null,
+  "base_type": "Splintered Tower Shield",
+  "category": "equipment",
+  "class": {
+    "type": "shield"
+  },
+  "corrupted": false,
+  "gem_level": null,
+  "item_level": 77,
+  "mirrored": false,
+  "modifiers": [
+    {
+      "advanced": null,
+      "kind": "skill",
+      "stat_id": null,
+      "template": "Grants Skill: Raise Shield",
+      "text": "Grants Skill: Raise Shield",
+      "values": []
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "#% increased Armour",
+      "text": "106% increased Armour",
+      "values": [
+        106
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+# to maximum Life",
+      "text": "+84 to maximum Life",
+      "values": [
+        84
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Cold Resistance",
+      "text": "+21% to Cold Resistance",
+      "values": [
+        21
+      ]
+    },
+    {
+      "advanced": null,
+      "kind": "explicit",
+      "stat_id": null,
+      "template": "+#% to Chaos Resistance",
+      "text": "+30% to Chaos Resistance",
+      "values": [
+        30
+      ]
+    }
+  ],
+  "name": "Rune Bastion",
+  "note": null,
+  "properties": [
+    {
+      "augmented": false,
+      "name": "Block chance",
+      "value": "26%"
+    },
+    {
+      "augmented": true,
+      "name": "Armour",
+      "value": "384"
+    }
+  ],
+  "quality": null,
+  "rarity": "rare",
+  "raw": "[raw]",
+  "requirements": {
+    "dex": null,
+    "int": null,
+    "level": 55,
+    "str": 98
+  },
+  "sanctified": false,
+  "sockets": 0,
+  "stack_size": null,
+  "stats": {
+    "armour": 384,
+    "attacks_per_second": null,
+    "block_chance": 26,
+    "critical_hit_chance": null,
+    "elemental_dps": null,
+    "energy_shield": null,
+    "evasion": null,
+    "physical_dps": null,
+    "spirit": null,
+    "total_dps": null
+  },
+  "unidentified": false,
+  "waystone_tier": null
+}

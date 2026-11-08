@@ -1,92 +1,99 @@
 package platform
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
 
-// ErrorKind classifies a platform [Error].
-type ErrorKind int
+// errorKind classifies a platform [Error].
+type errorKind int
 
 const (
-	KindUnsupported ErrorKind = iota + 1
-	KindPermissionDenied
-	KindInvalidChord
-	KindHotkeyConflict
-	KindAlreadyStarted
-	KindTimeout
-	KindNoItemText
-	KindBackend
+	kindUnsupported errorKind = iota + 1
+	kindPermissionDenied
+	kindInvalidChord
+	kindHotkeyConflict
+	kindAlreadyStarted
+	kindTimeout
+	kindNoItemText
+	kindBackend
 )
 
-// Error is a platform error. Match a kind with errors.Is against the Err* values below, or
-// read Kind after errors.As.
+// Error is a platform error. Match its kind with errors.Is against the Err* sentinels below.
 type Error struct {
-	Kind ErrorKind
-	// Detail is the capability, permission, chord or backend message, depending on Kind.
+	kind errorKind
+	// Detail is the capability, permission, chord or hotkey, depending on the kind.
 	Detail  string
 	Timeout time.Duration
+	// Err is the cause of a backend error.
+	Err error
 }
 
 func (e *Error) Error() string {
-	switch e.Kind {
-	case KindUnsupported:
+	switch e.kind {
+	case kindUnsupported:
 		return fmt.Sprintf("capability `%s` is not supported on this backend", e.Detail)
-	case KindPermissionDenied:
+	case kindPermissionDenied:
 		return fmt.Sprintf("permission `%s` has not been granted", e.Detail)
-	case KindInvalidChord:
+	case kindInvalidChord:
 		return fmt.Sprintf("invalid key chord `%s`", e.Detail)
-	case KindHotkeyConflict:
+	case kindHotkeyConflict:
 		return "hotkey already registered by another application: " + e.Detail
-	case KindAlreadyStarted:
+	case kindAlreadyStarted:
 		return "already started"
-	case KindTimeout:
+	case kindTimeout:
 		return fmt.Sprintf("timed out after %s", e.Timeout)
-	case KindNoItemText:
+	case kindNoItemText:
 		return "clipboard did not contain item text"
-	default:
-		return "backend error: " + e.Detail
+	case kindBackend:
 	}
+	if e.Err == nil {
+		return "backend error"
+	}
+	return "backend error: " + e.Err.Error()
 }
+
+// Unwrap returns the cause of a backend error.
+func (e *Error) Unwrap() error { return e.Err }
 
 // Is matches any error of the same kind, so errors.Is(err, platform.ErrTimeout) works for every
 // timeout.
 func (e *Error) Is(target error) bool {
-	var t *Error
-	return errors.As(target, &t) && t.Kind == e.Kind
+	t, ok := target.(*Error)
+	return ok && t.kind == e.kind
 }
 
 // Kind sentinels for errors.Is.
 var (
-	ErrUnsupported      = &Error{Kind: KindUnsupported}
-	ErrPermissionDenied = &Error{Kind: KindPermissionDenied}
-	ErrInvalidChord     = &Error{Kind: KindInvalidChord}
-	ErrHotkeyConflict   = &Error{Kind: KindHotkeyConflict}
-	ErrAlreadyStarted   = &Error{Kind: KindAlreadyStarted}
-	ErrTimeout          = &Error{Kind: KindTimeout}
-	ErrNoItemText       = &Error{Kind: KindNoItemText}
-	ErrBackend          = &Error{Kind: KindBackend}
+	ErrUnsupported      = &Error{kind: kindUnsupported}
+	ErrPermissionDenied = &Error{kind: kindPermissionDenied}
+	ErrInvalidChord     = &Error{kind: kindInvalidChord}
+	ErrHotkeyConflict   = &Error{kind: kindHotkeyConflict}
+	ErrAlreadyStarted   = &Error{kind: kindAlreadyStarted}
+	ErrTimeout          = &Error{kind: kindTimeout}
+	ErrNoItemText       = &Error{kind: kindNoItemText}
+	ErrBackend          = &Error{kind: kindBackend}
 )
 
 // Unsupported reports a capability this backend lacks.
-func Unsupported(capability string) error { return &Error{Kind: KindUnsupported, Detail: capability} }
+func Unsupported(capability string) error { return &Error{kind: kindUnsupported, Detail: capability} }
 
 // PermissionDenied reports a missing OS permission.
-func PermissionDenied(permission string) error {
-	return &Error{Kind: KindPermissionDenied, Detail: permission}
+func PermissionDenied(p Permission) error {
+	return &Error{kind: kindPermissionDenied, Detail: string(p)}
 }
 
 // InvalidChord reports a chord that cannot be parsed or registered.
-func InvalidChord(chord string) error { return &Error{Kind: KindInvalidChord, Detail: chord} }
+func InvalidChord(chord string) error { return &Error{kind: kindInvalidChord, Detail: chord} }
 
 // HotkeyConflict reports a chord another application already holds.
-func HotkeyConflict(chord string) error { return &Error{Kind: KindHotkeyConflict, Detail: chord} }
+func HotkeyConflict(chord string) error { return &Error{kind: kindHotkeyConflict, Detail: chord} }
 
 // Timeout reports an operation that gave up after d.
-func Timeout(d time.Duration) error { return &Error{Kind: KindTimeout, Timeout: d} }
+func Timeout(d time.Duration) error { return &Error{kind: kindTimeout, Timeout: d} }
 
-// Backend wraps any other backend failure.
+// Backend reports any other backend failure, formatted by [fmt.Errorf] (so %w wraps a cause
+// that errors.Is and errors.As then find).
 func Backend(format string, args ...any) error {
-	return &Error{Kind: KindBackend, Detail: fmt.Sprintf(format, args...)}
+	return &Error{kind: kindBackend, Err: fmt.Errorf(format, args...)}
 }
