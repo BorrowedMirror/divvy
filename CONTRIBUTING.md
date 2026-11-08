@@ -104,7 +104,7 @@ file (`-version` or `RKL_RELEASE_VERSION` overrides it for a package:
 
 The Windows installer is cross-compiled, so it builds on Linux too. It installs for the current
 user to `%LOCALAPPDATA%\Rust King Ledger` and uses the same registry keys as the installer of
-the earlier Tauri-based releases, so it upgrades such an install in place. It needs `makensis`
+earlier releases, so it upgrades such an install in place. It needs `makensis`
 (Debian/Ubuntu: `nsis`; Arch: `nsis` from the AUR). Distribution packages ship either the 64-bit or the 32-bit NSIS
 stubs; either works. When the system NSIS has neither, the task adds the 32-bit ones from the
 official NSIS zip (pinned SHA-256) under `target/go/nsis/`.

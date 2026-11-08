@@ -27,9 +27,9 @@ export function looksLikeSessionId(s: string): boolean {
 const inRange = (v: number | null, lo: number, hi: number) => v !== null && Number.isFinite(v) && v >= lo && v <= hi;
 
 /**
- * Client-side mirror of `rkl_config::validate` so messages appear inline; the backend stays
- * authoritative. Numeric fields are `f64`/`u64` in Rust, so `null` is invalid even though the
- * generated bindings allow it.
+ * Client-side mirror of the backend's settings validation (`config.Validate`) so messages
+ * appear inline; the backend stays authoritative. Numeric fields are plain numbers in the Go
+ * settings, so `null` is invalid even though the generated bindings allow it.
  */
 export function validateSettings(s: Settings_Serialize): ValidationErrors {
   const errors: ValidationErrors = {};

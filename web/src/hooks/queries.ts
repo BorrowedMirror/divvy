@@ -1,6 +1,6 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useTauriEvent } from "@hooks/useTauriEvent";
+import { useBackendEvent } from "@hooks/useBackendEvent";
 import { unwrap } from "@lib/ipc";
 import type { FilterSet_Serialize, PriceSummary_Serialize, Settings_Serialize } from "@src/bindings";
 import { commands, events } from "@src/bindings";
@@ -63,7 +63,7 @@ export function permissionPollInterval(): number | false {
  */
 export function usePermissions() {
   const queryClient = useQueryClient();
-  useTauriEvent(events.permissionsChanged, (p) => {
+  useBackendEvent(events.permissionsChanged, (p) => {
     queryClient.setQueryData(keys.permissions, p.report);
   });
   return useQuery({

@@ -182,8 +182,10 @@ func TestEarlierCustomFileLoads(t *testing.T) {
 			AutoHideMS: 1500, Opacity: 0.8, Side: SideLast, GroupBySeller: false,
 			ListingColumns: []ListingColumn{ColumnItemLevel, ColumnStock, ColumnSeller},
 			Scale:          1.25, BackdropDim: 0, ClosePinnedOnGameFocus: true,
-			Links:   LinkSettings{Poe2db: false, Wiki: true, CraftOfExile: false},
-			Results: ResultsAuto,
+			// Not in files written before the setting existed: the default applies.
+			ReadyNotice: true,
+			Links:       LinkSettings{Poe2db: false, Wiki: true, CraftOfExile: false},
+			Results:     ResultsAuto,
 		},
 		Waystone: WaystoneSettings{Flags: map[string]ModFlag{
 			"#% increased Pack Size in Map":          FlagGood,
@@ -229,7 +231,7 @@ const defaultSettingsJSON = `{"version":1,` +
 	`"listing_count":20,"convert_prices":true,"remember_filters":true,"contact":null,"poesessid":null},` +
 	`"overlay":{"auto_hide_ms":400,"opacity":0.95,"side":"cursor","group_by_seller":true,` +
 	`"listing_columns":["seller","listed"],"scale":1,"backdrop_dim":0.6,` +
-	`"close_pinned_on_game_focus":false,"links":{"poe2db":true,"wiki":true,"craft_of_exile":true},` +
+	`"close_pinned_on_game_focus":false,"ready_notice":true,"links":{"poe2db":true,"wiki":true,"craft_of_exile":true},` +
 	`"results":"below"},` +
 	`"waystone":{"flags":{"Monsters fire # additional Projectiles":"danger",` +
 	`"Players have #% less Recovery Rate of Life and Energy Shield":"danger",` +

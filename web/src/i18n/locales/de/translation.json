@@ -48,6 +48,9 @@
       "skill": "Fertigkeit"
     }
   },
+  "notice": {
+    "ready": "Bereit und läuft im Hintergrund"
+  },
   "item": {
     "rarityLabel": "Seltenheit:",
     "ilvl": "GS {{value}}",
@@ -188,6 +191,7 @@
     "scale": "Panelgröße",
     "backdropDim": "Hintergrund hinter dem Panel",
     "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke",
+    "readyNotice": "Hinweis über dem Spiel anzeigen, wenn RKL es findet",
     "itemLinks": "Links zum Gegenstand im Panel",
     "results": "Preise und Angebote"
   },

@@ -101,6 +101,7 @@ func (f *Flow) layoutOverlay(w Window, card point) {
 
 // showOverlay positions the panel beside the cursor and shows it.
 func (f *Flow) showOverlay() {
+	f.dismissNotice()
 	st := f.st
 	w := f.d.Overlay()
 	scale := w.ScaleFactor()

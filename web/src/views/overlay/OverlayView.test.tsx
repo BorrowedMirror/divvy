@@ -100,7 +100,7 @@ describe("OverlayView", () => {
     expect(callsOf(calls, "open_settings_tab")[0]?.args).toEqual({ tab: "waystones" });
   });
 
-  test("dragging the header reports start, moves and end; Rust moves the card", async () => {
+  test("dragging the header reports start, moves and end; the backend moves the card", async () => {
     const calls = setupIpc({
       get_overlay_snapshot: () => null,
       get_overlay_layout: () => ({ cover: true, x: 100, y: 50 }),
@@ -550,6 +550,7 @@ describe("overlay extras", () => {
               scale: 1,
               backdrop_dim: 0.6,
               close_pinned_on_game_focus: false,
+              ready_notice: true,
               links: { poe2db: true, wiki: true, craft_of_exile: true },
               results: "below",
             },

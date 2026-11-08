@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { commands } from "@src/bindings";
 
 /**
- * Keep the (Tauri) window exactly as tall as `ref`'s content: measures it with a
- * ResizeObserver and asks Rust to resize the window (`resize_overlay`), which clamps to the
+ * Keep the window exactly as tall as `ref`'s content: measures it with a
+ * ResizeObserver and asks the backend to resize the window (`resize_overlay`), which clamps to the
  * monitor. Only content taller than the screen ends up scrolling.
  */
 export function useFitWindowHeight<T extends HTMLElement>(

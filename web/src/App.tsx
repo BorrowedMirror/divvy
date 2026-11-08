@@ -7,12 +7,14 @@ import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { BrandMark } from "@components/BrandMark";
 import { createQueryClient, keys, useSettingsQuery } from "@hooks/queries";
-import { useTauriEvent } from "@hooks/useTauriEvent";
+import { useBackendEvent } from "@hooks/useBackendEvent";
 import i18n, { supportedLanguage } from "@i18n/index";
 import { commands, events } from "@src/bindings";
 import { type Route, routeFromHash } from "@src/route";
 import { DiagnosticsView } from "@views/diagnostics/DiagnosticsView";
+import { NoticeView } from "@views/notice/NoticeView";
 import { OnboardingView } from "@views/onboarding/OnboardingView";
 import { OverlayView } from "@views/overlay/OverlayView";
 import { SettingsView } from "@views/settings/SettingsView";
@@ -22,7 +24,7 @@ import { UpdateBanner, UpdateSync } from "@views/update/UpdateBanner";
 function SettingsSync() {
   const queryClient = useQueryClient();
   const settings = useSettingsQuery().data;
-  useTauriEvent(events.settingsChanged, (p) => {
+  useBackendEvent(events.settingsChanged, (p) => {
     queryClient.setQueryData(keys.settings, p.settings);
   });
   const language = supportedLanguage(settings?.ui.language);
@@ -98,16 +100,17 @@ function useRoute(): [Route, (r: Route) => void] {
   return [route, navigate];
 }
 
-/** True while Rust shows the settings window as an overlay covering the game window. */
+/** True while the backend shows the settings window as an overlay covering the game window. */
 export function isGameOverlay(): boolean {
   return document.documentElement.dataset.overlay === "1";
 }
 
 /**
- * Settings-window chrome. In overlay mode (`html[data-overlay="1"]`, set by Rust when the
- * window covers the game) the page is a transparent, dimmed backdrop with the content in a
- * top-anchored card that sizes to the current tab; Esc or a click on the backdrop closes it.
- * Otherwise it is a plain page.
+ * Settings-window chrome; the window is always borderless. In overlay mode
+ * (`html[data-overlay="1"]`, set by the backend when the window covers the game) the page is a
+ * transparent, dimmed backdrop with the content in a top-anchored card that sizes to the
+ * current tab; Esc or a click on the backdrop closes it. Otherwise (`data-overlay="0"`) the
+ * card fills the window, with a title bar to drag it by and the close button.
  */
 function SettingsShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -130,6 +133,11 @@ function SettingsShell({ children }: { children: ReactNode }) {
       }}
     >
       <div className="k-card" role="dialog" aria-label={t("settings.title")}>
+        {/* Borderless window away from the game: drag it by this bar (Wails' --wails-draggable). */}
+        <div className="k-titlebar" data-testid="settings-titlebar">
+          <BrandMark size={18} />
+          <span className="text-sm font-semibold text-gold">Rust King Ledger</span>
+        </div>
         <button
           type="button"
           className="k-overlay-close"
@@ -151,6 +159,13 @@ export function Routes() {
     return (
       <main data-route={route} className="min-h-screen">
         <OverlayView />
+      </main>
+    );
+  }
+  if (route === "notice") {
+    return (
+      <main data-route={route}>
+        <NoticeView />
       </main>
     );
   }
@@ -179,7 +194,7 @@ export function Routes() {
   );
 }
 
-/** Root component: providers + hash route (`overlay | settings | diagnostics | onboarding`). */
+/** Root component: providers + hash route (`overlay | notice | settings | diagnostics | onboarding`). */
 export function App({ client }: { client?: QueryClient }) {
   return (
     <AppProviders client={client}>

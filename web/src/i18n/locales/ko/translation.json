@@ -48,6 +48,9 @@
       "skill": "스킬"
     }
   },
+  "notice": {
+    "ready": "준비 완료, 백그라운드에서 실행 중"
+  },
   "item": {
     "rarityLabel": "희귀도:",
     "ilvl": "템렙 {{value}}",
@@ -183,6 +186,7 @@
     "scale": "패널 크기",
     "backdropDim": "패널 뒤 배경",
     "closePinnedOnGameFocus": "게임을 다시 클릭하면 고정된 패널 닫기",
+    "readyNotice": "RKL이 게임을 감지하면 게임 위에 알림 표시",
     "checkUpdates": "업데이트 자동 확인",
     "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다.",
     "itemLinks": "패널의 아이템 링크",

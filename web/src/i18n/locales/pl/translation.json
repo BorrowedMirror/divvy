@@ -48,6 +48,9 @@
       "skill": "umiejętność"
     }
   },
+  "notice": {
+    "ready": "Gotowe i działa w tle"
+  },
   "item": {
     "rarityLabel": "Rzadkość:",
     "ilvl": "ilvl {{value}}",
@@ -194,6 +197,7 @@
     "scale": "Rozmiar panelu",
     "backdropDim": "Tło za panelem",
     "closePinnedOnGameFocus": "Zamykaj przypięty panel, gdy kliknę z powrotem w grę",
+    "readyNotice": "Pokazuj powiadomienie nad grą, gdy RKL ją wykryje",
     "itemLinks": "Linki do przedmiotu w panelu",
     "results": "Ceny i oferty"
   },

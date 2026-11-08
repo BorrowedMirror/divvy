@@ -95,6 +95,8 @@ type OverlaySettings struct {
 	// ClosePinnedOnGameFocus closes a pinned panel as soon as the game window gets focus
 	// again.
 	ClosePinnedOnGameFocus bool `json:"close_pinned_on_game_focus" koanf:"close_pinned_on_game_focus"`
+	// ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it.
+	ReadyNotice bool `json:"ready_notice" koanf:"ready_notice"`
 	// Links says which lookup links the panel shows under the item name.
 	Links LinkSettings `json:"links" koanf:"links"`
 	// Results says where prices and listings go: below the filters, or in a column beside
@@ -274,6 +276,7 @@ func DefaultSettings() Settings {
 			ListingColumns: []ListingColumn{ColumnSeller, ColumnListed},
 			Scale:          1.0,
 			BackdropDim:    0.6,
+			ReadyNotice:    true,
 			Links:          LinkSettings{Poe2db: true, Wiki: true, CraftOfExile: true},
 			Results:        ResultsBelow,
 		},

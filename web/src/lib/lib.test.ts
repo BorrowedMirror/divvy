@@ -43,7 +43,7 @@ describe("rewiden", () => {
     expect(widenValue([null], 10)).toBeNull();
   });
 
-  test("rewiden updates every stat min and widen_pct, clears max like Rust, keeps enabled", () => {
+  test("rewiden updates every stat min and widen_pct, clears max, keeps enabled", () => {
     const f = filterSet();
     const out = rewiden(f, 20);
     expect(out.widen_pct).toBe(20);
@@ -58,7 +58,7 @@ describe("rewiden", () => {
     expect(rewidenStat(s, 10)).toBe(s);
   });
 
-  test("reduced (negative) stats get an upper bound, mirroring Rust", () => {
+  test("reduced (negative) stats get an upper bound instead", () => {
     const s = {
       stat_id: "x",
       text: "30% reduced Attribute Requirements",
@@ -226,14 +226,14 @@ describe("validateSettings", () => {
     });
   });
 
-  test("null numeric fields are rejected (Rust f64/u64 cannot be null)", () => {
+  test("null numeric fields are rejected (the backend has no null numbers)", () => {
     const s = settings();
     expect(
       validateSettings({ ...s, trade: { ...s.trade, widen_pct: null }, overlay: { ...s.overlay, opacity: null } }),
     ).toEqual({ "trade.widen_pct": "validation.widen", "overlay.opacity": "validation.opacity" });
   });
 
-  test("range bounds are inclusive like Rust", () => {
+  test("range bounds are inclusive", () => {
     const s = settings();
     expect(
       validateSettings({

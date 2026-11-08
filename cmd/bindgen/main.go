@@ -52,6 +52,7 @@ func run(root string, check bool) error {
 			{Name: "permissionsChanged", Wire: ipc.EventPermissionsChanged, Payload: reflect.TypeFor[ipc.PermissionsChanged]()},
 			{Name: "priceFailed", Wire: ipc.EventPriceFailed, Payload: reflect.TypeFor[ipc.PriceFailed]()},
 			{Name: "priceReady", Wire: ipc.EventPriceReady, Payload: reflect.TypeFor[ipc.PriceReady]()},
+			{Name: "readyNotice", Wire: ipc.EventReadyNotice, Payload: reflect.TypeFor[ipc.ReadyNotice]()},
 			{Name: "settingsChanged", Wire: ipc.EventSettingsChanged, Payload: reflect.TypeFor[ipc.SettingsChanged]()},
 			{Name: "updateAvailable", Wire: ipc.EventUpdateAvailable, Payload: reflect.TypeFor[ipc.UpdateAvailable]()},
 		},

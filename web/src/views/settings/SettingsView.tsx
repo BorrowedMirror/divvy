@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { BrandMark } from "@components/BrandMark";
 import { Button, CheckboxField, NumberInput, SelectField, SwitchField, cx } from "@components/ui";
 import { keys, useLeagues, useSaveSettings, useSettingsQuery } from "@hooks/queries";
-import { useTauriEvent } from "@hooks/useTauriEvent";
+import { useBackendEvent } from "@hooks/useBackendEvent";
 import { LANGUAGES } from "@i18n/index";
 import { toIpcError, unwrap } from "@lib/ipc";
 import { HOTKEY_ACTIONS, type ValidationErrors, validateSettings } from "@lib/validate";
@@ -62,7 +62,7 @@ export function SettingsView({ onOpenDiagnostics }: { onOpenDiagnostics?: () => 
   useEffect(() => {
     if (query.data && useSettingsStore.getState().base === null) load(query.data);
   }, [query.data, load]);
-  useTauriEvent(events.settingsChanged, (p) => external(p.settings));
+  useBackendEvent(events.settingsChanged, (p) => external(p.settings));
 
   const errors = useMemo(() => (draft ? validateSettings(draft) : {}), [draft]);
   const invalid = Object.keys(errors).length > 0;
@@ -790,6 +790,11 @@ function OverlayTab({ s, update, errors }: TabProps) {
         label={t("settings.closePinnedOnGameFocus")}
         checked={s.overlay.close_pinned_on_game_focus}
         onChange={(close_pinned_on_game_focus) => setOverlay({ close_pinned_on_game_focus })}
+      />
+      <SwitchField
+        label={t("settings.readyNotice")}
+        checked={s.overlay.ready_notice}
+        onChange={(ready_notice) => setOverlay({ ready_notice })}
       />
       <fieldset className="flex flex-col gap-1.5 py-1.5">
         <legend className="text-sm">{t("settings.itemLinks")}</legend>

@@ -1,15 +1,15 @@
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@components/ui";
+import { useBackendEvent } from "@hooks/useBackendEvent";
 import { useCommand } from "@hooks/useCommand";
-import { useTauriEvent } from "@hooks/useTauriEvent";
 import { commands, events } from "@src/bindings";
 import { useUpdateStore } from "@stores/update";
 
 /** Records `update-available` for this window. Mounted once in `AppProviders`. */
 export function UpdateSync() {
   const announce = useUpdateStore((s) => s.announce);
-  useTauriEvent(events.updateAvailable, announce);
+  useBackendEvent(events.updateAvailable, announce);
   return null;
 }
 

@@ -163,6 +163,7 @@ type appState struct {
 	OverlayVisible  bool          `json:"overlay_visible"`
 	OverlayPinned   bool          `json:"overlay_pinned"`
 	SettingsVisible bool          `json:"settings_visible"`
+	NoticeVisible   bool          `json:"notice_visible"`
 	TrayPresent     bool          `json:"tray_present"`
 	LastItem        *string       `json:"last_item"`
 	LastPrice       *priceSummary `json:"last_price"`

@@ -48,6 +48,9 @@
       "skill": "abilità"
     }
   },
+  "notice": {
+    "ready": "Pronto e in esecuzione in background"
+  },
   "item": {
     "rarityLabel": "Rarità:",
     "ilvl": "liv. ogg. {{value}}",
@@ -191,6 +194,7 @@
     "scale": "Dimensione del pannello",
     "backdropDim": "Sfondo dietro il pannello",
     "closePinnedOnGameFocus": "Chiudi un pannello fissato quando torno a cliccare nel gioco",
+    "readyNotice": "Mostra un avviso sul gioco quando RKL lo rileva",
     "itemLinks": "Link dell'oggetto nel pannello",
     "results": "Prezzi e inserzioni"
   },

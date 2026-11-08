@@ -127,7 +127,7 @@ function invoke<T>(cmd: string, args: Record<string, unknown>): Promise<T> {
 `
 
 const footer = `
-/** tauri-specta's result shape, kept so the views did not change. */
+/** A command's outcome: its value, or the error it returned. */
 export type Result<T, E> = { status: "ok"; data: T } | { status: "error"; error: E };
 
 /**
@@ -148,7 +148,7 @@ async function typedError<T, E>(result: Promise<T>): Promise<Result<T, E>> {
 	}
 }
 
-/** An event with Tauri's listener shape: the callback gets ` + "`{ event, payload }`" + `. */
+/** A backend event; listen() passes the callback ` + "`{ event, payload }`" + ` and resolves to an unsubscribe function. */
 function makeEvent<T>(name: string) {
 	return {
 		listen: (cb: (event: { event: string; payload: T }) => void): Promise<() => void> =>

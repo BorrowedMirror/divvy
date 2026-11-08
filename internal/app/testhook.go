@@ -36,14 +36,14 @@ type HookActions struct {
 	TrayPresent func() bool
 	// Quit exits the app.
 	Quit func()
-	// DOM asks the web view of window (`overlay` or `settings`) about the first element
+	// DOM asks the web view of window (`overlay`, `notice` or `settings`) about the first element
 	// matching a CSS selector and returns its JSON reply,
 	// `{"exists":bool,"visible":bool,"text":string}`. Read-only.
 	DOM func(ctx context.Context, window, selector string) (string, error)
 }
 
 // domWindows are the windows `dom` can query.
-var domWindows = []string{"overlay", "settings"}
+var domWindows = []string{"overlay", "notice", "settings"}
 
 // StartTestHook serves the e2e line protocol on 127.0.0.1:port (0 picks a port) until ctx is
 // done, and returns the bound port. One command per line, one reply line each.
@@ -209,6 +209,7 @@ func (f *Flow) hookState(actions HookActions) string {
 		OverlayVisible  bool               `json:"overlay_visible"`
 		OverlayPinned   bool               `json:"overlay_pinned"`
 		SettingsVisible bool               `json:"settings_visible"`
+		NoticeVisible   bool               `json:"notice_visible"`
 		TrayPresent     bool               `json:"tray_present"`
 		LastItem        *string            `json:"last_item"`
 		LastPrice       *core.PriceSummary `json:"last_price"`
@@ -218,6 +219,7 @@ func (f *Flow) hookState(actions HookActions) string {
 		OverlayVisible:  st.overlayVisible.Load(),
 		OverlayPinned:   st.pinned.Load(),
 		SettingsVisible: f.d.Settings().IsVisible(),
+		NoticeVisible:   f.d.Notice().IsVisible(),
 		TrayPresent:     actions.TrayPresent != nil && actions.TrayPresent(),
 		LastItem:        lastItem,
 		LastPrice:       st.lastPriceSummary(),

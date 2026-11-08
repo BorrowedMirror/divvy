@@ -48,6 +48,9 @@
       "skill": "技能"
     }
   },
+  "notice": {
+    "ready": "已就緒，正在背景執行"
+  },
   "item": {
     "rarityLabel": "稀有度：",
     "ilvl": "物等 {{value}}",
@@ -183,6 +186,7 @@
     "scale": "面板大小",
     "backdropDim": "面板後方的背景",
     "closePinnedOnGameFocus": "點擊回到遊戲時關閉已釘選的面板",
+    "readyNotice": "RKL 偵測到遊戲時在遊戲上方顯示提示",
     "checkUpdates": "自動檢查更新",
     "checkUpdatesHelp": "啟動後不久及每天檢查一次新版本。在你選擇安裝之前不會下載任何內容。",
     "itemLinks": "面板中的物品連結",

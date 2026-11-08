@@ -16,6 +16,7 @@ const (
 	EventPermissionsChanged = "permissions-changed"
 	EventPriceFailed        = "price-failed"
 	EventPriceReady         = "price-ready"
+	EventReadyNotice        = "ready-notice"
 	EventSettingsChanged    = "settings-changed"
 	EventUpdateAvailable    = "update-available"
 )
@@ -117,5 +118,16 @@ type PermissionsChanged struct {
 // MarshalJSONTo writes the wire format.
 func (e PermissionsChanged) MarshalJSONTo(enc *jsontext.Encoder) error {
 	type plain PermissionsChanged
+	return marshalWire(enc, plain(e))
+}
+
+// ReadyNotice shows the "ready" notice over a newly found game window for DurationMS.
+type ReadyNotice struct {
+	DurationMS uint32 `json:"duration_ms"`
+}
+
+// MarshalJSONTo writes the wire format.
+func (e ReadyNotice) MarshalJSONTo(enc *jsontext.Encoder) error {
+	type plain ReadyNotice
 	return marshalWire(enc, plain(e))
 }

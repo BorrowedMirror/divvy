@@ -19,7 +19,7 @@ export class IpcFailure extends Error {
 
 type Result<T> = { status: "ok"; data: T } | { status: "error"; error: IpcError_Serialize };
 
-/** Turn a tauri-specta `Result` into a value or a thrown `IpcFailure`. */
+/** Turn a command `Result` into a value or a thrown `IpcFailure`. */
 export function unwrap<T>(result: Result<T>): T {
   if (result.status === "ok") return result.data;
   throw new IpcFailure(result.error);

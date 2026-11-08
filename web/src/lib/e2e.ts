@@ -17,9 +17,9 @@ export const REPLY_EVENT = "e2e-reply";
 export type DomQuery = { id: string; window: string; selector: string };
 export type DomReply = { id: string; exists: boolean; visible: boolean; text: string };
 
-/** The window a route is shown in: the overlay, or the settings window for every other page. */
-export function windowOf(route: Route): "overlay" | "settings" {
-  return route === "overlay" ? "overlay" : "settings";
+/** The window a route is shown in: the overlay, the notice, or the settings window for every other page. */
+export function windowOf(route: Route): "overlay" | "notice" | "settings" {
+  return route === "overlay" || route === "notice" ? route : "settings";
 }
 
 function isQuery(v: unknown): v is DomQuery {

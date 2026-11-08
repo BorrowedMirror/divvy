@@ -110,6 +110,29 @@ func (d *Desktop) Overlay() app.Window {
 // Settings is the settings window.
 func (d *Desktop) Settings() app.Window { return window{w: d.shell.Settings} }
 
+// Notice is the ready notice window.
+func (d *Desktop) Notice() app.Window { return window{w: d.shell.Notice} }
+
+// PrepareNotice styles the ready notice once: no taskbar entry, always on top, clicks pass
+// through to the game, and it never takes keyboard focus. Without window tracking
+// (Wayland-native) there is no notice to style.
+func (d *Desktop) PrepareNotice() error {
+	if !d.parts.Capabilities.WindowTracking || d.parts.Kind == platform.BackendWayland {
+		return nil
+	}
+	s, err := d.Styler(d.shell.Notice)
+	if err != nil {
+		return err
+	}
+	err = errors.Join(s.Prepare(), s.SetClickThrough(true))
+	if r, ok := s.(platform.FocusRefuser); ok {
+		var refuseErr error
+		application.InvokeSync(func() { refuseErr = r.RefuseFocus() })
+		err = errors.Join(err, refuseErr)
+	}
+	return err
+}
+
 // Styler is the backend's native styling for w, created on first use.
 func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, error) {
 	d.mu.Lock()
@@ -128,7 +151,20 @@ func (d *Desktop) Styler(w *application.WebviewWindow) (platform.OverlayWindow, 
 	// Linux backends read the GtkWindow, which GTK only allows on its main thread. The lock is
 	// not held across the hop: the main thread may be asking for a styler too.
 	var s platform.OverlayWindow
-	application.InvokeSync(func() { s, err = d.parts.Overlay(native) })
+	application.InvokeSync(func() {
+		if s, err = d.parts.Overlay(native); err != nil {
+			return
+		}
+		// A frameless helper window gets its title and stays out of taskbars and window
+		// lists (otherwise it shows there unnamed whenever it is visible).
+		if title, ok := d.shell.toolTitles[w]; ok {
+			if t, ok := s.(platform.ToolWindow); ok {
+				if err := t.MarkToolWindow(title); err != nil {
+					slog.Debug("tool window", "title", title, "err", err)
+				}
+			}
+		}
+	})
 	if err != nil {
 		return nil, err
 	}

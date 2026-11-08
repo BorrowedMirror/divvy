@@ -170,6 +170,12 @@ func run(ctx context.Context, argv []string) error {
 		}
 	}
 
+	// The borderless settings window's rounded corners follow its size when the window
+	// manager resizes it. Wails emits the common event on Windows and macOS, its own on Linux.
+	for _, ev := range []events.WindowEventType{events.Common.WindowDidResize, events.Linux.WindowDidResize} {
+		s.Settings.OnWindowEvent(ev, func(*application.WindowEvent) { go f.SettingsResized() })
+	}
+
 	// Quitting (tray, test hook, signal) stops the background work before the windows go.
 	s.App.OnShutdown(cancel)
 	s.App.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
@@ -186,6 +192,9 @@ func start(ctx context.Context, s *shell.Shell, desktop *shell.Desktop, a *app.A
 		if err := styler.Prepare(); err != nil {
 			st.RecordError("overlay styling failed", err)
 		}
+	}
+	if err := desktop.PrepareNotice(); err != nil && !errors.Is(err, platform.ErrUnsupported) {
+		st.RecordError("notice styling failed", err)
 	}
 	// Portal registration can block for seconds; keep the UI thread free.
 	go func() {

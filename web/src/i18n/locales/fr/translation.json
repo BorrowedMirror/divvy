@@ -48,6 +48,9 @@
       "skill": "compétence"
     }
   },
+  "notice": {
+    "ready": "Prêt et actif en arrière-plan"
+  },
   "item": {
     "rarityLabel": "Rareté :",
     "ilvl": "niv. obj. {{value}}",
@@ -191,6 +194,7 @@
     "scale": "Taille du panneau",
     "backdropDim": "Arrière-plan derrière le panneau",
     "closePinnedOnGameFocus": "Fermer un panneau épinglé quand je clique de nouveau dans le jeu",
+    "readyNotice": "Afficher un avis sur le jeu quand RKL le détecte",
     "itemLinks": "Liens de l'objet dans le panneau",
     "results": "Prix et annonces"
   },

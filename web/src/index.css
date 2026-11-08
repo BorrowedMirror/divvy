@@ -161,6 +161,83 @@ html[data-overlay="1"] .k-overlay-close:focus-visible {
   box-shadow: 0 0 0 2px var(--k-gold);
 }
 
+/* Settings window away from the game: borderless, the card fills the window (the shell cuts
+   the window's corners to the same 12px radius) and the title bar drags it. */
+.k-titlebar {
+  display: none;
+}
+html[data-overlay="0"],
+html[data-overlay="0"] body {
+  background: transparent;
+  overflow: hidden;
+}
+html[data-overlay="0"] main {
+  min-height: 0;
+}
+html[data-overlay="0"] .k-shell {
+  position: fixed;
+  inset: 0;
+  display: flex;
+}
+html[data-overlay="0"] .k-card {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--k-bg);
+  border: 1px solid color-mix(in srgb, var(--k-gold) 35%, transparent);
+  border-radius: 0.75rem;
+}
+html[data-overlay="0"] .k-titlebar {
+  --wails-draggable: drag;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding: 0 3.5rem 0 1rem;
+  border-bottom: 1px solid var(--k-line);
+  user-select: none;
+  cursor: default;
+}
+html[data-overlay="0"] .k-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+html[data-overlay="0"] [data-testid="settings-root"] {
+  min-height: 0;
+}
+html[data-overlay="0"] .k-overlay-close {
+  --wails-draggable: no-drag;
+  display: block;
+  user-select: none;
+  position: absolute;
+  top: 0.375rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  color: var(--k-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  z-index: 10;
+}
+html[data-overlay="0"] .k-overlay-close:hover {
+  color: var(--k-fg);
+  background: var(--k-surface-2);
+}
+html[data-overlay="0"] .k-overlay-close:focus {
+  outline: none;
+}
+html[data-overlay="0"] .k-overlay-close:focus-visible {
+  box-shadow: 0 0 0 2px var(--k-gold);
+}
+
 /* The overlay window is transparent; only the panel card is opaque. */
 html[data-route="overlay"],
 html[data-route="overlay"] body {
@@ -171,6 +248,46 @@ html[data-route="overlay"] body {
 html[data-route="overlay"] body {
   overflow-y: auto;
   scrollbar-width: thin;
+}
+
+/* The ready notice: a transparent window holding one card that fades in and out over
+   --k-notice-ms (the window's corners are cut to the card's 10px radius by the shell). */
+html[data-route="notice"],
+html[data-route="notice"] body {
+  background: transparent;
+  overflow: hidden;
+}
+.k-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  height: 100vh;
+  padding: 0 1rem;
+  border: 1px solid color-mix(in srgb, var(--k-gold) 45%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--k-surface-2) 94%, transparent);
+  animation: k-notice var(--k-notice-ms, 4000ms) ease-out both;
+}
+@keyframes k-notice {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  6%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* Without motion the card simply shows; the shell hides the window when the time is up. */
+@media (prefers-reduced-motion: reduce) {
+  .k-notice {
+    animation-name: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

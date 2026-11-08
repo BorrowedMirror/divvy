@@ -150,6 +150,7 @@ export const events = {
 	permissionsChanged: makeEvent<PermissionsChanged_Serialize>("permissions-changed"),
 	priceFailed: makeEvent<PriceFailed_Serialize>("price-failed"),
 	priceReady: makeEvent<PriceReady_Serialize>("price-ready"),
+	readyNotice: makeEvent<ReadyNotice_Serialize>("ready-notice"),
 	settingsChanged: makeEvent<SettingsChanged_Serialize>("settings-changed"),
 	updateAvailable: makeEvent<UpdateAvailable_Serialize>("update-available"),
 };
@@ -632,6 +633,8 @@ export type OverlaySettings_Serialize = {
 	 * again.
 	 */
 	close_pinned_on_game_focus: boolean,
+	/** ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it. */
+	ready_notice: boolean,
 	/** Links says which lookup links the panel shows under the item name. */
 	links: LinkSettings_Serialize,
 	/**
@@ -661,6 +664,8 @@ export type OverlaySettings_Deserialize = {
 	 * again.
 	 */
 	close_pinned_on_game_focus: boolean,
+	/** ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it. */
+	ready_notice: boolean,
 	/** Links says which lookup links the panel shows under the item name. */
 	links: LinkSettings_Deserialize,
 	/**
@@ -946,6 +951,13 @@ export type Rarity =
 	/** RarityOther covers quest items, divination-like or other. */
 	| "other";
 
+/** ReadyNotice shows the "ready" notice over a newly found game window for DurationMS. */
+export type ReadyNotice = {
+	duration_ms: number,
+};
+export type ReadyNotice_Serialize = ReadyNotice;
+export type ReadyNotice_Deserialize = ReadyNotice;
+
 /** Requirements are the level and attribute requirements. */
 export type Requirements = Requirements_Serialize | Requirements_Deserialize;
 export type Requirements_Serialize = {
@@ -1219,7 +1231,7 @@ export type WaystoneSettings_Serialize = WaystoneSettings;
 export type WaystoneSettings_Deserialize = WaystoneSettings;
 
 
-/** tauri-specta's result shape, kept so the views did not change. */
+/** A command's outcome: its value, or the error it returned. */
 export type Result<T, E> = { status: "ok"; data: T } | { status: "error"; error: E };
 
 /**
@@ -1240,7 +1252,7 @@ async function typedError<T, E>(result: Promise<T>): Promise<Result<T, E>> {
 	}
 }
 
-/** An event with Tauri's listener shape: the callback gets `{ event, payload }`. */
+/** A backend event; listen() passes the callback `{ event, payload }` and resolves to an unsubscribe function. */
 function makeEvent<T>(name: string) {
 	return {
 		listen: (cb: (event: { event: string; payload: T }) => void): Promise<() => void> =>

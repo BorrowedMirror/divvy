@@ -42,10 +42,9 @@ RKL_TEST_HOOK=$PORT RKL_CONFIG_DIR=$CFG RKL_LOG=warn "$APP" >"$LOG/app" 2>&1 & P
 trap "kill $FG $PID 2>/dev/null || true" EXIT
 for _ in $(seq 100); do (exec 3<>/dev/tcp/127.0.0.1/$PORT) 2>/dev/null && break; sleep 0.1; done
 hook() { exec 3<>/dev/tcp/127.0.0.1/$PORT; echo "$1" >&3; head -1 <&3; exec 3>&-; }
-# Wails does not title frameless windows on Linux, so the overlay is named after the program
-# ("rkl"); report it as "RKL overlay" like the titled settings window ("RKL settings").
-name() { local n; n=$(xprop -id "$1" _NET_WM_NAME 2>/dev/null | sed "s/.*= //; s/\"//g"); [ "$n" = rkl ] && n="RKL overlay"; echo "$n"; }
-overlay_id() { for w in $(xprop -root _NET_CLIENT_LIST | sed "s/.*# //; s/,//g"); do [ "$(name "$w")" = "RKL overlay" ] && { echo "$w"; return; }; done; }
+# Windows by title: the price panel is "RKL price check", the settings window "RKL settings".
+name() { xprop -id "$1" _NET_WM_NAME 2>/dev/null | sed "s/.*= //; s/\"//g"; }
+overlay_id() { for w in $(xprop -root _NET_CLIENT_LIST | sed "s/.*# //; s/,//g"); do [ "$(name "$w")" = "RKL price check" ] && { echo "$w"; return; }; done; }
 top() { name "$(xprop -root _NET_CLIENT_LIST_STACKING | sed "s/.*# //; s/.*, //")"; }
 active() { name "$(xprop -root _NET_ACTIVE_WINDOW | sed "s/.*# //")"; }
 geo() { xwininfo -id "$1" | awk "/Absolute upper-left X/{x=\$NF}/Absolute upper-left Y/{y=\$NF}/Width/{w=\$NF}/Height/{h=\$NF}END{print x\",\"y\",\"w\",\"h}"; }
@@ -53,23 +52,23 @@ xdotool windowactivate --sync "$GAME"; sleep 0.3
 
 hook "text $(python3 -c "import json;print(json.dumps(open(\"e2e/fixtures/rare-ring.txt\").read()))")" >/dev/null
 sleep 0.8
-[ "$(top)" = "RKL overlay" ] || fail "unpinned panel is not above the game (top: $(top))"
-[ "$(active)" = "RKL overlay" ] || fail "unpinned panel is not focused (active: $(active))"
+[ "$(top)" = "RKL price check" ] || fail "unpinned panel is not above the game (top: $(top))"
+[ "$(active)" = "RKL price check" ] || fail "unpinned panel is not focused (active: $(active))"
 echo "ok: unpinned panel above the fullscreen game and focused"
 
 xdotool windowactivate --sync "$GAME"; sleep 0.3
 hook hide >/dev/null; xdotool windowactivate --sync "$GAME"; sleep 0.3
 hook "tray price_check" >/dev/null; sleep 1.5
-[ "$(top)" = "RKL overlay" ] || fail "pinned panel is not above the game (top: $(top))"
-[ "$(active)" = "RKL overlay" ] || fail "pinned panel did not take focus (active: $(active))"
+[ "$(top)" = "RKL price check" ] || fail "pinned panel is not above the game (top: $(top))"
+[ "$(active)" = "RKL price check" ] || fail "pinned panel did not take focus (active: $(active))"
 echo "ok: pinned panel above the game and focused"
 
 for keys in ctrl+d ctrl+alt+d; do
   hook hide >/dev/null
   xdotool windowactivate --sync "$GAME"; sleep 0.3
   xdotool key --clearmodifiers "$keys"; sleep 1.5
-  [ "$(top)" = "RKL overlay" ] || fail "$keys: panel is not above the game (top: $(top))"
-  [ "$(active)" = "RKL overlay" ] || fail "$keys: panel is not focused (active: $(active))"
+  [ "$(top)" = "RKL price check" ] || fail "$keys: panel is not above the game (top: $(top))"
+  [ "$(active)" = "RKL price check" ] || fail "$keys: panel is not focused (active: $(active))"
   echo "ok: $keys hotkey shows the panel above the game, focused"
   if [ "$keys" = ctrl+d ]; then
     xdotool key Escape; sleep 0.8
@@ -89,7 +88,7 @@ OW=$(overlay_id)
 [ -n "$OW" ] || fail "no overlay window"
 [ "$(geo "$OW")" = "$(geo "$GAME")" ] || fail "unpinned panel $(geo "$OW") does not cover the game $(geo "$GAME")"
 xdotool mousemove 1700 900; sleep 0.6; xdotool mousemove 1750 950; sleep 0.6
-[ "$(active)" = "RKL overlay" ] || fail "moving the mouse handed focus away (active: $(active))"
+[ "$(active)" = "RKL price check" ] || fail "moving the mouse handed focus away (active: $(active))"
 echo "ok: unpinned panel covers the game and keeps focus while the mouse moves"
 xdotool click 1; sleep 0.8
 [ "$(xwininfo -id "$OW" | awk "/Map State/{print \$NF}")" != IsViewable ] || fail "backdrop click did not close the panel"
@@ -107,7 +106,7 @@ xdotool mousemove 1700 900; sleep 0.8
 echo "ok: pinned panel is card-sized and the game can be hovered back into focus"
 xdotool click 1; sleep 1
 [ "$(xwininfo -id "$OW" | awk "/Map State/{print \$NF}")" = IsViewable ] || fail "clicking the game closed the pinned panel"
-[ "$(top)" = "RKL overlay" ] || fail "clicking the game hid the pinned panel behind it (top: $(top))"
+[ "$(top)" = "RKL price check" ] || fail "clicking the game hid the pinned panel behind it (top: $(top))"
 [ "$(active)" = "Path of Exile 2" ] || fail "the game lost focus after being clicked (active: $(active))"
 echo "ok: clicking the game keeps the pinned panel on top, and the game focused"
 # Proton/Wine holds an X pointer grab while the game is focused, so the WM never sees the
@@ -130,7 +129,7 @@ python3 -I "$GRAB" 6 >"$LOG/grab" 2>&1 & GP=$!
 sleep 0.5; grep -q "grab 0" "$LOG/grab" || fail "test helper could not grab the pointer: $(cat "$LOG/grab")"
 [ "$(active)" = "Path of Exile 2" ] || fail "game should be focused before hovering (active: $(active))"
 xdotool mousemove --window "$OW" 100 100; sleep 0.8
-[ "$(active)" = "RKL overlay" ] || fail "resting the cursor on the pinned panel under a pointer grab did not focus it (active: $(active))"
+[ "$(active)" = "RKL price check" ] || fail "resting the cursor on the pinned panel under a pointer grab did not focus it (active: $(active))"
 echo "ok: hovering the pinned panel focuses it even while the game holds the pointer"
 kill $GP 2>/dev/null || true; wait $GP 2>/dev/null || true
 xprop -id "$OW" _COMPTON_SHADOW | grep -q "= 0" || fail "the panel should ask compositors for no drop shadow ($(xprop -id "$OW" _COMPTON_SHADOW))"

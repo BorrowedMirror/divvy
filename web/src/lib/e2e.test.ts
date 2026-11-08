@@ -27,6 +27,7 @@ describe("e2e DOM queries", () => {
 
   it("maps every page but the overlay to the settings window", () => {
     expect(windowOf("overlay")).toBe("overlay");
+    expect(windowOf("notice")).toBe("notice");
     expect(windowOf("settings")).toBe("settings");
     expect(windowOf("diagnostics")).toBe("settings");
     expect(windowOf("onboarding")).toBe("settings");

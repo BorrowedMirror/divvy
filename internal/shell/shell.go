@@ -16,6 +16,13 @@ import (
 const (
 	overlayWindow  = "overlay"
 	settingsWindow = "settings"
+	noticeWindow   = "notice"
+)
+
+// Titles of the frameless windows, as window lists and screen readers name them.
+const (
+	overlayTitle = "RKL price check"
+	noticeTitle  = "RKL notice"
 )
 
 // Icons the shell needs.
@@ -47,7 +54,14 @@ type Shell struct {
 	App      *application.App
 	Overlay  *application.WebviewWindow
 	Settings *application.WebviewWindow
-	Tray     *application.SystemTray
+	// Notice is the ready notice over the game window; it never takes focus or mouse input
+	// (cmd/rkl styles it at startup).
+	Notice *application.WebviewWindow
+	Tray   *application.SystemTray
+
+	// toolTitles are the titles of the frameless helper windows (overlay, notice): Wails sets
+	// no title on frameless windows, and they stay out of taskbars and window lists.
+	toolTitles map[*application.WebviewWindow]string
 
 	trayActions TrayActions
 }
@@ -88,7 +102,7 @@ func New(opts Options) *Shell {
 
 	s.Overlay = s.App.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:             overlayWindow,
-		Title:            "RKL overlay",
+		Title:            overlayTitle,
 		URL:              "/#/overlay",
 		Width:            420,
 		Height:           560,
@@ -114,11 +128,30 @@ func New(opts Options) *Shell {
 		BackgroundType:   application.BackgroundTypeTransparent,
 		BackgroundColour: application.NewRGBA(0, 0, 0, 0),
 	})
+	s.Notice = s.App.Window.NewWithOptions(application.WebviewWindowOptions{
+		Name:             noticeWindow,
+		Title:            noticeTitle,
+		URL:              "/#/notice",
+		Width:            300,
+		Height:           64,
+		Hidden:           true,
+		Frameless:        true,
+		AlwaysOnTop:      true,
+		BackgroundType:   application.BackgroundTypeTransparent,
+		BackgroundColour: application.NewRGBA(0, 0, 0, 0),
+		Windows:          application.WindowsWindow{HiddenOnTaskbar: true},
+		Mac: application.MacWindow{
+			WindowClass:      application.MacWindowClassPanel,
+			PanelPreferences: application.MacPanelPreferences{NonActivating: true},
+		},
+	})
+
 	// The close button hides the settings window; quitting is the tray's job.
 	s.Settings.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		e.Cancel()
 		s.Settings.Hide()
 	})
+	s.toolTitles = map[*application.WebviewWindow]string{s.Overlay: overlayTitle, s.Notice: noticeTitle}
 	return s
 }
 

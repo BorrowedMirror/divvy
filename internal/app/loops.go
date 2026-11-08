@@ -49,9 +49,10 @@ func (f *Flow) RunInputLoop(ctx context.Context) {
 }
 
 // RunGameFollower keeps the settings overlay glued to the game window while it moves or
-// resizes, hides it when the game window goes away, grabs the hotkeys only while the game is
-// focused, and keeps a pinned panel above a fullscreen game that is clicked back into. It
-// follows the game until ctx is done.
+// resizes, hides it when the game window goes away, shows the ready notice when a new game
+// window appears, grabs the hotkeys only while the game is focused, and keeps a pinned
+// panel above a fullscreen game that is clicked back into. It follows the game until ctx is
+// done.
 func (f *Flow) RunGameFollower(ctx context.Context) {
 	st := f.st
 	p := st.platform
@@ -78,9 +79,13 @@ func (f *Flow) onWindowEvent(ev platform.WindowEvent) {
 	switch ev.Type {
 	case platform.WindowFound:
 		slog.Info("game window found", "rect", ev.Info.Rect)
+		f.gameFound(ev.Info.Rect)
 	case platform.WindowLost:
 		slog.Info("game window lost")
-	case platform.WindowMoved, platform.WindowFocusChanged:
+		f.gameLost()
+	case platform.WindowMoved:
+		f.gameMoved(ev.Rect)
+	case platform.WindowFocusChanged:
 	}
 	if ev.Type != platform.WindowMoved {
 		f.SyncHotkeysToFocus()

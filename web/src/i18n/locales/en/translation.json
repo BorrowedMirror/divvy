@@ -48,6 +48,9 @@
       "skill": "skill"
     }
   },
+  "notice": {
+    "ready": "Ready and running in the background"
+  },
   "item": {
     "rarityLabel": "Rarity:",
     "ilvl": "ilvl {{value}}",
@@ -188,6 +191,7 @@
     "scale": "Panel size",
     "backdropDim": "Backdrop behind the panel",
     "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game",
+    "readyNotice": "Show a notice over the game when RKL finds it",
     "itemLinks": "Item links in the panel",
     "results": "Prices and listings"
   },

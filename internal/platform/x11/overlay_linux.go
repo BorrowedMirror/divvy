@@ -8,6 +8,7 @@ import (
 	"errors"
 	"log/slog"
 	"math"
+	"slices"
 	"sync"
 	"unsafe"
 
@@ -30,6 +31,8 @@ const sourcePager = 2
 type overlay struct {
 	conn   *xConn
 	window xproto.Window
+	// native is the GtkWindow* the overlay styles, nil when built from a bare window id.
+	native unsafe.Pointer
 
 	extOnce sync.Once
 	extErr  error
@@ -39,6 +42,8 @@ var (
 	_ platform.OverlayWindow = (*overlay)(nil)
 	_ platform.Rounder       = (*overlay)(nil)
 	_ platform.DirectMover   = (*overlay)(nil)
+	_ platform.FocusRefuser  = (*overlay)(nil)
+	_ platform.ToolWindow    = (*overlay)(nil)
 )
 
 // newOverlay styles X window xid on display ("" = $DISPLAY) over a connection of its own
@@ -60,7 +65,45 @@ func overlayFromNative(display string, native unsafe.Pointer) (platform.OverlayW
 	if err != nil {
 		return nil, err
 	}
-	return newOverlay(display, xid)
+	o, err := newOverlay(display, xid)
+	if err != nil {
+		return nil, err
+	}
+	o.native = native
+	return o, nil
+}
+
+// RefuseFocus implements [platform.FocusRefuser]: GTK stops asking for focus on show, and
+// the window drops WM_TAKE_FOCUS, which GTK registers on every window. With the input hint off
+// and no WM_TAKE_FOCUS the window is in the ICCCM "no input" model, which window managers
+// (XWayland's included) never focus; with WM_TAKE_FOCUS they treat it as wanting focus.
+func (o *overlay) RefuseFocus() error {
+	if o.native == nil {
+		return platform.Unsupported("refuse focus: no GTK window")
+	}
+	gtkRefuseFocus(o.native)
+	return errors.Join(o.setInputHint(false), o.dropTakeFocus())
+}
+
+// MarkToolWindow implements [platform.ToolWindow] through GTK, which owns the title and the
+// taskbar and pager hints.
+func (o *overlay) MarkToolWindow(title string) error {
+	if o.native == nil {
+		return platform.Unsupported("tool window: no GTK window")
+	}
+	gtkToolWindow(o.native, title)
+	return nil
+}
+
+// dropTakeFocus removes WM_TAKE_FOCUS from the window's WM_PROTOCOLS.
+func (o *overlay) dropTakeFocus() error {
+	a := &o.conn.atoms
+	protocols := o.conn.property32(o.window, a.wmProtocols, xproto.AtomAtom, 16)
+	kept := slices.DeleteFunc(slices.Clone(protocols), func(p uint32) bool { return p == uint32(a.wmTakeFocus) })
+	if len(kept) == len(protocols) {
+		return nil
+	}
+	return o.conn.changeProperty32(o.window, a.wmProtocols, xproto.AtomAtom, kept)
 }
 
 func (o *overlay) wmStateAtoms() [4]xproto.Atom {

@@ -11,29 +11,34 @@ import (
 )
 
 // settingsWidth and settingsHeight are the settings window's size (logical px) when it is not
-// bound to the game.
-const settingsWidth, settingsHeight = 900.0, 680.0
+// bound to the game; settingsRadius is its card's corner radius (web/src/index.css).
+const settingsWidth, settingsHeight, settingsRadius = 900.0, 680.0, 12.0
 
 // ShowSettings shows the settings window on route (`settings`, `diagnostics`, `onboarding`).
+// The window is always borderless: the page draws its own title bar and close button.
 //
 // With a tracked game window the settings become an overlay that covers the game exactly
-// (undecorated, transparent backdrop, card centred, kept above the game); otherwise it is a
-// normal decorated window.
+// (transparent backdrop, card centred, kept above the game); otherwise the window is the card
+// itself, with rounded corners and a title bar to drag it by.
 func (f *Flow) ShowSettings(route string) {
+	f.dismissNotice()
 	st := f.st
 	w := f.d.Settings()
 	g, overlay := f.gameWindow()
 	wasOverlay := st.settingsOverlay.Swap(overlay)
+	w.SetFrameless(true)
 	if overlay {
-		w.SetFrameless(true)
 		w.SetSkipTaskbar(true)
+		f.d.RoundWindow(w, 0, 0, 0)
 		coverGame(w, g.Rect)
-	} else if wasOverlay {
-		w.SetAlwaysOnTop(false)
-		w.SetSkipTaskbar(false)
-		w.SetFrameless(false)
-		w.SetLogicalSize(settingsWidth, settingsHeight)
-		w.Center()
+	} else {
+		if wasOverlay {
+			w.SetAlwaysOnTop(false)
+			w.SetSkipTaskbar(false)
+			w.SetLogicalSize(settingsWidth, settingsHeight)
+			w.Center()
+		}
+		f.roundSettings(w)
 	}
 	overlayFlag := "0"
 	if overlay {
@@ -48,6 +53,20 @@ func (f *Flow) ShowSettings(route string) {
 	if err := f.d.BringToFront(w, new(g.NativeID), true); err != nil {
 		st.RecordError("settings raise", err)
 	}
+}
+
+// SettingsResized recuts the rounded corners of the settings window after it was resized (the
+// window manager can resize the borderless window); over the game the window is not rounded.
+func (f *Flow) SettingsResized() {
+	if w := f.d.Settings(); !f.st.settingsOverlay.Load() && w.IsVisible() {
+		f.roundSettings(w)
+	}
+}
+
+// roundSettings cuts the settings window's corners to the card's radius at its current size.
+func (f *Flow) roundSettings(w Window) {
+	_, _, width, height := w.Bounds()
+	f.d.RoundWindow(w, width, height, physical(settingsRadius, w.ScaleFactor()))
 }
 
 // hideSettings hides the settings window (Esc / backdrop click in overlay mode, close button).

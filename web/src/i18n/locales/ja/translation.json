@@ -48,6 +48,9 @@
       "skill": "スキル"
     }
   },
+  "notice": {
+    "ready": "準備完了、バックグラウンドで実行中"
+  },
   "item": {
     "rarityLabel": "レアリティ:",
     "ilvl": "iLv {{value}}",
@@ -183,6 +186,7 @@
     "scale": "パネルのサイズ",
     "backdropDim": "パネルの背後の背景",
     "closePinnedOnGameFocus": "ゲームをクリックして戻ったら固定したパネルを閉じる",
+    "readyNotice": "RKL がゲームを検出したらゲーム上に通知を表示する",
     "checkUpdates": "アップデートを自動的に確認",
     "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。",
     "itemLinks": "パネルのアイテムリンク",

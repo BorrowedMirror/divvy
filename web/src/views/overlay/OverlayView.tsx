@@ -6,10 +6,10 @@ import { CloseIcon, GearIcon, PinIcon } from "@components/icons";
 import { Button, IconButton, NumberInput, Segmented, SelectField, Spinner, cx } from "@components/ui";
 import { useLeagues, useQueryPrice, useSettingsQuery } from "@hooks/queries";
 import { useAutoHide } from "@hooks/useAutoHide";
+import { useBackendEvent } from "@hooks/useBackendEvent";
 import { useCommand } from "@hooks/useCommand";
 import { useCountdown } from "@hooks/useCountdown";
 import { useFitWindowHeight } from "@hooks/useFitWindowHeight";
-import { useTauriEvent } from "@hooks/useTauriEvent";
 import { formatChord, isUnbound } from "@lib/chord";
 import { toIpcError } from "@lib/ipc";
 import type { FilterSet_Serialize, ItemCopied_Serialize, OnlineStatus, OverlayLayout } from "@src/bindings";
@@ -88,14 +88,14 @@ export function OverlayView() {
       () => {},
     );
   }, [onItemCopied]);
-  useTauriEvent(events.itemCopied, onItemCopied, catchUp);
-  useTauriEvent(events.priceReady, (p) => useOverlayStore.getState().priceReady(p.summary));
-  useTauriEvent(events.priceFailed, (p) => {
-    // Rust shows the overlay on copy/query failure; an in-flight result must not overwrite it.
+  useBackendEvent(events.itemCopied, onItemCopied, catchUp);
+  useBackendEvent(events.priceReady, (p) => useOverlayStore.getState().priceReady(p.summary));
+  useBackendEvent(events.priceFailed, (p) => {
+    // The backend shows the overlay on copy/query failure; an in-flight result must not overwrite it.
     invalidate();
     useOverlayStore.getState().priceFailed(p.error);
   });
-  useTauriEvent(events.overlayState, (p) => useOverlayStore.getState().setOverlayState(p));
+  useBackendEvent(events.overlayState, (p) => useOverlayStore.getState().setOverlayState(p));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -125,7 +125,7 @@ export function OverlayView() {
   const side = resultsAt !== "below" && !!item && !!filters;
   const layout = useOverlayLayout();
   const dragHandlers = useCardDrag();
-  // Full content height (not the capped card): Rust places a tall card so it fits on screen.
+  // Full content height (not the capped card): the backend places a tall card so it fits on screen.
   const contentRef = useRef<HTMLDivElement | null>(null);
   const fitRef = useFitWindowHeight<HTMLDivElement>(contentRef, () => CARD_CHROME);
 
@@ -272,7 +272,7 @@ export const AUTO_SIDE_STATS = 6;
 
 /** Keep the card inside the covering window horizontally; vertically it may move anywhere that
  * leaves at least `MIN_VISIBLE` px of it on screen (a tall card then gets shorter and scrolls).
- * Rust already places a card that fits so it fits when the panel opens. */
+ * The backend already places the card so it fits when the panel opens. */
 export function cardPosition(layout: OverlayLayout, width = 420): { left: number; top: number } {
   const maxLeft = Math.max(EDGE, window.innerWidth - width - EDGE);
   const maxTop = Math.max(0, window.innerHeight - MIN_VISIBLE);
@@ -290,12 +290,12 @@ function useOverlayLayout(): OverlayLayout {
       live = false;
     };
   }, []);
-  useTauriEvent(events.overlayLayout, setLayout);
+  useBackendEvent(events.overlayLayout, setLayout);
   return layout;
 }
 
 /**
- * Drag the card by its header. Only the phase is sent: Rust reads the real cursor and moves the
+ * Drag the card by its header. Only the phase is sent: the backend reads the real cursor and moves the
  * window (card-sized) or the card inside the covering window (layout events), and remembers the
  * spot on release for `Position: Last`. Buttons and fields in the header keep working.
  */

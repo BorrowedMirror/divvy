@@ -48,6 +48,9 @@
       "skill": "yetenek"
     }
   },
+  "notice": {
+    "ready": "Hazır ve arka planda çalışıyor"
+  },
   "item": {
     "rarityLabel": "Nadirlik:",
     "ilvl": "eşya sv. {{value}}",
@@ -188,6 +191,7 @@
     "scale": "Panel boyutu",
     "backdropDim": "Panelin arkasındaki arka plan",
     "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat",
+    "readyNotice": "RKL oyunu bulduğunda oyunun üzerinde bildirim göster",
     "itemLinks": "Paneldeki eşya bağlantıları",
     "results": "Fiyatlar ve ilanlar"
   },

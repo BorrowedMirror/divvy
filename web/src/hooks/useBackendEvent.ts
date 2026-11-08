@@ -4,8 +4,8 @@ type Listenable<T> = {
   listen: (cb: (event: { payload: T }) => void) => Promise<() => void>;
 };
 
-/** Subscribe to a tauri-specta event for the lifetime of the component; `onReady` runs once listening. */
-export function useTauriEvent<T>(event: Listenable<T>, handler: (payload: T) => void, onReady?: () => void): void {
+/** Subscribe to a backend event for the lifetime of the component; `onReady` runs once listening. */
+export function useBackendEvent<T>(event: Listenable<T>, handler: (payload: T) => void, onReady?: () => void): void {
   const ref = useRef(handler);
   const readyRef = useRef(onReady);
   useEffect(() => {
@@ -25,7 +25,7 @@ export function useTauriEvent<T>(event: Listenable<T>, handler: (payload: T) => 
         }
       })
       .catch(() => {
-        // No Tauri runtime (plain browser preview): events simply never arrive.
+        // No Wails runtime (plain browser preview): events simply never arrive.
       });
     return () => {
       disposed = true;

@@ -175,6 +175,7 @@ export function settings(overrides: Partial<Settings_Serialize> = {}): Settings_
       scale: 1,
       backdrop_dim: 0.6,
       close_pinned_on_game_focus: false,
+      ready_notice: true,
       links: { poe2db: true, wiki: true, craft_of_exile: true },
       results: "below",
     },

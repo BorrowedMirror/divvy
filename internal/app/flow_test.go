@@ -88,14 +88,15 @@ type emitted struct {
 }
 
 type fakeDesktop struct {
-	overlay, settings fakeWindow
+	overlay, settings, notice fakeWindow
 
 	mu       sync.Mutex
 	cursor   [2]float64
 	events   []emitted
 	opened   []string
 	tray     string
-	raised   int // BringToFront calls that focus
+	raised   int                 // BringToFront calls that focus
+	rounded  map[Window][3]int32 // last RoundWindow per window: width, height, radius
 	anchored int
 }
 
@@ -103,6 +104,7 @@ var _ Desktop = (*fakeDesktop)(nil)
 
 func (d *fakeDesktop) Overlay() Window  { return &d.overlay }
 func (d *fakeDesktop) Settings() Window { return &d.settings }
+func (d *fakeDesktop) Notice() Window   { return &d.notice }
 func (d *fakeDesktop) CursorPosition() (x, y float64, ok bool) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -131,9 +133,16 @@ func (d *fakeDesktop) BringToFront(w Window, _ *uint64, focus bool) error {
 	}
 	return nil
 }
-func (d *fakeDesktop) RefocusGame(*uint64)                     {}
-func (d *fakeDesktop) RoundWindow(Window, int32, int32, int32) {}
-func (d *fakeDesktop) MoveDirect(Window, int32, int32) error   { return nil }
+func (d *fakeDesktop) RefocusGame(*uint64) {}
+func (d *fakeDesktop) RoundWindow(w Window, width, height, radius int32) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.rounded == nil {
+		d.rounded = map[Window][3]int32{}
+	}
+	d.rounded[w] = [3]int32{width, height, radius}
+}
+func (d *fakeDesktop) MoveDirect(Window, int32, int32) error { return nil }
 func (d *fakeDesktop) AnchorLayer(Window, bool, int32, int32) error {
 	d.mu.Lock()
 	d.anchored++
@@ -146,6 +155,12 @@ func (d *fakeDesktop) setCursor(x, y float64) {
 	d.mu.Lock()
 	d.cursor = [2]float64{x, y}
 	d.mu.Unlock()
+}
+
+func (d *fakeDesktop) roundedAs(w Window) [3]int32 {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.rounded[w]
 }
 
 func (d *fakeDesktop) raises() int { d.mu.Lock(); defer d.mu.Unlock(); return d.raised }
@@ -406,6 +421,24 @@ func TestSettingsCoverTheGameWhenTracked(t *testing.T) {
 		assert.Contains(t, js[0], "dataset.overlay = '1'")
 		assert.Contains(t, js[0], "#/settings?tab=hotkeys")
 		require.Error(t, s.OpenSettingsTab("../x"))
+	})
+}
+
+func TestSettingsAwayFromTheGameAreABorderlessRoundedWindow(t *testing.T) {
+	st := newTestState(t)
+	synctest.Test(t, func(t *testing.T) {
+		a, d, _ := newTestAppOn(t, st, platformtest.Options{})
+		d.settings.SetSize(900, 680)
+		a.ShowSettings("settings")
+		assert.True(t, d.settings.IsVisible())
+		assert.True(t, d.settings.isFrameless(), "borderless: the page draws its own title bar")
+		assert.Contains(t, d.settings.scripts()[0], "dataset.overlay = '0'")
+		assert.Equal(t, [3]int32{900, 680, 12}, d.roundedAs(&d.settings))
+
+		// The window manager resized it: the rounded corners follow.
+		d.settings.SetSize(1400, 900)
+		a.SettingsResized()
+		assert.Equal(t, [3]int32{1400, 900, 12}, d.roundedAs(&d.settings))
 	})
 }
 

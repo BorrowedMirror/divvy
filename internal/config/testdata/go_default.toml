@@ -88,6 +88,7 @@ close_pinned_on_game_focus = false
 group_by_seller = true
 listing_columns = ['seller', 'listed']
 opacity = 0.95
+ready_notice = true
 results = 'below'
 scale = 1.0
 side = 'cursor'

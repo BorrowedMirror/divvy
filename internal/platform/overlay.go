@@ -35,6 +35,18 @@ type (
 	Resizer interface {
 		Resize(width, height int32) error
 	}
+	// FocusRefuser makes the window never take keyboard focus, even when the toolkit maps
+	// it (GTK rewrites the window manager's focus hints on every show). It calls the toolkit,
+	// so it must run on the UI thread.
+	FocusRefuser interface {
+		RefuseFocus() error
+	}
+	// ToolWindow names a frameless helper window and keeps it out of taskbars and window
+	// lists, through the toolkit (GTK rewrites the window manager's hints on every show, and
+	// Wails gives frameless windows no title). UI thread only.
+	ToolWindow interface {
+		MarkToolWindow(title string) error
+	}
 	// LayerAnchorer anchors a layer-shell surface to an output edge (Wayland-native): right
 	// selects the right edge, top and side are margins in px.
 	LayerAnchorer interface {

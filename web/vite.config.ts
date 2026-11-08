@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   clearScreen: false,
   server: { port: 5173, strictPort: true },
-  envPrefix: ["VITE_", "TAURI_ENV_"],
+  envPrefix: ["VITE_"],
   build: { target: "es2022", sourcemap: true },
   test: {
     globals: true,

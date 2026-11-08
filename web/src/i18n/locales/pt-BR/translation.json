@@ -48,6 +48,9 @@
       "skill": "habilidade"
     }
   },
+  "notice": {
+    "ready": "Pronto e em execução em segundo plano"
+  },
   "item": {
     "rarityLabel": "Raridade:",
     "ilvl": "nv. item {{value}}",
@@ -191,6 +194,7 @@
     "scale": "Tamanho do painel",
     "backdropDim": "Fundo atrás do painel",
     "closePinnedOnGameFocus": "Fechar um painel fixado quando eu clicar de volta no jogo",
+    "readyNotice": "Mostrar um aviso sobre o jogo quando o RKL o detectar",
     "itemLinks": "Links do item no painel",
     "results": "Preços e anúncios"
   },

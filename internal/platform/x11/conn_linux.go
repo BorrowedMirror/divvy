@@ -28,7 +28,8 @@ func xErr(err error) error {
 
 type atoms struct {
 	netActiveWindow, netRestackWindow, comptonShadow, netClientList, netWMName, netWMState,
-	netWMStateAbove, netWMStateSkipTaskbar, netWMStateSkipPager, netWMStateSticky, utf8String xproto.Atom
+	netWMStateAbove, netWMStateSkipTaskbar, netWMStateSkipPager, netWMStateSticky, utf8String,
+	wmProtocols, wmTakeFocus xproto.Atom
 }
 
 // xConn is an X connection plus the atoms we need.
@@ -70,6 +71,8 @@ func connect(display string, events chan<- xgb.Event) (*xConn, error) {
 		{"_NET_WM_STATE_SKIP_PAGER", &a.netWMStateSkipPager},
 		{"_NET_WM_STATE_STICKY", &a.netWMStateSticky},
 		{"UTF8_STRING", &a.utf8String},
+		{"WM_PROTOCOLS", &a.wmProtocols},
+		{"WM_TAKE_FOCUS", &a.wmTakeFocus},
 	}
 	cookies := make([]xproto.InternAtomCookie, len(wanted))
 	for i, w := range wanted {

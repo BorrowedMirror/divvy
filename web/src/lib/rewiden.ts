@@ -7,8 +7,8 @@ import type { FilterSet_Serialize, StatFilter_Serialize } from "@src/bindings";
  * and set `min = v - |v| * pct / 100` (pct 10 on 100 gives 90). `pct` is clamped to 0..=100.
  * Integer-valued stats are floored so the widened bound stays inclusive; fractional stats are
  * floored to 2 decimals, and the result never exceeds `v`. Negative ("reduced") values get the
- * mirrored upper bound instead (-30 at 10% gives max -27, min cleared), as in Rust's
- * `widen_bounds`. `enabled` is untouched; `widen_pct` is updated.
+ * mirrored upper bound instead (-30 at 10% gives max -27, min cleared), as the backend's
+ * `core.widenBounds` does. `enabled` is untouched; `widen_pct` is updated.
  */
 export function widenValue(values: readonly (number | null)[], pct: number): number | null {
   const nums = values.filter((v): v is number => typeof v === "number" && Number.isFinite(v));

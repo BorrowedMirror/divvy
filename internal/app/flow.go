@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
@@ -38,11 +39,13 @@ type Window interface {
 	Center()
 }
 
-// Desktop is everything the flow needs from the windowing side: the two windows, the cursor,
+// Desktop is everything the flow needs from the windowing side: the windows, the cursor,
 // monitors, events to the web views, the browser, and the per-OS window styling.
 type Desktop interface {
 	Overlay() Window
 	Settings() Window
+	// Notice is the ready notice shown over the game window when RKL finds it.
+	Notice() Window
 	// CursorPosition is the cursor in physical px.
 	CursorPosition() (x, y float64, ok bool)
 	// MonitorAt is the monitor under a point (physical px), else the primary monitor.
@@ -111,6 +114,9 @@ type Flow struct {
 	ctx context.Context
 	st  *State
 	d   Desktop
+	// noticeGen counts ready notices and dismissals, so a notice's hide timer leaves a newer
+	// one alone.
+	noticeGen atomic.Uint64
 }
 
 // NewFlow wires the flow to state and the desktop. Background work (focus guards, macros,
