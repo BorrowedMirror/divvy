@@ -2,121 +2,88 @@
 
 Budget: the hotkey-to-panel path must feel instant.
 
-| Target | Budget | Measured (after) |
+| Target | Budget | Measured |
 | --- | --- | --- |
-| parse + match + filters + query, per item, p95 | < 1 ms | **11.0 µs** |
-| bundled game data ready (cold, first call) | < 150 ms | **~7 ms** |
+| parse + match + filters + query, per item, p95 | < 1 ms | **26 µs** |
+| bundled game data decoded (English data + index) | < 150 ms | **~8 ms** |
+| bundled game data decoded, translations included | < 150 ms | **~100 ms** |
 
-Both budgets are met with roughly two orders of magnitude to spare. On a hotkey the
-local work is noise next to the trade2 round trips, so network latency (see
+Both budgets are met. The game data is decoded once, on a background goroutine at start-up
+(`State.DecodeData`), so it is normally ready before the first hotkey. On a hotkey the local
+work is noise next to the trade2 round trips, so network latency (see
 [Trade client](#trade-client)) is where the user-visible time goes.
 
 ## Machine
 
-- CPU: AMD Ryzen 9 9950X3D 16-Core Processor (`/proc/cpuinfo`)
-- `nproc`: 32
-- Linux 7.2, Rust 1.98.1, `bench` profile (inherits `[profile.release]`: LTO, 1 codegen unit, opt-level 3)
+- CPU: AMD Ryzen 9 9950X3D 16-Core Processor, 32 threads
+- Linux 7.2, Go 1.27.3, `go test -bench` defaults
 
-The machine was shared with other builds while measuring (load average 10-60), so
-criterion reported +-10-40 % swings between runs of unchanged code. Treat
-differences under ~15 % as noise; the large changes below were stable across runs.
+The machine was shared with other work while measuring (load average around 8), so treat
+differences under ~15 % between runs as noise.
 
 ## Running
 
 ```sh
-cargo bench -p rkl-core --bench pipeline   # parse / match / filters / full pipeline + p95 report
-cargo bench -p rkl-data --bench bundled    # cold bundled(), zstd, sha256, serde_json, index build
+go test -run '^$' -bench . ./internal/core   # parse / match / filters / full pipeline + p95 report
+go test -run '^$' -bench . ./internal/data   # zstd, sha256, JSON, index build, full uncached load
 ```
 
-`pipeline` prints a per-item latency distribution (every corpus item x200) before the
-criterion groups. `bundled` times the first `bundled()` call in its fresh process (the
-result is cached in a `OnceLock`) and then measures decode and index build through the
-public API, which bypasses the cache.
+`BenchmarkPipelineP95` logs a per-item latency distribution (every corpus item x200) and
+reports p50/p95/p99/max as metrics. The core benchmarks match against a synthetic catalog built
+from the corpus (every corpus template known) rather than the bundled data, which exercises the
+same code paths with cheaper lookups. `data.Bundled` caches its result for the process, so the
+data benchmarks measure the same work through the decode and index functions, which bypass
+the cache.
 
 ## Results
 
-Corpus: the 80 items in `crates/testkit/corpus/index.toml`. Times are criterion medians
-for the whole corpus unless noted.
+Corpus: the 81 items in `internal/core/testdata/corpus/index.toml`. Times are per benchmark
+operation, for the whole corpus unless noted.
 
-### rkl-core (`benches/pipeline.rs`)
+### internal/core (`bench_test.go`)
 
-| Bench | Before | After | Change |
-| --- | --- | --- | --- |
-| `parse_item/corpus` (80 items) | 167.6 µs | 154.3 µs | -8 % |
-| `match_item/corpus` (80 items) | 61.5 µs | 33.2 µs | -46 % |
-| `build_filters+to_trade_query/corpus` | 186 µs | 104-208 µs | unchanged code; noise |
-| `pipeline/corpus` (all of the above) | 647 µs | 369 µs | -43 % |
-| per-item pipeline p50 | 4.19 µs | 3.88 µs | |
-| per-item pipeline p95 | 11.26 µs | 11.02 µs | |
-| per-item pipeline p99 | 13.18 µs | 13.01 µs | |
-| first call in process (max) | 335 µs | 353 µs | lazy regex compilation |
+| Bench | Time |
+| --- | --- |
+| `ParseItemCorpus` | 645 µs |
+| `TemplatizeLine` (one line) | 0.72 µs |
+| `MatchItemCorpus` | 19 µs |
+| `BuildFiltersToTradeQueryCorpus` | 171 µs |
+| `PipelineCorpus` (all of the above) | 884 µs |
+| per-item pipeline p50 / p95 / p99 | 8.8 µs / 26.5 µs / 50.6 µs |
+| per-item pipeline max | 183 µs (an advanced-copy rare ring) |
 
-### rkl-data (`benches/bundled.rs`)
+### internal/data (`bench_test.go`)
 
-| Bench | Before | After | Change |
-| --- | --- | --- | --- |
-| `bundled()` cold, first call | 6.9 ms | 7.1-7.4 ms | noise |
-| `zstd/stats` (decompress only) | - | 0.32 ms | |
-| `sha256/stats` (verify) | - | 0.55 ms | |
-| `serde_json/stats` (8232 stats) | - | 1.9 ms | |
-| `decode_asset/all` (4 assets) | 3.96 ms | 3.74 ms | noise |
-| `index_build` | 1.92 ms | 1.66 ms | -14 % |
-| `decode+index` (uncached `bundled()`) | 5.95 ms | 6.17 ms | noise |
+| Bench | Time |
+| --- | --- |
+| `ZstdStats` (decompress only) | 0.94 ms |
+| `Sha256Stats` (verify) | 0.53 ms |
+| `JSONStats` (stats asset) | 3.6 ms |
+| `DecodeAssetStats` (zstd + sha256 + JSON) | 5.2 ms |
+| `DecodeAssetAll` (4 English assets) | 7.1 ms |
+| `IndexBuild` | 0.77 ms |
+| `DecodeIndex` (English decode + index) | 7.9 ms |
+| `BundledUncached` (everything, translations included) | 100 ms |
 
-Startup is dominated by JSON deserialisation of the stats asset; zstd decode is
-~0.3 ms and is not worth replacing.
-
-## Changes
-
-- **Magic base lookup** (`GameData::base_in_magic_name`): normalised the name once and
-  tries word runs as `&str` slices instead of `join`ing a new `String` for each of the
-  O(n²) candidates. This was the bulk of `match_item` on magic items.
-- **Parser**: sections hold borrowed `&str` lines instead of one `String` per line; the
-  `(augmented)` suffix and roll-range regexes are skipped for lines without `(`, the
-  only literal both patterns require.
-- **Index build**: per-kind template maps are pre-sized and keys are looked up by
-  `&str` before allocating, so only new kinds/templates allocate.
-- **Trade fetch**: listing chunks (`FETCH_CHUNK` = 10) are now requested concurrently.
-  The default `fetch_count` of 20 used to cost two sequential round trips after the
-  search; it now costs one. Each chunk still reserves its own rate-limiter slot, and
-  the seeded fetch policy (12 requests / 4 s) allows both at once.
-
-Already fine and left alone: every regex is a `LazyLock` static (none compiled per
-call); `templatize` is a single `replace_all` (~80 ns per line); catalog lookups are
-`HashMap`s (no linear scans); `bundled()` decodes once and shares the index behind an
-`Arc`, so later calls are a cheap clone.
+Start-up is dominated by JSON decoding; the translation tables are most of the full load.
 
 ## Trade client
 
-- **Connection reuse**: each client (`TradeClient`, `NinjaSource`, scout) builds one
-  `reqwest::Client` in its constructor and reuses it, so requests share the connection
-  pool.
-- **HTTP/2 and gzip**: the workspace `reqwest` features include `http2` (negotiated
-  through rustls ALPN) and `gzip` (automatic `Accept-Encoding` and decompression).
-- **Rate limiting**: `send` reserves a slot before awaiting, so concurrent requests
-  cannot overrun a policy. Requests the limiter would delay longer than
-  `MAX_QUEUE_WAIT` fail fast with `RateLimited`.
-- **Responses** are cached per query (`moka`, `cache_ttl`), so repeat lookups of the
-  same item skip the network.
+- **Connection reuse**: each client (`trade.Client`, `trade.NinjaSource`, `trade.ScoutSource`) builds
+  one `http.Client` with its own transport in its constructor and reuses it, so requests share
+  the connection pool.
+- **HTTP/2 and gzip**: the transport forces an HTTP/2 attempt, and Go's transport asks for and
+  decompresses gzip on its own.
+- **Concurrent fetches**: listing chunks (`FetchChunk` = 10) are requested concurrently, so the
+  default 20 listings cost one round trip after the search, not two. Each chunk still reserves
+  its own rate-limiter slot, and the seeded fetch policy (12 requests / 4 s) allows both at once.
+- **Rate limiting**: a request reserves a slot before it is sent, so concurrent requests cannot
+  overrun a policy. Requests the limiter would delay longer than `MaxQueueWait` (10 s) fail fast
+  as rate-limited.
+- **Responses** are cached per query (otter, `CacheTTL`, 5 minutes by default), so repeat
+  lookups of the same item skip the network.
 
-Possible follow-ups (not done here; they need app-side changes):
+## Release builds
 
-- Warm the parser regexes once at startup (for example by parsing a fixed item text) so
-  the first hotkey does not pay the ~0.35 ms lazy compilation.
-- Pre-connect to `www.pathofexile.com` at startup (a cheap `data/leagues` request
-  through the shared client) so the first search reuses a warm TLS connection.
-
-## Release profile
-
-`[profile.release]`: `lto = true`, `codegen-units = 1`, `opt-level = 3`,
-`strip = true`, `panic = "abort"`. This matches Tauri's size-optimisation advice except
-for `opt-level` (Tauri suggests `"s"`); 3 is kept on purpose for latency.
-
-`panic = "abort"` is safe: no workspace code uses `catch_unwind`, `resume_unwind`, a
-panic hook that expects to continue, or tokio `JoinError::is_panic`. Cargo ignores the
-`panic` setting for test and bench targets, so `#[should_panic]` tests still unwind.
-
-One soft dependency on unwinding: `apps/desktop/src-tauri/src/flow.rs` maps the
-`JoinError` of its clipboard-copy `spawn_blocking` task to an `internal` IPC error. In
-release builds a panic inside that task aborts the process instead. Such a panic would
-be a bug either way, so this is acceptable, but that error branch only runs in dev builds.
+Packages are built by `cmd/release` with `-tags production -trimpath -ldflags "-s -w ..."`
+(no symbol table or DWARF), with the Go compiler's default optimisations.

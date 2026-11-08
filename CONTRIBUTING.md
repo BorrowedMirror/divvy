@@ -1,8 +1,9 @@
 # Contributing to RKL
 
-Thanks for helping! RKL is a Path of Exile 2 price-check overlay: a Rust workspace
-(`crates/*`), a Tauri 2 shell (`apps/desktop`) and a React 19 + Vite web UI (`web/`).
-See [docs/architecture.md](docs/architecture.md) for how the pieces fit together.
+Thanks for helping! RKL is a Path of Exile 2 price-check overlay: a Go app built on
+[Wails v3](https://v3.wails.io) (`cmd/rkl`, `internal/*`) and a React 19 + Vite web UI (`web/`)
+that the binary embeds. See [docs/architecture.md](docs/architecture.md) for how the pieces fit
+together.
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Security issues go
 through [SECURITY.md](SECURITY.md), not public issues.
@@ -11,124 +12,59 @@ through [SECURITY.md](SECURITY.md), not public issues.
 
 All platforms need:
 
-- **Rust** via [rustup](https://rustup.rs). The toolchain is pinned in `rust-toolchain.toml`
-  and installed automatically on first `cargo` invocation (or run `rustup toolchain install`).
-- **Node.js 24** and **pnpm** (version pinned by `packageManager` in `package.json`; `corepack enable`
-  picks it up).
-- Cargo tools used by the checks:
-  `cargo install --locked cargo-nextest cargo-llvm-cov cargo-deny cargo-machete cargo-about`
-  (or `cargo binstall` the same list).
+- **Go**, the version in `go.mod`. A newer local Go downloads the pinned `toolchain` on its own.
+- **Node.js 24** and **pnpm** (version pinned by `packageManager` in `web/package.json`;
+  `corepack enable` picks it up).
+
+The other tools (the Wails CLI with its built-in Task runner, golangci-lint, govulncheck,
+go-licenses) are pinned in `tools/go.mod` and run through `go tool -modfile=tools/go.mod`; there
+is nothing else to install.
 
 ### Linux (Debian/Ubuntu)
 
 ```sh
-sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
-  librsvg2-dev libxdo-dev libgtk-layer-shell-dev
+sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev \
+  libxkbcommon-dev pkg-config
 # headless display tests (optional locally, used in CI)
 sudo apt-get install -y xvfb openbox xdotool
 ```
 
-Fedora: `webkit2gtk4.1-devel gtk3-devel libappindicator-gtk3-devel librsvg2-devel libxdo-devel gtk-layer-shell-devel`.
-Arch: `webkit2gtk-4.1 gtk3 libappindicator-gtk3 librsvg xdotool gtk-layer-shell`.
+Fedora: `webkit2gtk4.1-devel gtk3-devel gtk-layer-shell-devel libxkbcommon-devel`.
+Arch: `webkit2gtk-4.1 gtk3 gtk-layer-shell libxkbcommon xdotool`.
 
-libei is not needed: the Wayland backend injects keystrokes through the virtual-keyboard
-protocol or `ydotool` (see `crates/platform/Cargo.toml`).
+Linux builds use the `gtk3` build tag (GTK 3 and WebKitGTK 4.1); the `Taskfile.yml` tasks add it
+for you. Without it the build targets GTK 4.
 
 ### macOS
 
 Install the Xcode command line tools (`xcode-select --install`). Running the overlay needs the
 Accessibility permission, and preferably Screen Recording, for your terminal or the built app
-(System Settings -> Privacy & Security); see the [README](README.md#macos-13) and
+(System Settings -> Privacy & Security); see the [README](README.md#macos-12) and
 [docs/research/macos.md](docs/research/macos.md). Dev builds that are re-signed on every build
 can lose these grants.
 
 ### Windows
 
-Install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-with the "Desktop development with C++" workload. WebView2 ships with Windows 10/11.
-
-### Windows installer from Linux
-
-`cargo xtask windows-installer` builds the NSIS setup `.exe` without a Windows machine. It needs
-`clang`, `lld`, `llvm`, `unzip`, `makensis` (Arch: `nsis` from the AUR) and
-`cargo install cargo-xwin --locked`. It runs `cargo tauri build` with `cargo-xwin` and writes
-`target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe`. When the system NSIS lacks the
-32-bit stubs Tauri's installer needs, it adds them under `target/nsis-x86/` from the official NSIS
-zip (checked against a pinned SHA-256). The installer is not code-signed, and an MSI still needs
-Windows (WiX).
+Go, Node.js and pnpm are enough to build and run: the Windows build needs no cgo, and WebView2
+ships with Windows 10/11. `go test -race` (used by `task test` and `task coverage`) needs cgo, so
+install a gcc toolchain such as MinGW-w64 for it.
 
 ### First run
 
 ```sh
-pnpm install                 # web deps, commitlint, lefthook
-pnpm exec lefthook install   # hooks from .lefthook.yml: rustfmt check + biome on commit, commitlint on commit-msg
-cargo test                   # default members (crates/*)
-pnpm --dir web dev           # web UI on http://localhost:5173 (keep running for the app)
-cargo run -p rkl-desktop  # full app, loading the UI from the Vite dev server
-                             # (or `cargo install tauri-cli` and `cargo tauri dev` in apps/desktop)
+pnpm --dir web install                 # web deps, commitlint, lefthook
+pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: gofmt, biome and rustfmt (tools/game-extract) on commit, commitlint on commit-msg
+pnpm --dir web build                   # the binary embeds web/dist, so build it first
+go run -tags gtk3 ./cmd/rkl            # Linux; drop -tags gtk3 on Windows and macOS
 ```
 
 ## Everyday commands
 
-| Command | What it does |
-| --- | --- |
-| `cargo xtask lint` | rustfmt check, clippy `-D warnings` (workspace and `e2e/macos-harness`), cargo-deny, cargo-machete, biome, tsc for web and e2e (`--no-web`, `--no-tools` to skip groups) |
-| `cargo xtask coverage [--check] [--no-run] [--profile <p>]` | nextest under llvm-cov; prints per-crate line coverage, writes `target/coverage/<crate>.lcov`, `--check` enforces the gates |
-| `cargo xtask gen [--no-bindings]` | regenerates `.commitlintrc.json`, `docs/contributing/commit-message.md` (from `.commit-config.toml`) and `web/src/bindings.ts` |
-| `cargo xtask windows-installer [-- <tauri args>]` | cross-compiles the Windows NSIS installer on Linux; see [Windows installer from Linux](#windows-installer-from-linux) |
-| `cargo nextest run` | tests (profiles in `.config/nextest.toml`) |
-| `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, biome, tsc |
-
-Coverage gates (CI fails below them): core, trade, data, config >= 90% lines; platform >= 70%;
-web >= 80%; patch coverage >= 80%.
-
-### End-to-end tests
-
-The e2e tests run the real Go app against `e2e/cmd/fake-game` (a window titled "Path of Exile 2"
-that puts an item on the clipboard when it gets the copy chord; X11, native Wayland, Windows and
-macOS) and a mock trade2 API. They are
-Go tests in `e2e/` behind the `e2e` build tag. They start a test-hook build of the app
-(`-tags testhook`) with a fresh `RKL_CONFIG_DIR`, point its trade, poe2scout and poe.ninja URLs
-at the mock, and drive it over the test hook on 127.0.0.1. The hook's `dom <window> <selector>`
-command checks what the overlay and settings pages render, without WebDriver.
-
-The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and the fake game
-(`go build -o target/e2e/fake-game ./e2e/cmd/fake-game`), set up the session, then run
-`go test -tags e2e ./e2e/...`. `e2e/scripts/fake-game-smoke-{x11,wayland}.sh` check the fake game
-on its own (copy chords, clipboard, `--log-keys`).
-
-```sh
-task e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
-task e2e:wayland        # Linux: headless sway + portal + virtual keyboard (E2E_XWAYLAND=1 for XWayland)
-task e2e:stacking       # Linux: overlay stacking over a fullscreen game (needs the binaries above)
-task e2e:macos          # macOS desktop (bash e2e/scripts/run-macos.sh)
-task e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
-```
-
-`task` is `go tool -modfile=tools/go.mod wails3 task`, see [Go build](#go-build).
-`RUN=<regexp>` picks tests (`task e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
-for the PowerShell script) reuses the binaries. Each script lists the tools it needs in its
-header comment. The `RKL_E2E_*` variables (binary paths, how the price check is triggered,
-where logs are kept) are listed in `e2e/doc.go`. With a display already running,
-`go test -tags e2e ./e2e/...` works on its own, and `-run TestMockTrade` needs no display.
-
-## Go build
-
-RKL is being ported to Go and [Wails v3](https://v3.wails.io) (`cmd/rkl`, `internal/*`). Until
-the port is finished both builds live in the repository, and the Rust commands above keep
-working. The Go build needs the Go version in `go.mod` (the `toolchain` line is downloaded
-automatically) plus the same Linux packages, Xcode tools or Windows setup as the Rust build. The
-binary embeds the web UI, so build that first:
-
-```sh
-pnpm --dir web build
-go run -tags gtk3 ./cmd/rkl         # Linux; drop -tags gtk3 on Windows and macOS
-```
-
 Everyday work is plain Go: `go build`, `go test ./...`, `go vet ./...`, and `go generate ./...`
-to regenerate `web/src/bindings.ts` after changing the IPC service. The rest are
+to regenerate `web/src/bindings.ts` (after changing the IPC service) and the commit docs (after
+changing `.commit-config.toml`). On Linux add `-tags gtk3`. The rest are
 [Task](https://taskfile.dev) tasks in `Taskfile.yml`, run with the Task runner built into the
-Wails CLI, which is pinned with golangci-lint in `tools/go.mod`:
+Wails CLI:
 
 ```sh
 alias task='go tool -modfile=tools/go.mod wails3 task'   # or install Task
@@ -139,18 +75,48 @@ task --list
 | --- | --- |
 | `task dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
 | `task run` | builds the frontend and a development binary (`target/go/rkl`) and runs it |
-| `task check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `task test` | `go test -race ./...` |
+| `task check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `task vuln` | govulncheck for the same three targets |
+| `task licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
 | `task coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
+| `task generate` | `go generate ./...` |
 | `task package:windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` and the update exe |
 | `task package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
 | `task package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
-| `task updater:keygen` | prints a new updater key pair (see docs/contributing/releasing.md) |
-| `task data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `crates/data/assets` |
-| `task fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `crates/trade/tests/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
+| `task notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
+| `task updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |
+| `task data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `internal/data/assets` |
+| `task fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `internal/trade/testdata/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
+| `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, biome, tsc |
+
+Coverage targets (Codecov status checks, `.codecov.yml`): core, trade, data, config >= 90%
+lines; platform >= 70%; web >= 80%; patch coverage >= 80%.
+
+Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
+inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
+`production` tag. Packaging steps the `go` command can't do (installers, signing updates,
+notices) live in `cmd/release` (`go run ./cmd/release -h`). The version comes from the `VERSION`
+file (`-version` or `RKL_RELEASE_VERSION` overrides it for a package:
+`RKL_RELEASE_VERSION=0.2.0 task package:linux`); a plain `go build` reports `dev`.
+
+### Packages
+
+The Windows installer is cross-compiled, so it builds on Linux too. It installs for the current
+user to `%LOCALAPPDATA%\Rust King Ledger` and uses the same registry keys as the installer of
+the earlier Tauri-based releases, so it upgrades such an install in place. It needs `makensis`
+(Debian/Ubuntu: `nsis`; Arch: `nsis` from the AUR). Distribution packages ship either the 64-bit or the 32-bit NSIS
+stubs; either works. When the system NSIS has neither, the task adds the 32-bit ones from the
+official NSIS zip (pinned SHA-256) under `target/go/nsis/`.
+
+The AppImage needs `file` and `readelf` (binutils). The macOS package needs a Mac. Nothing is
+code-signed yet; the macOS bundle is signed ad hoc only.
+
+### Game translations
 
 The translations for non-English game clients come from an installed copy of the game. Its
-files are Oodle-compressed, which only the small Rust tool in `tools/game-extract` reads (it is
-not part of the Cargo workspace and needs only a Rust toolchain):
+files are Oodle-compressed, which only the small Rust tool in `tools/game-extract` reads. It is
+the one Rust program left in the repository and needs only a Rust toolchain:
 
 ```sh
 cargo run --release --manifest-path tools/game-extract/Cargo.toml -- l10n <game dir> target/l10n-raw.json
@@ -161,43 +127,59 @@ go run ./cmd/datarefresh l10n target/l10n-raw.json
 the translations it finds. `game-extract file <game dir> <path> <out>` copies a single game
 file out (`list:<text>` as the path lists the matching paths instead).
 
-Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
-inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
-`production` tag. Packaging steps the `go` command can't do (installers, signing updates) live
-in `cmd/release`. The version comes from the `VERSION` file (`-version` overrides it for a
-package: `RKL_RELEASE_VERSION=0.2.0 task package:linux`); a plain `go build` reports `dev`.
+### End-to-end tests
 
-The Windows installer installs for the current user to `%LOCALAPPDATA%\Rust King Ledger` and
-uses the Tauri installer's registry keys, so it upgrades a Tauri install in place. It needs
-`makensis` (Debian/Ubuntu: `nsis`; Arch: `nsis` from the AUR). Distribution packages ship
-either the 64-bit or the 32-bit NSIS stubs; either works. When the system NSIS has neither,
-the task adds the 32-bit ones from the official NSIS zip (pinned SHA-256) under
-`target/go/nsis/`, as `cargo xtask windows-installer` does. The AppImage needs `file` and
-`readelf` (binutils). Nothing is code-signed yet; the macOS bundle is signed ad hoc only.
+The e2e tests run the real app against `e2e/cmd/fake-game` (a window titled "Path of Exile 2"
+that puts an item on the clipboard when it gets the copy chord; X11, native Wayland, Windows and
+macOS) and a mock trade2 API. They are Go tests in `e2e/` behind the `e2e` build tag. They start
+a test-hook build of the app (`-tags testhook`) with a fresh `RKL_CONFIG_DIR`, point its trade,
+poe2scout and poe.ninja URLs at the mock, and drive it over the test hook on 127.0.0.1. The
+hook's `dom <window> <selector>` command checks what the overlay and settings pages render,
+without WebDriver.
+
+The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and the fake game
+(`target/e2e/fake-game`), set up the session, then run `go test -tags e2e ./e2e/...`.
+`e2e/scripts/fake-game-smoke-{x11,wayland}.sh` check the fake game on its own (copy chords,
+clipboard, `--log-keys`).
+
+```sh
+task e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
+task e2e:wayland        # Linux: headless sway + portal + virtual keyboard (E2E_XWAYLAND=1 for XWayland)
+task e2e:stacking       # Linux: overlay stacking over a fullscreen game (needs the binaries above)
+task e2e:macos          # macOS desktop (bash e2e/scripts/run-macos.sh)
+task e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
+```
+
+`RUN=<regexp>` picks tests (`task e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
+for the PowerShell script) reuses the binaries. Each script lists the tools it needs in its
+header comment. The `RKL_E2E_*` variables (binary paths, how the price check is triggered,
+where logs are kept) are listed in `e2e/doc.go`. With a display already running,
+`go test -tags e2e ./e2e/...` works on its own, and `-run TestMockTrade` needs no display.
 
 ## Commits and pull requests
 
 We use conventional commits, enforced by commitlint on every commit and on the PR title.
 The allowed types and scopes are listed in
 [docs/contributing/commit-message.md](docs/contributing/commit-message.md) (generated from
-`.commit-config.toml`; edit that file and run `cargo xtask gen` to change them).
+`.commit-config.toml`; edit that file and run `go generate ./...` to change them).
 
 - Header: `<type>(<scope>): <summary>`, at most 72 characters, imperative, lowercase, no period.
 - Body: explain **why**, not what.
 - Keep commits small and atomic; one logical change each.
 
-Before opening a PR, run `cargo xtask lint` and `cargo xtask coverage --check`. If you change
-IPC types, run `cargo xtask gen` and commit `web/src/bindings.ts`.
+Before opening a PR, run `task check` and, for web changes, `pnpm --dir web lint`,
+`pnpm --dir web typecheck` and `pnpm --dir web coverage`. If you change the IPC service or its types, run `go generate ./...`
+and commit `web/src/bindings.ts`.
 
 ### Reporting a wrong price
 
 Use the "Price check is wrong" issue form and paste the copied item text (Ctrl+Alt+C in game).
-A fix should add that text to `crates/testkit/corpus/` so it stays fixed.
+A fix should add that text to `internal/core/testdata/corpus/` so it stays fixed.
 
 ## Releases (maintainers)
 
-`cargo xtask release <version>` bumps every version, commits `release: v<version>` and creates an
-annotated tag. It never pushes; pushing the tag runs `.github/workflows/release.yml`, which
-produces a draft GitHub release whose notes GitHub generates from the merged pull requests,
-grouped by the labels `pr-labels.yml` applies from each title. See
+Bump the `VERSION` file in a `release: v<version>` pull request, then push the tag
+`v<version>` on the merged commit. The tag runs `.github/workflows/release.yml`, which produces
+a draft GitHub release whose notes GitHub generates from the merged pull requests, grouped by
+the labels `pr-labels.yml` applies from each title. See
 [docs/contributing/releasing.md](docs/contributing/releasing.md).

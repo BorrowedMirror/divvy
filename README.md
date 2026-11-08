@@ -2,11 +2,11 @@
 
 # Rust King Ledger (RKL)
 
-An open-source price-check overlay for **Path of Exile 2**. Rust + Tauri 2 + React.
+An open-source price-check overlay for **Path of Exile 2**. Go + [Wails](https://v3.wails.io) + React.
 
 Hover an item in game, press **Ctrl+D**, and RKL copies the item text, parses it, queries
 the official trade API and shows a price panel beside your cursor. **Ctrl+Alt+D** opens a pinned
-panel that does not auto-hide; **Ctrl+Alt+S** opens the settings. All three can be rebound.
+panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can be rebound.
 
 > RKL only reads what the game puts on the clipboard after the single, user-triggered copy
 > keystroke. It never reads game memory, never automates gameplay and never uses OCR.
@@ -28,13 +28,13 @@ The game must run in **windowed** or **borderless windowed** mode. Exclusive ful
 overlays on Windows and Linux.
 
 ### Windows 10/11
-Install the MSI or NSIS installer. WebView2 is bundled with Windows 11 and installed by the
-installer on Windows 10. Nothing else is required.
+Run the per-user setup `.exe` (no administrator rights needed). It installs WebView2 when it is
+missing; Windows 11 already has it. Nothing else is required.
 
-### macOS 13+
+### macOS 12+
 Install the DMG (universal binary). macOS gates the overlay behind privacy permissions, granted
 in System Settings → Privacy & Security to the RKL app (in development: to the terminal
-running `cargo`):
+that runs the binary):
 
 | Permission | Why | Without it |
 | --- | --- | --- |
@@ -51,14 +51,13 @@ The native macOS client copies items with **Cmd+C**, which RKL sends by default;
 Windows client under CrossOver/Wine set `RKL_MACOS_COPY_MODIFIER=ctrl`.
 
 ### Linux
-AppImage, `.deb` and `.rpm` are provided. Runtime dependencies: `webkit2gtk-4.1`, `gtk3`,
-`libayatana-appindicator` (tray), and for Wayland-native mode `gtk-layer-shell`.
+An x86_64 AppImage is provided.
 
 RKL picks a backend at start-up: the **Settings → Platform** override, else
-`RKL_BACKEND`, else auto-detection. Auto-detection chooses X11 when the desktop is GNOME
-(`XDG_CURRENT_DESKTOP` contains `GNOME`) or `DISPLAY` is set (XWayland running), Wayland-native
-when only `WAYLAND_DISPLAY` / `XDG_SESSION_TYPE=wayland` is present, and X11 otherwise.
-`GDK_BACKEND` is set to match before GTK starts.
+`RKL_BACKEND`, else auto-detection. Auto-detection chooses X11 whenever `DISPLAY` is set
+(XWayland running, GNOME included), Wayland-native when only `WAYLAND_DISPLAY` /
+`XDG_SESSION_TYPE=wayland` is present, and X11 otherwise. `GDK_BACKEND` is set to match before
+GTK starts.
 
 | Session | Support |
 | --- | --- |
@@ -68,23 +67,22 @@ when only `WAYLAND_DISPLAY` / `XDG_SESSION_TYPE=wayland` is present, and X11 oth
 | **Wayland-native** (no XWayland, or `RKL_BACKEND=wayland`) | Degraded: overlay anchored to the output via layer-shell (no game-window tracking); hotkeys via the XDG GlobalShortcuts portal; keystroke injection via the virtual-keyboard protocol (wlroots compositors) or `ydotool` (needs `ydotoold`); no passive input hook. |
 
 **Compositor shortcut fallback.** When global hotkeys are unavailable, bind a compositor
-shortcut to `RKL --trigger` (price check) or `RKL --trigger --pinned` (pinned
+shortcut to `rkl --trigger` (price check) or `rkl --trigger --pinned` (pinned
 panel). The command hands the request to the already running instance (RKL allows only
-one instance per user) and exits; `pkill -USR2 RKL` (price check) and `pkill -USR1
-RKL` (pinned) work too.
+one instance per user) and exits; `pkill -USR2 rkl` (price check) and `pkill -USR1
+rkl` (pinned) work too.
 
 ## Configuration
 
-Settings live in `settings.toml` in the per-OS config directory (project directories for
-`app.rkl`):
+Settings live in `settings.toml` in the per-OS config directory:
 
 | OS | Settings | Cache | Logs |
 | --- | --- | --- | --- |
-| Windows | `%APPDATA%\nerv\RKL\config\settings.toml` | `%LOCALAPPDATA%\nerv\RKL\cache` | `%LOCALAPPDATA%\nerv\RKL\data\logs` |
+| Windows | `%APPDATA%\rkl\config\settings.toml` | `%LOCALAPPDATA%\rkl\cache` | `%LOCALAPPDATA%\rkl\data\logs` |
 | macOS | `~/Library/Application Support/app.rkl/settings.toml` | `~/Library/Caches/app.rkl` | `~/Library/Application Support/app.rkl/logs` |
-| Linux | `$XDG_CONFIG_HOME/RKL/settings.toml` (`~/.config/RKL`) | `$XDG_CACHE_HOME/RKL` (`~/.cache/RKL`) | `$XDG_STATE_HOME/RKL/logs` (`~/.local/state/RKL/logs`) |
+| Linux | `$XDG_CONFIG_HOME/rkl/settings.toml` (`~/.config/rkl`) | `$XDG_CACHE_HOME/rkl` (`~/.cache/rkl`) | `$XDG_STATE_HOME/rkl/logs` (`~/.local/state/rkl/logs`) |
 
-The log file is `RKL.log` (rewritten on every start). The Diagnostics page shows the
+The log file is `rkl.log` (rewritten on every start). The Diagnostics page shows the
 settings and log paths.
 
 GGG asks API clients to identify themselves; add your contact e-mail in
@@ -92,51 +90,44 @@ GGG asks API clients to identify themselves; add your contact e-mail in
 
 ### Environment variables
 
-| Variable | Read by | Effect |
-| --- | --- | --- |
-| `RKL_CONFIG_DIR` | app | Put everything under one root (portable mode, tests): `<root>/config/settings.toml`, `<root>/cache`, `<root>/logs`. |
-| `RKL_BACKEND` | app | Force the platform backend: `x11` (or `xwayland`), `wayland`; also `windows`, `macos`, `fake`. Case-insensitive; unknown values are ignored; the Settings → Platform override wins. |
-| `RKL_LOG` | app | `tracing` filter, e.g. `debug` or `rkl_trade=trace` (default `info`). |
-| `RKL_MACOS_COPY_MODIFIER` | app (macOS) | Copy-chord modifier: `cmd` (default, native client) or `ctrl` (CrossOver/Wine). |
-| `RKL_TRADE_BASE_URL` | app | Trade API base URL, no trailing slash (default `https://www.pathofexile.com`); its host is also allowed for *open on trade*. For mocks/tests. |
-| `RKL_NINJA_BASE_URL` | app | poe.ninja base URL (default `https://poe.ninja`). For mocks/tests. |
-| `RKL_SCOUT_BASE_URL` | app | poe2scout base URL (default `https://poe2scout.com`). For mocks/tests. |
-| `RKL_TEST_HOOK` | app (debug builds, or feature `test-hook`) | Port of the localhost test-hook socket (protocol in [CONTRACTS.md](CONTRACTS.md#appsdesktop-tauri-2)). |
+| Variable | Effect |
+| --- | --- |
+| `RKL_CONFIG_DIR` | Put everything under one root (portable mode, tests): `<root>/config/settings.toml`, `<root>/cache`, `<root>/logs`. |
+| `RKL_BACKEND` | Force the platform backend: `x11` (or `xwayland`), `wayland`; also `windows`, `macos`, `fake`. Case-insensitive; unknown values are ignored; the Settings → Platform override wins. |
+| `RKL_LOG` | Log level: `debug`, `info` (default), `warn` or `error` (`trace` counts as `debug`). |
+| `RKL_MACOS_COPY_MODIFIER` | macOS only. Copy-chord modifier: `cmd` (default, native client) or `ctrl` (CrossOver/Wine). |
 
 Development and test-only variables:
 
 | Variable | Read by | Effect |
 | --- | --- | --- |
-| `RKL_UPDATE_BINDINGS` | `bindings` test | `1` rewrites `web/src/bindings.ts` instead of failing when stale (`cargo xtask gen` sets it). |
-| `RKL_CORPUS_DIR` | `tools/fake-game` | Corpus directory for `--corpus-id` (same as `--corpus-dir`). |
-| `RKL_APP_BIN`, `RKL_FAKE_GAME_BIN` | e2e (wdio, hook harness) | Paths to the `RKL` and `fake-game` binaries (default `target/debug/...`). |
-| `RKL_E2E_TRIGGER` | e2e | How the price check is fired. wdio: `auto` (default), `xdotool`, `hook`. Hook harness: `hook` (default), `xdotool`, `signal`. |
-| `RKL_E2E_HOTKEY`, `RKL_E2E_HOTKEY_PINNED` | e2e (wdio) | xdotool chords (default `ctrl+d`, `ctrl+alt+d`). |
-| `RKL_E2E_ITEM` | e2e | Item text file the fake game serves (default `e2e/fixtures/rare-ring.txt`). |
-| `RKL_E2E_MOCK_PORT` | e2e (wdio, mock server) | Port of the mock trade2 server (default `18080`). |
-| `RKL_E2E_DRIVER_PORT` | e2e (wdio) | tauri-driver port (default `4444`). |
-| `RKL_E2E_KEEP_CONFIG` | e2e (wdio) | Keep the temporary config dir after the run. |
-| `RKL_E2E_TIMEOUT_SECS` | e2e (hook harness) | Wait timeout (default `30`). |
-| `RKL_E2E_FOCUS_CMD` | e2e (hook harness) | Shell command that focuses the fake game before triggering. |
-| `RKL_E2E_IN_SESSION` | e2e scripts | Internal: set once a script runs inside its private display/D-Bus session. |
-| `RKL_NATIVE_DRIVER` | e2e (wdio, Linux) | Path to `WebKitWebDriver`. |
-| `RKL_TEST_X11_CHILD`, `RKL_TEST_WAYLAND_CHILD` | platform tests | Internal: marks the re-executed child in the Linux display tests. |
+| `RKL_TEST_HOOK` | test-hook builds (`-tags testhook`) | Port of the localhost test hook (protocol in [CONTRACTS.md](CONTRACTS.md#test-hook)). |
+| `RKL_TEST_HOOK_PORT_FILE` | test-hook builds | File the hook writes its bound port to (for `RKL_TEST_HOOK=0`). |
+| `RKL_TEST_HOOK_TOKEN` | test-hook builds | When set, every hook connection must send `auth <token>` first. |
+| `RKL_TRADE_BASE_URL` | test-hook builds | Trade API base URL, no trailing slash (default `https://www.pathofexile.com`); its host is also allowed for *open on trade*. Release builds ignore it. |
+| `RKL_NINJA_BASE_URL`, `RKL_SCOUT_BASE_URL` | test-hook builds | poe.ninja and poe2scout base URLs (defaults `https://poe.ninja`, `https://poe2scout.com`). Release builds ignore them. |
+| `RKL_CORPUS_DIR` | `e2e/cmd/fake-game` | Corpus directory for `--corpus-id` (same as `--corpus-dir`). |
+| `RKL_E2E_*` | e2e tests | Binary paths, how the price check is triggered, where logs are kept; listed in `e2e/doc.go`. |
+| `SKIP_BUILD`, `E2E_DISPLAY`, `E2E_XWAYLAND` | `e2e/scripts` | Reuse the built binaries; the Xvfb display (default `:99`); run the clients on XWayland under sway. |
+| `RKL_RELEASE_VERSION` | `cmd/release package` | Version to package instead of the `VERSION` file. |
+| `RKL_UPDATER_PUBKEY`, `RKL_UPDATER_PRIVATE_KEY` | `cmd/release` | Updater key pair; see [releasing](docs/contributing/releasing.md#updates). |
 
 ## Development
 
 ```sh
-rustup toolchain install            # installs the pinned toolchain (rust-toolchain.toml)
-pnpm install                        # web + e2e deps, commitlint, lefthook
-pnpm exec lefthook install          # hooks from .lefthook.yml
-cargo nextest run --workspace       # Rust tests
-pnpm --dir web test                 # web tests
-cargo xtask gen                     # regenerate bindings + commit docs
-cargo xtask coverage --check        # coverage gates
-pnpm --dir web dev & cargo run -p rkl-desktop
+pnpm --dir web install                  # web deps, commitlint, lefthook
+pnpm --dir web exec lefthook install    # hooks from .lefthook.yml
+pnpm --dir web build                    # the Go binary embeds web/dist
+go test -tags gtk3 ./...                # Go tests (Linux; drop -tags gtk3 elsewhere)
+pnpm --dir web test                     # web tests
+go generate ./...                       # regenerate bindings + commit docs
+alias task='go tool -modfile=tools/go.mod wails3 task'
+task dev                                # app with hot reload
+task check                              # what CI checks on the Go side
 ```
 
 See [docs/architecture.md](docs/architecture.md) for an overview,
-[CONTRACTS.md](CONTRACTS.md) for every public interface,
+[CONTRACTS.md](CONTRACTS.md) for the interfaces between the parts,
 [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
 [docs/contributing/commit-message.md](docs/contributing/commit-message.md) for commit rules.
 

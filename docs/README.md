@@ -1,14 +1,16 @@
 # RKL documentation
 
 - [Architecture](architecture.md): components, data flow and boundaries.
-- [Contracts](../CONTRACTS.md): the fixed public interfaces between crates, IPC and the web UI.
+- [Contracts](../CONTRACTS.md): package boundaries, IPC, the command line, the test hook and the data files.
 
 ## Contributing
 
 - [Contributing guide](../CONTRIBUTING.md): development setup per OS, everyday commands.
+- [Translations](i18n.md): languages, rules and the Crowdin sync.
+- [Performance](performance.md): latency budgets and benchmarks.
 - [Commit message guidelines](contributing/commit-message.md) (generated from `.commit-config.toml`).
 - [CI workflows](contributing/ci.md): what runs where and how to reproduce it locally.
-- [Releasing](contributing/releasing.md): `cargo xtask release` and the release workflow.
+- [Releasing](contributing/releasing.md): versioning, tags, the release workflow and updater keys.
 
 ## Research
 

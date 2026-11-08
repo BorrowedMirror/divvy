@@ -3,7 +3,7 @@
 Captured live on **2026-11-05** (UTC 12:00) from `https://www.pathofexile.com` with
 User-Agent `rkl-research/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)`, no
 POESESSID. Eight requests total. Cloudflare did not block us. Trimmed and
-anonymised copies are in `crates/trade/tests/fixtures/`.
+anonymised copies are in `internal/trade/testdata/fixtures/`.
 
 ## Endpoints
 
@@ -127,4 +127,4 @@ Error bodies are `{"error":{"code":N,"message":"..."}}`.
 
 - Responses set a fresh anonymous `POESESSID` cookie; we never persist it.
 - Data endpoints are served from Cloudflare cache with no rate-limit headers.
-- GGG asks for a descriptive User-Agent with contact info (`default_user_agent()`).
+- GGG asks for a descriptive User-Agent with contact info (`trade.DefaultUserAgent`).

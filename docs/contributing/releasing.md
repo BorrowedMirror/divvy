@@ -1,47 +1,70 @@
 # Releasing
 
-1. Make sure `master` is green and up to date locally.
-2. `cargo xtask release 0.2.0 --dry-run` to see what will change, then
-   `cargo xtask release 0.2.0`. This:
-   - sets the version in `Cargo.toml` (`[workspace.package]`), `apps/desktop/src-tauri/tauri.conf.json`
-     and `web/package.json`, and refreshes `Cargo.lock`;
-   - commits `release: v0.2.0` and creates the annotated tag `v0.2.0`.
-   It never pushes.
-3. Review the commit, then `git push origin master v0.2.0`.
-4. `.github/workflows/release.yml` creates a **draft** release, builds and signs the bundles
-   (Windows MSI + NSIS, macOS universal notarised DMG, Linux AppImage/deb/rpm; no rpm for
-   pre-releases, since RPM versions cannot contain `-`), uploads
-   `latest.json` for the updater, `SHA256SUMS.txt`, a CycloneDX SBOM and
-   `THIRD-PARTY-NOTICES.html`.
-   GitHub writes the draft's notes from the pull requests merged since the previous release,
-   grouped by label (see [Release notes](#release-notes)).
-5. Check the draft (install one bundle per OS if possible) and publish it. Publishing makes
-   `latest.json` visible to the updater.
+The version lives in the `VERSION` file (SemVer without a leading `v`, e.g. `0.2.0` or
+`0.2.0-rc.1`). Packages and the app's diagnostics read it from there.
+
+1. Make sure `master` is green.
+2. Open a pull request that changes only `VERSION`, titled `release: v0.2.0`, and squash-merge
+   it. The `release` type keeps it out of the release notes.
+3. Tag the merged commit and push the tag:
+
+   ```sh
+   git switch master && git pull --ff-only
+   git tag -a v0.2.0 -m "rkl 0.2.0"
+   git push origin v0.2.0
+   ```
+
+4. The tag runs `.github/workflows/release.yml`. It fails early unless the tag is `v` plus the
+   `VERSION` file at that commit. It then builds the Windows NSIS installer (cross-compiled on
+   Linux), the Linux AppImage and the macOS universal DMG with
+   `RKL_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts into
+   `update.json` (see [Updates](#updates)), and creates a **draft** release with the packages,
+   `update.json`, a CycloneDX SBOM, `THIRD-PARTY-NOTICES.html` and `SHA256SUMS.txt`. GitHub
+   writes the draft's notes from the pull requests merged since the previous release, grouped by
+   label (see [Release notes](#release-notes)).
+5. Check the draft (install one package per OS if possible) and publish it. Publishing makes
+   `update.json` visible to installed copies.
 
 Pre-releases use a SemVer pre-release suffix (`0.2.0-rc.1`); the workflow marks them as
-pre-releases automatically.
+pre-releases automatically. To discard a run, delete the draft and the tag.
 
-## Go build releases
+To try the packaging locally, run `task package:<os>` (see
+[CONTRIBUTING.md](../../CONTRIBUTING.md#everyday-commands)); it writes to `target/go/`.
 
-While the Go/Wails port is in progress, `.github/workflows/release-go.yml` releases the Go
-build separately. It is started by hand (Actions -> release-go -> Run workflow) with a version
-such as `0.2.0-rc.1`; `release.yml` keeps the `v*` tags.
+Nothing is code-signed yet: no Windows Authenticode signature, and the macOS app is signed ad
+hoc only (no Developer ID, no notarisation). Users see the usual SmartScreen and Gatekeeper
+warnings on first launch.
 
-It builds the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage and the
-macOS universal DMG with `RKL_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts
-into `update.json` with `go run ./cmd/release update-manifest`, then creates a
-**draft** release for the tag `go-v<version>` at the commit the run used, with GitHub-generated
-notes, a CycloneDX SBOM and `SHA256SUMS.txt`. The tag is created only when the draft is
-published; delete the draft to discard the run.
+## Updates
 
-Updates: every build links in the updater's public key, and installs only accept artifacts
-whose SHA-256 digest is signed with the matching private key (raw ed25519). Generate the pair
-once with `task updater:keygen` and store both lines as secrets of the `release` environment
-(`RKL_UPDATER_PUBKEY`, `RKL_UPDATER_PRIVATE_KEY`); the release fails without them. Installed
-builds trust only the key they were built with, so keep the private key safe.
+Installed copies update themselves with Wails' updater (`internal/shell/updater.go`). Every
+release build links in the updater's public key, and an install accepts only artifacts whose
+SHA-256 digest is signed with the matching private key (raw ed25519). The update artifacts are
+the bare Windows exe, the AppImage and the zipped `.app`;
+`go run ./cmd/release update-manifest` signs them into `update.json`, whose download URLs point
+at the release's tag.
 
-Not done yet for the Go build: Windows code signing, macOS Developer ID signing and
-notarisation (the app is signed ad hoc), and third-party notices.
+Builds without a key (development builds, forks, local packages without
+`RKL_UPDATER_PUBKEY`) never check for updates. Release builds read
+`https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/update.json`.
+GitHub's `latest` skips drafts and pre-releases, so installs only see a release once it is
+published, and release-candidate builds update to the next stable release. The first check runs
+30 s after start and then every 24 h while **Settings > General > Check for updates
+automatically** (`ui.check_updates`) is on. A found update is downloaded only when the user
+clicks **Install and restart**, and its signature is checked against the built-in key first.
+
+### Keys
+
+Generate the key pair once:
+
+```sh
+go tool -modfile=tools/go.mod wails3 task updater:keygen
+```
+
+It prints two lines, `RKL_UPDATER_PUBKEY=...` and `RKL_UPDATER_PRIVATE_KEY=...`. Store both as
+secrets of the `release` environment; the release fails without them. Installed builds trust
+only the key they were built with, so keep the private key safe: losing or rotating it means
+users must reinstall by hand to get later updates.
 
 ## Release notes
 
@@ -68,40 +91,12 @@ straight to `master` without a pull request do not appear in the notes.
 
 ## Secrets
 
-Signing secrets exist only in the protected `release` environment (deployment branches/tags:
-`v*`; required reviewer). Only the `build` job of `release.yml` uses that environment.
+| Secret | Where | Purpose |
+| --- | --- | --- |
+| `RKL_UPDATER_PUBKEY` | `release` environment | updater public key, linked into every package |
+| `RKL_UPDATER_PRIVATE_KEY` | `release` environment | signs the update artifacts into `update.json` |
+| `CODECOV_TOKEN` | repository | coverage uploads from `ci.yml` |
+| `CROWDIN_PROJECT_ID`, `CROWDIN_PERSONAL_TOKEN` | repository | translation sync in `crowdin.yml` |
 
-| Secret | Purpose |
-| --- | --- |
-| `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | updater signatures |
-| `TAURI_UPDATER_PUBKEY` | matching public key; merged into `plugins.updater.pubkey` at build time |
-| `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` | macOS code signing |
-| `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | macOS notarisation |
-
-Generate the updater key pair once with `cargo tauri signer generate -w RKL.key` and store
-the private key, its password and the public key (the `.pub` file contents) as the secrets above.
-The public key is not checked in: `release.yml` writes it into a copy of
-`.github/tauri-release.conf.json`, and the build fails early when it is missing, because
-`bundle.createUpdaterArtifacts` cannot sign without it. The secret overrides any
-`plugins.updater.pubkey` in `tauri.conf.json`, so both must be the same key.
-
-## Auto-update
-
-The app's updater (`apps/desktop/src-tauri/src/updater.rs`) is opt-in by build config. It is
-registered only when the merged config has a non-empty `plugins.updater.pubkey`, which only
-release builds get. Dev builds, forks and local `cargo tauri build` runs have no key, so they
-never check for updates and record no errors about it. Keep the pubkey out of the committed
-`tauri.conf.json`; a unit test enforces this.
-
-Release builds read `plugins.updater.endpoints` from `.github/tauri-release.conf.json`
-(`https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/latest.json`). GitHub's
-`latest` skips drafts and pre-releases, so installs only see a release once it is published,
-and rc builds update to the next stable release. The first check runs 30 s after startup and
-then every 24 h while **Settings > General > Check for updates automatically**
-(`ui.check_updates`) is on. A found update is downloaded only when the user clicks
-**Install and restart**, and its signature is checked against the embedded pubkey first.
-
-Keep the private key safe. Installed builds trust only the pubkey they were built with, so
-losing or rotating the key means users must reinstall by hand to get later updates.
-
-`CODECOV_TOKEN` is a repository secret used by `ci.yml`.
+The `release` environment should be protected (deployment tags `v*`, a required reviewer).
+Only the `build` and `draft` jobs of `release.yml` use it.
