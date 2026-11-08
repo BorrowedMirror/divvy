@@ -121,9 +121,8 @@ pnpm --dir web build                    # the Go binary embeds web/dist
 go test -tags gtk3 ./...                # Go tests (Linux; drop -tags gtk3 elsewhere)
 pnpm --dir web test                     # web tests
 go generate ./...                       # regenerate bindings + commit docs
-alias task='go tool -modfile=tools/go.mod wails3 task'
-task dev                                # app with hot reload
-task check                              # what CI checks on the Go side
+make dev                                # app with hot reload
+make check                              # what CI checks on the Go side
 ```
 
 See [docs/architecture.md](docs/architecture.md) for an overview,

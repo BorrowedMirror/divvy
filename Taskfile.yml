@@ -1,6 +1,7 @@
 # Tasks for the Go/Wails build, run with Wails' embedded Task runner:
 #
-#   go tool -modfile=tools/go.mod wails3 task <task>      (or `task <task>` with Task installed)
+#   make <task>                                        (the Makefile passes targets through)
+#   go tool -modfile=tools/go.mod wails3 task <task>   (without make)
 #
 # Everyday work needs no task: `go build`, `go test ./...`, `go vet ./...` and `go generate ./...`
 # work as usual. The tools (wails3, golangci-lint) are pinned in tools/go.mod.
@@ -199,7 +200,7 @@ tasks:
 
   # End-to-end tests (e2e/, `go test -tags e2e`): the scripts build the web UI, the test-hook
   # app and the fake game (SKIP_BUILD=1 reuses them) and provide the session. RUN=<regexp>
-  # picks tests (`task e2e:x11 RUN=TestPriceCheck`); with standalone Task, `-- <go test args>`
+  # picks tests (`make e2e:x11 RUN=TestPriceCheck`); with standalone Task, `-- <go test args>`
   # works too (Wails' built-in runner drops arguments after `--`).
   e2e:x11:
     desc: e2e tests under Xvfb + openbox with real hotkey presses (Linux).

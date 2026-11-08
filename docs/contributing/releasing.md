@@ -28,7 +28,7 @@ The version lives in the `VERSION` file (SemVer without a leading `v`, e.g. `0.2
 Pre-releases use a SemVer pre-release suffix (`0.2.0-rc.1`); the workflow marks them as
 pre-releases automatically. To discard a run, delete the draft and the tag.
 
-To try the packaging locally, run `task package:<os>` (see
+To try the packaging locally, run `make package:<os>` (see
 [CONTRIBUTING.md](../../CONTRIBUTING.md#everyday-commands)); it writes to `target/go/`.
 
 Nothing is code-signed yet: no Windows Authenticode signature, and the macOS app is signed ad
@@ -58,7 +58,7 @@ clicks **Install and restart**, and its signature is checked against the built-i
 Generate the key pair once:
 
 ```sh
-go tool -modfile=tools/go.mod wails3 task updater:keygen
+make updater:keygen
 ```
 
 It prints two lines, `RKL_UPDATER_PUBKEY=...` and `RKL_UPDATER_PRIVATE_KEY=...`. Store both as

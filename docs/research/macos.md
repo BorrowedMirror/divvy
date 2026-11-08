@@ -136,10 +136,10 @@ Every AppKit call runs on the main thread.
 ## Cross-compilation status (verified from Linux)
 
 - `GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go vet -tags purego ./...` and the matching
-  golangci-lint run pass (`task vet`, `task lint`). The backend itself needs no cgo; the
+  golangci-lint run pass (`make vet`, `make lint`). The backend itself needs no cgo; the
   `purego` tag builds Wails without it too, which is enough for checking but not for a
   runnable app.
-- Building and packaging the app (`task package:macos`) needs a Mac with the Xcode command
+- Building and packaging the app (`make package:macos`) needs a Mac with the Xcode command
   line tools.
-- The e2e suite (`task e2e:macos`) needs a real Mac with Accessibility and Screen Recording
+- The e2e suite (`make e2e:macos`) needs a real Mac with Accessibility and Screen Recording
   granted to the terminal.

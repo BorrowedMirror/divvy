@@ -24,10 +24,9 @@
 ## Running the same checks locally
 
 ```sh
-alias task='go tool -modfile=tools/go.mod wails3 task'
-task check                     # gofmt, vet, tests, generated files, golangci-lint
-task vuln licenses:check
-task coverage
+make check                     # gofmt, vet, tests, generated files, golangci-lint
+make vuln licenses:check
+make coverage
 pnpm --dir web lint && pnpm --dir web typecheck && pnpm --dir web coverage
 ```
 

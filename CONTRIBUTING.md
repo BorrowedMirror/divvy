@@ -46,7 +46,7 @@ can lose these grants.
 ### Windows
 
 Go, Node.js and pnpm are enough to build and run: the Windows build needs no cgo, and WebView2
-ships with Windows 10/11. `go test -race` (used by `task test` and `task coverage`) needs cgo, so
+ships with Windows 10/11. `go test -race` (used by `make test` and `make coverage`) needs cgo, so
 install a gcc toolchain such as MinGW-w64 for it.
 
 ### First run
@@ -64,36 +64,39 @@ Everyday work is plain Go: `go build`, `go test ./...`, `go vet ./...`, and `go 
 to regenerate `web/src/bindings.ts` (after changing the IPC service) and the commit docs (after
 changing `.commit-config.toml`). On Linux add `-tags gtk3`. The rest are
 [Task](https://taskfile.dev) tasks in `Taskfile.yml`, run with the Task runner built into the
-Wails CLI:
+Wails CLI (pinned in `tools/go.mod`, so nothing needs installing). The `Makefile` passes every
+target through to it, and `NAME=value` arguments to the task:
 
 ```sh
-alias task='go tool -modfile=tools/go.mod wails3 task'   # or install Task
-task --list
+make                 # lists the tasks
+make check           # = go tool -modfile=tools/go.mod wails3 task check
 ```
+
+Without `make` (a plain Windows shell), run `go tool -modfile=tools/go.mod wails3 task <task>`.
 
 | Task | What it does |
 | --- | --- |
-| `task dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
-| `task run` | builds the frontend and a development binary (`target/go/rkl`) and runs it |
-| `task test` | `go test -race ./...` |
-| `task check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`) |
-| `task vuln` | govulncheck for the same three targets |
-| `task licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
-| `task coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
-| `task generate` | `go generate ./...` |
-| `task package:windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` and the update exe |
-| `task package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
-| `task package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
-| `task notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
-| `task updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |
-| `task data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `internal/data/assets` |
-| `task fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `internal/trade/testdata/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
+| `make dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
+| `make run` | builds the frontend and a development binary (`target/go/rkl`) and runs it |
+| `make test` | `go test -race ./...` |
+| `make check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `make vuln` | govulncheck for the same three targets |
+| `make licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
+| `make coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
+| `make generate` | `go generate ./...` |
+| `make package:windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` and the update exe |
+| `make package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
+| `make package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
+| `make notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
+| `make updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |
+| `make data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `internal/data/assets` |
+| `make fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `internal/trade/testdata/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
 | `pnpm --dir web test` / `coverage` / `lint` / `typecheck` | Vitest, biome, tsc |
 
 Coverage targets (Codecov status checks, `.codecov.yml`): core, trade, data, config >= 90%
 lines; platform >= 70%; web >= 80%; patch coverage >= 80%.
 
-Development builds (`go build`, `task run`, `task dev`) are Wails dev builds: the web
+Development builds (`go build`, `make run`, `make dev`) are Wails dev builds: the web
 inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
 `production` tag. Packaging steps the `go` command can't do (installers, signing updates,
 notices) live in `cmd/release` (`go run ./cmd/release -h`). The version comes from the `VERSION`
@@ -123,7 +126,7 @@ cargo run --release --manifest-path tools/game-extract/Cargo.toml -- l10n <game 
 go run ./cmd/datarefresh l10n target/l10n-raw.json
 ```
 
-`<game dir>` is the folder holding `Bundles2/`. Run it after `task data:refresh`, which keeps
+`<game dir>` is the folder holding `Bundles2/`. Run it after `make data:refresh`, which keeps
 the translations it finds. `game-extract file <game dir> <path> <out>` copies a single game
 file out (`list:<text>` as the path lists the matching paths instead).
 
@@ -143,14 +146,14 @@ The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and the fa
 clipboard, `--log-keys`).
 
 ```sh
-task e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
-task e2e:wayland        # Linux: headless sway + portal + virtual keyboard (E2E_XWAYLAND=1 for XWayland)
-task e2e:stacking       # Linux: overlay stacking over a fullscreen game (needs the binaries above)
-task e2e:macos          # macOS desktop (bash e2e/scripts/run-macos.sh)
-task e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
+make e2e:x11            # Linux: Xvfb + openbox, real Ctrl+D presses (xdotool)
+make e2e:wayland        # Linux: headless sway + portal + virtual keyboard (E2E_XWAYLAND=1 for XWayland)
+make e2e:stacking       # Linux: overlay stacking over a fullscreen game (needs the binaries above)
+make e2e:macos          # macOS desktop (bash e2e/scripts/run-macos.sh)
+make e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
 ```
 
-`RUN=<regexp>` picks tests (`task e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
+`RUN=<regexp>` picks tests (`make e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
 for the PowerShell script) reuses the binaries. Each script lists the tools it needs in its
 header comment. The `RKL_E2E_*` variables (binary paths, how the price check is triggered,
 where logs are kept) are listed in `e2e/doc.go`. With a display already running,
@@ -167,7 +170,7 @@ The allowed types and scopes are listed in
 - Body: explain **why**, not what.
 - Keep commits small and atomic; one logical change each.
 
-Before opening a PR, run `task check` and, for web changes, `pnpm --dir web lint`,
+Before opening a PR, run `make check` and, for web changes, `pnpm --dir web lint`,
 `pnpm --dir web typecheck` and `pnpm --dir web coverage`. If you change the IPC service or its types, run `go generate ./...`
 and commit `web/src/bindings.ts`.
 

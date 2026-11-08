@@ -127,7 +127,7 @@ verification only; **not** used by the pipeline.
 
 ## Pipeline
 
-`go run ./cmd/datarefresh refresh [-offline]` (`task data:refresh`):
+`go run ./cmd/datarefresh refresh [-offline]` (`make data:refresh`):
 1. Download the sources above into `target/data-cache/`, 1.5 s apart (or reuse them with
    `-offline`).
 2. Normalise (`cmd/datarefresh/normalise.go`, pure + unit-tested), sort deterministically.
