@@ -39,6 +39,5 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `platform` | internal/platform |
 | `pnpm` | pnpm configuration (build) |
 | `renovate` | Renovate (ci) |
-| `testkit` | internal/testkit |
 | `trade` | internal/trade |
 | `web` | web/ |

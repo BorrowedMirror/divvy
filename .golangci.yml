@@ -1,11 +1,12 @@
 # golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci.yml).
-# The "standard" set plus a few bug-finding linters; formatting is gofmt's job.
+# The "standard" set plus bug-finding and convention linters (naming, modern Go, context use,
+# test style); formatting is gofmt's job.
 #
 # CI lints three times: host (Linux, gtk3), GOOS=windows, and GOOS=darwin with -tags purego.
 version: "2"
 
 run:
-  build-tags: [gtk3]
+  build-tags: [gtk3, testhook, e2e]
 
 linters:
   default: standard
@@ -19,22 +20,60 @@ linters:
     - misspell
     - nolintlint
     - usestdlibvars
+    - modernize
+    - revive
+    - sloglint
+    - errname
+    - noctx
+    - usetesting
+    - intrange
+    - perfsprint
+    - predeclared
+    - nilnil
+    - exhaustive
+    - testifylint
+    - thelper
+    - unparam
+    - canonicalheader
+    - recvcheck
+    - inamedparam
+    - forcetypeassert
+    - gochecknoinits
   settings:
+    revive:
+      rules:
+        - name: var-naming
+        - name: exported
+        - name: package-comments
+        - name: receiver-naming
+        - name: error-naming
+        - name: error-strings
+        - name: context-as-argument
+        - name: unexported-return
+        - name: use-any
+        - name: redefines-builtin-id
+        - name: indent-error-flow
+        - name: import-shadowing
+    sloglint:
+      static-msg: true
+      kv-only: true
+    exhaustive:
+      default-signifies-exhaustive: true
     errcheck:
       exclude-functions:
         # Win32 calls through LazyProc: the error is GetLastError and always non-nil.
         - (*syscall.LazyProc).Call
         - (*golang.org/x/sys/windows.LazyProc).Call
-    govet:
-      disable:
-        # Suggests //go:fix inline rewrites; not a correctness check.
-        - inline
     staticcheck:
       checks:
         - all
-        # Quick-fix suggestions (De Morgan and the like) and style checks.
+        # Quick-fix suggestions (De Morgan and the like), and the style checks revive covers
+        # (package comments, comment forms).
         - -QF*
-        - -ST*
+        - -ST1000
+        - -ST1020
+        - -ST1021
+        - -ST1022
     gocritic:
       disabled-checks:
         - ifElseChain
@@ -45,7 +84,13 @@ linters:
       - std-error-handling
     rules:
       - path: _test\.go
-        linters: [errcheck, gocritic]
+        linters: [errcheck, gocritic, forcetypeassert, unparam]
+      - path: e2e/
+        linters: [thelper]
+      # x11's pure files are only called from its _linux.go files, which the Windows and macOS
+      # lint runs never see, so unparam reports their test-only arguments as constant there.
+      - path: internal/platform/x11/
+        linters: [unparam]
 
 formatters:
   enable:
