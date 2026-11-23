@@ -2,6 +2,7 @@ package wayland
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -62,15 +63,20 @@ func TestEvdevCodes(t *testing.T) {
 
 func TestRunsAFakeBinary(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("needs /bin/true and /bin/false")
+		t.Skip("needs true and false")
 	}
+	// On PATH, not /bin: macOS has them in /usr/bin only.
+	trueBin, err := exec.LookPath("true")
+	require.NoError(t, err)
+	falseBin, err := exec.LookPath("false")
+	require.NoError(t, err)
 	chord := mustChord(t, "ctrl+c")
-	require.NoError(t, (&ydotool{binary: "/bin/true"}).SendChord(chord))
-	err := (&ydotool{binary: "/bin/false"}).SendChord(chord)
+	require.NoError(t, (&ydotool{binary: trueBin}).SendChord(chord))
+	err = (&ydotool{binary: falseBin}).SendChord(chord)
 	require.ErrorIs(t, err, platform.ErrBackend)
 	err = (&ydotool{binary: filepath.Join(t.TempDir(), "nope")}).SendChord(chord)
 	require.ErrorIs(t, err, platform.ErrBackend)
-	err = (&ydotool{binary: "/bin/true"}).SendChord(platform.NewChord("NoSuchKey"))
+	err = (&ydotool{binary: trueBin}).SendChord(platform.NewChord("NoSuchKey"))
 	require.ErrorIs(t, err, platform.ErrInvalidChord)
 
 	// The fake records its arguments: the exact `ydotool key` command line.

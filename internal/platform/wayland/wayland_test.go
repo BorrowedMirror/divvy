@@ -3,6 +3,8 @@
 package wayland
 
 import (
+	"slices"
+	"strings"
 	"testing"
 	"unsafe"
 
@@ -38,7 +40,9 @@ func TestUnreachableCompositorReportsItself(t *testing.T) {
 	assert.False(t, caps.WindowTracking || caps.PassiveHook || caps.GlobalHotkeys || caps.Clipboard)
 	// sway is plausible: available on demand, retried on each copy.
 	assert.True(t, caps.KeystrokeInjection)
-	assert.Contains(t, caps.Notes[len(caps.Notes)-1], "retried on each copy")
+	// Not necessarily the last note: a wl-clipboard note follows when it is not installed.
+	assert.True(t, slices.ContainsFunc(caps.Notes, func(n string) bool { return strings.Contains(n, "retried on each copy") }),
+		"notes: %q", caps.Notes)
 	assert.Nil(t, parts.Cursor)
 	assert.Nil(t, parts.ActivateWindow)
 
