@@ -18,7 +18,7 @@ const (
 // a reader never sees a partial file and concurrent writers never share a temporary file.
 func writeFileAtomic(path string, data []byte) error {
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
 	f, err := os.CreateTemp(dir, filepath.Base(path)+".*.tmp")
@@ -30,7 +30,7 @@ func writeFileAtomic(path string, data []byte) error {
 		f.Close()
 		return err
 	}
-	if err := f.Chmod(0o644); err != nil {
+	if err := f.Chmod(0o600); err != nil {
 		f.Close()
 		return err
 	}
