@@ -1,20 +1,9 @@
 name: Release
 
-# Pushing a `v<version>` tag drafts a GitHub release for it; a maintainer reviews and publishes
-# the draft by hand. The tag must match the VERSION file at the tagged commit (see
-# docs/contributing/releasing.md).
-#
-# Assets: the Windows NSIS installer (cross-compiled on Linux), the Linux AppImage, the macOS
-# universal DMG, a CycloneDX SBOM, third-party notices and SHA256SUMS.txt. Notes are generated
-# by GitHub from the labelled pull requests (.github/release.yml).
-#
-# Updates: every build links in the updater's public key (DIVVY_UPDATER_PUBKEY), and the draft job
-# signs the update artifacts (the bare Windows exe, the AppImage, the zipped .app) with
-# DIVVY_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. The
-# public key is a repository variable; the private key lives only in the protected `release`
-# environment, which only the draft job uses. Nothing is code-signed yet; see
-# docs/contributing/releasing.md. The build jobs only read the repository; the last job is the
-# only one that can write.
+# Pushing a `v<version>` tag drafts a GitHub release for it; a maintainer reviews and publishes the
+# draft by hand. tag-release.yml pushes the tag when a release pull request's
+# "release: vX.Y.Z (#N)" commit is merged to master; a tag pushed any other way is refused unless
+# it points at that same commit (see docs/contributing/releasing.md).
 on:
   push:
     tags: ["v*"]
@@ -22,163 +11,59 @@ on:
 permissions:
   contents: read
 
+# Never cancel a release mid-flight; queue instead.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   version:
-    name: Check the version
+    name: Check the tag
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.v.outputs.version }}
       tag: ${{ steps.v.outputs.tag }}
     steps:
+      # Full history, so the tagged commit can be checked against master.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - id: v
+      # A release branch's own "release: vX.Y.Z" commit isn't the one the squash merge puts on
+      # master; tagging it would release a commit master never had.
+      - name: Tag is on master
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::$GITHUB_REF_NAME points at ${GITHUB_SHA::8}, which isn't on master. Delete the tag; merging the release pull request tags the right commit."
+            exit 1
+          fi
+      # Only the merged "release: vX.Y.Z (#N)" commit, with VERSION set to the same version, is
+      # released; a later commit on master carries the same VERSION but isn't the release.
+      - name: Tag is the release commit
+        id: v
         env:
           TAG: ${{ github.ref_name }}
         run: |
-          VERSION="${TAG#v}"
-          if [ "$VERSION" != "$(tr -d '[:space:]' < VERSION)" ]; then
-            echo "::error::tag $TAG does not match the VERSION file ($(cat VERSION))" >&2
+          version="$(.github/scripts/release-commit.sh "$GITHUB_SHA")"
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::$TAG points at ${GITHUB_SHA::8} ($(git log -1 --format=%s "$GITHUB_SHA")), not the merged \"release: $TAG (#N)\" commit. Delete the tag; merging the release pull request tags the right commit."
             exit 1
           fi
-          if ! [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
-            echo "::error::version '$VERSION' must be MAJOR.MINOR.PATCH[-PRE] without a leading v" >&2
-            exit 1
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
+  # Builds, drafts and attests the release in a reusable workflow, so the provenance names it as
+  # the signer (SLSA Build Level 3). These permissions are the most its jobs may use; each job
+  # takes only what it needs.
   build:
-    name: Package (${{ matrix.label }})
+    name: Build
     needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: windows
-            label: Windows
-            os: ubuntu-24.04
-          - name: linux
-            label: Linux
-            os: ubuntu-24.04
-          - name: macos
-            label: macOS
-            os: macos-latest
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - if: matrix.name == 'linux'
-        uses: $/.github/actions/linux-deps
-        with:
-          # linuxdeploy (run by `wails3 generate appimage`) shells out to `file`.
-          extra: file
-      - if: matrix.name == 'windows'
-        name: apt install nsis
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends nsis
-      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
-        with:
-          go-version-file: go.mod
-          cache: false
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          package_json_file: web/package.json
-      # setup-node v4 caches nothing unless `cache` is set, and it is not here.
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        # zizmor: ignore[cache-poisoning]
-        with:
-          node-version: 24
-      - run: pnpm --dir web install --frozen-lockfile
-      - run: pnpm --dir web build
-      - name: task package:${{ matrix.name }}
-        env:
-          TARGET: ${{ matrix.name }}
-          VERSION: ${{ needs.version.outputs.version }}
-          # Linked into the build: installs only accept updates signed with its private key.
-          DIVVY_UPDATER_PUBKEY: ${{ vars.DIVVY_UPDATER_PUBKEY }}
-        run: |
-          if [ -z "$DIVVY_UPDATER_PUBKEY" ]; then
-            echo "::error::the DIVVY_UPDATER_PUBKEY repository variable is not set" >&2
-            exit 1
-          fi
-          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
-          DIVVY_RELEASE_VERSION="$VERSION" "$wails" task "package:$TARGET"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: divvy-${{ matrix.name }}
-          path: |
-            target/go/divvy-*.exe
-            target/go/divvy-*.AppImage
-            target/go/divvy-*.dmg
-            target/go/divvy-*.app.zip
-          if-no-files-found: error
-
-  draft:
-    name: Draft release
-    needs: [version, build]
-    runs-on: ubuntu-latest
-    environment: release
     permissions:
+      attestations: write
       contents: write
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          pattern: divvy-*
-          path: dist
-          merge-multiple: true
-      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
-        with:
-          go-version-file: go.mod
-          cache: false
-      # Raw ed25519 over each artifact's SHA-256 digest, as Wails' updater verifies it. The URLs
-      # point at this release's tag, which exists once the draft is published.
-      - name: Sign the update artifacts (update.json)
-        env:
-          DIVVY_UPDATER_PRIVATE_KEY: ${{ secrets.DIVVY_UPDATER_PRIVATE_KEY }}
-          TAG: ${{ needs.version.outputs.tag }}
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          go run ./cmd/release update-manifest -version "$VERSION" -dir dist \
-            -base-url "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/"
-      - name: SBOM (CycloneDX, go.mod + web/pnpm-lock.yaml)
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          path: .
-          format: cyclonedx-json
-          output-file: dist/divvy.cdx.json
-          upload-artifact: false
-          upload-release-assets: false
-      # The licences of the Go packages linked into the Linux, Windows and macOS builds; fails on
-      # any outside the policy in cmd/release/notices.go.
-      - name: Third-party notices
-        run: go run ./cmd/release notices -o dist/THIRD-PARTY-NOTICES.html
-      - name: SHA-256 checksums
-        run: |
-          (cd dist && sha256sum -- *) > SHA256SUMS.txt
-          cat SHA256SUMS.txt
-          mv SHA256SUMS.txt dist/
-      # GitHub writes the notes from the merged pull requests since the previous release,
-      # grouped by their labels (.github/release.yml).
-      - name: Create the draft release with the assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.version.outputs.tag }}
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          prerelease=()
-          case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
-          gh release create "$TAG" --draft "${prerelease[@]}" --verify-tag \
-            --title "divvy $VERSION" --generate-notes dist/*
+      id-token: write
+    uses: $/.github/workflows/release-slsa.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      tag: ${{ needs.version.outputs.tag }}

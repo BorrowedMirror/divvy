@@ -1,0 +1,76 @@
+name: Tag release
+
+# Merging a release pull request releases it: when its squash-merged "release: vX.Y.Z (#N)" commit
+# lands on master, this tags the commit vX.Y.Z, and that tag push starts release.yml. The tag is
+# pushed as the BorrowedMirror Bot GitHub App, because a tag pushed with this workflow's own
+# GITHUB_TOKEN would not start other workflows. The app's credentials live in the automation
+# environment, which deploys only from master.
+on:
+  push:
+    branches: [master]
+  # Re-runs the same checks on master's latest commit, for when a tag push failed after the merge.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  find:
+    name: Find the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      # Prints nothing, so tags nothing, unless this is a merged release commit whose VERSION matches.
+      - name: Release version
+        id: release
+        run: |
+          version="$(.github/scripts/release-commit.sh "$GITHUB_SHA")"
+          if [ -z "$version" ]; then
+            echo "${GITHUB_SHA::8} isn't a release commit; nothing to tag."
+          else
+            tagged="$(git ls-remote --tags origin "refs/tags/v$version" | cut -f1)"
+            if [ "$tagged" = "$GITHUB_SHA" ]; then
+              echo "v$version already points at ${GITHUB_SHA::8}; nothing to do."
+              version=""
+            elif [ -n "$tagged" ]; then
+              echo "::error::v$version already exists at ${tagged::8}. A version is released once; open a release pull request for the next one."
+              exit 1
+            fi
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  tag:
+    name: Tag v${{ needs.find.outputs.version }}
+    needs: find
+    if: needs.find.outputs.version != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: automation
+    steps:
+      # GitHub treats a new ref as a workflow change when the tagged commit's .github/workflows
+      # differs from master's (once a workflow change merges after the release commit), and refuses
+      # it without the workflows permission.
+      - name: Mint a BorrowedMirror Bot token
+        id: app-token
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-workflows: write
+      - name: Push the tag
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ needs.find.outputs.version }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/v$VERSION" -f sha="$GITHUB_SHA" > /dev/null
+          echo "Tagged ${GITHUB_SHA::8} as v$VERSION; release.yml takes it from here."

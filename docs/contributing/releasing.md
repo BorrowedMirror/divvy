@@ -6,27 +6,27 @@ The version lives in the `VERSION` file (SemVer without a leading `v`, e.g. `0.2
 1. Make sure `master` is green.
 2. Open a pull request that changes only `VERSION`, titled `release: v0.2.0`, and squash-merge
    it. The `release` type keeps it out of the release notes.
-3. Tag the merged commit and push the tag:
-
-   ```sh
-   git switch master && git pull --ff-only
-   git tag -a v0.2.0 -m "divvy 0.2.0"
-   git push origin v0.2.0
-   ```
-
-4. The tag runs `.github/workflows/release.yml`. It fails early unless the tag is `v` plus the
-   `VERSION` file at that commit. It then builds the Windows NSIS installer (cross-compiled on
-   Linux), the Linux AppImage and the macOS universal DMG with
+3. Merging it tags the release: `.github/workflows/tag-release.yml` sees the squash-merged
+   `release: v0.2.0 (#N)` commit on `master` and pushes the `v0.2.0` tag as the BorrowedMirror
+   Bot GitHub App (a tag pushed with `GITHUB_TOKEN` would not start the release). Don't tag by
+   hand: `release.yml` refuses a tag unless it points at that merged commit, on `master`, with
+   `VERSION` holding the same version (`.github/scripts/release-commit.sh` checks both). If the
+   tag push failed, run **Tag release** again from the Actions tab.
+4. The tag runs `.github/workflows/release.yml`, which checks the tag and calls
+   `.github/workflows/release-slsa.yml`. That builds the Windows NSIS installer (cross-compiled
+   on Linux), the Linux AppImage and the macOS universal DMG with
    `DIVVY_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts into
    `update.json` (see [Updates](#updates)), and creates a **draft** release with the packages,
-   `update.json`, a CycloneDX SBOM, `THIRD-PARTY-NOTICES.html` and `SHA256SUMS.txt`. GitHub
-   writes the draft's notes from the pull requests merged since the previous release, grouped by
-   label (see [Release notes](#release-notes)).
+   `update.json`, a CycloneDX SBOM, `THIRD-PARTY-NOTICES.html` and `SHA256SUMS.txt`. Its last
+   job attests every asset (see [Provenance](#provenance)) and attaches `divvy.intoto.jsonl`.
+   GitHub writes the draft's notes from the pull requests merged since the previous release,
+   grouped by label (see [Release notes](#release-notes)).
 5. Check the draft (install one package per OS if possible) and publish it. Publishing makes
    `update.json` visible to installed copies.
 
 Pre-releases use a SemVer pre-release suffix (`0.2.0-rc.1`); the workflow marks them as
-pre-releases automatically. To discard a run, delete the draft and the tag.
+pre-releases automatically. To discard a run, delete the draft and the tag; a version is
+tagged once, so release the fix as the next version.
 
 To try the packaging locally, run `make package:<os>` (see
 [CONTRIBUTING.md](../../CONTRIBUTING.md#everyday-commands)); it writes to `target/go/`.
@@ -34,6 +34,22 @@ To try the packaging locally, run `make package:<os>` (see
 Nothing is code-signed yet: no Windows Authenticode signature, and the macOS app is signed ad
 hoc only (no Developer ID, no notarisation). Users see the usual SmartScreen and Gatekeeper
 warnings on first launch.
+
+## Provenance
+
+Every release asset carries SLSA Build Level 3 provenance from GitHub's artifact attestations,
+signed with Sigstore by the reusable `release-slsa.yml` workflow rather than by the workflow
+that called it. Check a download with:
+
+```sh
+gh attestation verify divvy-0.2.0-linux-x86_64.AppImage --repo BorrowedMirror/divvy \
+  --signer-workflow BorrowedMirror/divvy/.github/workflows/release-slsa.yml
+```
+
+The same bundle is attached to each release as `divvy.intoto.jsonl`, for verifiers that work
+offline. Attestations need the repository to be public (private repositories need GitHub
+Enterprise Cloud), so the **Attest** job fails while it is private. Provenance says where and how
+a file was built; it is not code signing, so it does not quiet SmartScreen or Gatekeeper.
 
 ## Updates
 
@@ -96,13 +112,13 @@ straight to `master` without a pull request do not appear in the notes.
 | --- | --- | --- | --- |
 | `DIVVY_UPDATER_PUBKEY` | variable | repository | updater public key, linked into every package |
 | `DIVVY_UPDATER_PRIVATE_KEY` | secret | `release` environment | signs the update artifacts into `update.json` |
-| `APP_CLIENT_ID` | variable | `automation` environment | the BorrowedMirror Bot GitHub App, which opens the data-refresh, fixtures and Crowdin pull requests |
+| `APP_CLIENT_ID` | variable | `automation` environment | the BorrowedMirror Bot GitHub App, which opens the data-refresh, fixtures and Crowdin pull requests and pushes release tags |
 | `APP_PRIVATE_KEY` | secret | `automation` environment | that app's private key |
 | `CROWDIN_PROJECT_ID`, `CROWDIN_PERSONAL_TOKEN` | secrets | `automation` environment | translation sync in `crowdin.yml` |
 
 Coverage uploads to Codecov use OIDC, so there is no Codecov token.
 
 The `release` environment deploys only from `v*` tags and should require a reviewer; only the
-`draft` job of `release.yml` uses it, so a release asks for one approval, for the job that signs.
+`Draft release` job of `release-slsa.yml` uses it, so a release asks for one approval, for the job that signs.
 The `automation` environment deploys only from `master`. Both rules are enforced once the
 repository is public (private repositories on GitHub Free cannot enforce them).
