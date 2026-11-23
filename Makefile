@@ -5,7 +5,9 @@
 #
 # NAME=value arguments are passed to the task. Every task is defined in Taskfile.yml: add or
 # change tasks there, not here. Plain `make` lists them.
-TASK := go tool -modfile=tools/go.mod wails3 task
+# The CLI is built without cgo: it only runs tasks, and on Linux a cgo build would need GTK4
+# and WebKitGTK 6.0 headers (the app itself builds against GTK3). The tasks keep cgo.
+TASK := $(shell CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3) task
 
 .DEFAULT_GOAL := default
 

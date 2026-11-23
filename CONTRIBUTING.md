@@ -69,10 +69,12 @@ target through to it, and `NAME=value` arguments to the task:
 
 ```sh
 make                 # lists the tasks
-make check           # = go tool -modfile=tools/go.mod wails3 task check
+make check           # = the pinned wails3 CLI, built without cgo, running `task check`
 ```
 
-Without `make` (a plain Windows shell), run `go tool -modfile=tools/go.mod wails3 task <task>`.
+Without `make` (a plain Windows shell), run `go tool -modfile=tools/go.mod wails3 task <task>`
+(on Linux, prefix `CGO_ENABLED=0`: a cgo build of the CLI needs GTK4 headers). It runs one
+task per invocation.
 
 | Task | What it does |
 | --- | --- |

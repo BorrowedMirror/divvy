@@ -1,7 +1,8 @@
 # Tasks for the Go/Wails build, run with Wails' embedded Task runner:
 #
 #   make <task>                                        (the Makefile passes targets through)
-#   go tool -modfile=tools/go.mod wails3 task <task>   (without make)
+#   CGO_ENABLED=0 go tool -modfile=tools/go.mod wails3 task <task>   (without make; cgo off only
+#   for the CLI build, see WAILS)
 #
 # Everyday work needs no task: `go build`, `go test ./...`, `go vet ./...` and `go generate ./...`
 # work as usual. The tools (wails3, golangci-lint) are pinned in tools/go.mod.
@@ -9,6 +10,10 @@ version: "3"
 
 vars:
   TOOL: go tool -modfile=tools/go.mod
+  # The Wails CLI binary, built without cgo: it runs tasks and the dev server only, and a cgo
+  # build on Linux would need GTK4 and WebKitGTK 6.0 headers. `go tool -n` prints its path.
+  WAILS:
+    sh: CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3
   # Wails' GTK3 + webkit2gtk-4.1 backend on Linux.
   TAGS: '{{if eq OS "linux"}}gtk3{{end}}'
   # TAGS plus the test-hook build and the e2e tests, so vet covers them too.
@@ -23,7 +28,7 @@ vars:
 tasks:
   default:
     cmds:
-      - "{{.TOOL}} wails3 task --list"
+      - "{{.WAILS}} task --list"
     silent: true
 
   web:
@@ -54,13 +59,19 @@ tasks:
     desc: Vite with hot reload, plus a Go rebuild and restart on every Go change.
     deps: [web]
     cmds:
-      - '{{.TOOL}} wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}'
+      # cgo off is inherited by the `go tool ... wails3 task` calls in build/config.yml, so those
+      # CLI builds need no GTK4 either; dev:build turns it back on for the app.
+      - 'CGO_ENABLED=0 {{.WAILS}} dev -config ./build/config.yml -port {{.VITE_PORT}}'
 
   # Steps of `dev`, run by build/config.yml.
   dev:build:
     internal: true
     cmds:
-      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/divvy-dev{{exeExt}} ./cmd/divvy
+      # A prefix, not env: Task's env does not override the CGO_ENABLED=0 that dev sets. Linux
+      # (GTK3) and macOS need cgo; Wails on Windows is pure Go.
+      - >-
+        {{if ne OS "windows"}}CGO_ENABLED=1 {{end}}go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}'
+        -o {{.OUT}}/divvy-dev{{exeExt}} ./cmd/divvy
   dev:frontend:
     internal: true
     cmds:
@@ -90,14 +101,10 @@ tasks:
     cmds:
       - go vet -tags '{{.TAGS}}' ./...
       - go vet -tags '{{.E2E_TAGS}}' ./...
-      - cmd: go vet ./...
-        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
-      - cmd: go vet -tags testhook,e2e ./...
-        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
-      - cmd: go vet -tags purego ./...
-        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
-      - cmd: go vet -tags purego,testhook,e2e ./...
-        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+      - 'GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go vet ./...'
+      - 'GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go vet -tags testhook,e2e ./...'
+      - 'GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go vet -tags purego ./...'
+      - 'GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go vet -tags purego,testhook,e2e ./...'
 
   lint:
     desc: golangci-lint for this OS, Windows and macOS (purego).
@@ -109,10 +116,8 @@ tasks:
         sh: go tool -modfile=tools/go.mod -n golangci-lint
     cmds:
       - '{{.LINT}} run'
-      - cmd: '{{.LINT}} run'
-        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
-      - cmd: '{{.LINT}} run --build-tags purego'
-        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+      - 'GOOS=windows GOARCH=amd64 CGO_ENABLED=0 {{.LINT}} run'
+      - 'GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 {{.LINT}} run --build-tags purego'
 
   bindings:check:
     desc: Fail when web/src/bindings.ts is out of date.
@@ -121,12 +126,15 @@ tasks:
 
   vuln:
     desc: govulncheck for this OS, Windows and macOS (purego).
+    vars:
+      # The host binary, as for LINT: `go tool` with GOOS=windows would build govulncheck itself
+      # for Windows.
+      VULN:
+        sh: go tool -modfile=tools/go.mod -n govulncheck
     cmds:
-      - '{{.TOOL}} govulncheck -tags "{{.TAGS}}" ./...'
-      - cmd: '{{.TOOL}} govulncheck ./...'
-        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: "0" }
-      - cmd: '{{.TOOL}} govulncheck -tags purego ./...'
-        env: { GOOS: darwin, GOARCH: arm64, CGO_ENABLED: "0" }
+      - '{{.VULN}} -tags "{{.TAGS}}" ./...'
+      - 'GOOS=windows GOARCH=amd64 CGO_ENABLED=0 {{.VULN}} ./...'
+      - 'GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 {{.VULN}} -tags purego ./...'
 
   licenses:check:
     desc: Fail when a dependency of any OS build has a licence outside the policy (cmd/release/notices.go).
