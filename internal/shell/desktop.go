@@ -242,6 +242,23 @@ func (d *Desktop) ShowInactive(w app.Window) {
 	w.Show()
 }
 
+// DetachFromGame drops w's link to the game window where the backend has one (X11). A window
+// that was never styled has no link.
+func (d *Desktop) DetachFromGame(w app.Window) {
+	x, ok := w.(window)
+	if !ok {
+		return
+	}
+	d.mu.Lock()
+	s, styled := d.stylers[x.w]
+	d.mu.Unlock()
+	if g, ok := s.(platform.GameDetacher); styled && ok {
+		if err := g.DetachFromGame(); err != nil {
+			slog.Debug("detach from game", "err", err)
+		}
+	}
+}
+
 // BringToFront stacks w above the game and, with focus, gives it keyboard focus.
 func (d *Desktop) BringToFront(w app.Window, gameID *uint64, focus bool) error {
 	s, err := d.styler(w)

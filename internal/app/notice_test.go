@@ -92,6 +92,45 @@ func TestReadyNoticeHidesWhenTheGameCloses(t *testing.T) {
 	})
 }
 
+func TestPricePanelClosesWhenTheGameCloses(t *testing.T) {
+	testCases := []struct {
+		name   string
+		pinned bool
+	}{
+		{
+			"ClosesUnpinnedPanel",
+			false,
+		},
+		{
+			"ClosesPinnedPanel",
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			item := corpusText(t, "gloves/rare-stocky-mitts")
+			st := newTestState(t)
+			synctest.Test(t, func(t *testing.T) {
+				a, d, _ := newTestAppOn(t, st, platformtest.Options{Window: game(), ItemText: item, AdvancedText: item})
+				_, _, err := a.handleItemText(item, tc.pinned)
+				require.NoError(t, err)
+				require.True(t, d.overlay.IsVisible())
+				require.Equal(t, tc.pinned, a.st.pinned.Load())
+
+				a.onWindowEvent(platform.WindowEvent{Type: platform.WindowLost})
+				assert.False(t, d.overlay.IsVisible())
+				assert.False(t, a.st.overlayVisible.Load())
+				assert.False(t, a.st.pinned.Load())
+				d.mu.Lock()
+				defer d.mu.Unlock()
+				assert.Equal(t, map[Window]bool{&d.overlay: true, &d.notice: true, &d.settings: true}, d.detached,
+					"every window is detached from the game that went away")
+			})
+		})
+	}
+}
+
 func TestReadyNoticeGivesWayToThePricePanelAndSettings(t *testing.T) {
 	st := newTestState(t)
 	synctest.Test(t, func(t *testing.T) {

@@ -61,8 +61,17 @@ func (f *Flow) gameMoved(game platform.Rect) {
 	}
 }
 
-// gameLost hides the notice: the game window went away.
-func (f *Flow) gameLost() { f.dismissNotice() }
+// gameLost hides the notice and the price panel, pinned or not: the game window went away, so
+// there is nothing left for them to sit over.
+func (f *Flow) gameLost() {
+	f.dismissNotice()
+	if f.st.overlayVisible.Load() {
+		f.hideOverlay()
+	}
+	for _, w := range []Window{f.d.Overlay(), f.d.Notice(), f.d.Settings()} {
+		f.d.DetachFromGame(w)
+	}
+}
 
 // dismissNotice hides the notice now: the game went away, or the user opened the price panel
 // or settings, which the notice must not cover.

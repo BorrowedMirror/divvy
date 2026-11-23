@@ -43,6 +43,7 @@ var (
 	_ platform.Rounder       = (*overlay)(nil)
 	_ platform.DirectMover   = (*overlay)(nil)
 	_ platform.FocusRefuser  = (*overlay)(nil)
+	_ platform.GameDetacher  = (*overlay)(nil)
 	_ platform.ToolWindow    = (*overlay)(nil)
 )
 
@@ -161,7 +162,8 @@ func (o *overlay) Hide() error {
 }
 
 // RaiseAbove implements [platform.OverlayWindow]: the overlay becomes a transient of owner
-// and is restacked above it. It also asks compositors not to shadow the window, on every raise
+// and is restacked above it; with no owner (no game window) the transient link is removed, so
+// it never points at a game window that has gone away. It also asks compositors not to shadow the window, on every raise
 // since the WM may have reset the property.
 func (o *overlay) RaiseAbove(owner uint64) error {
 	if err := o.disableCompositorShadow(); err != nil {
@@ -174,6 +176,10 @@ func (o *overlay) RaiseAbove(owner uint64) error {
 		if err := o.conn.changeProperty32(o.window, xproto.AtomWmTransientFor, xproto.AtomWindow, []uint32{sibling}); err != nil {
 			return err
 		}
+	} else if owner == 0 {
+		if err := o.DetachFromGame(); err != nil {
+			return err
+		}
 	}
 	// EWMH restack request (source 2 = pager, so WMs honour it), sibling = owner, Above.
 	if err := o.conn.sendRootMessage(o.window, o.conn.atoms.netRestackWindow, [5]uint32{sourcePager, sibling, xproto.StackModeAbove, 0, 0}); err != nil {
@@ -184,6 +190,11 @@ func (o *overlay) RaiseAbove(owner uint64) error {
 		return xErr(err)
 	}
 	return nil
+}
+
+// DetachFromGame implements [platform.GameDetacher]: it removes WM_TRANSIENT_FOR.
+func (o *overlay) DetachFromGame() error {
+	return o.conn.deleteProperty(o.window, xproto.AtomWmTransientFor)
 }
 
 // Activate implements [platform.OverlayWindow].

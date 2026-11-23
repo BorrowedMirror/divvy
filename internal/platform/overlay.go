@@ -41,6 +41,11 @@ type (
 	FocusRefuser interface {
 		RefuseFocus() error
 	}
+	// GameDetacher drops the window's link to the game window (X11 WM_TRANSIENT_FOR, set by
+	// RaiseAbove), so it never points at a game window that has gone away.
+	GameDetacher interface {
+		DetachFromGame() error
+	}
 	// ToolWindow names a frameless helper window and keeps it out of taskbars and window
 	// lists, through the toolkit (GTK rewrites the window manager's hints on every show, and
 	// Wails gives frameless windows no title). UI thread only.

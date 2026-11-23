@@ -315,6 +315,15 @@ func (x *xConn) sendRootMessage(w xproto.Window, typ xproto.Atom, data [5]uint32
 	return nil
 }
 
+// deleteProperty removes prop from w; deleting a property the window does not have is not an
+// error in X11.
+func (x *xConn) deleteProperty(w xproto.Window, prop xproto.Atom) error {
+	if err := xproto.DeletePropertyChecked(x.c, w, prop).Check(); err != nil {
+		return xErr(err)
+	}
+	return nil
+}
+
 func (x *xConn) changeProperty32(w xproto.Window, prop, typ xproto.Atom, values []uint32) error {
 	buf := make([]byte, 4*len(values))
 	for i, v := range values {

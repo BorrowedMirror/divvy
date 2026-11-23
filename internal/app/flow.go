@@ -57,6 +57,8 @@ type Desktop interface {
 	BringToFront(w Window, gameID *uint64, focus bool) error
 	// ShowInactive shows w without taking keyboard focus from the game.
 	ShowInactive(w Window)
+	// DetachFromGame drops w's link to the game window (see BringToFront), once it is gone.
+	DetachFromGame(w Window)
 	// RefocusGame hands keyboard focus back to the game after the panel closes.
 	RefocusGame(gameID *uint64)
 	// RoundWindow gives w rounded corners (radius in physical px); width 0 removes the shape.

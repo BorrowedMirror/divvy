@@ -99,6 +99,7 @@ type fakeDesktop struct {
 	raised   int                 // BringToFront calls that focus
 	rounded  map[Window][3]int32 // last RoundWindow per window: width, height, radius
 	anchored int
+	detached map[Window]bool // windows DetachFromGame was called for
 }
 
 var _ Desktop = (*fakeDesktop)(nil)
@@ -135,7 +136,15 @@ func (d *fakeDesktop) BringToFront(w Window, _ *uint64, focus bool) error {
 	return nil
 }
 func (d *fakeDesktop) ShowInactive(w Window) { w.Show() }
-func (d *fakeDesktop) RefocusGame(*uint64)   {}
+func (d *fakeDesktop) DetachFromGame(w Window) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.detached == nil {
+		d.detached = map[Window]bool{}
+	}
+	d.detached[w] = true
+}
+func (d *fakeDesktop) RefocusGame(*uint64) {}
 func (d *fakeDesktop) RoundWindow(w Window, width, height, radius int32) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
