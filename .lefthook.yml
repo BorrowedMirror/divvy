@@ -11,13 +11,30 @@ pre-commit:
       root: tools/game-extract/
       glob: "*.rs"
       run: cargo fmt -- --check
-    gofmt:
+    # golangci-lint (pinned in tools/go.mod) also formats: .golangci.yml enables gofmt, so --fix
+    # rewrites badly formatted files and the fixes are staged again.
+    golangci-lint:
       glob: "*.go"
-      run: test -z "$(gofmt -l {staged_files})" || { gofmt -l {staged_files}; exit 1; }
+      run: go tool -modfile=tools/go.mod golangci-lint run --fix ./...
+      stage_fixed: true
     actionlint:
       glob: ".github/workflows/*.{yml,yaml}"
       run: go tool -modfile=tools/go.mod actionlint {staged_files}
-    web-lint:
+    # zizmor is not a Go tool, so it is not pinned here; CI runs a pinned version on every push.
+    zizmor:
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: |
+        if command -v zizmor >/dev/null; then
+          zizmor --no-progress {staged_files}
+        else
+          echo "zizmor is not installed, skipping (CI still runs it): https://docs.zizmor.sh/installation/"
+        fi
+    biome:
       root: web/
-      glob: "*.{ts,tsx,css,json}"
-      run: pnpm lint
+      glob: "*.{js,jsx,ts,tsx,mjs,json,jsonc,css}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    tsc:
+      root: web/
+      glob: "*.{ts,tsx}"
+      run: pnpm --reporter=silent typecheck

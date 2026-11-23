@@ -89,11 +89,9 @@ tasks:
       - go test -tags '{{.TAGS}}' -race ./...
 
   fmt:
-    desc: Fail when a Go file is not gofmt-clean.
+    desc: Format the Go code with golangci-lint's formatters (gofmt, see .golangci.yml); lint checks it.
     cmds:
-      - |
-        files=$(gofmt -l $(go list -f '{{"{{"}}.Dir{{"}}"}}' ./...))
-        if [ -n "$files" ]; then echo "not gofmt-clean:"; echo "$files"; exit 1; fi
+      - '{{.TOOL}} golangci-lint fmt'
 
   vet:
     desc: go vet for this OS, Windows and macOS (macOS as the cgo-free purego build), with and without the test hook and e2e tests.
@@ -159,7 +157,6 @@ tasks:
   check:
     desc: Everything CI checks on the Go side.
     cmds:
-      - task: fmt
       - task: vet
       - task: test
       - task: bindings:check
