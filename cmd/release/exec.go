@@ -77,8 +77,10 @@ func requireWebDist(root string) error {
 	return nil
 }
 
-// wails3 runs the Wails CLI pinned in tools/go.mod (`go tool -modfile=tools/go.mod wails3`).
+// wails3 runs the Wails CLI pinned in tools/go.mod (`go tool -modfile=tools/go.mod wails3`), built
+// for the host without cgo: its generators need no GUI, and a cgo build on Linux would need GTK4
+// and WebKitGTK 6.0 headers.
 func wails3(ctx context.Context, s sh, root string, args ...string) error {
 	tool := []string{"tool", "-modfile=" + filepath.Join(root, "tools", "go.mod"), "wails3"}
-	return s.with("GOOS=", "GOARCH=", "CGO_ENABLED=").run(ctx, "go", append(tool, args...)...)
+	return s.with("GOOS=", "GOARCH=", "CGO_ENABLED=0").run(ctx, "go", append(tool, args...)...)
 }
