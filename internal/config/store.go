@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"sync/atomic"
 
 	"github.com/knadh/koanf/parsers/toml/v2"
@@ -58,6 +59,10 @@ func MarshalTOML(s Settings) ([]byte, error) {
 // saveSeq makes each save's temp file name unique within the process.
 var saveSeq atomic.Uint64
 
+// saveMu serialises saves within the process: on Windows a rename onto the settings file fails
+// (access denied) while another rename is replacing it.
+var saveMu sync.Mutex
+
 // Save validates and atomically writes settings: a temp file in the same directory, fsync,
 // rename. New directories and the file are private to the user (0o700 / 0o600), as the
 // file may hold a POESESSID.
@@ -103,6 +108,8 @@ func Save(paths Paths, settings *Settings) error {
 		}
 		return os.Rename(tmp, target)
 	}
+	saveMu.Lock()
+	defer saveMu.Unlock()
 	if err := write(); err != nil {
 		_ = os.Remove(tmp)
 		return ioErr(target, err)
