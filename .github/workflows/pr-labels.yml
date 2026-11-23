@@ -1,4 +1,4 @@
-name: pr-labels
+name: PR Labels
 
 # Labels each pull request from its Conventional Commits title: type/<type>, area/<scope> for a
 # scoped title, and type/breaking-change for `!` or a BREAKING CHANGE footer, and puts it in the
@@ -22,6 +22,7 @@ permissions: {}
 
 jobs:
   label:
+    name: Apply Labels
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

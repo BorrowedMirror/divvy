@@ -1,4 +1,4 @@
-name: data-refresh
+name: Data refresh
 
 # Regenerates the bundled game data (internal/data/assets) and opens a PR only when it changed.
 on:
@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   refresh:
+    name: Refresh game data
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # The bot's credentials live in the automation environment, which deploys only from master.

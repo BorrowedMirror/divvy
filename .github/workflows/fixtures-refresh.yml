@@ -1,4 +1,4 @@
-name: fixtures-refresh
+name: Fixtures refresh
 
 # Manually re-records the trade2 wiremock fixtures from the live API at a low request rate
 # (`go run ./cmd/datarefresh fixtures`, 2 s between requests) and proposes them as a PR.
@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   record:
+    name: Record fixtures
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # The bot's credentials live in the automation environment, which deploys only from master.

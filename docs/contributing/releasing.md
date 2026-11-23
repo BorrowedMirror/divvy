@@ -61,8 +61,9 @@ Generate the key pair once:
 make updater:keygen
 ```
 
-It prints two lines, `DIVVY_UPDATER_PUBKEY=...` and `DIVVY_UPDATER_PRIVATE_KEY=...`. Store both as
-secrets of the `release` environment; the release fails without them. Installed builds trust
+It prints two lines, `DIVVY_UPDATER_PUBKEY=...` and `DIVVY_UPDATER_PRIVATE_KEY=...`. Store the
+public key as a repository variable and the private key as a secret of the `release` environment;
+the release fails without them. Installed builds trust
 only the key they were built with, so keep the private key safe: losing or rotating it means
 users must reinstall by hand to get later updates.
 
@@ -89,14 +90,19 @@ Pull requests are squash-merged, so the title is the commit message; fix a wrong
 merging, or relabel the pull request by hand before publishing the draft. Commits pushed
 straight to `master` without a pull request do not appear in the notes.
 
-## Secrets
+## Secrets and variables
 
-| Secret | Where | Purpose |
-| --- | --- | --- |
-| `DIVVY_UPDATER_PUBKEY` | `release` environment | updater public key, linked into every package |
-| `DIVVY_UPDATER_PRIVATE_KEY` | `release` environment | signs the update artifacts into `update.json` |
-| `CODECOV_TOKEN` | repository | coverage uploads from `ci.yml` |
-| `CROWDIN_PROJECT_ID`, `CROWDIN_PERSONAL_TOKEN` | repository | translation sync in `crowdin.yml` |
+| Name | Kind | Where | Purpose |
+| --- | --- | --- | --- |
+| `DIVVY_UPDATER_PUBKEY` | variable | repository | updater public key, linked into every package |
+| `DIVVY_UPDATER_PRIVATE_KEY` | secret | `release` environment | signs the update artifacts into `update.json` |
+| `APP_CLIENT_ID` | variable | `automation` environment | the BorrowedMirror Bot GitHub App, which opens the data-refresh, fixtures and Crowdin pull requests |
+| `APP_PRIVATE_KEY` | secret | `automation` environment | that app's private key |
+| `CROWDIN_PROJECT_ID`, `CROWDIN_PERSONAL_TOKEN` | secrets | `automation` environment | translation sync in `crowdin.yml` |
 
-The `release` environment should be protected (deployment tags `v*`, a required reviewer).
-Only the `build` and `draft` jobs of `release.yml` use it.
+Coverage uploads to Codecov use OIDC, so there is no Codecov token.
+
+The `release` environment deploys only from `v*` tags and should require a reviewer; only the
+`draft` job of `release.yml` uses it, so a release asks for one approval, for the job that signs.
+The `automation` environment deploys only from `master`. Both rules are enforced once the
+repository is public (private repositories on GitHub Free cannot enforce them).

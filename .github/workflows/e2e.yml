@@ -1,4 +1,4 @@
-name: e2e
+name: E2E
 
 # End-to-end runs of the Go/Wails app (a test-hook build of cmd/divvy) against e2e/cmd/fake-game
 # and a mock trade2 API, driven by the Go tests in e2e/ (`go test -tags e2e ./e2e/...`) over
@@ -23,14 +23,14 @@ env:
 
 jobs:
   linux-x11:
-    name: linux x11 (Xvfb + openbox, real hotkey)
+    name: X11 (real hotkey)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/linux-deps
+      - uses: $/.github/actions/linux-deps
         with:
           extra: xdotool
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -63,14 +63,14 @@ jobs:
           if-no-files-found: ignore
 
   linux-x11-stacking:
-    name: linux x11 (overlay stacking over a fullscreen game)
+    name: X11 (fullscreen stacking)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/linux-deps
+      - uses: $/.github/actions/linux-deps
         with:
           extra: xdotool wmctrl x11-utils
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -94,14 +94,14 @@ jobs:
         run: bash e2e/scripts/stacking-x11.sh
 
   linux-wayland:
-    name: linux wayland (sway headless)
+    name: Wayland (sway)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/linux-deps
+      - uses: $/.github/actions/linux-deps
         with:
           extra: sway xdg-desktop-portal xdg-desktop-portal-wlr wl-clipboard
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -136,7 +136,7 @@ jobs:
           if-no-files-found: ignore
 
   windows:
-    name: windows
+    name: Windows
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
@@ -173,7 +173,7 @@ jobs:
           if-no-files-found: ignore
 
   macos:
-    name: macos
+    name: macOS
     runs-on: macos-latest
     timeout-minutes: 45
     steps:

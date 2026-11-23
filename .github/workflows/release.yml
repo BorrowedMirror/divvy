@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 # Pushing a `v<version>` tag drafts a GitHub release for it; a maintainer reviews and publishes
 # the draft by hand. The tag must match the VERSION file at the tagged commit (see
@@ -10,8 +10,9 @@ name: release
 #
 # Updates: every build links in the updater's public key (DIVVY_UPDATER_PUBKEY), and the draft job
 # signs the update artifacts (the bare Windows exe, the AppImage, the zipped .app) with
-# DIVVY_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. Both
-# keys live only in the protected `release` environment. Nothing is code-signed yet; see
+# DIVVY_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. The
+# public key is a repository variable; the private key lives only in the protected `release`
+# environment, which only the draft job uses. Nothing is code-signed yet; see
 # docs/contributing/releasing.md. The build jobs only read the repository; the last job is the
 # only one that can write.
 on:
@@ -27,7 +28,7 @@ concurrency:
 
 jobs:
   version:
-    name: validate version
+    name: Check the version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
@@ -53,27 +54,29 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
   build:
-    name: package (${{ matrix.name }})
+    name: Package (${{ matrix.label }})
     needs: version
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: windows
+            label: Windows
             os: ubuntu-24.04
           - name: linux
+            label: Linux
             os: ubuntu-24.04
           - name: macos
+            label: macOS
             os: macos-latest
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    environment: release
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - if: matrix.name == 'linux'
-        uses: ./.github/actions/linux-deps
+        uses: $/.github/actions/linux-deps
         with:
           # linuxdeploy (run by `wails3 generate appimage`) shells out to `file`.
           extra: file
@@ -101,10 +104,10 @@ jobs:
           TARGET: ${{ matrix.name }}
           VERSION: ${{ needs.version.outputs.version }}
           # Linked into the build: installs only accept updates signed with its private key.
-          DIVVY_UPDATER_PUBKEY: ${{ secrets.DIVVY_UPDATER_PUBKEY }}
+          DIVVY_UPDATER_PUBKEY: ${{ vars.DIVVY_UPDATER_PUBKEY }}
         run: |
           if [ -z "$DIVVY_UPDATER_PUBKEY" ]; then
-            echo "::error::DIVVY_UPDATER_PUBKEY is not set in the release environment" >&2
+            echo "::error::the DIVVY_UPDATER_PUBKEY repository variable is not set" >&2
             exit 1
           fi
           wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
@@ -120,7 +123,7 @@ jobs:
           if-no-files-found: error
 
   draft:
-    name: draft release + checksums + sbom + notices
+    name: Draft release
     needs: [version, build]
     runs-on: ubuntu-latest
     environment: release

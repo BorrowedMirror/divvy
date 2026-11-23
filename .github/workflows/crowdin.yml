@@ -1,4 +1,4 @@
-name: crowdin
+name: Crowdin
 
 on:
   push:
@@ -17,7 +17,8 @@ concurrency:
 
 jobs:
   sync:
-    # Requires repository secrets CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN.
+    name: Sync translations
+    # Requires the secrets CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN in the automation environment.
     if: github.repository_owner == 'BorrowedMirror'
     runs-on: ubuntu-latest
     # Credentials as in data-refresh: the bot token pushes and opens the PR.
@@ -52,7 +53,7 @@ jobs:
           permission-pull-requests: write
       - name: Upload sources and download translations
         if: steps.secrets.outputs.configured == 'true'
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
         with:
           config: .crowdin.yml
           upload_sources: true
