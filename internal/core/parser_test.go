@@ -182,19 +182,49 @@ func TestMetaGemAndRefinements(t *testing.T) {
 	assert.Equal(t, new(uint32(15)), way.WaystoneTier)
 	core := mustParse(t, "Item Class: Augment\nRarity: Currency\nSoul Core of Tacati")
 	assert.Equal(t, ClassSoulCore.Class(), core.Class)
-	for _, c := range []struct {
-		base  string
-		class ItemClassKind
+
+	testCases := []struct {
+		name     string
+		have     string
+		expected ItemClassKind
 	}{
-		{"Greater Essence of the Body", ClassEssence},
-		{"Distilled Ire", ClassDistilledEmotion},
-		{"Breach Splinter", ClassSplinter},
-		{"Flesh Catalyst", ClassCatalyst},
-		{"Omen of Amelioration", ClassOmen},
-		{"Exalted Orb", ClassStackableCurrency},
-	} {
-		item := mustParse(t, "Item Class: Stackable Currency\nRarity: Currency\n"+c.base)
-		assert.Equal(t, c.class.Class(), item.Class, c.base)
+		{
+			"Essence",
+			"Greater Essence of the Body",
+			ClassEssence,
+		},
+		{
+			"DistilledEmotion",
+			"Distilled Ire",
+			ClassDistilledEmotion,
+		},
+		{
+			"Splinter",
+			"Breach Splinter",
+			ClassSplinter,
+		},
+		{
+			"Catalyst",
+			"Flesh Catalyst",
+			ClassCatalyst,
+		},
+		{
+			"Omen",
+			"Omen of Amelioration",
+			ClassOmen,
+		},
+		{
+			"StackableCurrency",
+			"Exalted Orb",
+			ClassStackableCurrency,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			item := mustParse(t, "Item Class: Stackable Currency\nRarity: Currency\n"+tc.have)
+			assert.Equal(t, tc.expected.Class(), item.Class)
+		})
 	}
 }
 

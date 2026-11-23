@@ -44,29 +44,74 @@ const (
 )
 
 func TestPayloadsZeroValues(t *testing.T) {
-	cases := []struct {
-		name string
-		v    any
-		want string
+	testCases := []struct {
+		name     string
+		have     any
+		expected string
 	}{
-		{"Error", Error{}, zeroError},
-		{"*Error", &Error{}, zeroError},
-		{"Diagnostics", Diagnostics{}, `{"version":"","os":"","backend":"","capabilities":{"window_tracking":false,` +
-			`"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,` +
-			`"keystroke_injection":false,"clipboard":false,"missing_permissions":[],"notes":[]},"data_version":null,` +
-			`"league":null,"settings_path":null,"log_path":null,"recent_errors":[]}`},
-		{"PriceCheckResponse", PriceCheckResponse{}, `{"item":` + zeroItem + `,"filters":` + zeroFilters + `}`},
-		{"ItemCopied", ItemCopied{}, `{"item":` + zeroItem + `,"filters":` + zeroFilters + `,"pinned":false}`},
-		{"*ItemCopied nil", (*ItemCopied)(nil), `null`},
-		{"PriceReady", PriceReady{}, `{"summary":` + zeroSummary + `}`},
-		{"PriceFailed", PriceFailed{}, `{"error":` + zeroError + `}`},
-		{"OverlayState", OverlayState{}, `{"visible":false,"pinned":false}`},
-		{"OverlayLayout", OverlayLayout{}, `{"cover":false,"x":0,"y":0}`},
-		{"UpdateAvailable", UpdateAvailable{}, `{"version":"","notes":null,"date":null}`},
+		{
+			"Error",
+			Error{},
+			zeroError,
+		},
+		{
+			"ErrorPointer",
+			&Error{},
+			zeroError,
+		},
+		{
+			"Diagnostics",
+			Diagnostics{},
+			`{"version":"","os":"","backend":"","capabilities":{"window_tracking":false,` +
+				`"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,` +
+				`"keystroke_injection":false,"clipboard":false,"missing_permissions":[],"notes":[]},"data_version":null,` +
+				`"league":null,"settings_path":null,"log_path":null,"recent_errors":[]}`,
+		},
+		{
+			"PriceCheckResponse",
+			PriceCheckResponse{},
+			`{"item":` + zeroItem + `,"filters":` + zeroFilters + `}`,
+		},
+		{
+			"ItemCopied",
+			ItemCopied{},
+			`{"item":` + zeroItem + `,"filters":` + zeroFilters + `,"pinned":false}`,
+		},
+		{
+			"NilItemCopiedPointer",
+			(*ItemCopied)(nil),
+			`null`,
+		},
+		{
+			"PriceReady",
+			PriceReady{},
+			`{"summary":` + zeroSummary + `}`,
+		},
+		{
+			"PriceFailed",
+			PriceFailed{},
+			`{"error":` + zeroError + `}`,
+		},
+		{
+			"OverlayState",
+			OverlayState{},
+			`{"visible":false,"pinned":false}`,
+		},
+		{
+			"OverlayLayout",
+			OverlayLayout{},
+			`{"cover":false,"x":0,"y":0}`,
+		},
+		{
+			"UpdateAvailable",
+			UpdateAvailable{},
+			`{"version":"","notes":null,"date":null}`,
+		},
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			assert.JSONEq(t, c.want, wailsJSON(t, c.v))
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.JSONEq(t, tc.expected, wailsJSON(t, tc.have))
 		})
 	}
 }

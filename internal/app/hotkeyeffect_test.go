@@ -10,22 +10,88 @@ import (
 
 func TestHotkeysToggleTheirWindow(t *testing.T) {
 	a := platform.Action
-	for _, c := range []struct {
-		action                    platform.HotkeyAction
-		overlayOpen, settingsOpen bool
-		want                      hotkeyEffect
+	testCases := []struct {
+		name         string
+		action       platform.HotkeyAction
+		overlayOpen  bool
+		settingsOpen bool
+		expected     hotkeyEffect
 	}{
-		{a(platform.PriceCheck), false, false, hotkeyEffect{kind: effectPriceCheck, pinned: false}},
-		{a(platform.PriceCheckPinned), false, true, hotkeyEffect{kind: effectPriceCheck, pinned: true}},
-		{a(platform.PriceCheck), true, false, hotkeyEffect{kind: effectHideOverlay}},
-		{a(platform.PriceCheckPinned), true, false, hotkeyEffect{kind: effectHideOverlay}},
-		{a(platform.OpenSettings), true, false, hotkeyEffect{kind: effectShowSettings}},
-		{a(platform.OpenSettings), false, true, hotkeyEffect{kind: effectHideSettings}},
-		{a(platform.OpenTrade), true, true, hotkeyEffect{kind: effectOpenTrade}},
-		{platform.ChatAction(2), true, true, hotkeyEffect{kind: effectRunChat, index: 2}},
-		{platform.StashSearchAction(0), false, false, hotkeyEffect{kind: effectRunStash, index: 0}},
-		{a("bogus"), false, false, hotkeyEffect{}},
-	} {
-		assert.Equal(t, c.want, hotkeyEffectFor(c.action, c.overlayOpen, c.settingsOpen), "%+v", c)
+		{
+			"PriceCheckOpensOverlay",
+			a(platform.PriceCheck),
+			false,
+			false,
+			hotkeyEffect{kind: effectPriceCheck, pinned: false},
+		},
+		{
+			"PinnedPriceCheckOpensPinnedOverlay",
+			a(platform.PriceCheckPinned),
+			false,
+			true,
+			hotkeyEffect{kind: effectPriceCheck, pinned: true},
+		},
+		{
+			"PriceCheckHidesOpenOverlay",
+			a(platform.PriceCheck),
+			true,
+			false,
+			hotkeyEffect{kind: effectHideOverlay},
+		},
+		{
+			"PinnedPriceCheckHidesOpenOverlay",
+			a(platform.PriceCheckPinned),
+			true,
+			false,
+			hotkeyEffect{kind: effectHideOverlay},
+		},
+		{
+			"OpenSettingsShowsSettings",
+			a(platform.OpenSettings),
+			true,
+			false,
+			hotkeyEffect{kind: effectShowSettings},
+		},
+		{
+			"OpenSettingsHidesOpenSettings",
+			a(platform.OpenSettings),
+			false,
+			true,
+			hotkeyEffect{kind: effectHideSettings},
+		},
+		{
+			"OpenTradeOpensTrade",
+			a(platform.OpenTrade),
+			true,
+			true,
+			hotkeyEffect{kind: effectOpenTrade},
+		},
+		{
+			"ChatActionRunsChat",
+			platform.ChatAction(2),
+			true,
+			true,
+			hotkeyEffect{kind: effectRunChat, index: 2},
+		},
+		{
+			"StashSearchActionRunsStash",
+			platform.StashSearchAction(0),
+			false,
+			false,
+			hotkeyEffect{kind: effectRunStash, index: 0},
+		},
+		{
+			"UnknownActionDoesNothing",
+			a("bogus"),
+			false,
+			false,
+			hotkeyEffect{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, hotkeyEffectFor(tc.action, tc.overlayOpen, tc.settingsOpen))
+		})
 	}
 }

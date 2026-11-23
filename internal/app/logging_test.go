@@ -11,12 +11,58 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLogLevelFromRKLLog(t *testing.T) {
-	for env, want := range map[string]slog.Level{
-		"": slog.LevelInfo, "info": slog.LevelInfo, "debug": slog.LevelDebug, "trace,enigo=debug": slog.LevelDebug,
-		" WARN ": slog.LevelWarn, "error": slog.LevelError, "debug,reqwest=info": slog.LevelDebug, "bogus": slog.LevelInfo,
-	} {
-		assert.Equal(t, want, LogLevel(env), env)
+func TestLogLevelFromDivvyLog(t *testing.T) {
+	testCases := []struct {
+		name     string
+		have     string
+		expected slog.Level
+	}{
+		{
+			"EmptyIsInfo",
+			"",
+			slog.LevelInfo,
+		},
+		{
+			"Info",
+			"info",
+			slog.LevelInfo,
+		},
+		{
+			"Debug",
+			"debug",
+			slog.LevelDebug,
+		},
+		{
+			"TraceWithTargetIsDebug",
+			"trace,enigo=debug",
+			slog.LevelDebug,
+		},
+		{
+			"PaddedUppercaseWarn",
+			" WARN ",
+			slog.LevelWarn,
+		},
+		{
+			"Error",
+			"error",
+			slog.LevelError,
+		},
+		{
+			"DebugWithTarget",
+			"debug,reqwest=info",
+			slog.LevelDebug,
+		},
+		{
+			"UnknownIsInfo",
+			"bogus",
+			slog.LevelInfo,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, LogLevel(tc.have))
+		})
 	}
 }
 

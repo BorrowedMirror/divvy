@@ -10,29 +10,84 @@ import (
 
 // The JSON below is the frontend contract.
 func TestJSONShapes(t *testing.T) {
-	cases := []struct {
-		v    any
-		want string
+	testCases := []struct {
+		name     string
+		have     any
+		expected string
 	}{
-		{Action(PriceCheck), `"price_check"`},
-		{Action(PriceCheckPinned), `"price_check_pinned"`},
-		{ChatAction(2), `{"chat":2}`},
-		{StashSearchAction(0), `{"stash_search":0}`},
-		{HotkeyEvent{Action: Action(OpenTrade)}, `{"action":"open_trade"}`},
-		{WindowEvent{Type: WindowFound, Info: WindowInfo{Title: "Path of Exile 2", Rect: Rect{1, 2, 3, 4}, Focused: true, NativeID: 9}},
-			`{"type":"found","title":"Path of Exile 2","rect":{"x":1,"y":2,"width":3,"height":4},"focused":true,"native_id":9}`},
-		{WindowEvent{Type: WindowMoved, Rect: Rect{-5, 0, 10, 10}}, `{"type":"moved","rect":{"x":-5,"y":0,"width":10,"height":10}}`},
-		{WindowEvent{Type: WindowFocusChanged, Focused: false}, `{"type":"focus_changed","focused":false}`},
-		{WindowEvent{Type: WindowLost}, `{"type":"lost"}`},
-		{InputEvent{Type: KeyDown, Key: "Escape"}, `{"type":"key_down","key":"Escape"}`},
-		{InputEvent{Type: Wheel, Delta: -1}, `{"type":"wheel","delta":-1}`},
-		{Capabilities{}, `{"window_tracking":false,"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,"keystroke_injection":false,"clipboard":false,"missing_permissions":[],"notes":[]}`},
-		{BackendX11, `"x11"`},
+		{
+			"PriceCheckAction",
+			Action(PriceCheck),
+			`"price_check"`,
+		},
+		{
+			"PinnedPriceCheckAction",
+			Action(PriceCheckPinned),
+			`"price_check_pinned"`,
+		},
+		{
+			"ChatAction",
+			ChatAction(2),
+			`{"chat":2}`,
+		},
+		{
+			"StashSearchAction",
+			StashSearchAction(0),
+			`{"stash_search":0}`,
+		},
+		{
+			"HotkeyEvent",
+			HotkeyEvent{Action: Action(OpenTrade)},
+			`{"action":"open_trade"}`,
+		},
+		{
+			"WindowFound",
+			WindowEvent{Type: WindowFound, Info: WindowInfo{Title: "Path of Exile 2", Rect: Rect{1, 2, 3, 4}, Focused: true, NativeID: 9}},
+			`{"type":"found","title":"Path of Exile 2","rect":{"x":1,"y":2,"width":3,"height":4},"focused":true,"native_id":9}`,
+		},
+		{
+			"WindowMoved",
+			WindowEvent{Type: WindowMoved, Rect: Rect{-5, 0, 10, 10}},
+			`{"type":"moved","rect":{"x":-5,"y":0,"width":10,"height":10}}`,
+		},
+		{
+			"WindowFocusChanged",
+			WindowEvent{Type: WindowFocusChanged, Focused: false},
+			`{"type":"focus_changed","focused":false}`,
+		},
+		{
+			"WindowLost",
+			WindowEvent{Type: WindowLost},
+			`{"type":"lost"}`,
+		},
+		{
+			"KeyDown",
+			InputEvent{Type: KeyDown, Key: "Escape"},
+			`{"type":"key_down","key":"Escape"}`,
+		},
+		{
+			"Wheel",
+			InputEvent{Type: Wheel, Delta: -1},
+			`{"type":"wheel","delta":-1}`,
+		},
+		{
+			"EmptyCapabilities",
+			Capabilities{},
+			`{"window_tracking":false,"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,"keystroke_injection":false,"clipboard":false,"missing_permissions":[],"notes":[]}`,
+		},
+		{
+			"BackendKind",
+			BackendX11,
+			`"x11"`,
+		},
 	}
-	for _, c := range cases {
-		b, err := json.Marshal(c.v)
-		require.NoError(t, err)
-		assert.JSONEq(t, c.want, string(b))
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			b, err := json.Marshal(tc.have)
+			require.NoError(t, err)
+			assert.JSONEq(t, tc.expected, string(b))
+		})
 	}
 }
 

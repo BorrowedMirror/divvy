@@ -26,23 +26,32 @@ func TestReadyNotice(t *testing.T) {
 	defer game.Stop()
 
 	steps(t,
-		step{"shows over the game when the game window appears", func(t *testing.T) {
-			app.WaitState(t, "the ready notice", 10*time.Second, func(s appState) bool { return s.NoticeVisible })
-			d := app.WaitDOM(t, "notice", `[data-testid="ready-notice"]`, 5*time.Second, func(d domReply) bool {
-				return d.Visible && strings.Contains(d.Text, "Divvy")
-			})
-			assert.Contains(t, d.Text, "Ready and running in the background")
-		}},
-		step{"leaves the keyboard focus with the game", func(t *testing.T) {
-			if !isX11() {
-				t.Skip("checked with xdotool on X11")
-			}
-			out, err := shell(t, "xdotool getactivewindow getwindowname").CombinedOutput()
-			require.NoError(t, err, "%s", out)
-			assert.Equal(t, "Path of Exile 2", strings.TrimSpace(string(out)))
-		}},
-		step{"hides by itself", func(t *testing.T) {
-			app.WaitState(t, "the ready notice hidden", 10*time.Second, func(s appState) bool { return !s.NoticeVisible })
-		}},
+		step{
+			"ShowsOverGameWhenGameWindowAppears",
+			func(t *testing.T) {
+				app.WaitState(t, "the ready notice", 10*time.Second, func(s appState) bool { return s.NoticeVisible })
+				d := app.WaitDOM(t, "notice", `[data-testid="ready-notice"]`, 5*time.Second, func(d domReply) bool {
+					return d.Visible && strings.Contains(d.Text, "Divvy")
+				})
+				assert.Contains(t, d.Text, "Ready and running in the background")
+			},
+		},
+		step{
+			"LeavesKeyboardFocusWithGame",
+			func(t *testing.T) {
+				if !isX11() {
+					t.Skip("checked with xdotool on X11")
+				}
+				out, err := shell(t, "xdotool getactivewindow getwindowname").CombinedOutput()
+				require.NoError(t, err, "%s", out)
+				assert.Equal(t, "Path of Exile 2", strings.TrimSpace(string(out)))
+			},
+		},
+		step{
+			"HidesByItself",
+			func(t *testing.T) {
+				app.WaitState(t, "the ready notice hidden", 10*time.Second, func(s appState) bool { return !s.NoticeVisible })
+			},
+		},
 	)
 }

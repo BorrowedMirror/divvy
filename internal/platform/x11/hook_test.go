@@ -10,29 +10,98 @@ import (
 )
 
 func TestMapsEvents(t *testing.T) {
-	cases := []struct {
-		typ, detail uint8
-		x, y        int16
-		want        *platform.InputEvent
+	testCases := []struct {
+		name     string
+		typ      uint8
+		detail   uint8
+		x        int16
+		y        int16
+		expected *platform.InputEvent
 	}{
-		{evKeyPress, 38, 0, 0, &platform.InputEvent{Type: platform.KeyDown, Key: "KeyA"}},
-		{evKeyRelease, 38, 0, 0, &platform.InputEvent{Type: platform.KeyUp, Key: "KeyA"}},
-		{evKeyPress | 0x80, 38, 0, 0, &platform.InputEvent{Type: platform.KeyDown, Key: "KeyA"}},
-		{evMotionNotify, 0, 10, -2, &platform.InputEvent{Type: platform.MouseMove, X: 10, Y: -2}},
-		{evButtonPress, 5, 0, 0, &platform.InputEvent{Type: platform.Wheel, Delta: -1}},
-		{evButtonPress, 4, 0, 0, &platform.InputEvent{Type: platform.Wheel, Delta: 1}},
-		{evButtonRelease, 4, 0, 0, nil},
-		{evButtonPress, 1, 0, 0, nil},
-		{12, 0, 0, 0, nil},
+		{
+			"KeyPress",
+			evKeyPress,
+			38,
+			0,
+			0,
+			&platform.InputEvent{Type: platform.KeyDown, Key: "KeyA"},
+		},
+		{
+			"KeyRelease",
+			evKeyRelease,
+			38,
+			0,
+			0,
+			&platform.InputEvent{Type: platform.KeyUp, Key: "KeyA"},
+		},
+		{
+			"SyntheticKeyPress",
+			evKeyPress | 0x80,
+			38,
+			0,
+			0,
+			&platform.InputEvent{Type: platform.KeyDown, Key: "KeyA"},
+		},
+		{
+			"MotionNotify",
+			evMotionNotify,
+			0,
+			10,
+			-2,
+			&platform.InputEvent{Type: platform.MouseMove, X: 10, Y: -2},
+		},
+		{
+			"WheelDown",
+			evButtonPress,
+			5,
+			0,
+			0,
+			&platform.InputEvent{Type: platform.Wheel, Delta: -1},
+		},
+		{
+			"WheelUp",
+			evButtonPress,
+			4,
+			0,
+			0,
+			&platform.InputEvent{Type: platform.Wheel, Delta: 1},
+		},
+		{
+			"IgnoresWheelRelease",
+			evButtonRelease,
+			4,
+			0,
+			0,
+			nil,
+		},
+		{
+			"IgnoresLeftButton",
+			evButtonPress,
+			1,
+			0,
+			0,
+			nil,
+		},
+		{
+			"IgnoresUnknownType",
+			12,
+			0,
+			0,
+			0,
+			nil,
+		},
 	}
-	for _, c := range cases {
-		got, ok := mapEvent(c.typ, c.detail, c.x, c.y)
-		if c.want == nil {
-			assert.False(t, ok, "%d/%d: unexpected %v", c.typ, c.detail, got)
-			continue
-		}
-		assert.True(t, ok, "%d/%d", c.typ, c.detail)
-		assert.Equal(t, *c.want, got, "%d/%d", c.typ, c.detail)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := mapEvent(tc.typ, tc.detail, tc.x, tc.y)
+			if tc.expected == nil {
+				assert.False(t, ok, "unexpected %v", got)
+				return
+			}
+			assert.True(t, ok)
+			assert.Equal(t, *tc.expected, got)
+		})
 	}
 }
 

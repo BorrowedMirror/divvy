@@ -9,49 +9,197 @@ import (
 )
 
 func TestMapsEveryKnownHeader(t *testing.T) {
-	cases := []struct {
-		header string
-		want   ItemClassKind
+	testCases := []struct {
+		name     string
+		have     string
+		expected ItemClassKind
 	}{
-		{"Stackable Currency", ClassStackableCurrency},
-		{"Omen", ClassOmen},
-		{"Essence", ClassEssence},
-		{"Essences", ClassEssence},
-		{"Soul Cores", ClassSoulCore},
-		{"Runes", ClassRune},
-		{"Socketable", ClassRune},
-		{"Augment", ClassRune},
-		{"Distilled Emotions", ClassDistilledEmotion},
-		{"Splinter", ClassSplinter},
-		{"Catalysts", ClassCatalyst},
-		{"Skill Gems", ClassSkillGem},
-		{"Support Gems", ClassSupportGem},
-		{"Uncut Skill Gems", ClassUncutGem},
-		{"Uncut Support Gems", ClassUncutGem},
-		{"Uncut Spirit Gems", ClassUncutGem},
-		{"Waystones", ClassWaystone},
-		{"Tablet", ClassTablet},
-		{"Precursor Tablets", ClassTablet},
-		{"Jewels", ClassJewel},
-		{"Life Flasks", ClassLifeFlask},
-		{"Mana Flasks", ClassManaFlask},
-		{"Charms", ClassCharm},
-		{"Relics", ClassRelic},
-		{"Amulets", ClassAmulet},
-		{"Rings", ClassRing},
-		{"Belts", ClassBelt},
-		{"Body Armours", ClassBodyArmour},
-		{"Helmets", ClassHelmet},
-		{"Gloves", ClassGloves},
-		{"Boots", ClassBoots},
-		{"Shields", ClassShield},
-		{"Bucklers", ClassBuckler},
-		{"Foci", ClassFocus},
-		{"Quivers", ClassQuiver},
-		{"  helmets \r", ClassHelmet},
+		{
+			"StackableCurrency",
+			"Stackable Currency",
+			ClassStackableCurrency,
+		},
+		{
+			"Omen",
+			"Omen",
+			ClassOmen,
+		},
+		{
+			"Essence",
+			"Essence",
+			ClassEssence,
+		},
+		{
+			"Essences",
+			"Essences",
+			ClassEssence,
+		},
+		{
+			"SoulCores",
+			"Soul Cores",
+			ClassSoulCore,
+		},
+		{
+			"Runes",
+			"Runes",
+			ClassRune,
+		},
+		{
+			"Socketable",
+			"Socketable",
+			ClassRune,
+		},
+		{
+			"Augment",
+			"Augment",
+			ClassRune,
+		},
+		{
+			"DistilledEmotions",
+			"Distilled Emotions",
+			ClassDistilledEmotion,
+		},
+		{
+			"Splinter",
+			"Splinter",
+			ClassSplinter,
+		},
+		{
+			"Catalysts",
+			"Catalysts",
+			ClassCatalyst,
+		},
+		{
+			"SkillGems",
+			"Skill Gems",
+			ClassSkillGem,
+		},
+		{
+			"SupportGems",
+			"Support Gems",
+			ClassSupportGem,
+		},
+		{
+			"UncutSkillGems",
+			"Uncut Skill Gems",
+			ClassUncutGem,
+		},
+		{
+			"UncutSupportGems",
+			"Uncut Support Gems",
+			ClassUncutGem,
+		},
+		{
+			"UncutSpiritGems",
+			"Uncut Spirit Gems",
+			ClassUncutGem,
+		},
+		{
+			"Waystones",
+			"Waystones",
+			ClassWaystone,
+		},
+		{
+			"Tablet",
+			"Tablet",
+			ClassTablet,
+		},
+		{
+			"PrecursorTablets",
+			"Precursor Tablets",
+			ClassTablet,
+		},
+		{
+			"Jewels",
+			"Jewels",
+			ClassJewel,
+		},
+		{
+			"LifeFlasks",
+			"Life Flasks",
+			ClassLifeFlask,
+		},
+		{
+			"ManaFlasks",
+			"Mana Flasks",
+			ClassManaFlask,
+		},
+		{
+			"Charms",
+			"Charms",
+			ClassCharm,
+		},
+		{
+			"Relics",
+			"Relics",
+			ClassRelic,
+		},
+		{
+			"Amulets",
+			"Amulets",
+			ClassAmulet,
+		},
+		{
+			"Rings",
+			"Rings",
+			ClassRing,
+		},
+		{
+			"Belts",
+			"Belts",
+			ClassBelt,
+		},
+		{
+			"BodyArmours",
+			"Body Armours",
+			ClassBodyArmour,
+		},
+		{
+			"Helmets",
+			"Helmets",
+			ClassHelmet,
+		},
+		{
+			"Gloves",
+			"Gloves",
+			ClassGloves,
+		},
+		{
+			"Boots",
+			"Boots",
+			ClassBoots,
+		},
+		{
+			"Shields",
+			"Shields",
+			ClassShield,
+		},
+		{
+			"Bucklers",
+			"Bucklers",
+			ClassBuckler,
+		},
+		{
+			"Foci",
+			"Foci",
+			ClassFocus,
+		},
+		{
+			"Quivers",
+			"Quivers",
+			ClassQuiver,
+		},
+		{
+			"IgnoresWhitespaceAndCase",
+			"  helmets \r",
+			ClassHelmet,
+		},
 	}
-	for _, c := range cases {
-		assert.Equal(t, c.want.Class(), itemClassFromHeader(c.header), c.header)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected.Class(), itemClassFromHeader(tc.have))
+		})
 	}
 }
 

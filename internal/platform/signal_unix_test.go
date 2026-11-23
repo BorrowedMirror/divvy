@@ -47,7 +47,7 @@ func raise(t *testing.T, sig syscall.Signal) {
 func TestSignalTriggers(t *testing.T) {
 	keep := SignalTriggers(t.Context())
 
-	t.Run("SIGUSR2 checks and SIGUSR1 pins", func(t *testing.T) {
+	t.Run("SIGUSR2ChecksAndSIGUSR1Pins", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(t.Context())
 		events := SignalTriggers(ctx)
 		raise(t, syscall.SIGUSR2)
@@ -68,7 +68,7 @@ func TestSignalTriggers(t *testing.T) {
 		}
 	})
 
-	t.Run("a full stream drops triggers", func(t *testing.T) {
+	t.Run("FullStreamDropsTriggers", func(t *testing.T) {
 		events := SignalTriggers(t.Context())
 		// Wait for each signal to arrive (the OS merges a signal raised while one is pending).
 		for range signalBuffer + 8 {

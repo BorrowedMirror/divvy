@@ -54,18 +54,46 @@ func TestAcceleratorMetaAndSuperAreTheSameShortcut(t *testing.T) {
 }
 
 func TestAcceleratorMatchesWailsStringParser(t *testing.T) {
-	for _, c := range []struct{ chord, wails string }{
-		{"Ctrl+Alt+D", "ctrl+alt+d"},
-		{"Shift+F5", "shift+f5"},
-		{"Ctrl+Space", "ctrl+space"},
-		{"Alt+Ctrl+ArrowUp", "ctrl+alt+up"},
-		{"Ctrl+PageDown", "ctrl+page down"},
-	} {
-		ours, ok := wailsCanonical(accel(t, c.chord))
-		require.True(t, ok, c.chord)
-		theirs, ok := wailsCanonical(c.wails)
-		require.True(t, ok, c.wails)
-		assert.Equal(t, theirs, ours, c.chord)
+	testCases := []struct {
+		name  string
+		chord string
+		wails string
+	}{
+		{
+			"Letter",
+			"Ctrl+Alt+D",
+			"ctrl+alt+d",
+		},
+		{
+			"FunctionKey",
+			"Shift+F5",
+			"shift+f5",
+		},
+		{
+			"Space",
+			"Ctrl+Space",
+			"ctrl+space",
+		},
+		{
+			"ArrowWithReorderedModifiers",
+			"Alt+Ctrl+ArrowUp",
+			"ctrl+alt+up",
+		},
+		{
+			"PageDown",
+			"Ctrl+PageDown",
+			"ctrl+page down",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ours, ok := wailsCanonical(accel(t, tc.chord))
+			require.True(t, ok)
+			theirs, ok := wailsCanonical(tc.wails)
+			require.True(t, ok)
+			assert.Equal(t, theirs, ours)
+		})
 	}
 }
 

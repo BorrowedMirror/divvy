@@ -167,13 +167,13 @@ func TestPermissionsForBackendPicksTheProbe(t *testing.T) {
 // The JSON goes to the frontend (PermissionReport / PermissionInfo / PermissionsChanged in
 // web/src/bindings.ts): lists are never null.
 func TestPermissionsJSON(t *testing.T) {
-	cases := []struct {
-		name string
-		v    any
-		want string
+	testCases := []struct {
+		name     string
+		have     any
+		expected string
 	}{
 		{
-			"macos",
+			"MacOS",
 			ipc.PermissionsChanged{Report: buildPermissionReport(platform.BackendMacOS, []string{permScreenRecording}, nil, false)},
 			`{"report":{"platform":"macos","missing":[` +
 				`{"kind":"accessibility","granted":true,"required":true,"settings_url":"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"},` +
@@ -182,12 +182,12 @@ func TestPermissionsJSON(t *testing.T) {
 				`],"notes":[],"gnome":false}}`,
 		},
 		{
-			"x11 without permissions",
+			"X11WithoutPermissions",
 			buildPermissionReport(platform.BackendX11, nil, nil, false),
 			`{"platform":"x11","missing":[],"notes":[],"gnome":false}`,
 		},
 		{
-			"wayland gnome",
+			"WaylandGNOME",
 			buildPermissionReport(platform.BackendWayland, []string{"foo"}, nil, true),
 			`{"platform":"wayland","missing":[{"kind":"foo","granted":false,"required":false,"settings_url":null}],"notes":[` +
 				`"Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it",` +
@@ -196,18 +196,21 @@ func TestPermissionsJSON(t *testing.T) {
 				`"GNOME: only X11/XWayland is supported; run the game under XWayland"],"gnome":true}`,
 		},
 		{
-			"zero value",
+			"ZeroValue",
 			ipc.PermissionReport{Platform: platform.BackendWindows},
 			`{"platform":"windows","missing":[],"notes":[],"gnome":false}`,
 		},
 	}
-	for _, c := range cases {
-		v2, err := json.Marshal(c.v)
-		require.NoError(t, err)
-		assert.JSONEq(t, c.want, string(v2), "%s (json/v2)", c.name)
-		v1, err := stdjson.Marshal(c.v)
-		require.NoError(t, err)
-		assert.JSONEq(t, c.want, string(v1), "%s (encoding/json)", c.name)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			v2, err := json.Marshal(tc.have)
+			require.NoError(t, err)
+			assert.JSONEq(t, tc.expected, string(v2), "json/v2")
+			v1, err := stdjson.Marshal(tc.have)
+			require.NoError(t, err)
+			assert.JSONEq(t, tc.expected, string(v1), "encoding/json")
+		})
 	}
 }
 

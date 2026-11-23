@@ -15,23 +15,68 @@ import (
 )
 
 func TestLookupURLsUseFixedHostsAndEncodeNames(t *testing.T) {
-	for _, c := range []struct {
-		site LookupSite
-		name string
-		want string // "" = none
+	testCases := []struct {
+		name     string
+		site     LookupSite
+		have     string
+		expected string // "" = none
 	}{
-		{LookupPoe2db, "Gold Ring", "https://poe2db.tw/us/Gold_Ring"},
-		{LookupWiki, "Ventor's Gamble", "https://www.poe2wiki.net/wiki/Ventor%27s_Gamble"},
-		{LookupWiki, "a/b?c#d", "https://www.poe2wiki.net/wiki/a%2Fb%3Fc%23d"},
-		{LookupPoe2db, "  ", ""},
-		{LookupCraftOfExile, "", "https://beta.craftofexile.com/?game=poe2"},
-		{LookupWiki, `100% "x" <y> {z} a\b`, "https://www.poe2wiki.net/wiki/100%25_%22x%22_%3Cy%3E_%7Bz%7D_a%5Cb"},
-		{LookupPoe2db, "Kalandra's Touché", "https://poe2db.tw/us/Kalandra%27s_Touch%C3%A9"},
-		{LookupPoe2db, "a\tb", "https://poe2db.tw/us/a%09b"},
-	} {
-		got, ok := lookupURL(c.site, c.name, "")
-		assert.Equal(t, c.want != "", ok, "%s %q", c.site, c.name)
-		assert.Equal(t, c.want, got, "%s %q", c.site, c.name)
+		{
+			"Poe2dbUnderscoresSpaces",
+			LookupPoe2db,
+			"Gold Ring",
+			"https://poe2db.tw/us/Gold_Ring",
+		},
+		{
+			"WikiEncodesApostrophe",
+			LookupWiki,
+			"Ventor's Gamble",
+			"https://www.poe2wiki.net/wiki/Ventor%27s_Gamble",
+		},
+		{
+			"WikiEncodesURLDelimiters",
+			LookupWiki,
+			"a/b?c#d",
+			"https://www.poe2wiki.net/wiki/a%2Fb%3Fc%23d",
+		},
+		{
+			"BlankNameHasNoURL",
+			LookupPoe2db,
+			"  ",
+			"",
+		},
+		{
+			"CraftOfExileIgnoresName",
+			LookupCraftOfExile,
+			"",
+			"https://beta.craftofexile.com/?game=poe2",
+		},
+		{
+			"WikiEncodesSpecialCharacters",
+			LookupWiki,
+			`100% "x" <y> {z} a\b`,
+			"https://www.poe2wiki.net/wiki/100%25_%22x%22_%3Cy%3E_%7Bz%7D_a%5Cb",
+		},
+		{
+			"Poe2dbEncodesNonASCII",
+			LookupPoe2db,
+			"Kalandra's Touché",
+			"https://poe2db.tw/us/Kalandra%27s_Touch%C3%A9",
+		},
+		{
+			"Poe2dbEncodesTab",
+			LookupPoe2db,
+			"a\tb",
+			"https://poe2db.tw/us/a%09b",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := lookupURL(tc.site, tc.have, "")
+			assert.Equal(t, tc.expected != "", ok)
+			assert.Equal(t, tc.expected, got)
+		})
 	}
 }
 

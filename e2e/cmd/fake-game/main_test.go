@@ -23,23 +23,56 @@ func mustArgs(t *testing.T, args ...string) options {
 func TestChords(t *testing.T) {
 	it := items{normal: "N", advanced: "A"}
 	ctrl, super, alt := mods{ctrl: true}, mods{super: true}, mods{alt: true}
-	cases := []struct {
+	testCases := []struct {
 		name string
 		ev   keyEvent
 		want string
 		ok   bool
 	}{
-		{"ctrl+c", keyEvent{isC: true, mods: ctrl}, "N", true},
-		{"cmd+c", keyEvent{isC: true, mods: super}, "N", true},
-		{"ctrl+alt+c", keyEvent{isC: true, mods: mods{ctrl: true, alt: true}}, "A", true},
-		{"c", keyEvent{isC: true}, "", false},
-		{"alt+c", keyEvent{isC: true, mods: alt}, "", false},
-		{"ctrl+d", keyEvent{mods: ctrl}, "", false},
+		{
+			"CopiesNormalItemOnCtrlC",
+			keyEvent{isC: true, mods: ctrl},
+			"N",
+			true,
+		},
+		{
+			"CopiesNormalItemOnCmdC",
+			keyEvent{isC: true, mods: super},
+			"N",
+			true,
+		},
+		{
+			"CopiesAdvancedItemOnCtrlAltC",
+			keyEvent{isC: true, mods: mods{ctrl: true, alt: true}},
+			"A",
+			true,
+		},
+		{
+			"IgnoresBareC",
+			keyEvent{isC: true},
+			"",
+			false,
+		},
+		{
+			"IgnoresAltC",
+			keyEvent{isC: true, mods: alt},
+			"",
+			false,
+		},
+		{
+			"IgnoresCtrlD",
+			keyEvent{mods: ctrl},
+			"",
+			false,
+		},
 	}
-	for _, c := range cases {
-		got, ok := it.forKey(c.ev)
-		assert.Equal(t, c.ok, ok, c.name)
-		assert.Equal(t, c.want, got, c.name)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := it.forKey(tc.ev)
+			assert.Equal(t, tc.ok, ok)
+			assert.Equal(t, tc.want, got)
+		})
 	}
 }
 

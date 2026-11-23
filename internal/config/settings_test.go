@@ -82,70 +82,144 @@ func TestCheckUpdatesDefaultsOnAndSurvivesOlderFiles(t *testing.T) {
 // ---------------------------------------------------------------- documents over the defaults
 
 func TestDocumentOverDefaults(t *testing.T) {
-	t.Run("waystone flags table replaces the defaults", func(t *testing.T) {
+	t.Run("WaystoneFlagsReplaceDefaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n\"Monsters fire # additional Projectiles\" = \"warn\"\n")
 		assert.Equal(t, map[string]ModFlag{"Monsters fire # additional Projectiles": FlagWarn}, s.Waystone.Flags)
 	})
-	t.Run("empty waystone flags table means none", func(t *testing.T) {
+	t.Run("EmptyWaystoneFlagsMeansNone", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n")
 		assert.Empty(t, s.Waystone.Flags)
 		s = mustFromTOML(t, "[waystone]\nflags = {}\n")
 		assert.Empty(t, s.Waystone.Flags)
 	})
-	t.Run("flag keys with dots", func(t *testing.T) {
+	t.Run("AcceptsFlagKeysWithDots", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone.flags]\n\"1.5x Pack.Size\" = \"good\"\n")
 		assert.Equal(t, map[string]ModFlag{"1.5x Pack.Size": FlagGood}, s.Waystone.Flags)
 	})
-	t.Run("empty waystone section keeps the defaults", func(t *testing.T) {
+	t.Run("EmptyWaystoneSectionKeepsDefaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[waystone]\n")
 		assert.Equal(t, DefaultSettings().Waystone, s.Waystone)
 	})
-	t.Run("chat commands replace the defaults wholesale", func(t *testing.T) {
+	t.Run("ChatCommandsReplaceDefaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[[chat.commands]]\ntext = \"/exit\"\nsend = false\n[chat.commands.chord]\nmodifiers = []\nkey = \"F9\"\n")
 		assert.Equal(t, []ChatCommand{{Chord: chord("F9"), Text: "/exit"}}, s.Chat.Commands)
 		assert.Empty(t, s.Chat.GameLog)
 		s = mustFromTOML(t, "[chat]\ncommands = []\n")
 		assert.Empty(t, s.Chat.Commands)
 	})
-	t.Run("listing columns replace the defaults", func(t *testing.T) {
+	t.Run("ListingColumnsReplaceDefaults", func(t *testing.T) {
 		s := mustFromTOML(t, "[overlay]\nlisting_columns = [\"stock\"]\n")
 		assert.Equal(t, []ListingColumn{ColumnStock}, s.Overlay.ListingColumns)
 	})
-	t.Run("links fill per field", func(t *testing.T) {
+	t.Run("LinksFillPerField", func(t *testing.T) {
 		s := mustFromTOML(t, "[overlay.links]\nwiki = false\n")
 		assert.Equal(t, LinkSettings{Poe2db: true, Wiki: false, CraftOfExile: true}, s.Overlay.Links)
 	})
-	t.Run("integers are accepted for floats", func(t *testing.T) {
+	t.Run("AcceptsIntegersForFloats", func(t *testing.T) {
 		s := mustFromTOML(t, "[trade]\nwiden_pct = 25\n")
 		assert.InDelta(t, 25.0, s.Trade.WidenPct, 0)
 	})
-	t.Run("unknown keys are ignored", func(t *testing.T) {
+	t.Run("IgnoresUnknownKeys", func(t *testing.T) {
 		s := mustFromTOML(t, "future = 1\n[trade]\nnew_thing = \"x\"\n")
 		assertSettings(t, s, DefaultSettings())
 	})
-	rejects := []struct{ name, text, want string }{
-		{"chord without modifiers", "[hotkeys.price_check]\nkey = \"KeyD\"\n", "missing field `modifiers`"},
-		{"chord without key", "[hotkeys.open_trade]\nmodifiers = []\n", "missing field `key`"},
-		{"chat command without send", "[[chat.commands]]\ntext = \"/exit\"\nchord = { modifiers = [], key = \"\" }\n", "missing field `send`"},
-		{"chat command without chord", "[[chat.commands]]\ntext = \"/exit\"\nsend = true\n", "missing field `chord`"},
-		{"stash search without text", "[[stash.searches]]\nchord = { modifiers = [], key = \"\" }\n", "missing field `text`"},
-		{"unknown enum value", "[ui]\ntheme = \"blue\"\n", "unknown variant `blue`"},
-		{"unknown modifier", "[hotkeys.price_check]\nmodifiers = [\"hyper\"]\nkey = \"KeyD\"\n", "unknown variant `hyper`"},
-		{"unknown backend", "[platform]\nbackend_override = \"beos\"\n", "unknown variant `beos`"},
-		{"unknown flag", "[waystone.flags]\nx = \"meh\"\n", "unknown variant `meh`"},
-		{"negative uint32", "[overlay]\nauto_hide_ms = -1\n", "out of range for uint32"},
-		{"uint32 overflow", "[trade]\nlisting_count = 4294967296\n", "out of range for uint32"},
-		{"float for uint32", "[trade]\nlisting_count = 20.0\n", "expected uint32"},
-		{"string for enum", "[platform]\nbackend_override = 3\n", "expected a string"},
-		{"string for float", "[overlay]\nopacity = \"high\"\n", "opacity"},
-		{"string for bool", "[ui]\nautostart = \"yes\"\n", "autostart"},
-		{"int for string", "[ui]\nlanguage = 3\n", "language"},
-		{"section not a table", "trade = 1\n", "trade"},
+
+	testCases := []struct {
+		name string
+		have string
+		err  string
+	}{
+		{
+			"RejectsChordWithoutModifiers",
+			"[hotkeys.price_check]\nkey = \"KeyD\"\n",
+			"missing field `modifiers`",
+		},
+		{
+			"RejectsChordWithoutKey",
+			"[hotkeys.open_trade]\nmodifiers = []\n",
+			"missing field `key`",
+		},
+		{
+			"RejectsChatCommandWithoutSend",
+			"[[chat.commands]]\ntext = \"/exit\"\nchord = { modifiers = [], key = \"\" }\n",
+			"missing field `send`",
+		},
+		{
+			"RejectsChatCommandWithoutChord",
+			"[[chat.commands]]\ntext = \"/exit\"\nsend = true\n",
+			"missing field `chord`",
+		},
+		{
+			"RejectsStashSearchWithoutText",
+			"[[stash.searches]]\nchord = { modifiers = [], key = \"\" }\n",
+			"missing field `text`",
+		},
+		{
+			"RejectsUnknownEnumValue",
+			"[ui]\ntheme = \"blue\"\n",
+			"unknown variant `blue`",
+		},
+		{
+			"RejectsUnknownModifier",
+			"[hotkeys.price_check]\nmodifiers = [\"hyper\"]\nkey = \"KeyD\"\n",
+			"unknown variant `hyper`",
+		},
+		{
+			"RejectsUnknownBackend",
+			"[platform]\nbackend_override = \"beos\"\n",
+			"unknown variant `beos`",
+		},
+		{
+			"RejectsUnknownFlag",
+			"[waystone.flags]\nx = \"meh\"\n",
+			"unknown variant `meh`",
+		},
+		{
+			"RejectsNegativeUint32",
+			"[overlay]\nauto_hide_ms = -1\n",
+			"out of range for uint32",
+		},
+		{
+			"RejectsUint32Overflow",
+			"[trade]\nlisting_count = 4294967296\n",
+			"out of range for uint32",
+		},
+		{
+			"RejectsFloatForUint32",
+			"[trade]\nlisting_count = 20.0\n",
+			"expected uint32",
+		},
+		{
+			"RejectsNumberForEnum",
+			"[platform]\nbackend_override = 3\n",
+			"expected a string",
+		},
+		{
+			"RejectsStringForFloat",
+			"[overlay]\nopacity = \"high\"\n",
+			"opacity",
+		},
+		{
+			"RejectsStringForBool",
+			"[ui]\nautostart = \"yes\"\n",
+			"autostart",
+		},
+		{
+			"RejectsIntForString",
+			"[ui]\nlanguage = 3\n",
+			"language",
+		},
+		{
+			"RejectsSectionNotTable",
+			"trade = 1\n",
+			"trade",
+		},
 	}
-	for _, c := range rejects {
-		t.Run(c.name, func(t *testing.T) {
-			_, err := fromTOML(c.text)
-			require.ErrorContains(t, err, c.want)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := fromTOML(tc.have)
+			require.ErrorContains(t, err, tc.err)
 		})
 	}
 }
@@ -419,38 +493,105 @@ func TestMigrateRejectsBadVersionValues(t *testing.T) {
 }
 
 func TestMigrateV0RejectsMalformedLegacyKeys(t *testing.T) {
-	cases := []struct{ text, field string }{
-		{"league = 3", "league"},
-		{"hotkey = 3", "hotkey"},
-		{"hotkey = \"Ctrl+\"", "hotkey"},
-		{"online_only = \"yes\"", "online_only"},
-		{"online_only = true\ntrade = 1", "trade"},
+	testCases := []struct {
+		name     string
+		have     string
+		expected string
+	}{
+		{
+			"RejectsNonStringLeague",
+			"league = 3",
+			"league",
+		},
+		{
+			"RejectsNonStringHotkey",
+			"hotkey = 3",
+			"hotkey",
+		},
+		{
+			"RejectsHotkeyWithoutKey",
+			"hotkey = \"Ctrl+\"",
+			"hotkey",
+		},
+		{
+			"RejectsNonBoolOnlineOnly",
+			"online_only = \"yes\"",
+			"online_only",
+		},
+		{
+			"RejectsNonTableTrade",
+			"online_only = true\ntrade = 1",
+			"trade",
+		},
 	}
-	for _, c := range cases {
-		_, err := migrated(c.text)
-		requireInvalid(t, err, c.field)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := migrated(tc.have)
+			requireInvalid(t, err, tc.expected)
+		})
 	}
 }
 
 // Each v0 key on its own, including the replace-not-merge behaviour of Table::insert.
 func TestMigrateV0Steps(t *testing.T) {
-	cases := []struct{ name, in, want string }{
-		{"league string", `league = "Standard"`, "version = 1\n[league]\nauto_detect = false\nleague = \"Standard\"\n"},
-		{"blank league", `league = "  "`, "version = 1\n[league]\nauto_detect = true\n"},
-		{"sectioned league kept", "[league]\nleague = \"X\"\n", "version = 1\n[league]\nleague = \"X\"\n"},
-		{"hotkey", `hotkey = "ctrl+a"`, "version = 1\n[hotkeys.price_check]\nmodifiers = [\"ctrl\"]\nkey = \"KeyA\"\n"},
-		{"hotkey replaces a price_check table", "hotkey = \"F2\"\n[hotkeys]\nadvanced_copy = false\n[hotkeys.price_check]\nmodifiers = [\"alt\"]\nkey = \"KeyX\"\nextra = 1\n",
-			"version = 1\n[hotkeys]\nadvanced_copy = false\n[hotkeys.price_check]\nmodifiers = []\nkey = \"F2\"\n"},
-		{"online_only true", "online_only = true\n[trade]\nwiden_pct = 5.0\n", "version = 1\n[trade]\nwiden_pct = 5.0\nsellers = \"online\"\n"},
-		{"online_only false", "online_only = false", "version = 1\n[trade]\nsellers = \"any\"\n"},
-		{"version 0 is v0", "version = 0\nleague = \"A\"", "version = 1\n[league]\nauto_detect = false\nleague = \"A\"\n"},
-		{"v1 keeps legacy-looking keys", "version = 1\nhotkey = \"F2\"", "version = 1\nhotkey = \"F2\"\n"},
+	testCases := []struct {
+		name     string
+		have     string
+		expected string
+	}{
+		{
+			"MigratesLeagueString",
+			`league = "Standard"`,
+			"version = 1\n[league]\nauto_detect = false\nleague = \"Standard\"\n",
+		},
+		{
+			"BlankLeagueAutoDetects",
+			`league = "  "`,
+			"version = 1\n[league]\nauto_detect = true\n",
+		},
+		{
+			"KeepsSectionedLeague",
+			"[league]\nleague = \"X\"\n",
+			"version = 1\n[league]\nleague = \"X\"\n",
+		},
+		{
+			"MigratesHotkey",
+			`hotkey = "ctrl+a"`,
+			"version = 1\n[hotkeys.price_check]\nmodifiers = [\"ctrl\"]\nkey = \"KeyA\"\n",
+		},
+		{
+			"HotkeyReplacesPriceCheckTable",
+			"hotkey = \"F2\"\n[hotkeys]\nadvanced_copy = false\n[hotkeys.price_check]\nmodifiers = [\"alt\"]\nkey = \"KeyX\"\nextra = 1\n",
+			"version = 1\n[hotkeys]\nadvanced_copy = false\n[hotkeys.price_check]\nmodifiers = []\nkey = \"F2\"\n",
+		},
+		{
+			"MigratesOnlineOnlyTrue",
+			"online_only = true\n[trade]\nwiden_pct = 5.0\n",
+			"version = 1\n[trade]\nwiden_pct = 5.0\nsellers = \"online\"\n",
+		},
+		{
+			"MigratesOnlineOnlyFalse",
+			"online_only = false",
+			"version = 1\n[trade]\nsellers = \"any\"\n",
+		},
+		{
+			"TreatsVersionZeroAsV0",
+			"version = 0\nleague = \"A\"",
+			"version = 1\n[league]\nauto_detect = false\nleague = \"A\"\n",
+		},
+		{
+			"V1KeepsLegacyLookingKeys",
+			"version = 1\nhotkey = \"F2\"",
+			"version = 1\nhotkey = \"F2\"\n",
+		},
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got, err := migrated(c.in)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := migrated(tc.have)
 			require.NoError(t, err)
-			assert.Equal(t, table(t, c.want), got)
+			assert.Equal(t, table(t, tc.expected), got)
 		})
 	}
 }
@@ -567,19 +708,56 @@ func TestPanelScaleAndBackdropDimAreValidated(t *testing.T) {
 	assert.InDelta(t, 0.6, s.Overlay.BackdropDim, 0)
 	assert.False(t, s.UI.Autostart)
 	assert.False(t, s.Overlay.ClosePinnedOnGameFocus)
-	for _, c := range []struct {
-		scale, dim float64
-		ok         bool
+
+	testCases := []struct {
+		name     string
+		scale    float64
+		dim      float64
+		expected bool
 	}{
-		{0.75, 0.0, true},
-		{1.5, 0.9, true},
-		{0.5, 0.6, false},
-		{1.6, 0.6, false},
-		{1.0, 0.95, false},
-		{1.0, -0.1, false},
-	} {
-		s.Overlay.Scale, s.Overlay.BackdropDim = c.scale, c.dim
-		assert.Equal(t, c.ok, Validate(&s) == nil, "scale %v dim %v", c.scale, c.dim)
+		{
+			"AcceptsMinimumScaleAndDim",
+			0.75,
+			0.0,
+			true,
+		},
+		{
+			"AcceptsMaximumScaleAndDim",
+			1.5,
+			0.9,
+			true,
+		},
+		{
+			"RejectsScaleBelowMinimum",
+			0.5,
+			0.6,
+			false,
+		},
+		{
+			"RejectsScaleAboveMaximum",
+			1.6,
+			0.6,
+			false,
+		},
+		{
+			"RejectsDimAboveMaximum",
+			1.0,
+			0.95,
+			false,
+		},
+		{
+			"RejectsNegativeDim",
+			1.0,
+			-0.1,
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			s.Overlay.Scale, s.Overlay.BackdropDim = tc.scale, tc.dim
+			assert.Equal(t, tc.expected, Validate(&s) == nil)
+		})
 	}
 }
 

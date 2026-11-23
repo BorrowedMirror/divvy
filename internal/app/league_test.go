@@ -14,19 +14,44 @@ func testLeague(id string) trade.League {
 }
 
 func TestAutoLeaguePrefersChallengeSoftcore(t *testing.T) {
-	for _, c := range []struct {
-		leagues []trade.League
-		want    string
-		ok      bool
+	testCases := []struct {
+		name     string
+		have     []trade.League
+		expected string
+		ok       bool
 	}{
-		{[]trade.League{testLeague("Standard"), testLeague("Hardcore"), testLeague("Rise of the Abyssal"), testLeague("HC Rise of the Abyssal")}, "Rise of the Abyssal", true},
-		{[]trade.League{testLeague("Standard"), testLeague("Hardcore")}, "Standard", true},
-		{nil, "", false},
-		{[]trade.League{testLeague("SSF Standard")}, "", false},
-	} {
-		got, ok := autoLeague(c.leagues)
-		assert.Equal(t, c.want, got)
-		assert.Equal(t, c.ok, ok)
+		{
+			"PicksChallengeSoftcore",
+			[]trade.League{testLeague("Standard"), testLeague("Hardcore"), testLeague("Rise of the Abyssal"), testLeague("HC Rise of the Abyssal")},
+			"Rise of the Abyssal",
+			true,
+		},
+		{
+			"FallsBackToStandard",
+			[]trade.League{testLeague("Standard"), testLeague("Hardcore")},
+			"Standard",
+			true,
+		},
+		{
+			"NoLeagues",
+			nil,
+			"",
+			false,
+		},
+		{
+			"SkipsSoloSelfFound",
+			[]trade.League{testLeague("SSF Standard")},
+			"",
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := autoLeague(tc.have)
+			assert.Equal(t, tc.expected, got)
+			assert.Equal(t, tc.ok, ok)
+		})
 	}
 }
 

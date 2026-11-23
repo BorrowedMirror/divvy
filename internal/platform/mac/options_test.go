@@ -25,13 +25,46 @@ func TestOptionsFromEnv(t *testing.T) {
 }
 
 func TestCopyModifierParseAndRemap(t *testing.T) {
-	for in, want := range map[string]CopyModifier{
-		" CMD ": CopyCommand, "meta": CopyCommand, "command": CopyCommand, "Control": CopyControl, "ctrl": CopyControl,
-	} {
-		got, ok := parseCopyModifier(in)
-		assert.True(t, ok, in)
-		assert.Equal(t, want, got, in)
+	testCases := []struct {
+		name     string
+		have     string
+		expected CopyModifier
+	}{
+		{
+			"PaddedUppercaseCmd",
+			" CMD ",
+			CopyCommand,
+		},
+		{
+			"Meta",
+			"meta",
+			CopyCommand,
+		},
+		{
+			"Command",
+			"command",
+			CopyCommand,
+		},
+		{
+			"CapitalizedControl",
+			"Control",
+			CopyControl,
+		},
+		{
+			"Ctrl",
+			"ctrl",
+			CopyControl,
+		},
 	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := parseCopyModifier(tc.have)
+			assert.True(t, ok)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
+
 	_, ok := parseCopyModifier("hyper")
 	assert.False(t, ok)
 	var zero CopyModifier

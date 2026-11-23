@@ -9,23 +9,87 @@ import (
 )
 
 func TestMapsKeycodesToW3CCodes(t *testing.T) {
-	for keycode, want := range map[uint16]string{
-		0x08: "KeyC",
-		0x1A: "Digit7",
-		0x60: "F5",
-		0x35: "Escape",
-		0x3B: "ControlLeft",
-		0x24: "Enter",
-		0x52: "Numpad0",
-		0x4C: "NumpadEnter",
-		0x5A: "F20",
-		0x3F: "Fn",
-		0x68: "Lang1",
-		0x6E: "ContextMenu",
-		0x42: "Unidentified",
-		999:  "Unidentified",
-	} {
-		assert.Equal(t, want, keyName(keycode), "%#x", keycode)
+	testCases := []struct {
+		name     string
+		have     uint16
+		expected string
+	}{
+		{
+			"KeyC",
+			0x08,
+			"KeyC",
+		},
+		{
+			"Digit7",
+			0x1A,
+			"Digit7",
+		},
+		{
+			"F5",
+			0x60,
+			"F5",
+		},
+		{
+			"Escape",
+			0x35,
+			"Escape",
+		},
+		{
+			"ControlLeft",
+			0x3B,
+			"ControlLeft",
+		},
+		{
+			"Enter",
+			0x24,
+			"Enter",
+		},
+		{
+			"Numpad0",
+			0x52,
+			"Numpad0",
+		},
+		{
+			"NumpadEnter",
+			0x4C,
+			"NumpadEnter",
+		},
+		{
+			"F20",
+			0x5A,
+			"F20",
+		},
+		{
+			"Fn",
+			0x3F,
+			"Fn",
+		},
+		{
+			"Lang1",
+			0x68,
+			"Lang1",
+		},
+		{
+			"ContextMenu",
+			0x6E,
+			"ContextMenu",
+		},
+		{
+			"UnmappedIsUnidentified",
+			0x42,
+			"Unidentified",
+		},
+		{
+			"UnknownIsUnidentified",
+			999,
+			"Unidentified",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, keyName(tc.have))
+		})
 	}
 }
 

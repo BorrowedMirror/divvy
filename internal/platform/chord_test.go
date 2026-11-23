@@ -10,20 +10,41 @@ import (
 )
 
 func TestParseLettersDigitsAndNamedKeys(t *testing.T) {
-	cases := []struct {
-		in   string
-		want Chord
+	testCases := []struct {
+		name     string
+		have     string
+		expected Chord
 	}{
-		{"Ctrl+Alt+D", NewChord("KeyD", Ctrl, Alt)},
-		{"control + 1", NewChord("Digit1", Ctrl)},
-		{"shift+F5", NewChord("F5", Shift)},
-		{"cmd+option+KeyX", NewChord("KeyX", Meta, Alt)},
+		{
+			"Letter",
+			"Ctrl+Alt+D",
+			NewChord("KeyD", Ctrl, Alt),
+		},
+		{
+			"DigitWithSpacesAndAlias",
+			"control + 1",
+			NewChord("Digit1", Ctrl),
+		},
+		{
+			"NamedKey",
+			"shift+F5",
+			NewChord("F5", Shift),
+		},
+		{
+			"CodeWithMacAliases",
+			"cmd+option+KeyX",
+			NewChord("KeyX", Meta, Alt),
+		},
 	}
-	for _, c := range cases {
-		got, err := ParseChord(c.in)
-		require.NoError(t, err, c.in)
-		assert.True(t, got.Equal(c.want), "%s: got %v", c.in, got)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := ParseChord(tc.have)
+			require.NoError(t, err)
+			assert.True(t, got.Equal(tc.expected), "got %v", got)
+		})
 	}
+
 	got, err := ParseChord("super+win+d")
 	require.NoError(t, err)
 	assert.Equal(t, []KeyModifier{Meta, Meta}, got.Modifiers)

@@ -297,7 +297,7 @@ func TestX11EndToEnd(t *testing.T) {
 	gameID := strconv.FormatUint(found.Info.NativeID, 10)
 	t.Logf("tracker found the fake game: %+v", found.Info)
 
-	t.Run("tracker follows moves and focus", func(t *testing.T) {
+	t.Run("TrackerFollowsMovesAndFocus", func(t *testing.T) {
 		run(t, display, "xdotool", "windowmove", gameID, "300", "200")
 		nextWindowEvent(t, events, "Moved", func(e platform.WindowEvent) bool {
 			return e.Type == platform.WindowMoved && e.Rect.X != found.Info.Rect.X
@@ -317,7 +317,7 @@ func TestX11EndToEnd(t *testing.T) {
 		}
 	})
 
-	t.Run("record hook sees xdotool keys", func(t *testing.T) {
+	t.Run("RecordHookSeesXdotoolKeys", func(t *testing.T) {
 		hookCtx, stopHook := context.WithCancel(t.Context())
 		input, err := parts.InputListener.Start(hookCtx)
 		if err != nil {
@@ -375,7 +375,7 @@ func TestX11EndToEnd(t *testing.T) {
 		}
 	})
 
-	t.Run("xtest chord reaches the game", func(t *testing.T) {
+	t.Run("XTestChordReachesGame", func(t *testing.T) {
 		run(t, display, "xdotool", "windowactivate", "--sync", gameID)
 		waitUntil(t, "game focused", 5*time.Second, tracker.IsGameFocused)
 		setClipboard(t, display, "previous")
@@ -396,7 +396,7 @@ func TestX11EndToEnd(t *testing.T) {
 		}
 	})
 
-	t.Run("held keys are respected", func(t *testing.T) {
+	t.Run("RespectsHeldKeys", func(t *testing.T) {
 		const kcCtrl, kcShift, kcA = 37, 50, 38
 		ctrlF5 := platform.NewChord("F5", platform.Ctrl)
 		fakeKey(t, x, kcCtrl, true)
@@ -444,7 +444,7 @@ func TestX11EndToEnd(t *testing.T) {
 		}
 	})
 
-	t.Run("overlay styling", func(t *testing.T) {
+	t.Run("StylesOverlay", func(t *testing.T) {
 		win, err := xproto.NewWindowId(x.c)
 		if err != nil {
 			t.Fatal(err)

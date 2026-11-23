@@ -61,11 +61,36 @@ func TestChatStashAndWheelSteps(t *testing.T) {
 	assertSteps(t, stashSteps(`"Rarity: Rare"`), nil,
 		key("KeyF", platform.Ctrl), key("KeyA", platform.Ctrl), pasteStep(`"Rarity: Rare"`), enter)
 
-	for delta, want := range map[int32]string{1: "ArrowLeft", -3: "ArrowRight", 0: ""} {
-		k, ok := wheelTabKey(delta)
-		assert.Equal(t, want, k, delta)
-		assert.Equal(t, want != "", ok, delta)
+	testCases := []struct {
+		name     string
+		have     int32
+		expected string
+	}{
+		{
+			"WheelUpIsArrowLeft",
+			1,
+			"ArrowLeft",
+		},
+		{
+			"WheelDownIsArrowRight",
+			-3,
+			"ArrowRight",
+		},
+		{
+			"NoDeltaHasNoKey",
+			0,
+			"",
+		},
 	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			k, ok := wheelTabKey(tc.have)
+			assert.Equal(t, tc.expected, k)
+			assert.Equal(t, tc.expected != "", ok)
+		})
+	}
+
 	assert.True(t, isCtrlKey("ControlLeft"))
 	assert.True(t, isCtrlKey("ControlRight"))
 	assert.False(t, isCtrlKey("ShiftLeft"))

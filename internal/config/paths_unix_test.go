@@ -10,15 +10,15 @@ import (
 )
 
 func TestResolveXDGLayouts(t *testing.T) {
-	cases := []struct {
-		name string
-		env  map[string]string
-		want Paths
+	testCases := []struct {
+		name     string
+		env      map[string]string
+		expected Paths
 	}{
 		{
-			name: "defaults",
-			env:  map[string]string{"HOME": "/home/exile"},
-			want: Paths{
+			"UsesDefaults",
+			map[string]string{"HOME": "/home/exile"},
+			Paths{
 				ConfigDir:    "/home/exile/.config/divvy",
 				CacheDir:     "/home/exile/.cache/divvy",
 				LogDir:       "/home/exile/.local/state/divvy/logs",
@@ -26,12 +26,12 @@ func TestResolveXDGLayouts(t *testing.T) {
 			},
 		},
 		{
-			name: "xdg overrides",
-			env: map[string]string{
+			"HonoursXDGOverrides",
+			map[string]string{
 				"HOME": "/home/exile", "XDG_CONFIG_HOME": "/cfg", "XDG_CACHE_HOME": "/var/cache/",
 				"XDG_STATE_HOME": "/st",
 			},
-			want: Paths{
+			Paths{
 				ConfigDir:    "/cfg/divvy",
 				CacheDir:     "/var/cache/divvy",
 				LogDir:       "/st/divvy/logs",
@@ -39,9 +39,9 @@ func TestResolveXDGLayouts(t *testing.T) {
 			},
 		},
 		{
-			name: "relative xdg ignored",
-			env:  map[string]string{"HOME": "/home/exile", "XDG_CONFIG_HOME": "cfg"},
-			want: Paths{
+			"IgnoresRelativeXDG",
+			map[string]string{"HOME": "/home/exile", "XDG_CONFIG_HOME": "cfg"},
+			Paths{
 				ConfigDir:    "/home/exile/.config/divvy",
 				CacheDir:     "/home/exile/.cache/divvy",
 				LogDir:       "/home/exile/.local/state/divvy/logs",
@@ -49,12 +49,13 @@ func TestResolveXDGLayouts(t *testing.T) {
 			},
 		},
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			setUserEnv(t, c.env)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			setUserEnv(t, tc.env)
 			got, err := Resolve()
 			require.NoError(t, err)
-			assert.Equal(t, c.want, got)
+			assert.Equal(t, tc.expected, got)
 		})
 	}
 }

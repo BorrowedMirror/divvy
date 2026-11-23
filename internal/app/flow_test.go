@@ -358,7 +358,7 @@ func TestHotkeysFollowGameFocus(t *testing.T) {
 	})
 }
 
-func TestHotkeysStayWhileAnRKLWindowIsFocused(t *testing.T) {
+func TestHotkeysStayWhileADivvyWindowIsFocused(t *testing.T) {
 	st := newTestState(t)
 	synctest.Test(t, func(t *testing.T) {
 		a, d, h := newTestAppOn(t, st, platformtest.Options{Window: game()})
@@ -374,7 +374,7 @@ func TestHotkeysStayWhileAnRKLWindowIsFocused(t *testing.T) {
 	})
 }
 
-func TestHotkeysAreRecheckedWhenAnRKLWindowTakesFocusLate(t *testing.T) {
+func TestHotkeysAreRecheckedWhenADivvyWindowTakesFocusLate(t *testing.T) {
 	st := newTestState(t)
 	synctest.Test(t, func(t *testing.T) {
 		a, d, h := newTestAppOn(t, st, platformtest.Options{Window: game()})

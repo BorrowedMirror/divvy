@@ -16,13 +16,49 @@ func TestSettingsOverrideWinsOverEverything(t *testing.T) {
 }
 
 func TestEnvOverrideWinsOverOS(t *testing.T) {
-	for v, k := range map[string]BackendKind{
-		"x11": BackendX11, "XWayland": BackendX11, "Wayland": BackendWayland,
-		"windows": BackendWindows, "macos": BackendMacOS, " fake ": BackendFake,
-	} {
-		probe := linux()
-		probe.OverrideBackend, probe.Display = v, ":0"
-		assert.Equal(t, k, Detect(probe, ""), v)
+	testCases := []struct {
+		name     string
+		have     string
+		expected BackendKind
+	}{
+		{
+			"X11",
+			"x11",
+			BackendX11,
+		},
+		{
+			"XWayland",
+			"XWayland",
+			BackendX11,
+		},
+		{
+			"Wayland",
+			"Wayland",
+			BackendWayland,
+		},
+		{
+			"Windows",
+			"windows",
+			BackendWindows,
+		},
+		{
+			"MacOS",
+			"macos",
+			BackendMacOS,
+		},
+		{
+			"PaddedFake",
+			" fake ",
+			BackendFake,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			probe := linux()
+			probe.OverrideBackend, probe.Display = tc.have, ":0"
+			assert.Equal(t, tc.expected, Detect(probe, ""))
+		})
 	}
 }
 

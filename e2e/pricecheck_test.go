@@ -26,55 +26,67 @@ func TestPriceCheck(t *testing.T) {
 	t.Logf("trigger: %s", triggerMode())
 
 	steps(t,
-		step{"starts with the overlay and the settings window hidden", func(t *testing.T) {
-			s, err := app.State()
-			require.NoError(t, err)
-			assert.False(t, s.OverlayVisible, "overlay visible before any price check: %s", s)
-			assert.False(t, s.SettingsVisible, "settings visible at a minimised start: %s", s)
-		}},
-		step{"copies the item from the game and shows the trade price", func(t *testing.T) {
-			triggerPriceCheck(t, app, false)
-			game.WaitCopied(t, 1, 10*time.Second, func() string { s, _ := app.State(); return "state: " + s.String() })
+		step{
+			"StartsWithOverlayAndSettingsHidden",
+			func(t *testing.T) {
+				s, err := app.State()
+				require.NoError(t, err)
+				assert.False(t, s.OverlayVisible, "overlay visible before any price check: %s", s)
+				assert.False(t, s.SettingsVisible, "settings visible at a minimised start: %s", s)
+			},
+		},
+		step{
+			"CopiesItemAndShowsTradePrice",
+			func(t *testing.T) {
+				triggerPriceCheck(t, app, false)
+				game.WaitCopied(t, 1, 10*time.Second, func() string { s, _ := app.State(); return "state: " + s.String() })
 
-			s := app.WaitState(t, "the overlay with a price", timeout(), func(s appState) bool {
-				return s.OverlayVisible && s.LastPrice != nil
-			})
-			require.NotNil(t, s.LastPrice.Median, "state: %s", s)
-			assert.Equal(t, price{Amount: 2, Currency: "divine"}, *s.LastPrice.Median)
-			assert.Equal(t, 3, s.LastPrice.Total)
-			assert.True(t, mock.Hit(http.MethodPost, "/api/trade2/search/poe2/"), "no trade2 search: %+v", mock.Requests())
-			assert.True(t, mock.Hit(http.MethodGet, "/api/trade2/fetch/"), "no trade2 fetch: %+v", mock.Requests())
-		}},
-		step{"renders the price in the overlay", func(t *testing.T) {
-			app.WaitDOM(t, "overlay", `[data-testid="price-summary"]`, 10*time.Second, func(d domReply) bool { return d.Visible })
-			median := app.WaitDOM(t, "overlay", `[data-testid="price-median"]`, 10*time.Second, func(d domReply) bool {
-				return d.Visible && strings.TrimSpace(d.Text) != ""
-			})
-			assert.Regexp(t, `^2(\.0+)?\b`, strings.TrimSpace(median.Text))
-		}},
-		step{"a pinned price check keeps the overlay open", func(t *testing.T) {
-			// Searches are cached by query, so the same ring again would never reach the mock:
-			// hover a different ring.
-			// Close the unpinned panel first, as a player does (Esc): while it is open it keeps the
-			// focus, so the game would never see the copy chord.
-			app.OK(t, "hide")
-			app.WaitState(t, "the overlay hidden", 10*time.Second, func(s appState) bool { return !s.OverlayVisible })
-			game.Stop()
-			game = startGame(t, fixture("rare-ring-2.txt"))
-			mock.Reset()
-			mock.Configure(mockConfig{Listings: []mockListing{{Amount: 5, Currency: "exalted"}}, Total: 1})
-			triggerPriceCheck(t, app, true)
-			game.WaitCopied(t, 1, 10*time.Second, func() string { s, _ := app.State(); return "state: " + s.String() })
-			s := app.WaitState(t, "the pinned overlay with the new price", timeout(), func(s appState) bool {
-				return s.OverlayVisible && s.LastPrice != nil && s.LastPrice.Median != nil && s.LastPrice.Median.Amount == 5
-			})
-			assert.Equal(t, price{Amount: 5, Currency: "exalted"}, *s.LastPrice.Median)
-			assert.True(t, s.OverlayPinned, "state: %s", s)
-			assert.True(t, mock.Hit(http.MethodPost, "/api/trade2/search/poe2/"), "no trade2 search: %+v", mock.Requests())
-			median := app.WaitDOM(t, "overlay", `[data-testid="price-median"]`, 10*time.Second, func(d domReply) bool {
-				return d.Visible && strings.HasPrefix(strings.TrimSpace(d.Text), "5")
-			})
-			assert.Regexp(t, `^5(\.0+)?\b`, strings.TrimSpace(median.Text))
-		}},
+				s := app.WaitState(t, "the overlay with a price", timeout(), func(s appState) bool {
+					return s.OverlayVisible && s.LastPrice != nil
+				})
+				require.NotNil(t, s.LastPrice.Median, "state: %s", s)
+				assert.Equal(t, price{Amount: 2, Currency: "divine"}, *s.LastPrice.Median)
+				assert.Equal(t, 3, s.LastPrice.Total)
+				assert.True(t, mock.Hit(http.MethodPost, "/api/trade2/search/poe2/"), "no trade2 search: %+v", mock.Requests())
+				assert.True(t, mock.Hit(http.MethodGet, "/api/trade2/fetch/"), "no trade2 fetch: %+v", mock.Requests())
+			},
+		},
+		step{
+			"RendersPriceInOverlay",
+			func(t *testing.T) {
+				app.WaitDOM(t, "overlay", `[data-testid="price-summary"]`, 10*time.Second, func(d domReply) bool { return d.Visible })
+				median := app.WaitDOM(t, "overlay", `[data-testid="price-median"]`, 10*time.Second, func(d domReply) bool {
+					return d.Visible && strings.TrimSpace(d.Text) != ""
+				})
+				assert.Regexp(t, `^2(\.0+)?\b`, strings.TrimSpace(median.Text))
+			},
+		},
+		step{
+			"PinnedPriceCheckKeepsOverlayOpen",
+			func(t *testing.T) {
+				// Searches are cached by query, so the same ring again would never reach the mock:
+				// hover a different ring.
+				// Close the unpinned panel first, as a player does (Esc): while it is open it keeps the
+				// focus, so the game would never see the copy chord.
+				app.OK(t, "hide")
+				app.WaitState(t, "the overlay hidden", 10*time.Second, func(s appState) bool { return !s.OverlayVisible })
+				game.Stop()
+				game = startGame(t, fixture("rare-ring-2.txt"))
+				mock.Reset()
+				mock.Configure(mockConfig{Listings: []mockListing{{Amount: 5, Currency: "exalted"}}, Total: 1})
+				triggerPriceCheck(t, app, true)
+				game.WaitCopied(t, 1, 10*time.Second, func() string { s, _ := app.State(); return "state: " + s.String() })
+				s := app.WaitState(t, "the pinned overlay with the new price", timeout(), func(s appState) bool {
+					return s.OverlayVisible && s.LastPrice != nil && s.LastPrice.Median != nil && s.LastPrice.Median.Amount == 5
+				})
+				assert.Equal(t, price{Amount: 5, Currency: "exalted"}, *s.LastPrice.Median)
+				assert.True(t, s.OverlayPinned, "state: %s", s)
+				assert.True(t, mock.Hit(http.MethodPost, "/api/trade2/search/poe2/"), "no trade2 search: %+v", mock.Requests())
+				median := app.WaitDOM(t, "overlay", `[data-testid="price-median"]`, 10*time.Second, func(d domReply) bool {
+					return d.Visible && strings.HasPrefix(strings.TrimSpace(d.Text), "5")
+				})
+				assert.Regexp(t, `^5(\.0+)?\b`, strings.TrimSpace(median.Text))
+			},
+		},
 	)
 }

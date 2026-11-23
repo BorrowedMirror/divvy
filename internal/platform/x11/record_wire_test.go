@@ -10,19 +10,51 @@ import (
 )
 
 func TestParseDisplay(t *testing.T) {
-	cases := map[string]displayAddr{
-		":1":                {network: "unix", address: "/tmp/.X11-unix/X1", number: "1"},
-		":0.0":              {network: "unix", address: "/tmp/.X11-unix/X0", number: "0"},
-		"unix:3":            {network: "unix", address: "/tmp/.X11-unix/X3", number: "3"},
-		"host:2.1":          {network: "tcp", address: "host:6002", host: "host", number: "2"},
-		"tcp/host:1":        {network: "tcp", address: "host:6001", host: "host", number: "1"},
-		"/tmp/launch-12/:0": {network: "unix", address: "/tmp/launch-12/:0", number: "0"},
+	testCases := []struct {
+		name     string
+		have     string
+		expected displayAddr
+	}{
+		{
+			"LocalDisplay",
+			":1",
+			displayAddr{network: "unix", address: "/tmp/.X11-unix/X1", number: "1"},
+		},
+		{
+			"LocalDisplayWithScreen",
+			":0.0",
+			displayAddr{network: "unix", address: "/tmp/.X11-unix/X0", number: "0"},
+		},
+		{
+			"UnixPrefix",
+			"unix:3",
+			displayAddr{network: "unix", address: "/tmp/.X11-unix/X3", number: "3"},
+		},
+		{
+			"RemoteHost",
+			"host:2.1",
+			displayAddr{network: "tcp", address: "host:6002", host: "host", number: "2"},
+		},
+		{
+			"TCPPrefix",
+			"tcp/host:1",
+			displayAddr{network: "tcp", address: "host:6001", host: "host", number: "1"},
+		},
+		{
+			"LaunchdSocketPath",
+			"/tmp/launch-12/:0",
+			displayAddr{network: "unix", address: "/tmp/launch-12/:0", number: "0"},
+		},
 	}
-	for in, want := range cases {
-		got, err := parseDisplay(in)
-		require.NoError(t, err, in)
-		assert.Equal(t, want, got, in)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := parseDisplay(tc.have)
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, got)
+		})
 	}
+
 	for _, bad := range []string{"", "nocolon", ":", ":x", "host:"} {
 		_, err := parseDisplay(bad)
 		require.Error(t, err, bad)

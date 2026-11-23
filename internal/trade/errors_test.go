@@ -11,23 +11,53 @@ import (
 )
 
 func TestFlattensEveryKind(t *testing.T) {
-	cases := []struct {
-		err   *Error
+	testCases := []struct {
+		name  string
+		have  *Error
 		kind  string
 		retry *uint64
 	}{
-		{rateLimitedError(1500 * time.Millisecond), "rate_limited", new(uint64(1500))},
-		{httpError(502, "bad"), "http", nil},
-		{decodeError("eof"), "decode", nil},
-		{unsupportedError("poe.ninja"), "unsupported", nil},
-		{configError("nope"), "config", nil},
+		{
+			"RateLimited",
+			rateLimitedError(1500 * time.Millisecond),
+			"rate_limited",
+			new(uint64(1500)),
+		},
+		{
+			"HTTP",
+			httpError(502, "bad"),
+			"http",
+			nil,
+		},
+		{
+			"Decode",
+			decodeError("eof"),
+			"decode",
+			nil,
+		},
+		{
+			"Unsupported",
+			unsupportedError("poe.ninja"),
+			"unsupported",
+			nil,
+		},
+		{
+			"Config",
+			configError("nope"),
+			"config",
+			nil,
+		},
 	}
-	for _, c := range cases {
-		info := c.err.Info()
-		assert.Equal(t, c.kind, info.Kind)
-		assert.Equal(t, c.retry, info.RetryAfterMS)
-		assert.Equal(t, c.err.Error(), info.Message)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			info := tc.have.Info()
+			assert.Equal(t, tc.kind, info.Kind)
+			assert.Equal(t, tc.retry, info.RetryAfterMS)
+			assert.Equal(t, tc.have.Error(), info.Message)
+		})
 	}
+
 	assert.Equal(t, "http 502: bad", httpError(502, "bad").Error())
 }
 

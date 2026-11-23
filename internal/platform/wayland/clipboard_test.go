@@ -54,13 +54,37 @@ func TestWLClipboardWritesAndClears(t *testing.T) {
 }
 
 func TestWLClipboardDetectsNonText(t *testing.T) {
-	for types, want := range map[string]bool{
-		"image/png\n":                         true,
-		"image/png\ntext/plain;charset=utf-8": false,
-		"UTF8_STRING\nTEXT\n":                 false,
-		"":                                    false,
-	} {
-		c, _ := fakeClipboard(func(call) ([]byte, error) { return []byte(types), nil })
-		assert.Equal(t, want, c.HasNonText(), types)
+	testCases := []struct {
+		name     string
+		have     string
+		expected bool
+	}{
+		{
+			"ImageOnly",
+			"image/png\n",
+			true,
+		},
+		{
+			"ImageAndText",
+			"image/png\ntext/plain;charset=utf-8",
+			false,
+		},
+		{
+			"X11TextTargets",
+			"UTF8_STRING\nTEXT\n",
+			false,
+		},
+		{
+			"NoTypes",
+			"",
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			c, _ := fakeClipboard(func(call) ([]byte, error) { return []byte(tc.have), nil })
+			assert.Equal(t, tc.expected, c.HasNonText())
+		})
 	}
 }

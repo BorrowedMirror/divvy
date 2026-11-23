@@ -9,24 +9,92 @@ import (
 )
 
 func TestMapsKeysToW3CCodes(t *testing.T) {
-	for kc, want := range map[uint8]string{
-		54:  "KeyC",
-		16:  "Digit7",
-		71:  "F5",
-		9:   "Escape",
-		37:  "ControlLeft",
-		36:  "Enter",
-		90:  "Numpad0",
-		104: "NumpadEnter",
-		198: "F20",
-		127: "Pause",
-		255: "Unidentified",
-		130: "Hangul",
-		131: "Hanja",
-		64:  "AltLeft",
-		108: "AltRight",
-	} {
-		assert.Equal(t, want, keyCode(kc), "keycode %d", kc)
+	testCases := []struct {
+		name     string
+		have     uint8
+		expected string
+	}{
+		{
+			"KeyC",
+			54,
+			"KeyC",
+		},
+		{
+			"Digit7",
+			16,
+			"Digit7",
+		},
+		{
+			"F5",
+			71,
+			"F5",
+		},
+		{
+			"Escape",
+			9,
+			"Escape",
+		},
+		{
+			"ControlLeft",
+			37,
+			"ControlLeft",
+		},
+		{
+			"Enter",
+			36,
+			"Enter",
+		},
+		{
+			"Numpad0",
+			90,
+			"Numpad0",
+		},
+		{
+			"NumpadEnter",
+			104,
+			"NumpadEnter",
+		},
+		{
+			"F20",
+			198,
+			"F20",
+		},
+		{
+			"Pause",
+			127,
+			"Pause",
+		},
+		{
+			"UnknownIsUnidentified",
+			255,
+			"Unidentified",
+		},
+		{
+			"Hangul",
+			130,
+			"Hangul",
+		},
+		{
+			"Hanja",
+			131,
+			"Hanja",
+		},
+		{
+			"AltLeft",
+			64,
+			"AltLeft",
+		},
+		{
+			"AltRight",
+			108,
+			"AltRight",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, keyCode(tc.have))
+		})
 	}
 }
 
@@ -41,14 +109,66 @@ func TestNamedKeysRoundTrip(t *testing.T) {
 }
 
 func TestMapsChordKeys(t *testing.T) {
-	for code, want := range map[string]uint32{
-		"KeyC": 'c', "Digit4": '4', "F12": 0xffc9, "F1": 0xffbe, "F10": 0xffc7, "Escape": xkEscape,
-		"PageDown": xkNext, "ArrowLeft": xkLeft, "ArrowRight": xkRight,
-	} {
-		got, ok := chordKeysym(code)
-		assert.True(t, ok, code)
-		assert.Equal(t, want, got, code)
+	testCases := []struct {
+		name     string
+		have     string
+		expected uint32
+	}{
+		{
+			"KeyC",
+			"KeyC",
+			'c',
+		},
+		{
+			"Digit4",
+			"Digit4",
+			'4',
+		},
+		{
+			"F12",
+			"F12",
+			0xffc9,
+		},
+		{
+			"F1",
+			"F1",
+			0xffbe,
+		},
+		{
+			"F10",
+			"F10",
+			0xffc7,
+		},
+		{
+			"Escape",
+			"Escape",
+			xkEscape,
+		},
+		{
+			"PageDown",
+			"PageDown",
+			xkNext,
+		},
+		{
+			"ArrowLeft",
+			"ArrowLeft",
+			xkLeft,
+		},
+		{
+			"ArrowRight",
+			"ArrowRight",
+			xkRight,
+		},
 	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := chordKeysym(tc.have)
+			assert.True(t, ok)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
+
 	for _, code := range []string{"Key1", "DigitX", "Pause", "F13", "F01", "", "KeyAB"} {
 		_, ok := chordKeysym(code)
 		assert.False(t, ok, code)
