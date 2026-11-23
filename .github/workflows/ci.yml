@@ -39,11 +39,16 @@ jobs:
       - run: pnpm --dir web build
       # gofmt; go vet for the host (gtk3), GOOS=windows and GOOS=darwin (purego, since cgo needs
       # the macOS SDK); bindgen and commitconfig -check; golangci-lint (pinned in tools/go.mod) for
-      # the same three targets. The tests run in the matrix below.
-      - run: go tool -modfile=tools/go.mod wails3 task fmt vet bindings:check commitconfig:check lint
+      # the same three targets. The tests run in the matrix below. The Wails CLI runs one task per
+      # call and is built without cgo (see WAILS in Taskfile.yml).
+      - run: |
+          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
+          for t in fmt vet bindings:check commitconfig:check lint; do "$wails" task "$t"; done
       # Known vulnerabilities in reachable code, and the dependency licence policy, for all three
       # targets (cmd/release/notices.go holds the allow-list).
-      - run: go tool -modfile=tools/go.mod wails3 task vuln licenses:check
+      - run: |
+          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
+          for t in vuln licenses:check; do "$wails" task "$t"; done
 
   test:
     name: test + coverage + build (${{ matrix.os }})
@@ -93,7 +98,9 @@ jobs:
           go build "${tags[@]}" -o target/go/ci/ ./cmd/divvy
       # go test -race, one coverage profile per internal package in target/go/coverage/.
       - name: go test -race + coverage
-        run: go tool -modfile=tools/go.mod wails3 task coverage
+        run: |
+          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
+          "$wails" task coverage
       - name: Upload coverage (core)
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
@@ -189,7 +196,9 @@ jobs:
           cache-dependency-path: web/pnpm-lock.yaml
       - run: pnpm --dir web install --frozen-lockfile
       - run: pnpm --dir web build
-      - run: go tool -modfile=tools/go.mod wails3 task package:windows
+      - run: |
+          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
+          "$wails" task package:windows
       - name: Installer contains divvy.exe
         run: 7z l target/go/divvy-*-windows-x64-setup.exe | grep -E ' divvy\.exe$'
 

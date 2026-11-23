@@ -107,7 +107,8 @@ jobs:
             echo "::error::DIVVY_UPDATER_PUBKEY is not set in the release environment" >&2
             exit 1
           fi
-          DIVVY_RELEASE_VERSION="$VERSION" go tool -modfile=tools/go.mod wails3 task "package:$TARGET"
+          wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
+          DIVVY_RELEASE_VERSION="$VERSION" "$wails" task "package:$TARGET"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: divvy-${{ matrix.name }}
