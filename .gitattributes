@@ -1,0 +1,4 @@
+# LF everywhere, also in Windows checkouts: tests compare generated text (settings TOML,
+# bindings.ts) with checked-in files byte for byte. Fixtures that must keep CRLF opt out in
+# their own .gitattributes (internal/core/testdata/corpus).
+* text=auto eol=lf
