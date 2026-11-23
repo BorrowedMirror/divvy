@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T12:26:24.855330419Z",
-  "game_version": "0.5.5.5",
+  "generated_at": "2026-11-23T09:58:17.705269818Z",
+  "game_version": "0.5.5.10",
   "stats": {
     "file": "stats.json.zst",
     "sources": [
       "https://www.pathofexile.com/api/trade2/data/stats"
     ],
-    "sha256": "c6b83f5bcd080c0a9b1a4c70099dd496a1217ede4f732f80c2a2fce03bad2d7d",
-    "records": 8232
+    "sha256": "b01651ef52b21b603f6a34f0c6b56ef8ef581bc5c38671d6094ac84b3f9508f2",
+    "records": 8236
   },
   "bases": {
     "file": "bases.json.zst",
@@ -17,8 +17,8 @@
       "https://repoe-fork.github.io/poe2/base_items.min.json",
       "https://repoe-fork.github.io/poe2/item_classes.min.json"
     ],
-    "sha256": "93c85494f0bf02a41ff0bfb046ad208fc844976bc9fd491c9485665553f5cfbb",
-    "records": 3129
+    "sha256": "af8739e93e3d38c259615030952e74a99a01c067bb8047c6fa6293d592c4b6af",
+    "records": 3130
   },
   "uniques": {
     "file": "uniques.json.zst",
