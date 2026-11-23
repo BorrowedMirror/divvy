@@ -1,0 +1,46 @@
+name: Restore the Go cache
+description: >-
+  Restores the Go module and build caches under one key per purpose (lint, test) and runner OS,
+  as Go reports their paths, so it works the same on Linux, macOS and Windows. It only restores;
+  the job that owns the key saves it, on master only, with actions/cache/save and this action's
+  outputs, so pull requests never add caches of their own.
+inputs:
+  name:
+    description: What the cache is for, the first part of its key (lint or test).
+    required: true
+outputs:
+  key:
+    description: The key to save under.
+    value: ${{ steps.paths.outputs.key }}
+  paths:
+    description: The module and build cache directories, one per line.
+    value: ${{ steps.paths.outputs.paths }}
+  cache-hit:
+    description: '"true" when the exact key was restored, so there is nothing new to save.'
+    value: ${{ steps.restore.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    # The key moves with either module's dependencies or the Go toolchain (go.mod), so a stale
+    # cache is replaced rather than kept beside the new one.
+    - name: Go cache paths and key
+      id: paths
+      shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        HASH: ${{ hashFiles('go.mod', 'go.sum', 'tools/go.mod', 'tools/go.sum') }}
+      run: |
+        {
+          echo "key=go-$NAME-$RUNNER_OS-$RUNNER_ARCH-$HASH"
+          echo "prefix=go-$NAME-$RUNNER_OS-$RUNNER_ARCH-"
+          echo "paths<<EOF"
+          go env GOMODCACHE GOCACHE
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+    - name: Restore
+      id: restore
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.paths.outputs.paths }}
+        key: ${{ steps.paths.outputs.key }}
+        restore-keys: ${{ steps.paths.outputs.prefix }}

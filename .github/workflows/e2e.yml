@@ -40,6 +40,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # CI's Test cache for this OS; e2e only restores it.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -84,6 +91,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # CI's Test cache for this OS; e2e only restores it.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -119,6 +133,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # CI's Test cache for this OS; e2e only restores it.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -162,6 +183,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # CI's Test cache for this OS; e2e only restores it.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -203,6 +231,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # CI's Test cache for this OS; e2e only restores it.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json

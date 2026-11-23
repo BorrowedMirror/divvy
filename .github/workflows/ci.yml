@@ -31,6 +31,12 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: lint
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -54,6 +60,13 @@ jobs:
       - run: |
           wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
           for t in vuln licenses:check; do "$wails" task "$t"; done
+      # Only master saves, and only what it didn't restore exactly, so there is one cache per key.
+      - name: Save the Go cache
+        if: github.ref == 'refs/heads/master' && steps.go-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.go-cache.outputs.paths }}
+          key: ${{ steps.go-cache.outputs.key }}
 
   # Everything that isn't Go or the web app: the workflows, whitespace and line endings, shell
   # scripts, secrets and known vulnerabilities in what ships.
@@ -73,6 +86,12 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      # Lint's cache, which holds the tools module's builds.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: lint
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -142,6 +161,12 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: test
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
@@ -237,6 +262,13 @@ jobs:
           name: ipc-${{ matrix.os }}
           disable_search: true
           fail_ci_if_error: false
+      # Only master saves, and only what it didn't restore exactly, so there is one cache per key.
+      - name: Save the Go cache
+        if: github.ref == 'refs/heads/master' && steps.go-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.go-cache.outputs.paths }}
+          key: ${{ steps.go-cache.outputs.key }}
 
   package-windows:
     name: Windows installer
@@ -256,6 +288,13 @@ jobs:
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.mod
+          cache: false
+      # Lint's cache, which holds the GOOS=windows builds.
+      - name: Restore the Go cache
+        id: go-cache
+        uses: $/.github/actions/go-cache
+        with:
+          name: lint
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: web/package.json
