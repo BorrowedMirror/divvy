@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 )
 
+// editorconfig-checker-disable
 const usage = `usage: go run ./cmd/release <command> [flags]
 
 commands:
@@ -34,6 +35,8 @@ commands:
 Run it from the repository root. Run "go run ./cmd/release <command> -h" for the flags of a
 command.
 `
+
+// editorconfig-checker-enable
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)

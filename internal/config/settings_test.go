@@ -422,18 +422,18 @@ func TestMigrateV0FullFixture(t *testing.T) {
 	doc, err := migrated(fixture(t, "v0_full.toml"))
 	require.NoError(t, err)
 	expected := table(t, `
-        version = 1
-        [league]
-        auto_detect = false
-        league = "Rise of the Abyssal"
-        [hotkeys.price_check]
-        modifiers = ["ctrl", "shift"]
-        key = "KeyD"
-        [trade]
-        sellers = "any"
-        [ui]
-        theme = "dark"
-        `)
+		version = 1
+		[league]
+		auto_detect = false
+		league = "Rise of the Abyssal"
+		[hotkeys.price_check]
+		modifiers = ["ctrl", "shift"]
+		key = "KeyD"
+		[trade]
+		sellers = "any"
+		[ui]
+		theme = "dark"
+		`)
 	assert.Equal(t, expected, doc)
 	s, err := decodeDocument(doc)
 	require.NoError(t, err)

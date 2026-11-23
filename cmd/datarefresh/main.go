@@ -23,6 +23,7 @@ import (
 	"time"
 )
 
+// editorconfig-checker-disable
 const usage = `usage: go run ./cmd/datarefresh <command> [flags]
 
 commands:
@@ -36,6 +37,8 @@ commands:
 Run it from the repository root. Run "go run ./cmd/datarefresh <command> -h" for the flags of
 a command.
 `
+
+// editorconfig-checker-enable
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)

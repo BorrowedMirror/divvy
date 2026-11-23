@@ -1,0 +1,8 @@
+{
+  "Exclude": [
+    "^LICENSE$",
+    "^web/src/bindings\\.ts$",
+    "^internal/data/assets/",
+    "\\.(png|ico|icns|svg)$"
+  ]
+}

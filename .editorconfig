@@ -1,0 +1,41 @@
+# Editors read this; editorconfig-checker (pinned in tools/go.mod) enforces it on commit and in CI.
+# Formatters own the layout of what they format (gofmt for Go, Biome for the web app, rustfmt
+# for tools/game-extract); the sections below match them.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[{*.go,go.mod,go.sum}]
+indent_style = tab
+
+[Makefile]
+indent_style = tab
+
+# C helpers for the cgo packages, written in the usual C style.
+[*.{c,h}]
+indent_style = tab
+
+[*.rs]
+indent_size = 4
+
+[*.py]
+indent_size = 4
+
+# Numbered lists indent their continuation lines by three spaces; Biome lays out CSS comments.
+[*.{md,css}]
+indent_size = unset
+
+# The release templates keep the indentation of the files they produce (Info.plist, info.json).
+[cmd/release/assets/*.tmpl]
+indent_style = unset
+indent_size = unset
+
+# Fixtures that test Windows clipboard line endings (see their .gitattributes).
+[*-crlf.txt]
+end_of_line = crlf

@@ -17,11 +17,13 @@ use anyhow::bail;
 mod bundle;
 mod l10n;
 
+// editorconfig-checker-disable
 const USAGE: &str = "usage:
   game-extract file <game_dir> <path> <out>         copy one file out of the game's bundles
   game-extract file <game_dir> list:<text> <out>    write the paths containing <text>
   game-extract l10n <game_dir> <out.json> [folder...]
                                                     write the tables for `go run ./cmd/datarefresh l10n`";
+// editorconfig-checker-enable
 
 /// Copy one file out of an installed client's bundles, or list the paths containing a text.
 fn file(game_dir: &Path, path: &str, out: &Path) -> anyhow::Result<()> {

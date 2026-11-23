@@ -4,6 +4,7 @@ go 1.27.0
 
 tool (
 	actionlint.kjanat.dev/cmd/actionlint
+	github.com/editorconfig-checker/editorconfig-checker/v4/cmd/editorconfig-checker
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	github.com/google/go-licenses/v2
 	github.com/wailsapp/wails/v3/cmd/wails3
@@ -107,6 +108,8 @@ require (
 	github.com/dominikbraun/graph v0.23.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.11.1 // indirect
+	github.com/editorconfig-checker/editorconfig-checker/v4 v4.0.2 // indirect
+	github.com/editorconfig/editorconfig-core-go/v2 v2.6.4 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
@@ -115,7 +118,9 @@ require (
 	github.com/firefart/nonamedreturns v1.0.8 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/ghostiam/protogetter v1.0.1 // indirect
+	github.com/gkampitakis/ciinfo v0.3.4 // indirect
 	github.com/go-critic/go-critic v0.15.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.0 // indirect
@@ -293,6 +298,7 @@ require (
 	github.com/uudashr/iface v1.5.3 // indirect
 	github.com/wailsapp/task/v3 v3.40.1-patched3 // indirect
 	github.com/wailsapp/wails/v3 v3.1.0 // indirect
+	github.com/wlynxg/chardet v1.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xen0n/gosmopolitan v1.3.0 // indirect
 	github.com/xo/terminfo v1.0.0 // indirect
@@ -329,6 +335,7 @@ require (
 	golang.org/x/tools v0.52.0 // indirect
 	golang.org/x/vuln v1.9.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
+	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
