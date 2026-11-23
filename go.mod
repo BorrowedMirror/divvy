@@ -2,7 +2,7 @@ module github.com/BorrowedMirror/divvy
 
 go 1.27.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 require (
 	github.com/ebitengine/purego v0.11.3
