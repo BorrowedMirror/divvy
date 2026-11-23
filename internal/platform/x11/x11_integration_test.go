@@ -25,11 +25,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BorrowedMirror/divvy/internal/platform"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/shape"
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgb/xtest"
+
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 func repoRoot(t *testing.T) string {

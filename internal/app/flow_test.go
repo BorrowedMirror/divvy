@@ -77,6 +77,7 @@ func (w *fakeWindow) zoomFactor() float64 {
 	defer w.mu.Unlock()
 	return w.zoom
 }
+
 func (w *fakeWindow) scripts() []string {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -112,20 +113,24 @@ func (d *fakeDesktop) CursorPosition() (x, y float64, ok bool) {
 	defer d.mu.Unlock()
 	return d.cursor[0], d.cursor[1], true
 }
+
 func (d *fakeDesktop) MonitorAt(float64, float64) (Area, bool) {
 	return Area{X: 0, Y: 0, Width: 1920, Height: 1080}, true
 }
+
 func (d *fakeDesktop) Emit(name string, payload any) {
 	d.mu.Lock()
 	d.events = append(d.events, emitted{name, payload})
 	d.mu.Unlock()
 }
+
 func (d *fakeDesktop) OpenURL(u string) error {
 	d.mu.Lock()
 	d.opened = append(d.opened, u)
 	d.mu.Unlock()
 	return nil
 }
+
 func (d *fakeDesktop) BringToFront(w Window, _ *uint64, focus bool) error {
 	if focus {
 		w.Focus()

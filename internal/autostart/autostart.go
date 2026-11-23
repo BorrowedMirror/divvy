@@ -84,10 +84,10 @@ func desktopEntryPath(configDir string) string {
 
 // writeFile writes an entry, creating its directory.
 func writeFile(path, contents string) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil { //nolint:gosec // ~/.config/autostart, shared with other autostart entries
 		return err
 	}
-	return os.WriteFile(path, []byte(contents), 0o644)
+	return os.WriteFile(path, []byte(contents), 0o644) //nolint:gosec // desktop entries are world-readable by convention
 }
 
 // removeFile removes an entry; a missing one is already off.

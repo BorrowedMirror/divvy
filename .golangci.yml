@@ -1,6 +1,7 @@
 # golangci-lint v2 configuration for the Go build (`golangci-lint run`; CI: ci.yml).
 # The "standard" set plus bug-finding and convention linters (naming, modern Go, context use,
-# test style); formatting is gofmt's job.
+# test style, security); formatting is gofumpt's and goimports' job, applied by `make fmt` and the
+# pre-commit hook's --fix.
 #
 # CI lints three times: host (Linux, gtk3), GOOS=windows, and GOOS=darwin with -tags purego.
 version: "2"
@@ -39,7 +40,14 @@ linters:
     - inamedparam
     - forcetypeassert
     - gochecknoinits
+    - gosec
   settings:
+    gosec:
+      excludes:
+        - G104 # duplicate of errcheck
+        - G103 # unsafe is how cgo and the Win32 calls pass memory
+        - G115 # integer conversions sit at syscall and protocol boundaries (X11, Win32, rate limits)
+        - G304 # the files read are the app's own (config, cache, logs) or ones the user picked
     revive:
       rules:
         - name: var-naming
@@ -87,6 +95,10 @@ linters:
         linters: [errcheck, gocritic, forcetypeassert, unparam]
       - path: e2e/
         linters: [thelper]
+      # gosec is for what ships: tests, the e2e harness, the test hook and the developer tools
+      # in cmd/ (everything but cmd/divvy) run only on developer machines and CI.
+      - path: (_test\.go|^e2e/|testhook|^cmd/(bindgen|commitconfig|datarefresh|release)/)
+        linters: [gosec]
       # x11's pure files are only called from its _linux.go files, which the Windows and macOS
       # lint runs never see, so unparam reports their test-only arguments as constant there.
       - path: internal/platform/x11/
@@ -94,4 +106,9 @@ linters:
 
 formatters:
   enable:
-    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/BorrowedMirror/divvy

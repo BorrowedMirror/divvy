@@ -47,8 +47,10 @@ func decodeAsset[T any](entry *AssetEntry, compressed []byte) (T, error) {
 		return out, &AssetError{File: entry.File, Op: "decompress", Err: err}
 	}
 	if actual := sha256Hex(raw); !strings.EqualFold(actual, entry.Sha256) {
-		return out, &AssetError{File: entry.File, Op: "verify",
-			Err: fmt.Errorf("%w: expected %s, got %s", ErrHashMismatch, entry.Sha256, actual)}
+		return out, &AssetError{
+			File: entry.File, Op: "verify",
+			Err: fmt.Errorf("%w: expected %s, got %s", ErrHashMismatch, entry.Sha256, actual),
+		}
 	}
 	if err := json.Unmarshal(raw, &out); err != nil {
 		return out, &AssetError{File: entry.File, Op: "decode", Err: err}

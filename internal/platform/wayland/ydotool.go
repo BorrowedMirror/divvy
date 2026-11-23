@@ -35,7 +35,7 @@ func (y *ydotool) SendChord(chord platform.Chord) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
-	if err := exec.CommandContext(ctx, y.binary, args...).Run(); err != nil {
+	if err := exec.CommandContext(ctx, y.binary, args...).Run(); err != nil { //nolint:gosec // the ydotool found on PATH, with key codes as arguments
 		return platform.Backend("ydotool: %w", err)
 	}
 	return nil

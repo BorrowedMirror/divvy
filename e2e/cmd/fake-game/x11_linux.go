@@ -88,10 +88,16 @@ func (x *x11Game) setup() error {
 		dst  *xproto.Atom
 		name string
 	}{
-		{&x.atoms.clipboard, "CLIPBOARD"}, {&x.atoms.targets, "TARGETS"}, {&x.atoms.utf8, "UTF8_STRING"},
-		{&x.atoms.text, "TEXT"}, {&x.atoms.plain, "text/plain"}, {&x.atoms.plainUTF8, "text/plain;charset=utf-8"},
-		{&x.atoms.netWMName, "_NET_WM_NAME"}, {&x.atoms.wmProtocols, "WM_PROTOCOLS"},
-		{&x.atoms.wmDelete, "WM_DELETE_WINDOW"}, {&x.atoms.netWMPID, "_NET_WM_PID"},
+		{&x.atoms.clipboard, "CLIPBOARD"},
+		{&x.atoms.targets, "TARGETS"},
+		{&x.atoms.utf8, "UTF8_STRING"},
+		{&x.atoms.text, "TEXT"},
+		{&x.atoms.plain, "text/plain"},
+		{&x.atoms.plainUTF8, "text/plain;charset=utf-8"},
+		{&x.atoms.netWMName, "_NET_WM_NAME"},
+		{&x.atoms.wmProtocols, "WM_PROTOCOLS"},
+		{&x.atoms.wmDelete, "WM_DELETE_WINDOW"},
+		{&x.atoms.netWMPID, "_NET_WM_PID"},
 		{&x.atoms.paste, "DIVVY_FAKE_GAME_PASTE"},
 	} {
 		atom, err := x.intern(a.name)

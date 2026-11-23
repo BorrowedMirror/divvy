@@ -54,7 +54,7 @@ func xauthority(d displayAddr) (string, []byte) {
 		}
 		path = filepath.Join(home, ".Xauthority")
 	}
-	f, err := os.Open(path)
+	f, err := os.Open(path) //nolint:gosec // $XAUTHORITY, as every X client reads it
 	if err != nil {
 		return "", nil
 	}

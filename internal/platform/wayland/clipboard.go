@@ -34,7 +34,7 @@ func detectWLClipboard() *wlClipboard {
 func runCmd(name string, stdin []byte, args ...string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, name, args...)
+	cmd := exec.CommandContext(ctx, name, args...) //nolint:gosec // name is wl-copy or wl-paste, chosen by this package
 	if stdin != nil {
 		cmd.Stdin = bytes.NewReader(stdin)
 	}

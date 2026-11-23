@@ -230,8 +230,10 @@ func TestFetchChunksIDsByTenAndSkipsNulls(t *testing.T) {
 	}
 	first := strings.Join(ids[:fetchChunk], ",")
 	second := strings.Join(ids[fetchChunk:], ",")
-	m.mount(mockSpec{Method: "GET", Path: "/api/trade2/fetch/" + first,
-		Match: matchers(queryParam("query", "Q1"), queryParam("realm", "poe2")), Expect: 1}, fetchOK(t))
+	m.mount(mockSpec{
+		Method: "GET", Path: "/api/trade2/fetch/" + first,
+		Match: matchers(queryParam("query", "Q1"), queryParam("realm", "poe2")), Expect: 1,
+	}, fetchOK(t))
 	tail := map[string]any{"result": []any{fetchResults(t)[0], nil}}
 	m.mount(mockSpec{Method: "GET", Path: "/api/trade2/fetch/" + second, Expect: 1}, respondJSON(t, 200, tail))
 	c := newClient(t, tradeConfig(m))

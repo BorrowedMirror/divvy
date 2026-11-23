@@ -88,14 +88,14 @@ type AssetSources struct {
 // manifest. Records are written in the given order; translations only when the bundle has
 // languages.
 func WriteDir(dir string, bundle *Bundle, sources *AssetSources, generatedAt string, gameVersion *string) (Manifest, error) {
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil { //nolint:gosec // internal/data/assets, committed to the repository
 		return Manifest{}, &AssetError{File: dir, Op: "write", Err: err}
 	}
 	write := func(entry AssetEntry, b []byte, err error) (AssetEntry, error) {
 		if err != nil {
 			return AssetEntry{}, err
 		}
-		if err := os.WriteFile(filepath.Join(dir, entry.File), b, 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, entry.File), b, 0o644); err != nil { //nolint:gosec // committed to the repository
 			return AssetEntry{}, &AssetError{File: entry.File, Op: "write", Err: err}
 		}
 		return entry, nil
@@ -125,7 +125,7 @@ func WriteDir(dir string, bundle *Bundle, sources *AssetSources, generatedAt str
 	if err != nil {
 		return Manifest{}, err
 	}
-	if err := os.WriteFile(filepath.Join(dir, manifestFile), b, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, manifestFile), b, 0o644); err != nil { //nolint:gosec // committed to the repository
 		return Manifest{}, &AssetError{File: manifestFile, Op: "write", Err: err}
 	}
 	return m, nil

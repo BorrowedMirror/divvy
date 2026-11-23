@@ -80,8 +80,9 @@ var _ platform.ChordKeys = sendKeys{}
 
 func (k sendKeys) ReleaseHeld(m platform.KeyModifier) error { return k.Release(m) }
 func (k sendKeys) Press(m platform.KeyModifier) error       { return sendKey(modifierVK(m), true, false) }
-func (k sendKeys) Release(m platform.KeyModifier) error     { return sendKey(modifierVK(m), false, true) }
-func (k sendKeys) Click() error                             { return sendKey(k.vk, true, true) }
+
+func (k sendKeys) Release(m platform.KeyModifier) error { return sendKey(modifierVK(m), false, true) }
+func (k sendKeys) Click() error                         { return sendKey(k.vk, true, true) }
 
 // sendKey injects a key-down, a key-up, or both in one SendInput call, carrying both the
 // virtual key and its scan code for the foreground window's layout (games that read scan codes

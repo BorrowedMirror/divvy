@@ -36,8 +36,10 @@ func (p packager) macos(ctx context.Context) error {
 	for _, arch := range []string{"arm64", "amd64"} {
 		out := filepath.Join(work, binaryName+"-"+arch)
 		minFlag := "-mmacosx-version-min=" + macOSMin
-		env := []string{"GOOS=darwin", "GOARCH=" + arch, "CGO_ENABLED=1",
-			"CGO_CFLAGS=" + minFlag, "CGO_LDFLAGS=" + minFlag, "MACOSX_DEPLOYMENT_TARGET=" + macOSMin}
+		env := []string{
+			"GOOS=darwin", "GOARCH=" + arch, "CGO_ENABLED=1",
+			"CGO_CFLAGS=" + minFlag, "CGO_LDFLAGS=" + minFlag, "MACOSX_DEPLOYMENT_TARGET=" + macOSMin,
+		}
 		if err := s.with(env...).run(ctx, "go", "build", "-tags", "production", "-trimpath", "-ldflags", ldflags(p.version), "-o", out, "./cmd/divvy"); err != nil {
 			return err
 		}

@@ -9,13 +9,14 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/BorrowedMirror/divvy/internal/platform"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/record"
 	"github.com/jezek/xgb/shape"
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgb/xtest"
+
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // silenceXGB stops xgb's logging to stderr (missing Xauthority, read errors on close); we

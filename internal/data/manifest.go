@@ -46,8 +46,10 @@ func parseManifest(b []byte) (Manifest, error) {
 		return Manifest{}, &AssetError{File: manifestFile, Op: "decode", Err: err}
 	}
 	if m.SchemaVersion != schemaVersion {
-		return Manifest{}, &AssetError{File: manifestFile, Op: "decode",
-			Err: fmt.Errorf("%w %d (expected %d)", ErrSchemaVersion, m.SchemaVersion, schemaVersion)}
+		return Manifest{}, &AssetError{
+			File: manifestFile, Op: "decode",
+			Err: fmt.Errorf("%w %d (expected %d)", ErrSchemaVersion, m.SchemaVersion, schemaVersion),
+		}
 	}
 	entries := map[string]*AssetEntry{"stats": &m.Stats, "bases": &m.Bases, "uniques": &m.Uniques, "statics": &m.Statics}
 	if m.L10n != nil {
@@ -55,8 +57,10 @@ func parseManifest(b []byte) (Manifest, error) {
 	}
 	for name, e := range entries {
 		if e.File == "" || e.Sha256 == "" {
-			return Manifest{}, &AssetError{File: manifestFile, Op: "decode",
-				Err: fmt.Errorf("entry %q has no file or sha256", name)}
+			return Manifest{}, &AssetError{
+				File: manifestFile, Op: "decode",
+				Err: fmt.Errorf("entry %q has no file or sha256", name),
+			}
 		}
 	}
 	return m, nil

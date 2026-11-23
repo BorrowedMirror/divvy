@@ -134,7 +134,7 @@ func (o *overlay) Prepare() error {
 		return err
 	}
 	// ...after mapping it only honours client messages to the root.
-	for i := 0; i < len(vals); i += 2 {
+	for i := 0; i+1 < len(vals); i += 2 {
 		if err := o.conn.sendRootMessage(o.window, o.conn.atoms.netWMState, [5]uint32{netWMStateAdd, vals[i], vals[i+1], 1, 0}); err != nil {
 			return err
 		}

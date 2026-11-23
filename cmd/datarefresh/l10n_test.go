@@ -93,8 +93,11 @@ func TestPickChecksEnglishAndDedupes(t *testing.T) {
 	en := map[string]string{"ItemDisplayStringClass": "Item Class: ", "ItemDisplayStringRarity": "Rarity:", "Renamed": "Other"}
 	local := map[string]string{"ItemDisplayStringClass": "[Klasse|Gegenstandsklasse]：", "ItemDisplayStringRarity": "Seltenheit:", "Renamed": "x"}
 	ids := []clientKey{
-		{"ItemDisplayStringClass", "Item Class"}, {"ItemDisplayStringClass", "Item Class"},
-		{"ItemDisplayStringRarity", "Rarity"}, {"Renamed", "Expected"}, {"Missing", "Missing"},
+		{"ItemDisplayStringClass", "Item Class"},
+		{"ItemDisplayStringClass", "Item Class"},
+		{"ItemDisplayStringRarity", "Rarity"},
+		{"Renamed", "Expected"},
+		{"Missing", "Missing"},
 	}
 	assert.Equal(t, [][2]string{{"Item Class", "Gegenstandsklasse"}, {"Rarity", "Seltenheit"}}, pick(en, local, ids, true, "German"))
 }

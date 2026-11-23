@@ -79,7 +79,7 @@ func (TCCProbe) OpenSettings(kind string) {
 	}
 	request(p)
 	// `open` returns as soon as System Settings is asked to show the pane; nothing to cancel.
-	cmd := exec.CommandContext(context.Background(), "/usr/bin/open", url)
+	cmd := exec.CommandContext(context.Background(), "/usr/bin/open", url) //nolint:gosec // url is one of this package's System Settings panes
 	if err := cmd.Start(); err != nil {
 		slog.Warn("failed to open System Settings", "error", err, "url", url)
 		return

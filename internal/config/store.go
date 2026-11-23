@@ -164,7 +164,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(dst, data, info.Mode().Perm()); err != nil {
+	if err := os.WriteFile(dst, data, info.Mode().Perm()); err != nil { //nolint:gosec // both paths are in the app's own config directory
 		return err
 	}
 	return os.Chmod(dst, info.Mode().Perm())

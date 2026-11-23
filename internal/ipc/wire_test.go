@@ -159,9 +159,11 @@ func TestPayloadsPopulated(t *testing.T) {
 		`"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,`+
 		`"keystroke_injection":false,"clipboard":true,"missing_permissions":[],"notes":["n"]},"data_version":"0.5",`+
 		`"league":"Standard","settings_path":null,"log_path":null,"recent_errors":["boom"]}`,
-		wailsJSON(t, Diagnostics{Version: "1.0", OS: "linux", Backend: platform.BackendX11,
+		wailsJSON(t, Diagnostics{
+			Version: "1.0", OS: "linux", Backend: platform.BackendX11,
 			Capabilities: platform.Capabilities{WindowTracking: true, Clipboard: true, Notes: []string{"n"}},
-			DataVersion:  new("0.5"), League: new("Standard"), RecentErrors: []string{"boom"}}))
+			DataVersion:  new("0.5"), League: new("Standard"), RecentErrors: []string{"boom"},
+		}))
 }
 
 // Values a command returns directly, outside a payload type, are built non-nil.
@@ -177,8 +179,16 @@ func TestDirectResults(t *testing.T) {
 // nil, never null.
 func TestPayloadsHaveNoNullCollections(t *testing.T) {
 	for _, v := range []any{
-		Error{}, Diagnostics{}, PriceCheckResponse{}, ItemCopied{}, PriceReady{}, PriceFailed{},
-		SettingsChanged{}, SettingsChanged{Settings: config.DefaultSettings()}, OverlayState{}, OverlayLayout{},
+		Error{},
+		Diagnostics{},
+		PriceCheckResponse{},
+		ItemCopied{},
+		PriceReady{},
+		PriceFailed{},
+		SettingsChanged{},
+		SettingsChanged{Settings: config.DefaultSettings()},
+		OverlayState{},
+		OverlayLayout{},
 		UpdateAvailable{},
 	} {
 		t.Run(reflect.TypeOf(v).Name(), func(t *testing.T) {
