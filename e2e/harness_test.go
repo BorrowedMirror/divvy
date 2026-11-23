@@ -165,6 +165,7 @@ type appState struct {
 	SettingsVisible bool          `json:"settings_visible"`
 	NoticeVisible   bool          `json:"notice_visible"`
 	TrayPresent     bool          `json:"tray_present"`
+	CanCopy         bool          `json:"can_copy"`
 	LastItem        *string       `json:"last_item"`
 	LastPrice       *priceSummary `json:"last_price"`
 }
@@ -639,6 +640,9 @@ const triggerSpacing = 300 * time.Millisecond
 func triggerPriceCheck(t *testing.T, a *appProcess, pinned bool) {
 	t.Helper()
 	focusGame(t)
+	// The app copies only once it sees the game focused (its tracker polls, and a notice or a
+	// just-hidden panel may hold focus for a moment); a trigger before that is dropped.
+	a.WaitState(t, "the game focused", timeout(), func(s appState) bool { return s.CanCopy })
 	if wait := triggerSpacing - time.Since(a.lastTrigger); wait > 0 {
 		time.Sleep(wait)
 	}

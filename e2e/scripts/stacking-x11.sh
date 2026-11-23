@@ -16,7 +16,8 @@ PORT=${STACK_HOOK_PORT:-47188}
 Xvfb "$DISP" -screen 0 1920x1080x24 >/dev/null 2>&1 &
 XV=$!
 trap 'kill $XV 2>/dev/null || true' EXIT
-sleep 1
+# openbox exits at once if the X server is not accepting connections yet.
+for _ in $(seq 100); do DISPLAY=$DISP xdotool getdisplaygeometry >/dev/null 2>&1 && break; sleep 0.1; done
 export DISPLAY=$DISP APP GAMEBIN PORT
 exec dbus-run-session -- bash -euo pipefail -c '
 fail() { echo "FAIL: $*"; exit 1; }
@@ -27,7 +28,9 @@ OBRC=$(mktemp); cat >"$OBRC" <<RC
   <focus><focusNew>yes</focusNew><followMouse>yes</followMouse><underMouse>no</underMouse><focusDelay>0</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>
 </openbox_config>
 RC
-openbox --config-file "$OBRC" >/dev/null 2>&1 & sleep 1
+OBLOG=$(mktemp); openbox --config-file "$OBRC" >"$OBLOG" 2>&1 &
+for _ in $(seq 100); do xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q "window id" && break; sleep 0.1; done
+xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q "window id" || { cat "$OBLOG"; fail "openbox did not start"; }
 CFG=$(mktemp -d); mkdir -p "$CFG/config"
 printf "version = 1\n\n[ui]\nonboarding_done = true\n" > "$CFG/config/settings.toml"
 LOG=$(mktemp -d)

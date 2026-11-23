@@ -211,6 +211,7 @@ func (f *Flow) hookState(actions HookActions) string {
 		SettingsVisible bool               `json:"settings_visible"`
 		NoticeVisible   bool               `json:"notice_visible"`
 		TrayPresent     bool               `json:"tray_present"`
+		CanCopy         bool               `json:"can_copy"`
 		LastItem        *string            `json:"last_item"`
 		LastPrice       *core.PriceSummary `json:"last_price"`
 		OverlayLayout   ipc.OverlayLayout  `json:"overlay_layout"`
@@ -221,6 +222,7 @@ func (f *Flow) hookState(actions HookActions) string {
 		SettingsVisible: f.d.Settings().IsVisible(),
 		NoticeVisible:   f.d.Notice().IsVisible(),
 		TrayPresent:     actions.TrayPresent != nil && actions.TrayPresent(),
+		CanCopy:         st.platform != nil && mayCopy(st.platform.Capabilities.WindowTracking, st.platform.WindowTracker.IsGameFocused),
 		LastItem:        lastItem,
 		LastPrice:       st.lastPriceSummary(),
 		OverlayLayout:   st.layout(),
