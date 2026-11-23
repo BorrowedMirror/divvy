@@ -55,6 +55,8 @@ type Desktop interface {
 	// BringToFront stacks w above the game (gameID, when tracked) and optionally focuses it,
 	// bypassing focus-stealing prevention where the platform allows it.
 	BringToFront(w Window, gameID *uint64, focus bool) error
+	// ShowInactive shows w without taking keyboard focus from the game.
+	ShowInactive(w Window)
 	// RefocusGame hands keyboard focus back to the game after the panel closes.
 	RefocusGame(gameID *uint64)
 	// RoundWindow gives w rounded corners (radius in physical px); width 0 removes the shape.

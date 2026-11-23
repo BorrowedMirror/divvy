@@ -133,7 +133,8 @@ func (d *fakeDesktop) BringToFront(w Window, _ *uint64, focus bool) error {
 	}
 	return nil
 }
-func (d *fakeDesktop) RefocusGame(*uint64) {}
+func (d *fakeDesktop) ShowInactive(w Window) { w.Show() }
+func (d *fakeDesktop) RefocusGame(*uint64)   {}
 func (d *fakeDesktop) RoundWindow(w Window, width, height, radius int32) {
 	d.mu.Lock()
 	defer d.mu.Unlock()

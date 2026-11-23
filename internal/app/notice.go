@@ -41,7 +41,7 @@ func (f *Flow) gameFound(game platform.Rect) {
 	w := f.d.Notice()
 	f.placeNotice(w, game)
 	f.emit(ipc.EventReadyNotice, ipc.ReadyNotice{DurationMS: uint32(noticeDuration.Milliseconds())})
-	w.Show()
+	f.d.ShowInactive(w)
 	// Stacked above a fullscreen game like the pinned panel, without taking its focus.
 	if err := f.d.BringToFront(w, f.gameID(), false); err != nil {
 		f.st.RecordError("ready notice", err)

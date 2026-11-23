@@ -226,6 +226,22 @@ func (d *Desktop) Emit(event string, payload any) { d.shell.App.Event.Emit(event
 // OpenURL opens url in the default browser.
 func (d *Desktop) OpenURL(url string) error { return d.shell.App.Browser.OpenURL(url) }
 
+// ShowInactive shows w without taking keyboard focus. On Windows Wails' Show activates the
+// window even with WS_EX_NOACTIVATE, so it goes through the backend's no-activate ShowAt at
+// w's current bounds; elsewhere Show leaves focus alone (X11 refuses it natively, macOS uses a
+// non-activating panel).
+func (d *Desktop) ShowInactive(w app.Window) {
+	if d.parts.Kind == platform.BackendWindows {
+		if s, err := d.styler(w); err == nil {
+			x, y, width, height := w.Bounds()
+			if err := s.ShowAt(platform.Rect{X: x, Y: y, Width: uint32(width), Height: uint32(height)}); err == nil {
+				return
+			}
+		}
+	}
+	w.Show()
+}
+
 // BringToFront stacks w above the game and, with focus, gives it keyboard focus.
 func (d *Desktop) BringToFront(w app.Window, gameID *uint64, focus bool) error {
 	s, err := d.styler(w)
