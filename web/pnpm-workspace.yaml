@@ -2,3 +2,5 @@
 allowBuilds:
   lefthook: true
   esbuild: true
+# `pnpm add` writes exact versions; Renovate bumps them.
+saveExact: true
