@@ -18,7 +18,7 @@ import (
 
 // updaterPrivateKeyEnv holds the base64 ed25519 private key (seed or full key) in the release
 // workflow's protected environment.
-const updaterPrivateKeyEnv = "RKL_UPDATER_PRIVATE_KEY"
+const updaterPrivateKeyEnv = "DIVVY_UPDATER_PRIVATE_KEY"
 
 // updateArtifact is one platform's update in the manifest: the file the updater swaps in.
 type updateArtifact struct {
@@ -60,8 +60,8 @@ type updateManifest struct {
 }
 
 // runUpdaterKeygen prints a new updater key pair. The public key goes in the release
-// environment as RKL_UPDATER_PUBKEY (it is linked into builds), the private key as
-// RKL_UPDATER_PRIVATE_KEY. Installed builds trust only the key they were built with.
+// environment as DIVVY_UPDATER_PUBKEY (it is linked into builds), the private key as
+// DIVVY_UPDATER_PRIVATE_KEY. Installed builds trust only the key they were built with.
 func runUpdaterKeygen(stdout io.Writer) error {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {

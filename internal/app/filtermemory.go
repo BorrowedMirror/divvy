@@ -8,7 +8,7 @@ import (
 	"encoding/json/v2"
 	"os"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // maxFilterMemoryPerCategory is the most stat choices kept per category, so the file stays

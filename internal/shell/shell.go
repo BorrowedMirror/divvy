@@ -8,8 +8,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/product"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/product"
 )
 
 // Window names, matching the routes the frontend reads from the URL hash.
@@ -21,8 +21,8 @@ const (
 
 // Titles of the frameless windows, as window lists and screen readers name them.
 const (
-	overlayTitle = "RKL price check"
-	noticeTitle  = "RKL notice"
+	overlayTitle = "Divvy price check"
+	noticeTitle  = "Divvy notice"
 )
 
 // Icons the shell needs.
@@ -38,13 +38,13 @@ type Options struct {
 	Icons  Icons
 	Logger *slog.Logger
 	// SingleInstance makes a second launch hand its arguments to the running instance and exit.
-	// Off for test-hook runs, so a test instance can start next to an installed RKL.
+	// Off for test-hook runs, so a test instance can start next to an installed Divvy.
 	SingleInstance bool
 	// OnPanic is called with a panic Wails recovered (a bound method or event handler).
 	OnPanic func(details *application.PanicDetails)
 	// Services are the bound IPC services.
 	Services []application.Service
-	// OnSecondInstance runs in the first instance when RKL is launched again, with the second
+	// OnSecondInstance runs in the first instance when Divvy is launched again, with the second
 	// launch's arguments (for example `--trigger`).
 	OnSecondInstance func(args []string)
 }
@@ -55,7 +55,7 @@ type Shell struct {
 	Overlay  *application.WebviewWindow
 	Settings *application.WebviewWindow
 	// Notice is the ready notice over the game window; it never takes focus or mouse input
-	// (cmd/rkl styles it at startup).
+	// (cmd/divvy styles it at startup).
 	Notice *application.WebviewWindow
 	Tray   *application.SystemTray
 
@@ -94,7 +94,7 @@ func New(opts Options) *Shell {
 		},
 		Assets:         application.AssetOptions{Handler: application.AssetFileServerFS(opts.Assets)},
 		SingleInstance: single,
-		// RKL lives in the tray: closing the settings window must not quit it.
+		// Divvy lives in the tray: closing the settings window must not quit it.
 		Linux:   application.LinuxOptions{DisableQuitOnLastWindowClosed: true, ApplicationID: product.ID, ProgramName: product.Binary},
 		Mac:     application.MacOptions{ApplicationShouldTerminateAfterLastWindowClosed: false, ActivationPolicy: application.ActivationPolicyAccessory},
 		Windows: application.WindowsOptions{DisableQuitOnLastWindowClosed: true},
@@ -120,7 +120,7 @@ func New(opts Options) *Shell {
 
 	s.Settings = s.App.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:             settingsWindow,
-		Title:            "RKL settings",
+		Title:            "Divvy settings",
 		URL:              "/#/settings",
 		Width:            900,
 		Height:           680,

@@ -3,7 +3,7 @@ package mac
 import (
 	"math"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // The OS-independent half of the passive hook (hook_darwin.go): CGEvent -> [platform.InputEvent]

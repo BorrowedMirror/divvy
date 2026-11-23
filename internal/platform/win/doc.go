@@ -1,4 +1,4 @@
-// Package win is RKL's Windows backend.
+// Package win is Divvy's Windows backend.
 //
 //   - tracker: SetWinEventHook (foreground + location change) on a dedicated message-loop
 //     thread, plus a 1 s rescan timer for the game window appearing or disappearing.

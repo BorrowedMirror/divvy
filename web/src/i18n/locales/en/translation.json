@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "App update",
-    "available": "RKL {{version}} is available.",
+    "available": "Divvy {{version}} is available.",
     "notes": "What's new",
     "later": "Later",
     "install": "Install and restart",
@@ -187,11 +187,11 @@
     "rememberFiltersHelp": "The next ring, bow and so on starts with the stats you had on or off when you last searched one.",
     "forgetFilters": "Forget remembered choices",
     "forgotFilters": "Forgotten.",
-    "autostart": "Start RKL when I log in",
+    "autostart": "Start Divvy when I log in",
     "scale": "Panel size",
     "backdropDim": "Backdrop behind the panel",
     "closePinnedOnGameFocus": "Close a pinned panel when I click back into the game",
-    "readyNotice": "Show a notice over the game when RKL finds it",
+    "readyNotice": "Show a notice over the game when Divvy finds it",
     "itemLinks": "Item links in the panel",
     "results": "Prices and listings"
   },
@@ -269,21 +269,21 @@
     "clipboard": "Clipboard access"
   },
   "guidance": {
-    "accessibility": "macOS: open System Settings → Privacy & Security → Accessibility and enable RKL. This is needed for hotkeys and copying items.",
-    "screenRecording": "macOS: open System Settings → Privacy & Security → Screen Recording and enable RKL so it can find the game window. Restart RKL afterwards.",
+    "accessibility": "macOS: open System Settings → Privacy & Security → Accessibility and enable Divvy. This is needed for hotkeys and copying items.",
+    "screenRecording": "macOS: open System Settings → Privacy & Security → Screen Recording and enable Divvy so it can find the game window. Restart Divvy afterwards.",
     "wayland": "Wayland-native mode: global hotkeys go through the desktop portal, the overlay is anchored to the output rather than the game window, and keystroke injection may be unavailable. Use X11/XWayland if your compositor allows it.",
-    "gnome": "GNOME does not support the Wayland features RKL needs, so it runs through XWayland (X11) there. Run the game under XWayland too.",
+    "gnome": "GNOME does not support the Wayland features Divvy needs, so it runs through XWayland (X11) there. Run the game under XWayland too.",
     "generic": "Missing permission: {{permission}}"
   },
   "tray": {
     "priceCheck": "Price check (pinned)",
     "settings": "Settings…",
     "diagnostics": "Diagnostics",
-    "quit": "Quit RKL",
-    "tooltip": "RKL"
+    "quit": "Quit Divvy",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "Set up RKL",
+    "title": "Set up Divvy",
     "intro": "A few platform-specific steps so price checks work smoothly. You can come back here any time from Diagnostics.",
     "stepsHeading": "Setup for {{platform}}",
     "loadFailed": "Couldn't check permissions.",
@@ -292,25 +292,25 @@
     "granted": "Granted",
     "notGranted": "Not granted",
     "openSettings": "Open System Settings",
-    "relaunch": "macOS applies this permission after RKL restarts. Quit and reopen RKL once you've enabled it.",
+    "relaunch": "macOS applies this permission after Divvy restarts. Quit and reopen Divvy once you've enabled it.",
     "requestFailed": "Couldn't open System Settings: {{message}}",
     "details": "Technical details",
-    "blockedHint": "Some required permissions are still missing. RKL will keep working with reduced features.",
+    "blockedHint": "Some required permissions are still missing. Divvy will keep working with reduced features.",
     "continueWithout": "Continue without",
     "done": "Done",
     "saveFailed": "Couldn't save: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Accessibility",
-        "body": "RKL presses the game's copy shortcut for you when you hit the price-check hotkey. macOS requires Accessibility access for that."
+        "body": "Divvy presses the game's copy shortcut for you when you hit the price-check hotkey. macOS requires Accessibility access for that."
       },
       "screen_recording": {
         "name": "Screen Recording",
-        "body": "Lets RKL read window titles so it can find the Path of Exile 2 window reliably. RKL never captures your screen."
+        "body": "Lets Divvy read window titles so it can find the Path of Exile 2 window reliably. Divvy never captures your screen."
       },
       "input_monitoring": {
         "name": "Input Monitoring",
-        "body": "Lets RKL close the overlay with Esc and react to Ctrl+scroll while the game has focus."
+        "body": "Lets Divvy close the overlay with Esc and react to Ctrl+scroll while the game has focus."
       },
       "unknown": "Permission: {{kind}}"
     },
@@ -318,15 +318,15 @@
       "windowedTitle": "Use windowed or borderless fullscreen",
       "windowedBody": "The overlay can't appear above exclusive fullscreen. In the game's graphics options pick Windowed or Windowed Fullscreen (borderless).",
       "elevatedTitle": "Running the game as administrator?",
-      "elevatedBody": "Windows blocks hotkeys and simulated keystrokes from a normal app to an elevated one (UIPI). If the game runs as administrator, run RKL as administrator too."
+      "elevatedBody": "Windows blocks hotkeys and simulated keystrokes from a normal app to an elevated one (UIPI). If the game runs as administrator, run Divvy as administrator too."
     },
     "x11": {
       "title": "No extra setup needed",
-      "body": "X11 supports everything RKL needs: global hotkeys, window tracking and an overlay above the game."
+      "body": "X11 supports everything Divvy needs: global hotkeys, window tracking and an overlay above the game."
     },
     "gnome": {
       "title": "GNOME: X11/XWayland only",
-      "x11Body": "GNOME lacks the Wayland features RKL needs, so RKL runs through XWayland here. Run the game under XWayland too (the default for Proton and Wine).",
+      "x11Body": "GNOME lacks the Wayland features Divvy needs, so Divvy runs through XWayland here. Run the game under XWayland too (the default for Proton and Wine).",
       "waylandBody": "GNOME has no layer-shell, so in Wayland-native mode the overlay can't stay above the game. Switch the backend to X11 / XWayland in Settings."
     },
     "wayland": {
@@ -334,9 +334,9 @@
       "degradedBody": "Wayland keeps apps isolated from each other, so some features work differently:",
       "portal": "Global hotkeys go through the desktop's GlobalShortcuts portal, which asks you to confirm them. Not every compositor offers it.",
       "layerShell": "The overlay is anchored to the screen edge with layer-shell instead of following the game window.",
-      "noTracking": "RKL can't see the game window or listen for Esc, so close the overlay with its own button.",
+      "noTracking": "Divvy can't see the game window or listen for Esc, so close the overlay with its own button.",
       "triggerTitle": "Bind the price check in your compositor",
-      "triggerBody": "If hotkeys don't work, add a keyboard shortcut in your compositor that runs RKL --trigger. It price-checks the item under the cursor in the running RKL.",
+      "triggerBody": "If hotkeys don't work, add a keyboard shortcut in your compositor that runs Divvy --trigger. It price-checks the item under the cursor in the running Divvy.",
       "pinnedHint": "Add --pinned to open the overlay pinned.",
       "example": {
         "sway": "sway",
@@ -400,7 +400,7 @@
       "area": "Area and rewards",
       "other": "Other flagged mods"
     },
-    "footnote": "Mods come from RKL's game data; # stands for the rolled value. Mods you flag from the panel appear here too."
+    "footnote": "Mods come from Divvy's game data; # stands for the rolled value. Mods you flag from the panel appear here too."
   },
   "resultsLayout": {
     "below": "Below the filters",
@@ -430,6 +430,6 @@
     "addSearch": "Add search",
     "remove": "Remove {{what}}",
     "ctrlScroll": "Switch stash tabs with Ctrl + mouse wheel",
-    "ctrlScrollHelp": "Each wheel step over the game presses the Left or Right arrow key once, with Ctrl still held. Takes effect after restarting RKL (it needs a mouse hook, which adds a little input latency on Windows)."
+    "ctrlScrollHelp": "Each wheel step over the game presses the Left or Right arrow key once, with Ctrl still held. Takes effect after restarting Divvy (it needs a mouse hook, which adds a little input latency on Windows)."
   }
 }

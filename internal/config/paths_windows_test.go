@@ -14,10 +14,10 @@ func TestResolveWindowsLayout(t *testing.T) {
 	got, err := Resolve()
 	require.NoError(t, err)
 	assert.Equal(t, Paths{
-		ConfigDir:    `C:\Users\Exile\AppData\Roaming\rkl\config`,
-		CacheDir:     `C:\Users\Exile\AppData\Local\rkl\cache`,
-		LogDir:       `C:\Users\Exile\AppData\Local\rkl\data\logs`,
-		SettingsFile: `C:\Users\Exile\AppData\Roaming\rkl\config\settings.toml`,
+		ConfigDir:    `C:\Users\Exile\AppData\Roaming\divvy\config`,
+		CacheDir:     `C:\Users\Exile\AppData\Local\divvy\cache`,
+		LogDir:       `C:\Users\Exile\AppData\Local\divvy\data\logs`,
+		SettingsFile: `C:\Users\Exile\AppData\Roaming\divvy\config\settings.toml`,
 	}, got)
 
 	legacy, ok := LegacySettingsFile()

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 func TestRequiresWaylandDisplay(t *testing.T) {
@@ -18,7 +18,7 @@ func TestRequiresWaylandDisplay(t *testing.T) {
 }
 
 func TestOverlayOverNilHandleIsUnsupported(t *testing.T) {
-	parts, err := New(testOptions(platform.EnvProbe{OS: "linux", WaylandDisplay: "rkl-no-such-display"}))
+	parts, err := New(testOptions(platform.EnvProbe{OS: "linux", WaylandDisplay: "divvy-no-such-display"}))
 	require.NoError(t, err)
 	_, err = parts.Overlay(unsafe.Pointer(nil))
 	require.ErrorIs(t, err, platform.ErrUnsupported)
@@ -27,7 +27,7 @@ func TestOverlayOverNilHandleIsUnsupported(t *testing.T) {
 // testOptions points the virtual keyboard at a display that does not exist and turns ydotool
 // off.
 func testOptions(probe platform.EnvProbe) Options {
-	return Options{Probe: probe, display: "rkl-no-such-display", noYdotool: true}
+	return Options{Probe: probe, display: "divvy-no-such-display", noYdotool: true}
 }
 
 func TestUnreachableCompositorReportsItself(t *testing.T) {
@@ -63,7 +63,7 @@ type countingSim struct{ n int }
 func (c *countingSim) SendChord(platform.Chord) error { c.n++; return nil }
 
 func TestLazyVirtualKeyboardRetriesAndUsesFallback(t *testing.T) {
-	vk := &virtualKeyboard{display: "rkl-no-such-display"}
+	vk := &virtualKeyboard{display: "divvy-no-such-display"}
 	chord := platform.NewChord("KeyC", platform.Ctrl)
 	require.Error(t, vk.ensureReady())
 	err := vk.SendChord(chord)
@@ -73,7 +73,7 @@ func TestLazyVirtualKeyboardRetriesAndUsesFallback(t *testing.T) {
 	require.ErrorIs(t, err, platform.ErrInvalidChord)
 
 	fallback := &countingSim{}
-	vk = &virtualKeyboard{display: "rkl-no-such-display", fallback: fallback}
+	vk = &virtualKeyboard{display: "divvy-no-such-display", fallback: fallback}
 	require.NoError(t, vk.SendChord(chord))
 	require.NoError(t, vk.SendChord(chord))
 	assert.Equal(t, 2, fallback.n)

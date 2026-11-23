@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "앱 업데이트",
-    "available": "RKL {{version}} 버전을 사용할 수 있습니다.",
+    "available": "Divvy {{version}} 버전을 사용할 수 있습니다.",
     "notes": "새로운 기능",
     "later": "나중에",
     "install": "설치 후 다시 시작",
@@ -182,11 +182,11 @@
     "rememberFiltersHelp": "다음에 반지, 활 등을 검색하면 마지막으로 같은 종류를 검색했을 때 켜거나 끈 능력치로 시작합니다.",
     "forgetFilters": "기억한 선택 지우기",
     "forgotFilters": "지웠습니다",
-    "autostart": "로그인할 때 RKL 시작",
+    "autostart": "로그인할 때 Divvy 시작",
     "scale": "패널 크기",
     "backdropDim": "패널 뒤 배경",
     "closePinnedOnGameFocus": "게임을 다시 클릭하면 고정된 패널 닫기",
-    "readyNotice": "RKL이 게임을 감지하면 게임 위에 알림 표시",
+    "readyNotice": "Divvy이 게임을 감지하면 게임 위에 알림 표시",
     "checkUpdates": "업데이트 자동 확인",
     "checkUpdatesHelp": "시작 직후와 하루에 한 번 새 릴리스를 확인합니다. 설치를 선택하기 전에는 아무것도 다운로드하지 않습니다.",
     "itemLinks": "패널의 아이템 링크",
@@ -266,21 +266,21 @@
     "clipboard": "클립보드 접근"
   },
   "guidance": {
-    "accessibility": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용에서 RKL를 허용하세요. 단축키와 아이템 복사에 필요합니다.",
-    "screenRecording": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 화면 기록에서 RKL를 허용해야 게임 창을 찾을 수 있습니다. 그런 다음 RKL를 재시작하세요.",
+    "accessibility": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용에서 Divvy를 허용하세요. 단축키와 아이템 복사에 필요합니다.",
+    "screenRecording": "macOS: 시스템 설정 → 개인정보 보호 및 보안 → 화면 기록에서 Divvy를 허용해야 게임 창을 찾을 수 있습니다. 그런 다음 Divvy를 재시작하세요.",
     "wayland": "Wayland 네이티브 모드: 전역 단축키는 데스크톱 포털을 거치고, 오버레이는 게임 창이 아닌 화면 기준으로 배치되며, 키 입력 전송을 사용하지 못할 수 있습니다. 컴포지터가 지원하면 X11/XWayland를 사용하세요.",
-    "gnome": "GNOME은 RKL에 필요한 Wayland 기능을 지원하지 않으므로 XWayland(X11)로 실행됩니다. 게임도 XWayland에서 실행하세요.",
+    "gnome": "GNOME은 Divvy에 필요한 Wayland 기능을 지원하지 않으므로 XWayland(X11)로 실행됩니다. 게임도 XWayland에서 실행하세요.",
     "generic": "누락된 권한: {{permission}}"
   },
   "tray": {
     "priceCheck": "시세 확인 (고정)",
     "settings": "설정…",
     "diagnostics": "진단",
-    "quit": "RKL 종료",
-    "tooltip": "RKL"
+    "quit": "Divvy 종료",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "RKL 설정",
+    "title": "Divvy 설정",
     "intro": "시세 확인이 원활하게 작동하도록 플랫폼별로 몇 가지 단계를 진행합니다. 언제든지 진단에서 다시 이 화면으로 돌아올 수 있습니다.",
     "stepsHeading": "{{platform}} 설정",
     "loadFailed": "권한을 확인할 수 없습니다.",
@@ -289,21 +289,21 @@
     "granted": "허용됨",
     "notGranted": "허용 안 됨",
     "openSettings": "시스템 설정 열기",
-    "relaunch": "macOS는 RKL를 재시작한 후에 이 권한을 적용합니다. 권한을 허용한 다음 RKL를 종료하고 다시 여세요.",
+    "relaunch": "macOS는 Divvy를 재시작한 후에 이 권한을 적용합니다. 권한을 허용한 다음 Divvy를 종료하고 다시 여세요.",
     "requestFailed": "시스템 설정을 열 수 없습니다: {{message}}",
     "details": "기술 세부 정보",
-    "blockedHint": "일부 필수 권한이 아직 없습니다. RKL는 일부 기능이 제한된 상태로 계속 작동합니다.",
+    "blockedHint": "일부 필수 권한이 아직 없습니다. Divvy는 일부 기능이 제한된 상태로 계속 작동합니다.",
     "continueWithout": "허용하지 않고 계속",
     "done": "완료",
     "saveFailed": "저장할 수 없습니다: {{message}}",
     "permission": {
       "accessibility": {
         "name": "손쉬운 사용",
-        "body": "시세 확인 단축키를 누르면 RKL가 게임의 복사 단축키를 대신 누릅니다. macOS에서는 이를 위해 손쉬운 사용 권한이 필요합니다."
+        "body": "시세 확인 단축키를 누르면 Divvy가 게임의 복사 단축키를 대신 누릅니다. macOS에서는 이를 위해 손쉬운 사용 권한이 필요합니다."
       },
       "screen_recording": {
         "name": "화면 기록",
-        "body": "RKL가 창 제목을 읽어 Path of Exile 2 창을 정확하게 찾을 수 있게 합니다. RKL는 화면을 절대 캡처하지 않습니다."
+        "body": "Divvy가 창 제목을 읽어 Path of Exile 2 창을 정확하게 찾을 수 있게 합니다. Divvy는 화면을 절대 캡처하지 않습니다."
       },
       "input_monitoring": {
         "name": "입력 모니터링",
@@ -315,15 +315,15 @@
       "windowedTitle": "창 모드 또는 테두리 없는 전체 화면 사용",
       "windowedBody": "오버레이는 전용 전체 화면 위에 표시될 수 없습니다. 게임의 그래픽 옵션에서 창 모드 또는 창 모드 전체 화면(테두리 없음)을 선택하세요.",
       "elevatedTitle": "게임을 관리자 권한으로 실행하고 있나요?",
-      "elevatedBody": "Windows는 일반 앱에서 관리자 권한 앱으로 보내는 단축키와 키 입력을 차단합니다(UIPI). 게임을 관리자 권한으로 실행한다면 RKL도 관리자 권한으로 실행하세요."
+      "elevatedBody": "Windows는 일반 앱에서 관리자 권한 앱으로 보내는 단축키와 키 입력을 차단합니다(UIPI). 게임을 관리자 권한으로 실행한다면 Divvy도 관리자 권한으로 실행하세요."
     },
     "x11": {
       "title": "추가 설정이 필요 없습니다",
-      "body": "X11은 전역 단축키, 창 추적, 게임 위 오버레이 등 RKL에 필요한 모든 기능을 지원합니다."
+      "body": "X11은 전역 단축키, 창 추적, 게임 위 오버레이 등 Divvy에 필요한 모든 기능을 지원합니다."
     },
     "gnome": {
       "title": "GNOME: X11/XWayland 전용",
-      "x11Body": "GNOME에는 RKL에 필요한 Wayland 기능이 없으므로 여기서는 XWayland를 통해 실행됩니다. 게임도 XWayland에서 실행하세요(Proton과 Wine의 기본값).",
+      "x11Body": "GNOME에는 Divvy에 필요한 Wayland 기능이 없으므로 여기서는 XWayland를 통해 실행됩니다. 게임도 XWayland에서 실행하세요(Proton과 Wine의 기본값).",
       "waylandBody": "GNOME에는 layer-shell이 없어 Wayland 네이티브 모드에서는 오버레이를 게임 위에 유지할 수 없습니다. 설정에서 백엔드를 X11 / XWayland로 바꾸세요."
     },
     "wayland": {
@@ -331,9 +331,9 @@
       "degradedBody": "Wayland는 앱을 서로 격리하므로 일부 기능이 다르게 작동합니다:",
       "portal": "전역 단축키는 데스크톱의 GlobalShortcuts 포털을 거치며, 단축키를 확인하라는 요청이 표시됩니다. 모든 컴포지터가 이를 제공하지는 않습니다.",
       "layerShell": "오버레이는 게임 창을 따라가지 않고 layer-shell을 통해 화면 가장자리에 고정됩니다.",
-      "noTracking": "RKL는 게임 창을 볼 수 없고 Esc 입력도 감지할 수 없으므로, 오버레이 자체의 버튼으로 닫으세요.",
+      "noTracking": "Divvy는 게임 창을 볼 수 없고 Esc 입력도 감지할 수 없으므로, 오버레이 자체의 버튼으로 닫으세요.",
       "triggerTitle": "컴포지터에서 시세 확인 단축키 지정",
-      "triggerBody": "단축키가 작동하지 않으면 컴포지터에 RKL --trigger를 실행하는 키보드 단축키를 추가하세요. 실행 중인 RKL에서 커서 아래 아이템의 시세를 확인합니다.",
+      "triggerBody": "단축키가 작동하지 않으면 컴포지터에 Divvy --trigger를 실행하는 키보드 단축키를 추가하세요. 실행 중인 Divvy에서 커서 아래 아이템의 시세를 확인합니다.",
       "pinnedHint": "--pinned를 추가하면 오버레이가 고정된 상태로 열립니다.",
       "example": {
         "sway": "sway",
@@ -391,7 +391,7 @@
       "area": "지역 및 보상",
       "other": "기타 표시된 속성"
     },
-    "footnote": "속성은 RKL의 게임 데이터에서 가져옵니다. #은 굴림 값을 나타냅니다. 패널에서 표시한 속성도 여기에 나타납니다."
+    "footnote": "속성은 Divvy의 게임 데이터에서 가져옵니다. #은 굴림 값을 나타냅니다. 패널에서 표시한 속성도 여기에 나타납니다."
   },
   "resultsLayout": {
     "below": "조건 아래",
@@ -421,6 +421,6 @@
     "addSearch": "검색 추가",
     "remove": "{{what}} 삭제",
     "ctrlScroll": "Ctrl + 마우스 휠로 보관함 탭 전환",
-    "ctrlScrollHelp": "게임 위에서 휠을 한 칸 돌릴 때마다 왼쪽 또는 오른쪽 화살표 키를 한 번 누릅니다. RKL을 다시 시작하면 적용됩니다."
+    "ctrlScrollHelp": "게임 위에서 휠을 한 칸 돌릴 때마다 왼쪽 또는 오른쪽 화살표 키를 한 번 누릅니다. Divvy을 다시 시작하면 적용됩니다."
   }
 }

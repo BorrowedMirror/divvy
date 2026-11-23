@@ -8,7 +8,7 @@ import (
 
 	"github.com/godbus/dbus/v5"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // portalTimeout is how long [GlobalHotkeys] waits for the portal.

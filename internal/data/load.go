@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data/assets"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/data/assets"
 )
 
 // Bundle is the raw decoded asset bundle.

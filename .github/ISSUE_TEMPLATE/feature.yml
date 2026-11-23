@@ -1,12 +1,12 @@
 name: Feature request
-description: Suggest an idea or improvement for RKL.
+description: Suggest an idea or improvement for Divvy.
 labels: [enhancement, triage]
 body:
   - type: textarea
     id: problem
     attributes:
       label: Problem
-      description: What are you trying to do that RKL makes hard or impossible today?
+      description: What are you trying to do that Divvy makes hard or impossible today?
     validations:
       required: true
   - type: textarea

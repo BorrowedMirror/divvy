@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 type xy[T int32 | float64] struct{ x, y T }

@@ -3,7 +3,7 @@ package trade
 import (
 	"context"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // PriceRequest is the input to a price lookup.

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/config"
 )
 
 func TestWaystoneCatalogGroupsDedupesAndAddsExtras(t *testing.T) {

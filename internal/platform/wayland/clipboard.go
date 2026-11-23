@@ -9,12 +9,12 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // wlClipboard is the text clipboard through wl-clipboard (`wl-paste`, `wl-copy`), which use the
 // compositor's data-control protocol (wlr / ext data-control). Unlike GTK's clipboard (Wails'),
-// that works while RKL has no focused window: sway, for one, only tells the focused window
+// that works while Divvy has no focused window: sway, for one, only tells the focused window
 // about clipboard changes, so after the game copies an item GTK would never see it.
 type wlClipboard struct {
 	paste, copy string // binary paths

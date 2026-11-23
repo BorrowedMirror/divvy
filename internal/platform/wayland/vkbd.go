@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // virtualKeyboard injects chords through zwp_virtual_keyboard_v1.

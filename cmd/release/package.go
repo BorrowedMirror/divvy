@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/product"
+	"github.com/BorrowedMirror/divvy/internal/product"
 )
 
 //go:embed assets
@@ -19,9 +19,9 @@ const (
 	productName  = product.Name
 	binaryName   = product.Binary
 	identifier   = product.ID
-	publisher    = "RKL contributors"
+	publisher    = "Divvy contributors"
 	description  = product.Description
-	copyrightMsg = "Copyright (c) 2026 RKL contributors. Apache-2.0."
+	copyrightMsg = "Copyright (c) 2026 Divvy contributors. Apache-2.0."
 )
 
 // outDir is where packaging writes, relative to the module root (gitignored via target/).
@@ -86,7 +86,7 @@ func (p packager) fresh(elem ...string) (string, error) {
 	return dir, os.MkdirAll(dir, 0o755)
 }
 
-// artifact is the file name of a release asset, e.g. rkl-0.1.0-windows-x64-setup.exe.
+// artifact is the file name of a release asset, e.g. divvy-0.1.0-windows-x64-setup.exe.
 func (p packager) artifact(suffix string) string {
 	return fmt.Sprintf("%s-%s-%s", binaryName, p.version, suffix)
 }

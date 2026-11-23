@@ -10,14 +10,14 @@ The version lives in the `VERSION` file (SemVer without a leading `v`, e.g. `0.2
 
    ```sh
    git switch master && git pull --ff-only
-   git tag -a v0.2.0 -m "rkl 0.2.0"
+   git tag -a v0.2.0 -m "divvy 0.2.0"
    git push origin v0.2.0
    ```
 
 4. The tag runs `.github/workflows/release.yml`. It fails early unless the tag is `v` plus the
    `VERSION` file at that commit. It then builds the Windows NSIS installer (cross-compiled on
    Linux), the Linux AppImage and the macOS universal DMG with
-   `RKL_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts into
+   `DIVVY_RELEASE_VERSION=<version> task package:<os>`, signs the update artifacts into
    `update.json` (see [Updates](#updates)), and creates a **draft** release with the packages,
    `update.json`, a CycloneDX SBOM, `THIRD-PARTY-NOTICES.html` and `SHA256SUMS.txt`. GitHub
    writes the draft's notes from the pull requests merged since the previous release, grouped by
@@ -45,8 +45,8 @@ the bare Windows exe, the AppImage and the zipped `.app`;
 at the release's tag.
 
 Builds without a key (development builds, forks, local packages without
-`RKL_UPDATER_PUBKEY`) never check for updates. Release builds read
-`https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/update.json`.
+`DIVVY_UPDATER_PUBKEY`) never check for updates. Release builds read
+`https://github.com/BorrowedMirror/divvy/releases/latest/download/update.json`.
 GitHub's `latest` skips drafts and pre-releases, so installs only see a release once it is
 published, and release-candidate builds update to the next stable release. The first check runs
 30 s after start and then every 24 h while **Settings > General > Check for updates
@@ -61,7 +61,7 @@ Generate the key pair once:
 make updater:keygen
 ```
 
-It prints two lines, `RKL_UPDATER_PUBKEY=...` and `RKL_UPDATER_PRIVATE_KEY=...`. Store both as
+It prints two lines, `DIVVY_UPDATER_PUBKEY=...` and `DIVVY_UPDATER_PRIVATE_KEY=...`. Store both as
 secrets of the `release` environment; the release fails without them. Installed builds trust
 only the key they were built with, so keep the private key safe: losing or rotating it means
 users must reinstall by hand to get later updates.
@@ -93,8 +93,8 @@ straight to `master` without a pull request do not appear in the notes.
 
 | Secret | Where | Purpose |
 | --- | --- | --- |
-| `RKL_UPDATER_PUBKEY` | `release` environment | updater public key, linked into every package |
-| `RKL_UPDATER_PRIVATE_KEY` | `release` environment | signs the update artifacts into `update.json` |
+| `DIVVY_UPDATER_PUBKEY` | `release` environment | updater public key, linked into every package |
+| `DIVVY_UPDATER_PRIVATE_KEY` | `release` environment | signs the update artifacts into `update.json` |
 | `CODECOV_TOKEN` | repository | coverage uploads from `ci.yml` |
 | `CROWDIN_PROJECT_ID`, `CROWDIN_PERSONAL_TOKEN` | repository | translation sync in `crowdin.yml` |
 

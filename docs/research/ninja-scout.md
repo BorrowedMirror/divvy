@@ -1,7 +1,7 @@
 # Aggregated price APIs: poe.ninja and poe2scout
 
 Captured live on **2026-11-05** with User-Agent
-`rkl-research/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)`. Trimmed fixtures live in
+`divvy-research/0.1 (+https://github.com/BorrowedMirror/divvy)`. Trimmed fixtures live in
 `internal/trade/testdata/fixtures/{ninja,scout}/`.
 
 ## poe.ninja (PoE2)

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	modulePath = "github.com/BorrowedMirror/rust-king-ledger"
+	modulePath = "github.com/BorrowedMirror/divvy"
 	// appVersionVar is the variable the app version is linked into with -ldflags -X
 	// (diagnostics, updater, the trade User-Agent).
 	appVersionVar = modulePath + "/internal/app.Version"
@@ -16,14 +16,14 @@ const (
 	versionFile = "VERSION"
 	// versionEnv overrides versionFile for a package build (the release workflow sets it; the
 	// Task runner inside wails3 drops arguments after --, so tasks can't pass -version).
-	versionEnv = "RKL_RELEASE_VERSION"
+	versionEnv = "DIVVY_RELEASE_VERSION"
 )
 
 // updaterKeyVar receives the updater's public key; updaterKeyEnv holds it in the release
 // workflow. Builds without it have the updater off.
 const (
 	updaterKeyVar = modulePath + "/internal/shell.UpdaterPublicKey"
-	updaterKeyEnv = "RKL_UPDATER_PUBKEY"
+	updaterKeyEnv = "DIVVY_UPDATER_PUBKEY"
 )
 
 // appVersion reads the version from versionFile.

@@ -25,7 +25,7 @@ type Parts struct {
 	// the panel closes). Nil where the platform cannot.
 	ActivateWindow func(nativeID uint64) error
 	// Clipboard is the clipboard: the backend's own where Wails' does not work (Wayland-native:
-	// GTK only sees clipboard changes while RKL has a focused window, so the backend reads it
+	// GTK only sees clipboard changes while Divvy has a focused window, so the backend reads it
 	// through data-control), else nil until the shell sets Wails'.
 	Clipboard Clipboard
 }

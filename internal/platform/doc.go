@@ -1,4 +1,4 @@
-// Package platform is RKL's OS integration behind interfaces.
+// Package platform is Divvy's OS integration behind interfaces.
 //
 // Rules:
 //   - Exactly one global input hook per process. Hook callbacks only hand events off with

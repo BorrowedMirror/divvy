@@ -30,8 +30,8 @@ import (
 func main() {
 	// C memory: the registry listener keeps a pointer to it, which Go memory must not hand out.
 	// It is never freed: it lives until the process exits.
-	vk := (*C.rkl_vk)(C.calloc(1, C.sizeof_rkl_vk))
-	if rc := C.rkl_vk_open(vk, nil); rc != C.RKL_VK_OK {
+	vk := (*C.divvy_vk)(C.calloc(1, C.sizeof_divvy_vk))
+	if rc := C.divvy_vk_open(vk, nil); rc != C.DIVVY_VK_OK {
 		fmt.Fprintf(os.Stderr, "wl-keyboard: cannot create a virtual keyboard on $WAYLAND_DISPLAY (code %d)\n", int(rc))
 		os.Exit(1)
 	}

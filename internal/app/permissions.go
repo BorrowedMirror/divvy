@@ -14,8 +14,8 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Permission kinds, as [platform.Permission] names them.
@@ -42,7 +42,7 @@ var macosPermissions = [...]macosPermission{
 // Degradation notes.
 const (
 	noteWaylandPortal     = "Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it"
-	noteWaylandTrigger    = "Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor"
+	noteWaylandTrigger    = "Wayland-native: without the portal, bind `divvy --trigger` (add `--pinned` for pinned) in your compositor"
 	noteWaylandLayerShell = "Wayland-native: the overlay is anchored to the output with layer-shell, not to the game window"
 	noteGNOME             = "GNOME: only X11/XWayland is supported; run the game under XWayland"
 )

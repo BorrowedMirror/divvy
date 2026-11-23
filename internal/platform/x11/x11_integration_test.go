@@ -3,12 +3,12 @@
 package x11
 
 // End-to-end tests against a real X server: a private Xvfb (+ openbox when installed), or the
-// display in RKL_X11TEST_DISPLAY. Run with:
+// display in DIVVY_X11TEST_DISPLAY. Run with:
 //
 //	go test -tags x11test ./internal/platform/x11/
 //
 // They need xdotool and xclip; the copy test also needs the fake game
-// (RKL_FAKE_GAME, default target/e2e/fake-game at the repository root).
+// (DIVVY_FAKE_GAME, default target/e2e/fake-game at the repository root).
 
 import (
 	"bufio"
@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/shape"
 	"github.com/jezek/xgb/xproto"
@@ -68,10 +68,10 @@ func waitUntil(t *testing.T, what string, timeout time.Duration, f func() bool) 
 	}
 }
 
-// xserver starts Xvfb (and openbox) on a free display, or uses RKL_X11TEST_DISPLAY.
+// xserver starts Xvfb (and openbox) on a free display, or uses DIVVY_X11TEST_DISPLAY.
 func xserver(t *testing.T) string {
 	t.Helper()
-	if d := os.Getenv("RKL_X11TEST_DISPLAY"); d != "" {
+	if d := os.Getenv("DIVVY_X11TEST_DISPLAY"); d != "" {
 		return d
 	}
 	need(t, "Xvfb")
@@ -168,7 +168,7 @@ func clipboard(display string) string {
 func fakeGame(t *testing.T, display string) (cmd *exec.Cmd, lines <-chan string, item string) {
 	t.Helper()
 	root := repoRoot(t)
-	bin := os.Getenv("RKL_FAKE_GAME")
+	bin := os.Getenv("DIVVY_FAKE_GAME")
 	if bin == "" {
 		bin = filepath.Join(root, "target/e2e/fake-game")
 		if _, err := os.Stat(bin); err != nil {

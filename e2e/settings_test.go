@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Settings are saved to RKL_CONFIG_DIR, survive a restart, and the settings page renders.
+// Settings are saved to DIVVY_CONFIG_DIR, survive a restart, and the settings page renders.
 func TestSettings(t *testing.T) {
 	session := newSession(t)
 	app := session.Start(t)

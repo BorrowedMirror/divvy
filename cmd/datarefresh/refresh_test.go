@@ -13,14 +13,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/data"
 )
 
 func TestSourceURLs(t *testing.T) {
 	assert.Equal(t, "https://www.pathofexile.com/api/trade2/data/stats", tradeStats.url())
 	assert.Equal(t, "https://repoe-fork.github.io/poe2/", repoeIndex.url())
-	assert.Contains(t, userAgent, "rkl")
+	assert.Contains(t, userAgent, "divvy")
 }
 
 func TestOfflineWithoutCacheErrors(t *testing.T) {

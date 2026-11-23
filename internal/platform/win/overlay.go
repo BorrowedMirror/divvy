@@ -3,7 +3,7 @@ package win
 import (
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Win32 extended window styles we touch (values from WinUser.h).

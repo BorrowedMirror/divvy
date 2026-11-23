@@ -19,11 +19,11 @@ const (
 	BackendX11 BackendKind = "x11"
 	// BackendWayland is Wayland-native (layer-shell and portals).
 	BackendWayland BackendKind = "wayland"
-	// BackendFake is in-process fakes (tests, `RKL_BACKEND=fake`).
+	// BackendFake is in-process fakes (tests, `DIVVY_BACKEND=fake`).
 	BackendFake BackendKind = "fake"
 )
 
-// ParseBackendKind parses a `RKL_BACKEND` value (`x11|wayland|windows|macos|fake`,
+// ParseBackendKind parses a `DIVVY_BACKEND` value (`x11|wayland|windows|macos|fake`,
 // case-insensitive).
 func ParseBackendKind(s string) (BackendKind, bool) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
@@ -62,7 +62,7 @@ type EnvProbe struct {
 	XDGSessionType  string
 	WaylandDisplay  string
 	Display         string
-	OverrideBackend string // RKL_BACKEND
+	OverrideBackend string // DIVVY_BACKEND
 	Desktop         string // XDG_CURRENT_DESKTOP
 }
 
@@ -73,7 +73,7 @@ func EnvProbeFromEnv() EnvProbe {
 		XDGSessionType:  os.Getenv("XDG_SESSION_TYPE"),
 		WaylandDisplay:  os.Getenv("WAYLAND_DISPLAY"),
 		Display:         os.Getenv("DISPLAY"),
-		OverrideBackend: os.Getenv("RKL_BACKEND"),
+		OverrideBackend: os.Getenv("DIVVY_BACKEND"),
 		Desktop:         os.Getenv("XDG_CURRENT_DESKTOP"),
 	}
 }
@@ -92,7 +92,7 @@ func (p EnvProbe) HasDesktop(desktop string) bool {
 // IsGNOME reports whether the desktop is GNOME.
 func (p EnvProbe) IsGNOME() bool { return p.HasDesktop("gnome") }
 
-// Detect picks a backend. Order: explicit override (settings; empty for none) > RKL_BACKEND >
+// Detect picks a backend. Order: explicit override (settings; empty for none) > DIVVY_BACKEND >
 // OS defaults. On Linux, X11/XWayland is preferred whenever DISPLAY is set; Wayland-native only
 // when there is no X server, or when explicitly requested. GNOME with DISPLAY is X11
 // (XWayland); GNOME without DISPLAY is Wayland-native, since there is no X server for GTK to

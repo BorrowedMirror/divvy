@@ -6,7 +6,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // HotkeyHost is a hotkey host; the test presses a hotkey with Fire or Press.

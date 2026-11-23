@@ -215,7 +215,7 @@ export function diagnostics(overrides: Partial<Diagnostics_Serialize> = {}): Dia
     },
     data_version: "0.3.1",
     league: "Standard",
-    settings_path: "/Users/exile/Library/Application Support/rkl/settings.toml",
+    settings_path: "/Users/exile/Library/Application Support/divvy/settings.toml",
     log_path: null,
     recent_errors: ["trade: 503 Service Unavailable"],
     ...overrides,

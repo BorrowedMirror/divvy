@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 func TestUserAgentAppendsContact(t *testing.T) {
@@ -46,10 +46,10 @@ func TestUpdatedSourcesKeepUnchangedClients(t *testing.T) {
 }
 
 func TestEndpointOverridesNeedATestHookBuild(t *testing.T) {
-	t.Setenv("RKL_TRADE_BASE_URL", "http://127.0.0.1:9")
-	_, ok := envOverride("RKL_TRADE_BASE_URL")
+	t.Setenv("DIVVY_TRADE_BASE_URL", "http://127.0.0.1:9")
+	_, ok := envOverride("DIVVY_TRADE_BASE_URL")
 	assert.Equal(t, testHookBuild, ok)
-	t.Setenv("RKL_TRADE_BASE_URL", "http://example.com")
-	_, ok = envOverride("RKL_TRADE_BASE_URL")
+	t.Setenv("DIVVY_TRADE_BASE_URL", "http://example.com")
+	_, ok = envOverride("DIVVY_TRADE_BASE_URL")
 	assert.False(t, ok, "non-loopback http is never allowed")
 }

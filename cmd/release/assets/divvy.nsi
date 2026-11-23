@@ -1,12 +1,12 @@
-; Per-user NSIS installer for Rust King Ledger (`task package:windows`).
+; Per-user NSIS installer for Divvy (`task package:windows`).
 ;
-; Installs to %LOCALAPPDATA%\Rust King Ledger without UAC, under the same uninstall and
+; Installs to %LOCALAPPDATA%\Divvy without UAC, under the same uninstall and
 ; product registry keys as earlier releases' installer, so it upgrades those installs in place.
 ;
 ; cmd/release passes these with -D:
 ;   VERSION    app version, e.g. 0.1.0-rc.1
 ;   VERSION4   numeric version, e.g. 0.1.0.0
-;   BINARY     path of rkl.exe
+;   BINARY     path of divvy.exe
 ;   ICON       path of icon.ico
 ;   LICENSE    path of LICENSE
 ;   WEBVIEW2   path of MicrosoftEdgeWebview2Setup.exe (the evergreen bootstrapper)
@@ -15,9 +15,9 @@ Unicode true
 ManifestDPIAware true
 SetCompressor /SOLID lzma
 
-!define PRODUCTNAME "Rust King Ledger"
-!define MANUFACTURER "RKL contributors"
-!define MAINBINARYNAME "rkl"
+!define PRODUCTNAME "Divvy"
+!define MANUFACTURER "Divvy contributors"
+!define MAINBINARYNAME "divvy"
 !define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCTNAME}"
 !define MANUPRODUCTKEY "Software\${MANUFACTURER}\${PRODUCTNAME}"
 !define RUNKEY "Software\Microsoft\Windows\CurrentVersion\Run"
@@ -43,7 +43,7 @@ VIAddVersionKey "CompanyName" "${MANUFACTURER}"
 VIAddVersionKey "FileDescription" "${PRODUCTNAME} installer"
 VIAddVersionKey "ProductVersion" "${VERSION}"
 VIAddVersionKey "FileVersion" "${VERSION}"
-VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 RKL contributors. Apache-2.0."
+VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 Divvy contributors. Apache-2.0."
 
 !define MUI_ICON "${ICON}"
 !define MUI_UNICON "${ICON}"
@@ -75,7 +75,7 @@ Function un.onInit
   SetRegView 64
 FunctionEnd
 
-; Ask a running RKL to close (it has no console, so taskkill without /F posts WM_CLOSE to its
+; Ask a running Divvy to close (it has no console, so taskkill without /F posts WM_CLOSE to its
 ; windows), then force it, so the exe can be replaced.
 !macro StopRunningApp
   ReadEnvStr $1 USERNAME
@@ -137,7 +137,7 @@ Section "Uninstall"
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\${PRODUCTNAME}.lnk"
   Delete "$DESKTOP\${PRODUCTNAME}.lnk"
-  ; The autostart entry RKL writes when "start at login" is on.
+  ; The autostart entry Divvy writes when "start at login" is on.
   DeleteRegValue HKCU "${RUNKEY}" "${MAINBINARYNAME}"
   DeleteRegKey HKCU "${UNINSTKEY}"
   DeleteRegKey HKCU "${MANUPRODUCTKEY}"

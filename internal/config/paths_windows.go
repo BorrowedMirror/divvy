@@ -7,7 +7,7 @@ import (
 
 // The app's directory under %APPDATA% and %LOCALAPPDATA%, now and before the rename.
 const (
-	appDirName    = "rkl"
+	appDirName    = "divvy"
 	legacyDirName = `nerv\kalandra`
 )
 

@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 type kinded struct{ msg string }

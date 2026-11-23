@@ -3,9 +3,9 @@ package app
 import (
 	"net/url"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 // Version is the app version, linked in from the VERSION file by the Taskfile builds and the
@@ -44,7 +44,7 @@ func userAgent(settings *config.Settings) string {
 
 func tradeConfig(s *config.Settings) trade.Config {
 	cfg := trade.DefaultConfig(Version)
-	if u, ok := envOverride("RKL_TRADE_BASE_URL"); ok {
+	if u, ok := envOverride("DIVVY_TRADE_BASE_URL"); ok {
 		cfg.BaseURL = u
 	}
 	cfg.UserAgent = userAgent(s)
@@ -58,13 +58,13 @@ func tradeConfig(s *config.Settings) trade.Config {
 // aggregateSources builds the poe.ninja and poe2scout sources.
 func aggregateSources(ua string) (*trade.NinjaSource, *trade.ScoutSource, error) {
 	ninja, err := trade.NewNinjaSource(trade.SourceOptions{
-		BaseURL: baseURL("RKL_NINJA_BASE_URL", ninjaBaseURL), UserAgent: ua, CacheTTL: trade.DefaultSourceCacheTTL,
+		BaseURL: baseURL("DIVVY_NINJA_BASE_URL", ninjaBaseURL), UserAgent: ua, CacheTTL: trade.DefaultSourceCacheTTL,
 	})
 	if err != nil {
 		return nil, nil, err
 	}
 	scout, err := trade.NewScoutSource(trade.SourceOptions{
-		BaseURL: baseURL("RKL_SCOUT_BASE_URL", scoutBaseURL), UserAgent: ua, CacheTTL: trade.DefaultSourceCacheTTL,
+		BaseURL: baseURL("DIVVY_SCOUT_BASE_URL", scoutBaseURL), UserAgent: ua, CacheTTL: trade.DefaultSourceCacheTTL,
 	})
 	if err != nil {
 		return nil, nil, err

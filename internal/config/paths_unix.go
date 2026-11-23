@@ -9,7 +9,7 @@ import (
 
 // The app's directory name under each XDG base directory, now and before the rename.
 const (
-	appDirName    = "rkl"
+	appDirName    = "divvy"
 	legacyDirName = "kalandra"
 )
 

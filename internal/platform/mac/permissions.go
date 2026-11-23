@@ -1,6 +1,6 @@
 package mac
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // permissionState is the TCC permission state of this process.
 type permissionState struct {

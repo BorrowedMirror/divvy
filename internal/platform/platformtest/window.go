@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // GameWindow is a plausible focused game window at rect.

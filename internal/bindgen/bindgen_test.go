@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/bindgen/fixture"
+	"github.com/BorrowedMirror/divvy/internal/bindgen/fixture"
 )
 
 func spec(t *testing.T) Spec {
@@ -22,7 +22,7 @@ func spec(t *testing.T) Spec {
 		Service:    reflect.TypeFor[fixture.Service](),
 		Error:      reflect.TypeFor[fixture.Fault](),
 		Names:      map[reflect.Type]string{reflect.TypeFor[fixture.Fault](): "Problem"},
-		ModulePath: "github.com/BorrowedMirror/rust-king-ledger",
+		ModulePath: "github.com/BorrowedMirror/divvy",
 		ModuleDir:  filepath.Join(wd, "..", ".."),
 		Literal:    map[reflect.Type]string{reflect.TypeFor[fixture.Shape](): `{ round: true }`},
 		Events:     []Event{{Name: "outerChanged", Wire: "outer-changed", Payload: reflect.TypeFor[fixture.Outer]()}},
@@ -45,7 +45,7 @@ func TestCommandsUseSnakeCaseNamesAndVariants(t *testing.T) {
 	clearAt := strings.Index(out, "\tclear: () => typedError<null, Problem_Serialize>(invoke<null>(\"clear\", {})),")
 	assert.True(t, get >= 0 && count > get && clearAt > count, out)
 	assert.Contains(t, out, "\t/** Get returns the thing. */\n")
-	assert.Contains(t, out, "\tget: [\"github.com/BorrowedMirror/rust-king-ledger/internal/bindgen/fixture.Service.Get\", [\"which\", \"mode\"]],")
+	assert.Contains(t, out, "\tget: [\"github.com/BorrowedMirror/divvy/internal/bindgen/fixture.Service.Get\", [\"which\", \"mode\"]],")
 	assert.Contains(t, out, "\touterChanged: makeEvent<Outer_Serialize>(\"outer-changed\"),")
 }
 

@@ -1,6 +1,6 @@
 package wayland
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // Anchor is where a layer surface sits: against the right (or left) output edge, Top and Side
 // pixels in from the top and that edge.

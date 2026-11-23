@@ -163,7 +163,7 @@ export function OverlayView() {
             {...dragHandlers}
           >
             <div className="min-w-0 flex-1">
-              {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">RKL</h1>}
+              {item ? <ItemHeader item={item} /> : <h1 className="text-base font-semibold text-gold">Divvy</h1>}
             </div>
             <IconButton label={t("overlay.openSettings")} onClick={() => void command(commands.openSettings())}>
               <GearIcon />

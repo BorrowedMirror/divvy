@@ -55,7 +55,7 @@ type noticeGroup struct {
 }
 
 // runNotices writes THIRD-PARTY-NOTICES.html for the release (or only checks the licence
-// policy with -check), from `go-licenses report` over ./cmd/rkl for every target OS.
+// policy with -check), from `go-licenses report` over ./cmd/divvy for every target OS.
 func runNotices(ctx context.Context, root string, args []string) error {
 	flags := flag.NewFlagSet("notices", flag.ContinueOnError)
 	out := flags.String("o", filepath.Join(root, outDir, "THIRD-PARTY-NOTICES.html"), "output file")
@@ -67,7 +67,7 @@ func runNotices(ctx context.Context, root string, args []string) error {
 	if err != nil {
 		return err
 	}
-	tmpl, err := writeTemp("rkl-licenses-*.tmpl", licenseLineTemplate)
+	tmpl, err := writeTemp("divvy-licenses-*.tmpl", licenseLineTemplate)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func runNotices(ctx context.Context, root string, args []string) error {
 		if t.goos != "linux" {
 			env = append(env, "CGO_ENABLED=0")
 		}
-		report, err := sh{dir: root}.with(env...).output(ctx, tool, "report", "./cmd/rkl",
+		report, err := sh{dir: root}.with(env...).output(ctx, tool, "report", "./cmd/divvy",
 			"--template", tmpl, "--ignore", modulePath)
 		if err != nil {
 			return fmt.Errorf("go-licenses (%s): %w", t.goos, err)

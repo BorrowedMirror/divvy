@@ -9,11 +9,11 @@ import { keys, usePermissions, useRequestPermission, useSaveSettings, useSetting
 import { toIpcError } from "@lib/ipc";
 import type { PermissionInfo_Serialize, PermissionReport_Serialize } from "@src/bindings";
 
-/** Example compositor bindings for `rkl --trigger` (code, not translated). */
+/** Example compositor bindings for `divvy --trigger` (code, not translated). */
 export const TRIGGER_EXAMPLES = [
-  { id: "sway", code: "bindsym Ctrl+d exec rkl --trigger" },
-  { id: "hyprland", code: "bind = CTRL, D, exec, rkl --trigger" },
-  { id: "kde", code: "rkl --trigger --pinned" },
+  { id: "sway", code: "bindsym Ctrl+d exec divvy --trigger" },
+  { id: "hyprland", code: "bind = CTRL, D, exec, divvy --trigger" },
+  { id: "kde", code: "divvy --trigger --pinned" },
 ] as const;
 
 /** Permission kinds the backend can report; others fall back to a generic label. */

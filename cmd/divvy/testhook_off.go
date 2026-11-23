@@ -5,8 +5,8 @@ package main
 import (
 	"context"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/shell"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/shell"
 )
 
 // startTestHook: release builds have no test hook.

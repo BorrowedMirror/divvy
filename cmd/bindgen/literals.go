@@ -3,8 +3,8 @@ package main
 import (
 	"reflect"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // literal is the TypeScript of the tagged unions, whose JSON is written by hand (a string per

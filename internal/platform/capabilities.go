@@ -30,7 +30,7 @@ func (c Capabilities) MarshalJSON() ([]byte, error) {
 	return json.Marshal(plain(c))
 }
 
-// Permission is an OS permission RKL may need, as the onboarding view names it. Only macOS has
+// Permission is an OS permission Divvy may need, as the onboarding view names it. Only macOS has
 // any.
 type Permission string
 

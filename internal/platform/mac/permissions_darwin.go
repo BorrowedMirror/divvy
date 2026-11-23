@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"os/exec"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // accessibility reports whether this process is a trusted Accessibility client (no prompt).

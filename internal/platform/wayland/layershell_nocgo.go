@@ -5,7 +5,7 @@ package wayland
 import (
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // newOverlay needs cgo and the gtk3 build tag (the Wails GTK3 build) to drive gtk-layer-shell.

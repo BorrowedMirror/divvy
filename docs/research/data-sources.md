@@ -1,7 +1,7 @@
 # Game data sources
 
 Research for the data refresh, `go run ./cmd/datarefresh refresh` (workstream C). Checked live on 2026-11-05
-(PoE2 0.5.5.5) with UA `rkl-data-refresh/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)`.
+(PoE2 0.5.5.5) with UA `divvy-data-refresh/0.1 (+https://github.com/BorrowedMirror/divvy)`.
 
 ## Summary
 
@@ -88,7 +88,7 @@ Entry `{id, text, image}`; `image` is a path relative to `https://web.poecdn.com
 ### `filters` (~10 KB)
 Search filter definitions. Not bundled; used as the reference list of trade category ids
 (`type_filters.category`: `weapon.onesword`, `armour.helmet`, `accessory.ring`,
-`flask.charm`, `map.waystone`, `currency.omen`, ...) for `ItemClass.TradeCategory` (`internal/core`). RKL does not fetch it at runtime.
+`flask.charm`, `map.waystone`, `currency.omen`, ...) for `ItemClass.TradeCategory` (`internal/core`). Divvy does not fetch it at runtime.
 
 Licensing: game data is (c) Grinding Gear Games. GGG permits third-party tools that use
 the public endpoints with a descriptive User-Agent and respect for rate limits

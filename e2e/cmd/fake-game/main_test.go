@@ -130,9 +130,9 @@ func TestFilesAndErrors(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "adv", it.advanced)
 
-	// RKL_CORPUS_DIR, unless --corpus-dir is given.
+	// DIVVY_CORPUS_DIR, unless --corpus-dir is given.
 	o, err := parseArgs([]string{"--corpus-id", "a"}, func(k string) string {
-		if k == "RKL_CORPUS_DIR" {
+		if k == "DIVVY_CORPUS_DIR" {
 			return dir
 		}
 		return ""

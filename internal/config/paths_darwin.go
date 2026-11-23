@@ -8,7 +8,7 @@ import (
 // The app's directory under ~/Library/Application Support and ~/Library/Caches (the
 // bundle identifier), now and before the rename.
 const (
-	appDirName    = "app.rkl"
+	appDirName    = "app.divvy"
 	legacyDirName = "au.nerv.kalandra"
 )
 

@@ -14,7 +14,7 @@ import (
 
 	"github.com/jezek/xgb/record"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // hookStarted is true while a hook runs (or starts): exactly one per process.

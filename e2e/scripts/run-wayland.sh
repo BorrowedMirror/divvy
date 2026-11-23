@@ -3,13 +3,13 @@
 #   e2e/scripts/run-wayland.sh [go test args...]
 #       Wayland-native app and fake game (virtual-keyboard copy chord, layer-shell overlay).
 #       Global hotkeys cannot be injected here, so the price check is triggered over the test
-#       hook (RKL_E2E_TRIGGER=hook, or signal for SIGUSR2/SIGUSR1); the app's own copy chord
+#       hook (DIVVY_E2E_TRIGGER=hook, or signal for SIGUSR2/SIGUSR1); the app's own copy chord
 #       still has to reach the focused fake game.
 #   E2E_XWAYLAND=1 e2e/scripts/run-wayland.sh
 #       app and fake game as XWayland clients (the X11 backend); the price check is a real XTest
-#       key press caught by the app's X11 hotkey grab (RKL_E2E_TRIGGER=xdotool).
+#       key press caught by the app's X11 hotkey grab (DIVVY_E2E_TRIGGER=xdotool).
 # Env: SKIP_BUILD=1; PORTAL_LIBEXEC (where xdg-desktop-portal(-wlr) live, default /usr/lib);
-# the RKL_E2E_* knobs in e2e/doc.go.
+# the DIVVY_E2E_* knobs in e2e/doc.go.
 # Needs: sway swaymsg dbus-run-session go pnpm, the wayland-client and xkbcommon headers (for
 # the wl-keyboard helper and the fake game's Wayland window), xdg-desktop-portal +
 # xdg-desktop-portal-wlr (optional), Xwayland + xdotool for E2E_XWAYLAND=1.
@@ -17,7 +17,7 @@ set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$here/../.." && pwd)
 
-if [ -z "${RKL_E2E_IN_SESSION:-}" ]; then
+if [ -z "${DIVVY_E2E_IN_SESSION:-}" ]; then
   for tool in sway swaymsg dbus-run-session go; do
     command -v "$tool" >/dev/null || { echo "run-wayland: missing $tool" >&2; exit 2; }
   done
@@ -28,7 +28,7 @@ if [ -z "${RKL_E2E_IN_SESSION:-}" ]; then
   fi
   . "$here/build.sh"
   e2e_build
-  export RKL_E2E_IN_SESSION=1
+  export DIVVY_E2E_IN_SESSION=1
   exec dbus-run-session -- "$0" "$@"
 fi
 
@@ -71,7 +71,7 @@ done
 # `no_keymap` keymap: modifiers of injected chords get lost and Xwayland's core keyboard has no
 # modifier map, so XTest chords never reach X clients. A real session always has a keyboard:
 # emulate one with a long-lived virtual keyboard carrying a full keymap (e2e/cmd/wl-keyboard).
-kbd=${RKL_E2E_WL_KEYBOARD:-$repo/target/e2e/wl-keyboard}
+kbd=${DIVVY_E2E_WL_KEYBOARD:-$repo/target/e2e/wl-keyboard}
 [ -x "$kbd" ] || { echo "run-wayland: $kbd missing; go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard" >&2; exit 2; }
 mkfifo "$work/kbd.fifo"
 XKB_DEFAULT_LAYOUT=us "$kbd" >"$work/kbd.fifo" & pids+=($!)
@@ -100,11 +100,11 @@ if [ -n "${E2E_XWAYLAND:-}" ]; then
   # Both clients go through XWayland: hide the Wayland socket from them (and the tests).
   wl=$WAYLAND_DISPLAY
   unset WAYLAND_DISPLAY
-  export GDK_BACKEND=x11 RKL_BACKEND=x11 RKL_E2E_TRIGGER=${RKL_E2E_TRIGGER:-xdotool}
-  export RKL_E2E_FOCUS_CMD=${RKL_E2E_FOCUS_CMD:-"WAYLAND_DISPLAY=$wl $focus"}
+  export GDK_BACKEND=x11 DIVVY_BACKEND=x11 DIVVY_E2E_TRIGGER=${DIVVY_E2E_TRIGGER:-xdotool}
+  export DIVVY_E2E_FOCUS_CMD=${DIVVY_E2E_FOCUS_CMD:-"WAYLAND_DISPLAY=$wl $focus"}
 else
-  export GDK_BACKEND=wayland RKL_BACKEND=wayland RKL_E2E_TRIGGER=${RKL_E2E_TRIGGER:-hook}
-  export RKL_E2E_FOCUS_CMD=${RKL_E2E_FOCUS_CMD:-$focus}
+  export GDK_BACKEND=wayland DIVVY_BACKEND=wayland DIVVY_E2E_TRIGGER=${DIVVY_E2E_TRIGGER:-hook}
+  export DIVVY_E2E_FOCUS_CMD=${DIVVY_E2E_FOCUS_CMD:-$focus}
 fi
 
 cd "$repo"

@@ -3,7 +3,7 @@ package x11
 import (
 	"encoding/binary"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Core event codes in a RECORD device-event range.

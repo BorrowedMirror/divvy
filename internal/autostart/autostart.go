@@ -1,4 +1,4 @@
-// Package autostart starts RKL at login: an XDG autostart entry on Linux, the
+// Package autostart starts Divvy at login: an XDG autostart entry on Linux, the
 // `HKCU\...\Run` key on Windows and a LaunchAgent on macOS. Linux uses `$APPIMAGE` when set,
 // because an AppImage's executable path is a temporary mount that changes on every launch.
 //
@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/product"
+	"github.com/BorrowedMirror/divvy/internal/product"
 )
 
 const (
@@ -58,7 +58,7 @@ func desktopExec(path string) string {
 
 // desktopEntry is the XDG autostart desktop entry for path.
 func desktopEntry(path string) string {
-	return "[Desktop Entry]\nType=Application\nName=Rust King Ledger\nComment=Path of Exile 2 price-check overlay\nExec=" +
+	return "[Desktop Entry]\nType=Application\nName=Divvy\nComment=Path of Exile 2 price-check overlay\nExec=" +
 		desktopExec(path) + "\nTerminal=false\nX-GNOME-Autostart-enabled=true\n"
 }
 

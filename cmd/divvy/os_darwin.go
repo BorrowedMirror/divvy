@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/mac"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform/mac"
 )
 
 // preInit: nothing needs preparing before Wails starts here.

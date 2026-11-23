@@ -14,10 +14,10 @@ func TestResolveMacOSLayout(t *testing.T) {
 	got, err := Resolve()
 	require.NoError(t, err)
 	assert.Equal(t, Paths{
-		ConfigDir:    "/Users/exile/Library/Application Support/app.rkl",
-		CacheDir:     "/Users/exile/Library/Caches/app.rkl",
-		LogDir:       "/Users/exile/Library/Application Support/app.rkl/logs",
-		SettingsFile: "/Users/exile/Library/Application Support/app.rkl/settings.toml",
+		ConfigDir:    "/Users/exile/Library/Application Support/app.divvy",
+		CacheDir:     "/Users/exile/Library/Caches/app.divvy",
+		LogDir:       "/Users/exile/Library/Application Support/app.divvy/logs",
+		SettingsFile: "/Users/exile/Library/Application Support/app.divvy/settings.toml",
 	}, got)
 
 	legacy, ok := LegacySettingsFile()

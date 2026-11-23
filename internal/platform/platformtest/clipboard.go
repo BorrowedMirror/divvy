@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // ClipboardOpKind is the kind of a [ClipboardOp].

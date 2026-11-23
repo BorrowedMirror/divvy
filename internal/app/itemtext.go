@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 // maxItemText is the largest clipboard text accepted as an item (real items are a few KiB).

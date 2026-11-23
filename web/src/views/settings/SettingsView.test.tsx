@@ -171,7 +171,7 @@ describe("SettingsView", () => {
     await user.click(screen.getByRole("switch", { name: "Close a pinned panel when I click back into the game" }));
     expect(draft().overlay).toMatchObject({ scale: 1.25, backdrop_dim: 0.8, close_pinned_on_game_focus: true });
     await user.click(screen.getByRole("tab", { name: "General" }));
-    await user.click(screen.getByRole("switch", { name: "Start RKL when I log in" }));
+    await user.click(screen.getByRole("switch", { name: "Start Divvy when I log in" }));
     expect(draft().ui.autostart).toBe(true);
   });
 

@@ -1,6 +1,6 @@
 name: e2e
 
-# End-to-end runs of the Go/Wails app (a test-hook build of cmd/rkl) against e2e/cmd/fake-game
+# End-to-end runs of the Go/Wails app (a test-hook build of cmd/divvy) against e2e/cmd/fake-game
 # and a mock trade2 API, driven by the Go tests in e2e/ (`go test -tags e2e ./e2e/...`) over
 # the app's test hook. Each job builds the binaries once and runs the e2e/scripts script with
 # SKIP_BUILD (-SkipBuild on Windows); the Linux scripts provide the session themselves. The
@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  RKL_E2E_ARTIFACTS: ${{ github.workspace }}/target/e2e/logs
+  DIVVY_E2E_ARTIFACTS: ${{ github.workspace }}/target/e2e/logs
 
 jobs:
   linux-x11:
@@ -48,7 +48,7 @@ jobs:
       - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
-          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -tags gtk3,testhook -o target/go/divvy-e2e ./cmd/divvy
           go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard
           go build -o target/e2e/fake-game ./e2e/cmd/fake-game
       - name: Run e2e (script starts Xvfb + openbox in a private D-Bus session)
@@ -88,7 +88,7 @@ jobs:
       - name: Build web, app (test hook) and fake game
         run: |
           pnpm --dir web build
-          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -tags gtk3,testhook -o target/go/divvy-e2e ./cmd/divvy
           go build -o target/e2e/fake-game ./e2e/cmd/fake-game
       - name: Check overlay stacking over a fullscreen game (openbox)
         run: bash e2e/scripts/stacking-x11.sh
@@ -119,7 +119,7 @@ jobs:
       - name: Build web, app (test hook), wl-keyboard and fake game
         run: |
           pnpm --dir web build
-          go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -tags gtk3,testhook -o target/go/divvy-e2e ./cmd/divvy
           go build -o target/e2e/wl-keyboard ./e2e/cmd/wl-keyboard
           go build -o target/e2e/fake-game ./e2e/cmd/fake-game
       - name: Run e2e (script starts headless sway + portal + virtual keyboard in a D-Bus session)
@@ -160,7 +160,7 @@ jobs:
         shell: bash
         run: |
           pnpm --dir web build
-          go build -tags testhook -o target/go/rkl-e2e.exe ./cmd/rkl
+          go build -tags testhook -o target/go/divvy-e2e.exe ./cmd/divvy
           go build -o target/e2e/fake-game.exe ./e2e/cmd/fake-game
       - name: Run e2e
         shell: pwsh
@@ -195,7 +195,7 @@ jobs:
       - name: Build web, app (test hook) and fake game
         run: |
           pnpm --dir web build
-          go build -tags testhook -o target/go/rkl-e2e ./cmd/rkl
+          go build -tags testhook -o target/go/divvy-e2e ./cmd/divvy
           go build -o target/e2e/fake-game ./e2e/cmd/fake-game
       # WKWebView has no WebDriver; the Go tests drive the app over its test hook.
       - name: Run e2e

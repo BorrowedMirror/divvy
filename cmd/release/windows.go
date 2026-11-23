@@ -17,7 +17,7 @@ import (
 
 // The Windows package is cross-compiled: the Go build needs no cgo on Windows, the resources
 // (icon, manifest, version info) go into a .syso that Wails' CLI writes, and the system makensis
-// builds the installer from assets/rkl.nsi.
+// builds the installer from assets/divvy.nsi.
 //
 // NSIS installers can be built for the amd64-unicode or x86-unicode target; both run on 64-bit
 // Windows. Distribution packages of NSIS often ship only one of them (Arch: amd64, Debian and
@@ -34,7 +34,7 @@ var nsisZips = map[string]string{
 	"3.13": "ba63dffc4410ee89193e1cb5a41989991bd77c61068da17e3156d136b7b0b3d8",
 }
 
-// The .syso Go links into cmd/rkl for windows/amd64 builds; it exists only during the build.
+// The .syso Go links into cmd/divvy for windows/amd64 builds; it exists only during the build.
 const sysoName = "rsrc_windows_amd64.syso"
 
 func (p packager) windows(ctx context.Context) error {
@@ -51,8 +51,8 @@ func (p packager) windows(ctx context.Context) error {
 	s := sh{dir: p.root}
 
 	// Resources: icon, manifest (DPI awareness, common controls) and version info.
-	manifest, info, syso := filepath.Join(work, "rkl.exe.manifest"), filepath.Join(work, "info.json"), filepath.Join(work, sysoName)
-	if err := p.render("rkl.exe.manifest.tmpl", manifest); err != nil {
+	manifest, info, syso := filepath.Join(work, "divvy.exe.manifest"), filepath.Join(work, "info.json"), filepath.Join(work, sysoName)
+	if err := p.render("divvy.exe.manifest.tmpl", manifest); err != nil {
 		return err
 	}
 	if err := p.render("info.json.tmpl", info); err != nil {
@@ -76,8 +76,8 @@ func (p packager) windows(ctx context.Context) error {
 	if err := wails3(ctx, s, p.root, "generate", "webview2bootstrapper", "-dir", work); err != nil {
 		return err
 	}
-	script := filepath.Join(work, "rkl.nsi")
-	if err := copyFromAssets("rkl.nsi", script); err != nil {
+	script := filepath.Join(work, "divvy.nsi")
+	if err := copyFromAssets("divvy.nsi", script); err != nil {
 		return err
 	}
 	makensis, env, target, err := p.nsis(ctx)
@@ -102,16 +102,16 @@ func (p packager) windows(ctx context.Context) error {
 	return p.done(installer)
 }
 
-// buildWindowsExe links the .syso into cmd/rkl only for the duration of the build: Go picks up
+// buildWindowsExe links the .syso into cmd/divvy only for the duration of the build: Go picks up
 // .syso files from the package directory alone (go build -overlay does not cover them).
 func (p packager) buildWindowsExe(ctx context.Context, s sh, syso, exe string) error {
-	linked := filepath.Join(p.root, "cmd/rkl", sysoName)
+	linked := filepath.Join(p.root, "cmd/divvy", sysoName)
 	if err := copyFile(syso, linked, 0o644); err != nil {
 		return err
 	}
 	defer os.Remove(linked)
 	return s.with("GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0").run(ctx, "go", "build", "-tags", "production",
-		"-trimpath", "-ldflags", ldflags(p.version, "-H", "windowsgui"), "-o", exe, "./cmd/rkl")
+		"-trimpath", "-ldflags", ldflags(p.version, "-H", "windowsgui"), "-o", exe, "./cmd/divvy")
 }
 
 // nsis picks the makensis to run, the environment for it and the NSIS target.
@@ -219,7 +219,7 @@ func nsisVersion(out string) (string, error) {
 	return v, nil
 }
 
-// hasNSISTarget reports whether an NSIS data directory has what rkl.nsi needs for a target:
+// hasNSISTarget reports whether an NSIS data directory has what divvy.nsi needs for a target:
 // the solid LZMA stub and the nsExec plugin.
 func hasNSISTarget(dir, target string) bool {
 	if st, err := os.Stat(filepath.Join(dir, "Stubs", "lzma_solid-"+target)); err != nil || st.IsDir() {

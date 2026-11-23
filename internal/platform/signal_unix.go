@@ -31,7 +31,7 @@ const JSCSignalForGC = "40"
 // MoveJSCSignal points JavaScriptCore's garbage-collector signal away from SIGUSR1, unless the
 // user set JSC_SIGNAL_FOR_GC. WebKitGTK's JSC, which runs in our (UI) process, takes over
 // SIGUSR1 by default ("Overriding existing handler for signal 10") and then crashes the process
-// (SIGSEGV during cgo execution) when `pkill -USR1 rkl` arrives. It must run before the first
+// (SIGSEGV during cgo execution) when `pkill -USR1 divvy` arrives. It must run before the first
 // web view is created (in practice: at the top of main, with [SignalTriggers]); with cgo, Go's
 // os.Setenv updates the C environment JSC reads. Needed on every Linux backend.
 func MoveJSCSignal() {
@@ -42,8 +42,8 @@ func MoveJSCSignal() {
 
 // SignalTriggers listens for SIGUSR2 (PriceCheck) and SIGUSR1 (PriceCheckPinned) until ctx is
 // done and returns the stream of fired triggers, closed then. They are the hotkey fallback where
-// global shortcuts do not work (no GlobalShortcuts portal): users bind `pkill -USR2 rkl` /
-// `pkill -USR1 rkl` in their compositor.
+// global shortcuts do not work (no GlobalShortcuts portal): users bind `pkill -USR2 divvy` /
+// `pkill -USR1 divvy` in their compositor.
 //
 // Call it once, first thing in main: until it runs, SIGUSR1 and SIGUSR2 terminate the process,
 // and once ctx is done and no other os/signal subscriber is left they do again. Call

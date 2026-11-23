@@ -38,7 +38,7 @@ func (p packager) macos(ctx context.Context) error {
 		minFlag := "-mmacosx-version-min=" + macOSMin
 		env := []string{"GOOS=darwin", "GOARCH=" + arch, "CGO_ENABLED=1",
 			"CGO_CFLAGS=" + minFlag, "CGO_LDFLAGS=" + minFlag, "MACOSX_DEPLOYMENT_TARGET=" + macOSMin}
-		if err := s.with(env...).run(ctx, "go", "build", "-tags", "production", "-trimpath", "-ldflags", ldflags(p.version), "-o", out, "./cmd/rkl"); err != nil {
+		if err := s.with(env...).run(ctx, "go", "build", "-tags", "production", "-trimpath", "-ldflags", ldflags(p.version), "-o", out, "./cmd/divvy"); err != nil {
 			return err
 		}
 		parts = append(parts, out)

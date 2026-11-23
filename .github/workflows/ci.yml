@@ -1,6 +1,6 @@
 name: ci
 
-# The Go/Wails app (cmd/rkl, internal/...) and the React UI (web/). Every Go job builds web/dist
+# The Go/Wails app (cmd/divvy, internal/...) and the React UI (web/). Every Go job builds web/dist
 # first: the Go binary embeds it.
 on:
   push:
@@ -86,11 +86,11 @@ jobs:
           tags=()
           if [ "$RUNNER_OS" = Linux ]; then tags=(-tags gtk3); fi
           go vet "${tags[@]}" ./...
-      - name: go build ./cmd/rkl
+      - name: go build ./cmd/divvy
         run: |
           tags=()
           if [ "$RUNNER_OS" = Linux ]; then tags=(-tags gtk3); fi
-          go build "${tags[@]}" -o target/go/ci/ ./cmd/rkl
+          go build "${tags[@]}" -o target/go/ci/ ./cmd/divvy
       # go test -race, one coverage profile per internal package in target/go/coverage/.
       - name: go test -race + coverage
         run: go tool -modfile=tools/go.mod wails3 task coverage
@@ -190,8 +190,8 @@ jobs:
       - run: pnpm --dir web install --frozen-lockfile
       - run: pnpm --dir web build
       - run: go tool -modfile=tools/go.mod wails3 task package:windows
-      - name: Installer contains rkl.exe
-        run: 7z l target/go/rkl-*-windows-x64-setup.exe | grep -E ' rkl\.exe$'
+      - name: Installer contains divvy.exe
+        run: 7z l target/go/divvy-*-windows-x64-setup.exe | grep -E ' divvy\.exe$'
 
   web:
     name: web lint + typecheck + coverage

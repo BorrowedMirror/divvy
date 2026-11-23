@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // macroStep is one step of a chat command or stash search: press a chord, or paste text

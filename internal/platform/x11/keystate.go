@@ -13,7 +13,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // keymap is a QueryKeymap bit vector: bit k set = keycode k is down.

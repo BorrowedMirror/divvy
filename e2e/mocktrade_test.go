@@ -207,7 +207,7 @@ func (m *mockTrade) handle(w http.ResponseWriter, r *http.Request) {
 		if total == 0 {
 			total = len(cfg.Listings)
 		}
-		ok(map[string]any{"id": "rklMock", "complexity": 4, "result": ids, "total": total})
+		ok(map[string]any{"id": "divvyMock", "complexity": 4, "result": ids, "total": total})
 	case endpointFetch:
 		raw, _ := url.PathUnescape(strings.TrimPrefix(path, "/api/trade2/fetch/"))
 		result := []any{}

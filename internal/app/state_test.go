@@ -11,11 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 // newTestState builds an X11 state on the bundled game data, without a platform or settings

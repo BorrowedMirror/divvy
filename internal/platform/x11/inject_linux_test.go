@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // noDisplay is a display name no X server can have.
-const noDisplay = "rkl-disabled-display"
+const noDisplay = "divvy-disabled-display"
 
 type countingSim struct{ calls int }
 

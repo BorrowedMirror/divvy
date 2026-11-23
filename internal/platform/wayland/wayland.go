@@ -5,7 +5,7 @@ package wayland
 import (
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Options configures [New].
@@ -72,7 +72,7 @@ func New(opts Options) (platform.Parts, error) {
 	if clip := detectWLClipboard(); clip != nil {
 		parts.Clipboard = clip
 	} else {
-		parts.Capabilities.Notes = append(parts.Capabilities.Notes, "install wl-clipboard (wl-paste, wl-copy): without it the item the game copies is only seen while an RKL window has focus")
+		parts.Capabilities.Notes = append(parts.Capabilities.Notes, "install wl-clipboard (wl-paste, wl-copy): without it the item the game copies is only seen while a Divvy window has focus")
 	}
 	return parts, nil
 }

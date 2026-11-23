@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // SettingsVersion is the current schema version. Increment it and add a step to
@@ -95,7 +95,7 @@ type OverlaySettings struct {
 	// ClosePinnedOnGameFocus closes a pinned panel as soon as the game window gets focus
 	// again.
 	ClosePinnedOnGameFocus bool `json:"close_pinned_on_game_focus" koanf:"close_pinned_on_game_focus"`
-	// ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it.
+	// ReadyNotice briefly shows a "ready" notice over the game window when Divvy finds it.
 	ReadyNotice bool `json:"ready_notice" koanf:"ready_notice"`
 	// Links says which lookup links the panel shows under the item name.
 	Links LinkSettings `json:"links" koanf:"links"`
@@ -222,7 +222,7 @@ type UISettings struct {
 	// OnboardingDone says first-run onboarding (permissions / platform notes) was completed
 	// or dismissed.
 	OnboardingDone bool `json:"onboarding_done" koanf:"onboarding_done"`
-	// Autostart starts RKL when the user logs in.
+	// Autostart starts Divvy when the user logs in.
 	Autostart bool `json:"autostart" koanf:"autostart"`
 }
 

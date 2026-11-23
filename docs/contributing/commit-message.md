@@ -14,7 +14,7 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `docs` | Documentation only |
 | `feat` | A new feature |
 | `fix` | A bug fix |
-| `i18n` | Internationalisation: the code and tooling that make RKL translatable (not the translations) |
+| `i18n` | Internationalisation: the code and tooling that make Divvy translatable (not the translations) |
 | `l10n` | Localisation: the translations themselves, usually Crowdin's pull requests |
 | `perf` | A performance improvement |
 | `refactor` | A change that neither fixes a bug nor adds a feature |
@@ -32,7 +32,7 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `core` | internal/core |
 | `data` | internal/data and the data assets (also build(data) for data refreshes) |
 | `deps` | dependency updates (build) |
-| `desktop` | the desktop app: cmd/rkl, internal/app, internal/shell, internal/ipc |
+| `desktop` | the desktop app: cmd/divvy, internal/app, internal/shell, internal/ipc |
 | `e2e` | e2e/ |
 | `fake-game` | e2e/cmd/fake-game |
 | `github` | GitHub Actions (ci) |

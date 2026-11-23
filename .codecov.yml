@@ -61,7 +61,7 @@ flag_management:
 
 # Go cover profiles name files by import path.
 fixes:
-  - "github.com/BorrowedMirror/rust-king-ledger/::"
+  - "github.com/BorrowedMirror/divvy/::"
 
 ignore:
   - "tools/**"

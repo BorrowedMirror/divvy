@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/gamelog"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/gamelog"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Window is one web view window as the flow uses it. The shell implements it over Wails.
@@ -44,7 +44,7 @@ type Window interface {
 type Desktop interface {
 	Overlay() Window
 	Settings() Window
-	// Notice is the ready notice shown over the game window when RKL finds it.
+	// Notice is the ready notice shown over the game window when Divvy finds it.
 	Notice() Window
 	// CursorPosition is the cursor in physical px.
 	CursorPosition() (x, y float64, ok bool)
@@ -168,7 +168,7 @@ func mayCopy(windowTracking bool, gameFocused func() bool) bool {
 // MustShowSettings reports whether settings must be shown at startup: only when the user would
 // otherwise have no way in, neither a tray icon nor a registered hotkey. With either one the
 // app is reachable (missing hotkeys are explained by first-run onboarding and the diagnostics
-// page, and `rkl --trigger` works).
+// page, and `divvy --trigger` works).
 func MustShowSettings(trayOK, hotkeysOK bool) bool { return !trayOK && !hotkeysOK }
 
 // handleItemText parses text, remembers it, emits `item-copied` and shows the overlay.
@@ -347,7 +347,7 @@ func (f *Flow) ApplyPanelScale(scale float64) { f.d.Overlay().SetZoom(scale) }
 
 // openTrade opens a trade-site URL in the browser, refusing anything that is not one.
 func (f *Flow) openTrade(rawURL string) error {
-	override, _ := envOverride("RKL_TRADE_BASE_URL")
+	override, _ := envOverride("DIVVY_TRADE_BASE_URL")
 	u, ok := tradeURL(rawURL, override)
 	if !ok {
 		return ipc.Errorf(ipc.KindInternal, "refusing to open non-trade url %s", rawURL)

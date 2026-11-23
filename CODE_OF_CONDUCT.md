@@ -61,7 +61,7 @@ representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement privately through
 [GitHub](https://github.com/nightah) or by opening a private
-[security advisory](https://github.com/BorrowedMirror/rust-king-ledger/security/advisories/new)
+[security advisory](https://github.com/BorrowedMirror/divvy/security/advisories/new)
 marked "Code of Conduct".
 All complaints will be reviewed and investigated promptly and fairly.
 

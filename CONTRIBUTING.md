@@ -1,7 +1,7 @@
-# Contributing to RKL
+# Contributing to Divvy
 
-Thanks for helping! RKL is a Path of Exile 2 price-check overlay: a Go app built on
-[Wails v3](https://v3.wails.io) (`cmd/rkl`, `internal/*`) and a React 19 + Vite web UI (`web/`)
+Thanks for helping! Divvy is a Path of Exile 2 price-check overlay: a Go app built on
+[Wails v3](https://v3.wails.io) (`cmd/divvy`, `internal/*`) and a React 19 + Vite web UI (`web/`)
 that the binary embeds. See [docs/architecture.md](docs/architecture.md) for how the pieces fit
 together.
 
@@ -55,7 +55,7 @@ install a gcc toolchain such as MinGW-w64 for it.
 pnpm --dir web install                 # web deps, commitlint, lefthook
 pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: gofmt, biome and rustfmt (tools/game-extract) on commit, commitlint on commit-msg
 pnpm --dir web build                   # the binary embeds web/dist, so build it first
-go run -tags gtk3 ./cmd/rkl            # Linux; drop -tags gtk3 on Windows and macOS
+go run -tags gtk3 ./cmd/divvy            # Linux; drop -tags gtk3 on Windows and macOS
 ```
 
 ## Everyday commands
@@ -77,16 +77,16 @@ Without `make` (a plain Windows shell), run `go tool -modfile=tools/go.mod wails
 | Task | What it does |
 | --- | --- |
 | `make dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
-| `make run` | builds the frontend and a development binary (`target/go/rkl`) and runs it |
+| `make run` | builds the frontend and a development binary (`target/go/divvy`) and runs it |
 | `make test` | `go test -race ./...` |
 | `make check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`) |
 | `make vuln` | govulncheck for the same three targets |
 | `make licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
 | `make coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
 | `make generate` | `go generate ./...` |
-| `make package:windows` | cross-compiles `rkl.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/rkl-<version>-windows-x64-setup.exe` and the update exe |
-| `make package:linux` | builds `target/go/rkl-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
-| `make package:macos` | universal `Rust King Ledger.app`, `target/go/rkl-<version>-macos-universal.dmg` and the update zip; macOS only |
+| `make package:windows` | cross-compiles `divvy.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/divvy-<version>-windows-x64-setup.exe` and the update exe |
+| `make package:linux` | builds `target/go/divvy-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
+| `make package:macos` | universal `Divvy.app`, `target/go/divvy-<version>-macos-universal.dmg` and the update zip; macOS only |
 | `make notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
 | `make updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |
 | `make data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `internal/data/assets` |
@@ -100,13 +100,13 @@ Development builds (`go build`, `make run`, `make dev`) are Wails dev builds: th
 inspector is available and `FRONTEND_DEVSERVER_URL` is honoured. Packages are built with the
 `production` tag. Packaging steps the `go` command can't do (installers, signing updates,
 notices) live in `cmd/release` (`go run ./cmd/release -h`). The version comes from the `VERSION`
-file (`-version` or `RKL_RELEASE_VERSION` overrides it for a package:
-`RKL_RELEASE_VERSION=0.2.0 task package:linux`); a plain `go build` reports `dev`.
+file (`-version` or `DIVVY_RELEASE_VERSION` overrides it for a package:
+`DIVVY_RELEASE_VERSION=0.2.0 task package:linux`); a plain `go build` reports `dev`.
 
 ### Packages
 
 The Windows installer is cross-compiled, so it builds on Linux too. It installs for the current
-user to `%LOCALAPPDATA%\Rust King Ledger` and uses the same registry keys as the installer of
+user to `%LOCALAPPDATA%\Divvy` and uses the same registry keys as the installer of
 earlier releases, so it upgrades such an install in place. It needs `makensis`
 (Debian/Ubuntu: `nsis`; Arch: `nsis` from the AUR). Distribution packages ship either the 64-bit or the 32-bit NSIS
 stubs; either works. When the system NSIS has neither, the task adds the 32-bit ones from the
@@ -135,12 +135,12 @@ file out (`list:<text>` as the path lists the matching paths instead).
 The e2e tests run the real app against `e2e/cmd/fake-game` (a window titled "Path of Exile 2"
 that puts an item on the clipboard when it gets the copy chord; X11, native Wayland, Windows and
 macOS) and a mock trade2 API. They are Go tests in `e2e/` behind the `e2e` build tag. They start
-a test-hook build of the app (`-tags testhook`) with a fresh `RKL_CONFIG_DIR`, point its trade,
+a test-hook build of the app (`-tags testhook`) with a fresh `DIVVY_CONFIG_DIR`, point its trade,
 poe2scout and poe.ninja URLs at the mock, and drive it over the test hook on 127.0.0.1. The
 hook's `dom <window> <selector>` command checks what the overlay and settings pages render,
 without WebDriver.
 
-The scripts build the web UI, the test-hook app (`target/go/rkl-e2e`) and the fake game
+The scripts build the web UI, the test-hook app (`target/go/divvy-e2e`) and the fake game
 (`target/e2e/fake-game`), set up the session, then run `go test -tags e2e ./e2e/...`.
 `e2e/scripts/fake-game-smoke-{x11,wayland}.sh` check the fake game on its own (copy chords,
 clipboard, `--log-keys`).
@@ -155,7 +155,7 @@ make e2e:windows        # Windows desktop (pwsh e2e/scripts/run-windows.ps1)
 
 `RUN=<regexp>` picks tests (`make e2e:x11 RUN=TestPriceCheck`). `SKIP_BUILD=1` (`-SkipBuild`
 for the PowerShell script) reuses the binaries. Each script lists the tools it needs in its
-header comment. The `RKL_E2E_*` variables (binary paths, how the price check is triggered,
+header comment. The `DIVVY_E2E_*` variables (binary paths, how the price check is triggered,
 where logs are kept) are listed in `e2e/doc.go`. With a display already running,
 `go test -tags e2e ./e2e/...` works on its own, and `-run TestMockTrade` needs no display.
 

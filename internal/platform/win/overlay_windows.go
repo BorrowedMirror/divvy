@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // gwlExStyle is GWL_EXSTYLE (-20), sign-extended to the uintptr GetWindowLongPtrW takes: the

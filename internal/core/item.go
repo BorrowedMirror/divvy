@@ -1,6 +1,6 @@
 package core
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/enum"
+import "github.com/BorrowedMirror/divvy/internal/enum"
 
 // ModKind says which block of the item the modifier came from.
 type ModKind string

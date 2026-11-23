@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // copyModifierEnv selects the copy chord modifier (`cmd` or `ctrl`), read by [OptionsFromEnv].
-const copyModifierEnv = "RKL_MACOS_COPY_MODIFIER"
+const copyModifierEnv = "DIVVY_MACOS_COPY_MODIFIER"
 
 // Options are the macOS backend tunables.
 type Options struct {
@@ -22,7 +22,7 @@ type Options struct {
 	HookMouse bool
 }
 
-// OptionsFromEnv returns the defaults with RKL_MACOS_COPY_MODIFIER applied when set and valid.
+// OptionsFromEnv returns the defaults with DIVVY_MACOS_COPY_MODIFIER applied when set and valid.
 func OptionsFromEnv(hookMouse bool) Options {
 	return optionsFrom(os.LookupEnv, hookMouse)
 }

@@ -3,12 +3,12 @@ package app
 import (
 	"context"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/gamelog"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/gamelog"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 //go:generate go run ../../cmd/bindgen -root ../..
@@ -132,7 +132,7 @@ func (s *Service) OpenLookup(site LookupSite, name string) error {
 // OpenSettingsTab opens settings on one tab (`waystones`, `hotkeys`, ...).
 func (s *Service) OpenSettingsTab(tab string) error { return wrap(s.a.showSettingsTab(tab)) }
 
-// WaystoneMods lists every waystone mod RKL knows, grouped, for the Waystones settings tab.
+// WaystoneMods lists every waystone mod Divvy knows, grouped, for the Waystones settings tab.
 func (s *Service) WaystoneMods(_ context.Context) ([]WaystoneMod, error) {
 	return s.a.waystoneMods(), nil
 }

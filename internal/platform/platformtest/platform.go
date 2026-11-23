@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Capabilities are the capabilities the fake backend reports: everything works.

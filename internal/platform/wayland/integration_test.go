@@ -25,10 +25,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
-const childEnv = "RKL_TEST_WAYLAND_CHILD"
+const childEnv = "DIVVY_TEST_WAYLAND_CHILD"
 
 func TestWaylandBackendEndToEnd(t *testing.T) {
 	if os.Getenv(childEnv) != "" {
@@ -38,7 +38,7 @@ func TestWaylandBackendEndToEnd(t *testing.T) {
 	if _, err := exec.LookPath("sway"); err != nil {
 		t.Skip("sway not installed")
 	}
-	runtimeDir, err := os.MkdirTemp("", "rkl-wl-")
+	runtimeDir, err := os.MkdirTemp("", "divvy-wl-")
 	require.NoError(t, err)
 	defer os.RemoveAll(runtimeDir)
 	require.NoError(t, os.Chmod(runtimeDir, 0o700))
@@ -84,7 +84,7 @@ func TestWaylandBackendEndToEnd(t *testing.T) {
 		"XDG_SESSION_TYPE=wayland",
 		"XDG_CURRENT_DESKTOP=sway",
 		"GDK_BACKEND=wayland",
-		"DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/rkl-test-bus",
+		"DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/divvy-test-bus",
 	)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	require.NoError(t, cmd.Run(), "wayland child test failed")
@@ -95,7 +95,7 @@ func cleanEnv() []string {
 	for _, kv := range os.Environ() {
 		k, _, _ := strings.Cut(kv, "=")
 		switch k {
-		case "DISPLAY", "WAYLAND_DISPLAY", "SWAYSOCK", "RKL_BACKEND", "XDG_RUNTIME_DIR", "GDK_BACKEND",
+		case "DISPLAY", "WAYLAND_DISPLAY", "SWAYSOCK", "DIVVY_BACKEND", "XDG_RUNTIME_DIR", "GDK_BACKEND",
 			"XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE", "DBUS_SESSION_BUS_ADDRESS":
 			continue
 		}
@@ -160,7 +160,7 @@ func child(t *testing.T) {
 	_, err = parts.InputListener.Start(t.Context())
 	require.ErrorIs(t, err, platform.ErrUnsupported)
 
-	// Signal triggers, as `pkill -USR2 rkl` / `-USR1` would send them.
+	// Signal triggers, as `pkill -USR2 divvy` / `-USR1` would send them.
 	require.NoError(t, exec.Command("kill", "-USR2", strconv.Itoa(os.Getpid())).Run())
 	assert.Equal(t, platform.Action(platform.PriceCheck), recvTrigger(t, events).Action)
 	require.NoError(t, syscall.Kill(os.Getpid(), syscall.SIGUSR1))

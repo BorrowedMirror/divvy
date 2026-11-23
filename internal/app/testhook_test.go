@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/platformtest"
+	"github.com/BorrowedMirror/divvy/internal/platform/platformtest"
 )
 
 // dialHook connects to the hook on port and returns a function that sends one line and reads

@@ -1,6 +1,6 @@
 package x11
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // sessionNotes are diagnostics notes about the session the X11 backend runs in.
 func sessionNotes(probe platform.EnvProbe) []string {

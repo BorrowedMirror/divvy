@@ -12,7 +12,7 @@ Code: `internal/platform/mac/` (the backend, cgo-free over purego) and
 
 macOS gates everything an overlay needs behind three privacy permissions. They are granted per
 app bundle (per code signature). During development that means the terminal or IDE that
-starts the binary is the app that needs them. RKL never crashes or spins when one is missing. It
+starts the binary is the app that needs them. Divvy never crashes or spins when one is missing. It
 turns the matching capability off, lists the permission in `Capabilities.missing_permissions`,
 and keeps working in degraded mode.
 
@@ -50,17 +50,17 @@ re-queries all three cheaply. Call it when the settings or diagnostics window ga
 2. Otherwise the settings window opens on a **Permissions** step with one card per missing
    permission, in the order the backend returns them (accessibility, screen_recording,
    input_monitoring):
-   - **Accessibility (required).** "RKL presses the game's copy shortcut for you when
+   - **Accessibility (required).** "Divvy presses the game's copy shortcut for you when
      you hit the price-check hotkey. macOS requires Accessibility access for that." Button:
      *Open Accessibility settings*, which calls `request_permission("accessibility")`.
-   - **Screen Recording (recommended).** "Lets RKL read window titles so it can find
-     the Path of Exile 2 window reliably. RKL never captures your screen." Button:
+   - **Screen Recording (recommended).** "Lets Divvy read window titles so it can find
+     the Path of Exile 2 window reliably. Divvy never captures your screen." Button:
      `request_permission("screen_recording")`. Note: a relaunch is needed afterwards.
-   - **Input Monitoring (optional).** "Lets RKL close the overlay with Esc and react to
+   - **Input Monitoring (optional).** "Lets Divvy close the overlay with Esc and react to
      Ctrl+scroll while the game has focus." Button:
      `request_permission("input_monitoring")`.
 3. While the view is visible, it calls `recheck_permissions` (every 2 s) and ticks off granted cards. If
-   Screen Recording or Input Monitoring was just granted, show *Relaunch RKL*.
+   Screen Recording or Input Monitoring was just granted, show *Relaunch Divvy*.
 4. *Continue without* is always available. The diagnostics page shows the same cards plus
    `Capabilities.notes`.
 
@@ -77,7 +77,7 @@ on hardware from this workstream, so the modifier is configurable:
 - Default: Cmd. The backend's `InputSimulator` rewrites every `Ctrl` in the requested chord
   to `Meta` (Cmd), so the copy flow (`platform.CopyItemText`) can keep sending the portable
   `Ctrl+C`.
-- `RKL_MACOS_COPY_MODIFIER=ctrl` (`mac.OptionsFromEnv`) sends Ctrl unchanged, for
+- `DIVVY_MACOS_COPY_MODIFIER=ctrl` (`mac.OptionsFromEnv`) sends Ctrl unchanged, for
   Wine/CrossOver.
 - Follow-up: a setting for it, passed through `mac.Options`.
 
@@ -109,7 +109,7 @@ Ctrl+D is free on macOS, so the defaults stay as they are.
 Wails creates the `overlay` window as a non-activating `NSPanel`.
 `internal/platform/mac/overlay_darwin.go` adds the rest on top:
 
-- Style mask `NonactivatingPanel`. Clicking the overlay does not activate RKL, so the
+- Style mask `NonactivatingPanel`. Clicking the overlay does not activate Divvy, so the
   game stays the active app. The panel becomes key only when a text field needs it.
 - Collection behaviour `canJoinAllSpaces | fullScreenAuxiliary | stationary | ignoresCycle`.
   It shows over a full-screen PoE2 Space, follows Space switches, and stays out of Cmd+Tab

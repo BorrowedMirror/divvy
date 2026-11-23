@@ -1,7 +1,7 @@
 package trade
 
 // Wire types of `/api/trade2/*`. Field names match the live JSON (see
-// docs/research/trade2.md); only the fields RKL uses are decoded.
+// docs/research/trade2.md); only the fields Divvy uses are decoded.
 
 import (
 	"encoding/json/jsontext"

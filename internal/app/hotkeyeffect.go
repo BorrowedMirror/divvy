@@ -1,6 +1,6 @@
 package app
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // hotkeyEffectKind says which [hotkeyEffect] fields are set.
 type hotkeyEffectKind int

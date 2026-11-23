@@ -3,7 +3,7 @@ package core
 import (
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
+	"github.com/BorrowedMirror/divvy/internal/enum"
 )
 
 // Rarity is the rarity line (`Rarity: ...`) of an item.

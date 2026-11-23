@@ -17,11 +17,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/data"
 )
 
 // userAgent is descriptive, as GGG asks of API consumers.
-const userAgent = "rkl-data-refresh/0.1 (+https://github.com/BorrowedMirror/rust-king-ledger)"
+const userAgent = "divvy-data-refresh/0.1 (+https://github.com/BorrowedMirror/divvy)"
 
 // politeDelay is the pause between requests, to stay well under rate limits.
 const politeDelay = 1500 * time.Millisecond

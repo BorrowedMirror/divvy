@@ -1,4 +1,4 @@
-module github.com/BorrowedMirror/rust-king-ledger/tools
+module github.com/BorrowedMirror/divvy/tools
 
 go 1.27.0
 

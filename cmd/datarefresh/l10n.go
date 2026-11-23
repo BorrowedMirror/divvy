@@ -9,7 +9,7 @@ package main
 //   - stat lines from the stat descriptions, where each language lists its wordings in the
 //     same order as English.
 //
-// Only names and stats RKL can search for are kept (those in the other bundled assets), so
+// Only names and stats Divvy can search for are kept (those in the other bundled assets), so
 // run this after `refresh`.
 
 import (
@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/data"
 )
 
 // rawGame is the output of `game-extract l10n`: per data folder ("" for English, else

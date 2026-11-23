@@ -19,10 +19,10 @@ func TestResolveXDGLayouts(t *testing.T) {
 			name: "defaults",
 			env:  map[string]string{"HOME": "/home/exile"},
 			want: Paths{
-				ConfigDir:    "/home/exile/.config/rkl",
-				CacheDir:     "/home/exile/.cache/rkl",
-				LogDir:       "/home/exile/.local/state/rkl/logs",
-				SettingsFile: "/home/exile/.config/rkl/settings.toml",
+				ConfigDir:    "/home/exile/.config/divvy",
+				CacheDir:     "/home/exile/.cache/divvy",
+				LogDir:       "/home/exile/.local/state/divvy/logs",
+				SettingsFile: "/home/exile/.config/divvy/settings.toml",
 			},
 		},
 		{
@@ -32,20 +32,20 @@ func TestResolveXDGLayouts(t *testing.T) {
 				"XDG_STATE_HOME": "/st",
 			},
 			want: Paths{
-				ConfigDir:    "/cfg/rkl",
-				CacheDir:     "/var/cache/rkl",
-				LogDir:       "/st/rkl/logs",
-				SettingsFile: "/cfg/rkl/settings.toml",
+				ConfigDir:    "/cfg/divvy",
+				CacheDir:     "/var/cache/divvy",
+				LogDir:       "/st/divvy/logs",
+				SettingsFile: "/cfg/divvy/settings.toml",
 			},
 		},
 		{
 			name: "relative xdg ignored",
 			env:  map[string]string{"HOME": "/home/exile", "XDG_CONFIG_HOME": "cfg"},
 			want: Paths{
-				ConfigDir:    "/home/exile/.config/rkl",
-				CacheDir:     "/home/exile/.cache/rkl",
-				LogDir:       "/home/exile/.local/state/rkl/logs",
-				SettingsFile: "/home/exile/.config/rkl/settings.toml",
+				ConfigDir:    "/home/exile/.config/divvy",
+				CacheDir:     "/home/exile/.cache/divvy",
+				LogDir:       "/home/exile/.local/state/divvy/logs",
+				SettingsFile: "/home/exile/.config/divvy/settings.toml",
 			},
 		},
 	}

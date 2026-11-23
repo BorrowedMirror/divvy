@@ -1,4 +1,4 @@
-// Package x11 is RKL's X11 / XWayland backend, the default on Linux whenever DISPLAY is set.
+// Package x11 is Divvy's X11 / XWayland backend, the default on Linux whenever DISPLAY is set.
 //
 // It provides the game window tracker (EWMH properties and structure events), the passive
 // keyboard hook (the RECORD extension on a connection of its own), keystroke injection

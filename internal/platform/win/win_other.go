@@ -2,7 +2,7 @@
 
 package win
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // New reports the Windows backend as unsupported on other OSes, so the package (and its
 // OS-independent tests) still builds there.

@@ -49,7 +49,7 @@ func TestBuildsFetchPath(t *testing.T) {
 }
 
 func TestDescribes(t *testing.T) {
-	assert.Contains(t, fixturesUserAgent("1.2.3"), "github.com/BorrowedMirror/rust-king-ledger")
+	assert.Contains(t, fixturesUserAgent("1.2.3"), "github.com/BorrowedMirror/divvy")
 	query, _ := searchBody("Leather Belt")["query"].(map[string]any)
 	assert.Equal(t, any("Leather Belt"), query["type"])
 }

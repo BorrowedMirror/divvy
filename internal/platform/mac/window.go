@@ -4,7 +4,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // rawWindow is one entry of CGWindowListCopyWindowInfo, reduced to plain values.

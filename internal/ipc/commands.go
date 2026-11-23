@@ -3,9 +3,9 @@ package ipc
 import (
 	"encoding/json/jsontext"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/enum"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // PriceCheckRequest asks for a price check.

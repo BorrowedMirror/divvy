@@ -13,7 +13,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // layerOverlay styles the overlay's GtkWindow as a gtk-layer-shell surface on the OVERLAY layer
@@ -54,11 +54,11 @@ func newOverlay(native unsafe.Pointer, run func(func()), gnome bool) (platform.O
 // from it, and a web view requests next to nothing (the surface is then never painted).
 func (o *layerOverlay) Prepare() error {
 	var rc C.int
-	o.run(func() { rc = C.rkl_ls_prepare(o.win, cBool(o.layer)) })
+	o.run(func() { rc = C.divvy_ls_prepare(o.win, cBool(o.layer)) })
 	switch rc {
-	case C.RKL_LS_UNSUPPORTED:
+	case C.DIVVY_LS_UNSUPPORTED:
 		return platform.Backend("compositor does not implement wlr-layer-shell; overlay will be a normal window")
-	case C.RKL_LS_UNREALISED:
+	case C.DIVVY_LS_UNREALISED:
 		slog.Warn("overlay window already realised; unrealised it to attach layer-shell")
 	}
 	return nil
@@ -73,23 +73,23 @@ func (o *layerOverlay) ShowAt(rect platform.Rect) error {
 	o.mu.Unlock()
 	var err error
 	o.run(func() {
-		if C.rkl_ls_is_layer(o.win) != 0 {
+		if C.divvy_ls_is_layer(o.win) != 0 {
 			cx, cy := rect.X+int32(rect.Width/2), rect.Y+int32(rect.Height/2)
-			g := C.rkl_ls_monitor_area(o.win, C.int(cx), C.int(cy))
+			g := C.divvy_ls_monitor_area(o.win, C.int(cx), C.int(cy))
 			area := platform.Rect{X: int32(g.x), Y: int32(g.y), Width: uint32(g.width), Height: uint32(g.height)}
 			if area.Width > 0 && area.Height > 0 {
 				err = o.anchor(AnchorFor(rect, area))
 			}
 		}
-		C.rkl_ls_show(o.win, C.int(rect.X), C.int(rect.Y), C.int(rect.Width), C.int(rect.Height))
-		C.rkl_ls_click_through(o.win, cBool(through))
+		C.divvy_ls_show(o.win, C.int(rect.X), C.int(rect.Y), C.int(rect.Width), C.int(rect.Height))
+		C.divvy_ls_click_through(o.win, cBool(through))
 	})
 	return err
 }
 
 // Hide implements [platform.OverlayWindow].
 func (o *layerOverlay) Hide() error {
-	o.run(func() { C.rkl_ls_hide(o.win) })
+	o.run(func() { C.divvy_ls_hide(o.win) })
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (o *layerOverlay) SetClickThrough(enabled bool) error {
 	o.mu.Lock()
 	o.clickThrough = enabled
 	o.mu.Unlock()
-	o.run(func() { C.rkl_ls_click_through(o.win, cBool(enabled)) })
+	o.run(func() { C.divvy_ls_click_through(o.win, cBool(enabled)) })
 	return nil
 }
 
@@ -128,21 +128,21 @@ func (o *layerOverlay) Resize(width, height int32) error {
 	if width <= 0 || height <= 0 {
 		return nil
 	}
-	o.run(func() { C.rkl_ls_resize(o.win, C.int(width), C.int(height)) })
+	o.run(func() { C.divvy_ls_resize(o.win, C.int(width), C.int(height)) })
 	return nil
 }
 
 // anchor runs on the GTK main thread.
 func (o *layerOverlay) anchor(a Anchor) error {
-	if C.rkl_ls_anchor(o.win, cBool(a.Right), C.int(a.Top), C.int(a.Side)) == C.RKL_LS_NOT_LAYER {
+	if C.divvy_ls_anchor(o.win, cBool(a.Right), C.int(a.Top), C.int(a.Side)) == C.DIVVY_LS_NOT_LAYER {
 		return platform.Backend("overlay is not a layer-shell surface")
 	}
 	return nil
 }
 
 // isLayer and isMapped are for tests; GTK main thread only.
-func (o *layerOverlay) isLayer() bool  { return C.rkl_ls_is_layer(o.win) != 0 }
-func (o *layerOverlay) isMapped() bool { return C.rkl_ls_mapped(o.win) != 0 }
+func (o *layerOverlay) isLayer() bool  { return C.divvy_ls_is_layer(o.win) != 0 }
+func (o *layerOverlay) isMapped() bool { return C.divvy_ls_mapped(o.win) != 0 }
 
 func cBool(b bool) C.int {
 	if b {

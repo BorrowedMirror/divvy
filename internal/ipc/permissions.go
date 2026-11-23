@@ -4,7 +4,7 @@ import (
 	"encoding/json/jsontext"
 	"slices"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // PermissionInfo is one OS permission and whether it is currently granted.

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // titleMatches reports whether a window title is the game's. Exact match (after trimming) so

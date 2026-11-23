@@ -16,7 +16,7 @@ import (
 
 	"github.com/maypok86/otter/v2"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 const ninjaSource = "poe.ninja"

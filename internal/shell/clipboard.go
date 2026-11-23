@@ -3,7 +3,7 @@ package shell
 import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Clipboard implements platform.Clipboard with Wails' clipboard (it runs on the UI thread).

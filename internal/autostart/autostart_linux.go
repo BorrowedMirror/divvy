@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// set writes or removes `$XDG_CONFIG_HOME/autostart/rkl.desktop` (`~/.config` by default).
+// set writes or removes `$XDG_CONFIG_HOME/autostart/divvy.desktop` (`~/.config` by default).
 func set(enabled bool, path string) error {
 	dir, err := os.UserConfigDir()
 	if err != nil {

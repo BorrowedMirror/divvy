@@ -1,4 +1,4 @@
-# RKL documentation
+# Divvy documentation
 
 - [Architecture](architecture.md): components, data flow and boundaries.
 - [Contracts](../CONTRACTS.md): package boundaries, IPC, the command line, the test hook and the data files.
@@ -14,16 +14,16 @@
 
 ## Research
 
-Notes on external systems RKL depends on (captured live; background, not a spec):
+Notes on external systems Divvy depends on (captured live; background, not a spec):
 
 - [trade2 API](research/trade2.md): endpoints, payloads, rate-limit headers.
 - [poe.ninja and poe2scout](research/ninja-scout.md): aggregated price APIs.
 - [Game data sources](research/data-sources.md): inputs to the data refresh (`go run ./cmd/datarefresh`).
 - [macOS](research/macos.md): permissions, window tracking, overlay panel.
 
-## Using RKL
+## Using Divvy
 
-Install requirements, the Linux session matrix, settings paths and every `RKL_*`
+Install requirements, the Linux session matrix, settings paths and every `DIVVY_*`
 environment variable are in the [README](../README.md).
 
 ## Policies

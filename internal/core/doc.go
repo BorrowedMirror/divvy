@@ -1,4 +1,4 @@
-// Package core is RKL's pure domain logic: no I/O, no platform, no network.
+// Package core is Divvy's pure domain logic: no I/O, no platform, no network.
 //
 // Pipeline: clipboard text --[ParseItem]--> [ParsedItem]
 // --[MatchStats]--> matched stat ids

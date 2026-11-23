@@ -9,7 +9,7 @@ import (
 // runKey is `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
 
-// set writes or deletes the `rkl` value of the Run key, holding the quoted program path.
+// set writes or deletes the `divvy` value of the Run key, holding the quoted program path.
 func set(enabled bool, path string) error {
 	if enabled {
 		k, _, err := registry.CreateKey(registry.CURRENT_USER, runKey, registry.SET_VALUE)

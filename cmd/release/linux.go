@@ -40,7 +40,7 @@ func (p packager) linux(ctx context.Context) error {
 
 	bin := filepath.Join(work, binaryName)
 	if err := s.with("CGO_ENABLED=1").run(ctx, "go", "build", "-tags", "gtk3,production", "-trimpath",
-		"-ldflags", ldflags(p.version), "-o", bin, "./cmd/rkl"); err != nil {
+		"-ldflags", ldflags(p.version), "-o", bin, "./cmd/divvy"); err != nil {
 		return err
 	}
 	// The generator names the icon in the AppDir after the file, so it must match Icon= in the
@@ -50,7 +50,7 @@ func (p packager) linux(ctx context.Context) error {
 		return err
 	}
 	desktop := filepath.Join(work, binaryName+".desktop")
-	if err := p.render("rkl.desktop.tmpl", desktop); err != nil {
+	if err := p.render("divvy.desktop.tmpl", desktop); err != nil {
 		return err
 	}
 

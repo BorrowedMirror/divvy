@@ -12,12 +12,12 @@ import (
 func TestSetTogglesTheXDGEntry(t *testing.T) {
 	cfg := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", cfg)
-	t.Setenv("APPIMAGE", "/home/u/Apps/rkl.AppImage")
-	entry := filepath.Join(cfg, "autostart", "rkl.desktop")
+	t.Setenv("APPIMAGE", "/home/u/Apps/divvy.AppImage")
+	entry := filepath.Join(cfg, "autostart", "divvy.desktop")
 	require.NoError(t, Set(true))
 	b, err := os.ReadFile(entry)
 	require.NoError(t, err)
-	assert.Equal(t, desktopEntry("/home/u/Apps/rkl.AppImage"), string(b))
+	assert.Equal(t, desktopEntry("/home/u/Apps/divvy.AppImage"), string(b))
 	for range 2 {
 		require.NoError(t, Set(false))
 	}
@@ -28,7 +28,7 @@ func TestSetTogglesTheXDGEntry(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", "")
 	t.Setenv("HOME", home)
 	require.NoError(t, Set(true))
-	assert.FileExists(t, filepath.Join(home, ".config", "autostart", "rkl.desktop"), "~/.config without XDG_CONFIG_HOME")
+	assert.FileExists(t, filepath.Join(home, ".config", "autostart", "divvy.desktop"), "~/.config without XDG_CONFIG_HOME")
 
 	t.Setenv("HOME", "")
 	assert.Error(t, Set(true), "no config directory")

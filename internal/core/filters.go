@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
+	"github.com/BorrowedMirror/divvy/internal/enum"
 )
 
 // QueryOptions are options from settings that influence default filters.

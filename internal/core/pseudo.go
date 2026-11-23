@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// pseudo is one pseudo stat RKL builds, in display order.
+// pseudo is one pseudo stat Divvy builds, in display order.
 type pseudo struct {
 	id string
 	// Display template, `#` replaced by the total.

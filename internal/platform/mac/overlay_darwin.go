@@ -10,7 +10,7 @@ import (
 
 	"github.com/ebitengine/purego/objc"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 const (

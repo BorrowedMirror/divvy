@@ -3,7 +3,7 @@ package wayland
 import (
 	"fmt"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Capability notes, shown on the diagnostics page.
@@ -11,7 +11,7 @@ const (
 	noteNoTracking = "Wayland-native: game window cannot be tracked; overlay anchored to the output"
 	noteNoHook     = "Wayland-native: no passive input hook"
 	noteGNOME      = "GNOME has no layer-shell: the overlay cannot stay above the game; use X11/XWayland"
-	noteNoPortal   = "No GlobalShortcuts portal: bind `rkl --trigger` (or `pkill -USR2 rkl`; `-USR1` to pin) in " +
+	noteNoPortal   = "No GlobalShortcuts portal: bind `divvy --trigger` (or `pkill -USR2 divvy`; `-USR1` to pin) in " +
 		"your compositor"
 )
 

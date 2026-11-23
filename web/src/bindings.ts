@@ -4,33 +4,33 @@ import { Call, Events } from "@wailsio/runtime";
 
 /** Command name -> [bound Go method, argument names in order]. */
 const METHODS: Record<string, [string, string[]]> = {
-	get_settings: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.GetSettings", []],
-	find_game_log: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.FindGameLog", ["configured"]],
-	save_settings: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.SaveSettings", ["settings"]],
-	get_diagnostics: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.GetDiagnostics", []],
-	list_leagues: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.ListLeagues", []],
-	price_check: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.PriceCheck", ["request"]],
-	query_price: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.QueryPrice", ["filters"]],
-	open_trade: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.OpenTrade", ["url"]],
-	hide_overlay: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.HideOverlay", []],
-	set_overlay_pinned: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.SetOverlayPinned", ["pinned"]],
-	get_overlay_snapshot: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.GetOverlaySnapshot", []],
-	open_settings: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.OpenSettings", []],
-	close_settings: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.CloseSettings", []],
-	resize_overlay: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.ResizeOverlay", ["width", "height"]],
-	currency_icons: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.CurrencyIcons", []],
-	copy_text: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.CopyText", ["text"]],
-	drag_card: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.DragCard", ["phase"]],
-	open_lookup: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.OpenLookup", ["site", "name"]],
-	open_settings_tab: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.OpenSettingsTab", ["tab"]],
-	waystone_mods: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.WaystoneMods", []],
-	clear_filter_memory: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.ClearFilterMemory", []],
-	get_overlay_layout: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.GetOverlayLayout", []],
-	rebind_hotkey: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.RebindHotkey", ["action", "chord"]],
-	get_permissions: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.GetPermissions", []],
-	request_permission: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.RequestPermission", ["kind"]],
-	recheck_permissions: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.RecheckPermissions", []],
-	install_update: ["github.com/BorrowedMirror/rust-king-ledger/internal/app.Service.InstallUpdate", []],
+	get_settings: ["github.com/BorrowedMirror/divvy/internal/app.Service.GetSettings", []],
+	find_game_log: ["github.com/BorrowedMirror/divvy/internal/app.Service.FindGameLog", ["configured"]],
+	save_settings: ["github.com/BorrowedMirror/divvy/internal/app.Service.SaveSettings", ["settings"]],
+	get_diagnostics: ["github.com/BorrowedMirror/divvy/internal/app.Service.GetDiagnostics", []],
+	list_leagues: ["github.com/BorrowedMirror/divvy/internal/app.Service.ListLeagues", []],
+	price_check: ["github.com/BorrowedMirror/divvy/internal/app.Service.PriceCheck", ["request"]],
+	query_price: ["github.com/BorrowedMirror/divvy/internal/app.Service.QueryPrice", ["filters"]],
+	open_trade: ["github.com/BorrowedMirror/divvy/internal/app.Service.OpenTrade", ["url"]],
+	hide_overlay: ["github.com/BorrowedMirror/divvy/internal/app.Service.HideOverlay", []],
+	set_overlay_pinned: ["github.com/BorrowedMirror/divvy/internal/app.Service.SetOverlayPinned", ["pinned"]],
+	get_overlay_snapshot: ["github.com/BorrowedMirror/divvy/internal/app.Service.GetOverlaySnapshot", []],
+	open_settings: ["github.com/BorrowedMirror/divvy/internal/app.Service.OpenSettings", []],
+	close_settings: ["github.com/BorrowedMirror/divvy/internal/app.Service.CloseSettings", []],
+	resize_overlay: ["github.com/BorrowedMirror/divvy/internal/app.Service.ResizeOverlay", ["width", "height"]],
+	currency_icons: ["github.com/BorrowedMirror/divvy/internal/app.Service.CurrencyIcons", []],
+	copy_text: ["github.com/BorrowedMirror/divvy/internal/app.Service.CopyText", ["text"]],
+	drag_card: ["github.com/BorrowedMirror/divvy/internal/app.Service.DragCard", ["phase"]],
+	open_lookup: ["github.com/BorrowedMirror/divvy/internal/app.Service.OpenLookup", ["site", "name"]],
+	open_settings_tab: ["github.com/BorrowedMirror/divvy/internal/app.Service.OpenSettingsTab", ["tab"]],
+	waystone_mods: ["github.com/BorrowedMirror/divvy/internal/app.Service.WaystoneMods", []],
+	clear_filter_memory: ["github.com/BorrowedMirror/divvy/internal/app.Service.ClearFilterMemory", []],
+	get_overlay_layout: ["github.com/BorrowedMirror/divvy/internal/app.Service.GetOverlayLayout", []],
+	rebind_hotkey: ["github.com/BorrowedMirror/divvy/internal/app.Service.RebindHotkey", ["action", "chord"]],
+	get_permissions: ["github.com/BorrowedMirror/divvy/internal/app.Service.GetPermissions", []],
+	request_permission: ["github.com/BorrowedMirror/divvy/internal/app.Service.RequestPermission", ["kind"]],
+	recheck_permissions: ["github.com/BorrowedMirror/divvy/internal/app.Service.RecheckPermissions", []],
+	install_update: ["github.com/BorrowedMirror/divvy/internal/app.Service.InstallUpdate", []],
 };
 
 /**
@@ -124,7 +124,7 @@ export const commands = {
 	openLookup: (site: LookupSite, name: string) => typedError<null, IpcError_Serialize>(invoke<null>("open_lookup", { site, name })),
 	/** OpenSettingsTab opens settings on one tab (`waystones`, `hotkeys`, ...). */
 	openSettingsTab: (tab: string) => typedError<null, IpcError_Serialize>(invoke<null>("open_settings_tab", { tab })),
-	/** WaystoneMods lists every waystone mod RKL knows, grouped, for the Waystones settings tab. */
+	/** WaystoneMods lists every waystone mod Divvy knows, grouped, for the Waystones settings tab. */
 	waystoneMods: () => typedError<WaystoneMod_Serialize[], IpcError_Serialize>(invoke<WaystoneMod_Serialize[]>("waystone_mods", {})),
 	/** ClearFilterMemory forgets every remembered stat choice. */
 	clearFilterMemory: () => typedError<null, IpcError_Serialize>(invoke<null>("clear_filter_memory", {})),
@@ -184,7 +184,7 @@ export type BackendKind =
 	| "x11"
 	/** Wayland-native (layer-shell and portals). */
 	| "wayland"
-	/** In-process fakes (tests, `RKL_BACKEND=fake`). */
+	/** In-process fakes (tests, `DIVVY_BACKEND=fake`). */
 	| "fake";
 
 /** Capabilities is the per-capability support report shown on the diagnostics page. */
@@ -633,7 +633,7 @@ export type OverlaySettings_Serialize = {
 	 * again.
 	 */
 	close_pinned_on_game_focus: boolean,
-	/** ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it. */
+	/** ReadyNotice briefly shows a "ready" notice over the game window when Divvy finds it. */
 	ready_notice: boolean,
 	/** Links says which lookup links the panel shows under the item name. */
 	links: LinkSettings_Serialize,
@@ -664,7 +664,7 @@ export type OverlaySettings_Deserialize = {
 	 * again.
 	 */
 	close_pinned_on_game_focus: boolean,
-	/** ReadyNotice briefly shows a "ready" notice over the game window when RKL finds it. */
+	/** ReadyNotice briefly shows a "ready" notice over the game window when Divvy finds it. */
 	ready_notice: boolean,
 	/** Links says which lookup links the panel shows under the item name. */
 	links: LinkSettings_Deserialize,
@@ -1171,7 +1171,7 @@ export type UISettings = {
 	 * or dismissed.
 	 */
 	onboarding_done: boolean,
-	/** Autostart starts RKL when the user logs in. */
+	/** Autostart starts Divvy when the user logs in. */
 	autostart: boolean,
 };
 export type UISettings_Serialize = UISettings;

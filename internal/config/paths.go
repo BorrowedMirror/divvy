@@ -16,23 +16,23 @@ type Paths struct {
 }
 
 // ConfigDirEnv relocates every path under one root (portable mode, tests).
-const ConfigDirEnv = "RKL_CONFIG_DIR"
+const ConfigDirEnv = "DIVVY_CONFIG_DIR"
 
 // userDirs are the per-user directories of one app.
 type userDirs struct {
 	config, cache, logs string
 }
 
-// Resolve resolves the paths from the process environment: $RKL_CONFIG_DIR (when not
+// Resolve resolves the paths from the process environment: $DIVVY_CONFIG_DIR (when not
 // blank) roots everything there ([Under]); otherwise they are the per-user directories for
 // this OS:
 //
-//   - Linux: $XDG_CONFIG_HOME/rkl, $XDG_CACHE_HOME/rkl and $XDG_STATE_HOME/rkl/logs
+//   - Linux: $XDG_CONFIG_HOME/divvy, $XDG_CACHE_HOME/divvy and $XDG_STATE_HOME/divvy/logs
 //     (~/.config, ~/.cache and ~/.local/state when unset or relative);
-//   - Windows: %APPDATA%\rkl\config, %LOCALAPPDATA%\rkl\cache and
-//     %LOCALAPPDATA%\rkl\data\logs;
-//   - macOS: ~/Library/Application Support/app.rkl (logs in its `logs`) and
-//     ~/Library/Caches/app.rkl, after the bundle identifier `app.rkl`.
+//   - Windows: %APPDATA%\divvy\config, %LOCALAPPDATA%\divvy\cache and
+//     %LOCALAPPDATA%\divvy\data\logs;
+//   - macOS: ~/Library/Application Support/app.divvy (logs in its `logs`) and
+//     ~/Library/Caches/app.divvy, after the bundle identifier `app.divvy`.
 func Resolve() (Paths, error) {
 	if root := os.Getenv(ConfigDirEnv); strings.TrimSpace(root) != "" {
 		return Under(root), nil

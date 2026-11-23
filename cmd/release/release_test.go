@@ -72,7 +72,7 @@ func TestPickNSISTarget(t *testing.T) {
 
 func TestTemplatesRender(t *testing.T) {
 	p := packager{root: t.TempDir(), version: "0.1.0-rc.1"}
-	for _, name := range []string{"rkl.exe.manifest.tmpl", "info.json.tmpl", "rkl.desktop.tmpl", "Info.plist.tmpl"} {
+	for _, name := range []string{"divvy.exe.manifest.tmpl", "info.json.tmpl", "divvy.desktop.tmpl", "Info.plist.tmpl"} {
 		dst := filepath.Join(p.root, name)
 		require.NoError(t, p.render(name, dst), name)
 		b, err := os.ReadFile(dst)

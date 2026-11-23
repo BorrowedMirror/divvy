@@ -1,6 +1,6 @@
 package win
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // Low-level hook message identifiers (WinUser.h).
 const (

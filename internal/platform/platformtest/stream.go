@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // streamBuffer is how many undelivered events a fake stream holds; an emit into a full buffer

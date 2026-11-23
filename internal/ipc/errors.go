@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 // Kind is what went wrong, as the frontend tells errors apart (`IpcError.kind`).

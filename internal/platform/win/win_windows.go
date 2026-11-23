@@ -1,6 +1,6 @@
 package win
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // New builds the Windows backend parts. Nothing here can fail at construction: the hooks are
 // installed by Subscribe and Start.

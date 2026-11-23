@@ -7,7 +7,7 @@ import (
 
 	"github.com/knadh/koanf/v2"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // migrationStep upgrades a raw document in place from version i to i + 1, where i is the

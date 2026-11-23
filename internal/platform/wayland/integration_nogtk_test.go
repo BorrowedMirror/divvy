@@ -5,7 +5,7 @@ package wayland
 import (
 	"testing"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 func layerShellScenario(t *testing.T, _ platform.Parts) {

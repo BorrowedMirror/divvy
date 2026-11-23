@@ -8,9 +8,9 @@ name: release
 # universal DMG, a CycloneDX SBOM, third-party notices and SHA256SUMS.txt. Notes are generated
 # by GitHub from the labelled pull requests (.github/release.yml).
 #
-# Updates: every build links in the updater's public key (RKL_UPDATER_PUBKEY), and the draft job
+# Updates: every build links in the updater's public key (DIVVY_UPDATER_PUBKEY), and the draft job
 # signs the update artifacts (the bare Windows exe, the AppImage, the zipped .app) with
-# RKL_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. Both
+# DIVVY_UPDATER_PRIVATE_KEY into update.json, which installs read from the latest release. Both
 # keys live only in the protected `release` environment. Nothing is code-signed yet; see
 # docs/contributing/releasing.md. The build jobs only read the repository; the last job is the
 # only one that can write.
@@ -101,21 +101,21 @@ jobs:
           TARGET: ${{ matrix.name }}
           VERSION: ${{ needs.version.outputs.version }}
           # Linked into the build: installs only accept updates signed with its private key.
-          RKL_UPDATER_PUBKEY: ${{ secrets.RKL_UPDATER_PUBKEY }}
+          DIVVY_UPDATER_PUBKEY: ${{ secrets.DIVVY_UPDATER_PUBKEY }}
         run: |
-          if [ -z "$RKL_UPDATER_PUBKEY" ]; then
-            echo "::error::RKL_UPDATER_PUBKEY is not set in the release environment" >&2
+          if [ -z "$DIVVY_UPDATER_PUBKEY" ]; then
+            echo "::error::DIVVY_UPDATER_PUBKEY is not set in the release environment" >&2
             exit 1
           fi
-          RKL_RELEASE_VERSION="$VERSION" go tool -modfile=tools/go.mod wails3 task "package:$TARGET"
+          DIVVY_RELEASE_VERSION="$VERSION" go tool -modfile=tools/go.mod wails3 task "package:$TARGET"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: rkl-${{ matrix.name }}
+          name: divvy-${{ matrix.name }}
           path: |
-            target/go/rkl-*.exe
-            target/go/rkl-*.AppImage
-            target/go/rkl-*.dmg
-            target/go/rkl-*.app.zip
+            target/go/divvy-*.exe
+            target/go/divvy-*.AppImage
+            target/go/divvy-*.dmg
+            target/go/divvy-*.app.zip
           if-no-files-found: error
 
   draft:
@@ -131,7 +131,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: rkl-*
+          pattern: divvy-*
           path: dist
           merge-multiple: true
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -142,7 +142,7 @@ jobs:
       # point at this release's tag, which exists once the draft is published.
       - name: Sign the update artifacts (update.json)
         env:
-          RKL_UPDATER_PRIVATE_KEY: ${{ secrets.RKL_UPDATER_PRIVATE_KEY }}
+          DIVVY_UPDATER_PRIVATE_KEY: ${{ secrets.DIVVY_UPDATER_PRIVATE_KEY }}
           TAG: ${{ needs.version.outputs.tag }}
           VERSION: ${{ needs.version.outputs.version }}
         run: |
@@ -153,7 +153,7 @@ jobs:
         with:
           path: .
           format: cyclonedx-json
-          output-file: dist/rkl.cdx.json
+          output-file: dist/divvy.cdx.json
           upload-artifact: false
           upload-release-assets: false
       # The licences of the Go packages linked into the Linux, Windows and macOS builds; fails on
@@ -177,4 +177,4 @@ jobs:
           prerelease=()
           case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
           gh release create "$TAG" --draft "${prerelease[@]}" --verify-tag \
-            --title "rkl $VERSION" --generate-notes dist/*
+            --title "divvy $VERSION" --generate-notes dist/*

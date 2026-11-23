@@ -1,6 +1,6 @@
 package mac
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // Key tables: W3C KeyboardEvent.code names <-> macOS virtual keycodes (kVK_*, Carbon
 // Events.h). Virtual keycodes are layout-independent (they name physical positions), exactly

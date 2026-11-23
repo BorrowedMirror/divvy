@@ -5,7 +5,7 @@ package x11
 import (
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // xidFromGtk is the X window id of a GtkWindow* (a Wails window's NativeWindow()). It calls

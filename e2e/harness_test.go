@@ -32,10 +32,10 @@ var artifacts string
 
 func TestMain(m *testing.M) {
 	mock = newMockTrade()
-	dir, keep := os.LookupEnv("RKL_E2E_ARTIFACTS")
+	dir, keep := os.LookupEnv("DIVVY_E2E_ARTIFACTS")
 	if !keep {
 		var err error
-		if dir, err = os.MkdirTemp("", "rkl-e2e-"); err != nil {
+		if dir, err = os.MkdirTemp("", "divvy-e2e-"); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -82,19 +82,19 @@ func binary(t *testing.T, env, def, hint string) string {
 }
 
 func appBinary(t *testing.T) string {
-	return binary(t, "RKL_E2E_APP", filepath.Join("target", "go", exe("rkl-e2e")),
-		"build it with `pnpm --dir web build && go build -tags gtk3,testhook -o target/go/rkl-e2e ./cmd/rkl` (drop gtk3 off Linux)")
+	return binary(t, "DIVVY_E2E_APP", filepath.Join("target", "go", exe("divvy-e2e")),
+		"build it with `pnpm --dir web build && go build -tags gtk3,testhook -o target/go/divvy-e2e ./cmd/divvy` (drop gtk3 off Linux)")
 }
 
 func fakeGameBinary(t *testing.T) string {
-	return binary(t, "RKL_E2E_FAKE_GAME", filepath.Join("target", "e2e", exe("fake-game")),
+	return binary(t, "DIVVY_E2E_FAKE_GAME", filepath.Join("target", "e2e", exe("fake-game")),
 		"build it with `go build -o target/e2e/fake-game ./e2e/cmd/fake-game`")
 }
 
 func fixture(name string) string { return filepath.Join(repoRoot(), "e2e", "fixtures", name) }
 
 func timeout() time.Duration {
-	if s, err := strconv.Atoi(os.Getenv("RKL_E2E_TIMEOUT_SECS")); err == nil && s > 0 {
+	if s, err := strconv.Atoi(os.Getenv("DIVVY_E2E_TIMEOUT_SECS")); err == nil && s > 0 {
 		return time.Duration(s) * time.Second
 	}
 	return 30 * time.Second
@@ -297,7 +297,7 @@ type appSession struct {
 	starts    int
 }
 
-// newSession creates a fresh RKL_CONFIG_DIR with onboarding marked done (onboarding has its
+// newSession creates a fresh DIVVY_CONFIG_DIR with onboarding marked done (onboarding has its
 // own web tests; here it would open the settings window over everything).
 func newSession(t *testing.T) *appSession {
 	t.Helper()
@@ -331,14 +331,14 @@ func (s *appSession) Start(t *testing.T) *appProcess {
 	cmd.WaitDelay = waitDelay
 	// Later entries win over the inherited environment.
 	cmd.Env = append(os.Environ(),
-		"RKL_TEST_HOOK="+strconv.Itoa(port),
-		"RKL_TEST_HOOK_PORT_FILE="+portFile,
-		"RKL_TEST_HOOK_TOKEN="+token,
-		"RKL_CONFIG_DIR="+s.ConfigDir,
-		"RKL_TRADE_BASE_URL="+mock.URL(),
-		"RKL_SCOUT_BASE_URL="+mock.URL(),
-		"RKL_NINJA_BASE_URL="+mock.URL(),
-		"RKL_LOG="+envOr("RKL_LOG", "debug"),
+		"DIVVY_TEST_HOOK="+strconv.Itoa(port),
+		"DIVVY_TEST_HOOK_PORT_FILE="+portFile,
+		"DIVVY_TEST_HOOK_TOKEN="+token,
+		"DIVVY_CONFIG_DIR="+s.ConfigDir,
+		"DIVVY_TRADE_BASE_URL="+mock.URL(),
+		"DIVVY_SCOUT_BASE_URL="+mock.URL(),
+		"DIVVY_NINJA_BASE_URL="+mock.URL(),
+		"DIVVY_LOG="+envOr("DIVVY_LOG", "debug"),
 	)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
@@ -430,10 +430,10 @@ func envOr(key, def string) string {
 	return def
 }
 
-// hookPort is the fixed hook port from RKL_TEST_HOOK, else 0: the app binds a free port and
-// reports it in RKL_TEST_HOOK_PORT_FILE.
+// hookPort is the fixed hook port from DIVVY_TEST_HOOK, else 0: the app binds a free port and
+// reports it in DIVVY_TEST_HOOK_PORT_FILE.
 func hookPort() int {
-	if p, err := strconv.Atoi(os.Getenv("RKL_TEST_HOOK")); err == nil && p > 0 {
+	if p, err := strconv.Atoi(os.Getenv("DIVVY_TEST_HOOK")); err == nil && p > 0 {
 		return p
 	}
 	return 0
@@ -449,7 +449,7 @@ func readPortFile(path string) (int, error) {
 }
 
 func randomToken(t *testing.T) string {
-	if tok := os.Getenv("RKL_TEST_HOOK_TOKEN"); tok != "" {
+	if tok := os.Getenv("DIVVY_TEST_HOOK_TOKEN"); tok != "" {
 		return tok
 	}
 	b := make([]byte, 16)
@@ -580,9 +580,9 @@ func (g *gameProcess) Stop() {
 // Triggering a price check
 // ---------------------------------------------------------------------------------------------
 
-// triggerMode is RKL_E2E_TRIGGER resolved: hook, xdotool or signal.
+// triggerMode is DIVVY_E2E_TRIGGER resolved: hook, xdotool or signal.
 func triggerMode() string {
-	switch m := os.Getenv("RKL_E2E_TRIGGER"); m {
+	switch m := os.Getenv("DIVVY_E2E_TRIGGER"); m {
 	case "hook", "xdotool", "signal":
 		return m
 	}
@@ -592,10 +592,10 @@ func triggerMode() string {
 	return "hook"
 }
 
-// focusGame brings the fake game to the front: RKL_E2E_FOCUS_CMD, else xdotool on X11.
+// focusGame brings the fake game to the front: DIVVY_E2E_FOCUS_CMD, else xdotool on X11.
 func focusGame(t *testing.T) {
 	t.Helper()
-	cmd := os.Getenv("RKL_E2E_FOCUS_CMD")
+	cmd := os.Getenv("DIVVY_E2E_FOCUS_CMD")
 	if cmd == "" && isX11() {
 		cmd = `xdotool search --sync --name '^Path of Exile 2$' windowactivate --sync`
 	}
@@ -634,7 +634,7 @@ func run(t *testing.T, cmd string) {
 // could land inside it.
 const triggerSpacing = 300 * time.Millisecond
 
-// triggerPriceCheck starts a price check the way RKL_E2E_TRIGGER says, with the game focused
+// triggerPriceCheck starts a price check the way DIVVY_E2E_TRIGGER says, with the game focused
 // (the app sends its copy chord to whatever has focus, as for a real player).
 func triggerPriceCheck(t *testing.T, a *appProcess, pinned bool) {
 	t.Helper()
@@ -648,9 +648,9 @@ func triggerPriceCheck(t *testing.T, a *appProcess, pinned bool) {
 		// The app grabs its hotkeys only while it sees the game focused (it polls for that);
 		// a press right after focusing would beat the grab.
 		time.Sleep(time.Second)
-		chord := envOr("RKL_E2E_HOTKEY", "ctrl+d")
+		chord := envOr("DIVVY_E2E_HOTKEY", "ctrl+d")
 		if pinned {
-			chord = envOr("RKL_E2E_HOTKEY_PINNED", "ctrl+alt+d")
+			chord = envOr("DIVVY_E2E_HOTKEY_PINNED", "ctrl+alt+d")
 		}
 		run(t, "xdotool key --clearmodifiers "+chord)
 	case "signal":

@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "Atualização do app",
-    "available": "O RKL {{version}} está disponível.",
+    "available": "O Divvy {{version}} está disponível.",
     "notes": "Novidades",
     "later": "Mais tarde",
     "install": "Instalar e reiniciar",
@@ -190,11 +190,11 @@
     "rememberFiltersHelp": "O próximo anel, arco etc. começa com os atributos que você deixou ativados ou desativados na última busca desse tipo.",
     "forgetFilters": "Esquecer seleções lembradas",
     "forgotFilters": "Esquecido.",
-    "autostart": "Iniciar o RKL quando eu fizer login",
+    "autostart": "Iniciar o Divvy quando eu fizer login",
     "scale": "Tamanho do painel",
     "backdropDim": "Fundo atrás do painel",
     "closePinnedOnGameFocus": "Fechar um painel fixado quando eu clicar de volta no jogo",
-    "readyNotice": "Mostrar um aviso sobre o jogo quando o RKL o detectar",
+    "readyNotice": "Mostrar um aviso sobre o jogo quando o Divvy o detectar",
     "itemLinks": "Links do item no painel",
     "results": "Preços e anúncios"
   },
@@ -272,21 +272,21 @@
     "clipboard": "Acesso à área de transferência"
   },
   "guidance": {
-    "accessibility": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Acessibilidade e ative o RKL. Isso é necessário para os atalhos e para copiar itens.",
-    "screenRecording": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e ative o RKL para que ele encontre a janela do jogo. Depois, reinicie o RKL.",
+    "accessibility": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Acessibilidade e ative o Divvy. Isso é necessário para os atalhos e para copiar itens.",
+    "screenRecording": "macOS: abra Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e ative o Divvy para que ele encontre a janela do jogo. Depois, reinicie o Divvy.",
     "wayland": "Modo Wayland nativo: os atalhos globais passam pelo portal da área de trabalho, o overlay é ancorado à tela e não à janela do jogo, e a injeção de teclas pode não estar disponível. Use X11/XWayland se o seu compositor permitir.",
-    "gnome": "O GNOME não oferece os recursos do Wayland de que o RKL precisa, então ele roda via XWayland (X11) nesse caso. Rode o jogo no XWayland também.",
+    "gnome": "O GNOME não oferece os recursos do Wayland de que o Divvy precisa, então ele roda via XWayland (X11) nesse caso. Rode o jogo no XWayland também.",
     "generic": "Permissão ausente: {{permission}}"
   },
   "tray": {
     "priceCheck": "Consulta de preço (fixada)",
     "settings": "Configurações…",
     "diagnostics": "Diagnóstico",
-    "quit": "Sair do RKL",
-    "tooltip": "RKL"
+    "quit": "Sair do Divvy",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "Configurar o RKL",
+    "title": "Configurar o Divvy",
     "intro": "Alguns passos específicos da sua plataforma para que as consultas de preço funcionem sem problemas. Você pode voltar aqui a qualquer momento pelo Diagnóstico.",
     "stepsHeading": "Configuração para {{platform}}",
     "loadFailed": "Não foi possível verificar as permissões.",
@@ -295,25 +295,25 @@
     "granted": "Concedida",
     "notGranted": "Não concedida",
     "openSettings": "Abrir Ajustes do Sistema",
-    "relaunch": "O macOS aplica esta permissão depois que o RKL é reiniciado. Feche e abra o RKL novamente depois de ativá-la.",
+    "relaunch": "O macOS aplica esta permissão depois que o Divvy é reiniciado. Feche e abra o Divvy novamente depois de ativá-la.",
     "requestFailed": "Não foi possível abrir os Ajustes do Sistema: {{message}}",
     "details": "Detalhes técnicos",
-    "blockedHint": "Algumas permissões obrigatórias ainda estão faltando. O RKL continuará funcionando com recursos reduzidos.",
+    "blockedHint": "Algumas permissões obrigatórias ainda estão faltando. O Divvy continuará funcionando com recursos reduzidos.",
     "continueWithout": "Continuar sem elas",
     "done": "Concluído",
     "saveFailed": "Não foi possível salvar: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Acessibilidade",
-        "body": "O RKL pressiona o atalho de copiar do jogo por você quando você usa o atalho de consulta de preço. O macOS exige acesso de Acessibilidade para isso."
+        "body": "O Divvy pressiona o atalho de copiar do jogo por você quando você usa o atalho de consulta de preço. O macOS exige acesso de Acessibilidade para isso."
       },
       "screen_recording": {
         "name": "Gravação de Tela",
-        "body": "Permite que o RKL leia os títulos das janelas para encontrar a janela do Path of Exile 2 com confiabilidade. O RKL nunca captura a sua tela."
+        "body": "Permite que o Divvy leia os títulos das janelas para encontrar a janela do Path of Exile 2 com confiabilidade. O Divvy nunca captura a sua tela."
       },
       "input_monitoring": {
         "name": "Monitoramento de Entrada",
-        "body": "Permite que o RKL feche o overlay com Esc e reaja a Ctrl+rolagem enquanto o jogo está em foco."
+        "body": "Permite que o Divvy feche o overlay com Esc e reaja a Ctrl+rolagem enquanto o jogo está em foco."
       },
       "unknown": "Permissão: {{kind}}"
     },
@@ -321,15 +321,15 @@
       "windowedTitle": "Use o modo janela ou tela cheia sem bordas",
       "windowedBody": "O overlay não consegue aparecer sobre a tela cheia exclusiva. Nas opções gráficas do jogo, escolha Janela ou Tela cheia em janela (sem bordas).",
       "elevatedTitle": "O jogo está rodando como administrador?",
-      "elevatedBody": "O Windows bloqueia atalhos e teclas simuladas de um app comum para um app com privilégios elevados (UIPI). Se o jogo roda como administrador, rode o RKL como administrador também."
+      "elevatedBody": "O Windows bloqueia atalhos e teclas simuladas de um app comum para um app com privilégios elevados (UIPI). Se o jogo roda como administrador, rode o Divvy como administrador também."
     },
     "x11": {
       "title": "Nenhuma configuração extra necessária",
-      "body": "O X11 oferece tudo de que o RKL precisa: atalhos globais, rastreamento de janela e um overlay sobre o jogo."
+      "body": "O X11 oferece tudo de que o Divvy precisa: atalhos globais, rastreamento de janela e um overlay sobre o jogo."
     },
     "gnome": {
       "title": "GNOME: apenas X11/XWayland",
-      "x11Body": "O GNOME não oferece os recursos do Wayland de que o RKL precisa, então aqui o RKL roda via XWayland. Rode o jogo no XWayland também (o padrão no Proton e no Wine).",
+      "x11Body": "O GNOME não oferece os recursos do Wayland de que o Divvy precisa, então aqui o Divvy roda via XWayland. Rode o jogo no XWayland também (o padrão no Proton e no Wine).",
       "waylandBody": "O GNOME não tem layer-shell, então no modo Wayland nativo o overlay não consegue ficar sobre o jogo. Mude o backend para X11 / XWayland nas Configurações."
     },
     "wayland": {
@@ -337,9 +337,9 @@
       "degradedBody": "O Wayland isola os apps uns dos outros, então alguns recursos funcionam de outro jeito:",
       "portal": "Os atalhos globais passam pelo portal GlobalShortcuts da área de trabalho, que pede para você confirmá-los. Nem todo compositor oferece esse portal.",
       "layerShell": "O overlay é ancorado na borda da tela com layer-shell em vez de acompanhar a janela do jogo.",
-      "noTracking": "O RKL não consegue ver a janela do jogo nem detectar o Esc, então feche o overlay pelo botão dele.",
+      "noTracking": "O Divvy não consegue ver a janela do jogo nem detectar o Esc, então feche o overlay pelo botão dele.",
       "triggerTitle": "Vincule a consulta de preço no seu compositor",
-      "triggerBody": "Se os atalhos não funcionarem, adicione no seu compositor um atalho de teclado que execute RKL --trigger. Ele consulta o preço do item sob o cursor no RKL em execução.",
+      "triggerBody": "Se os atalhos não funcionarem, adicione no seu compositor um atalho de teclado que execute Divvy --trigger. Ele consulta o preço do item sob o cursor no Divvy em execução.",
       "pinnedHint": "Adicione --pinned para abrir o overlay fixado.",
       "example": {
         "sway": "sway",
@@ -409,7 +409,7 @@
       "area": "Área e recompensas",
       "other": "Outros modificadores marcados"
     },
-    "footnote": "Os modificadores vêm dos dados do jogo do RKL; # representa o valor rolado. Os modificadores que você marcar no painel também aparecem aqui."
+    "footnote": "Os modificadores vêm dos dados do jogo do Divvy; # representa o valor rolado. Os modificadores que você marcar no painel também aparecem aqui."
   },
   "resultsLayout": {
     "below": "Abaixo dos filtros",
@@ -439,6 +439,6 @@
     "addSearch": "Adicionar busca",
     "remove": "Remover {{what}}",
     "ctrlScroll": "Trocar de aba do baú com Ctrl + roda do mouse",
-    "ctrlScrollHelp": "Cada passo da roda sobre o jogo pressiona uma vez a seta para a esquerda ou para a direita. Vale após reiniciar o RKL."
+    "ctrlScrollHelp": "Cada passo da roda sobre o jogo pressiona uma vez a seta para a esquerda ou para a direita. Vale após reiniciar o Divvy."
   }
 }

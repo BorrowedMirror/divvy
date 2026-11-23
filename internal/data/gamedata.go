@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // statKinds returns the trade stat kinds ([core.StatDef.Kind], the trade2 stats group id)

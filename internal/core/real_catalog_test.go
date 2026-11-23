@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core/coretest"
+	"github.com/BorrowedMirror/divvy/internal/data"
 )
 
 type idText struct{ id, text string }

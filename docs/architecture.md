@@ -1,6 +1,6 @@
 # Architecture
 
-RKL reads the item text Path of Exile 2 puts on the clipboard, parses it, builds a trade
+Divvy reads the item text Path of Exile 2 puts on the clipboard, parses it, builds a trade
 query and shows prices in a transparent always-on-top overlay. It never reads game memory or
 automates gameplay. It is a single Go binary built on [Wails v3](https://v3.wails.io), with the
 React UI embedded. The interfaces between the parts are in [`CONTRACTS.md`](../CONTRACTS.md);
@@ -9,7 +9,7 @@ this page is the overview.
 ## Data flow
 
 ```text
-hotkey (platform.HotkeyHost), tray, or `rkl --trigger` (SIGUSR2/SIGUSR1)
+hotkey (platform.HotkeyHost), tray, or `divvy --trigger` (SIGUSR2/SIGUSR1)
   -> app copy flow (platform.CopyItemText: save clipboard, send Ctrl+C (Cmd+C on macOS), poll, restore)
   -> core.ParseItem                      text -> ParsedItem
   -> core.StatMatcher                    mod lines -> trade stat ids (via data.GameData as core.Catalog)
@@ -31,7 +31,7 @@ web edits FilterSet -> command `query_price` -> trade.PriceSource -> event `pric
 | `internal/app` | The app's behaviour: price-check flow, state, the bound IPC service, test hook, logging, tray labels, permission report. |
 | `internal/shell` | Wails wiring: the `overlay` and `settings` windows, tray, single instance, global hotkeys and clipboard, updater. |
 | `internal/platform/platformtest`, `internal/core/coretest` | Test support: in-memory fakes for every platform interface; the item-text corpus (`internal/core/testdata/corpus`). |
-| `cmd/rkl` | The app's `main`. |
+| `cmd/divvy` | The app's `main`. |
 | `web/` | React 19 UI for the overlay, settings, diagnostics and onboarding; talks to Go only through the generated `src/bindings.ts`. |
 | `cmd/bindgen`, `cmd/commitconfig` | Generators behind `go generate ./...`: `web/src/bindings.ts`, and the commitlint config and commit docs. |
 | `cmd/datarefresh` | Rebuilds the bundled game data and records the trade fixtures. |

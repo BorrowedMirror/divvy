@@ -33,8 +33,8 @@ func TestFlattensEveryKind(t *testing.T) {
 
 func TestDefaultUserAgentHasVersionAndContact(t *testing.T) {
 	ua := DefaultUserAgent("1.2.3")
-	assert.True(t, strings.HasPrefix(ua, "rkl/1.2.3 "), ua)
-	assert.Contains(t, ua, "github.com/BorrowedMirror/rust-king-ledger")
+	assert.True(t, strings.HasPrefix(ua, "divvy/1.2.3 "), ua)
+	assert.Contains(t, ua, "github.com/BorrowedMirror/divvy")
 }
 
 func TestErrorMessagesAndInfoJSON(t *testing.T) {

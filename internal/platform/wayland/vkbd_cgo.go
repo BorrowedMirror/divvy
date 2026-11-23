@@ -11,13 +11,13 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // vkConn is an open virtual keyboard. Its state lives in C memory: the registry listener keeps
 // a pointer to it, which Go memory must not hand out.
 type vkConn struct {
-	c *C.rkl_vk
+	c *C.divvy_vk
 }
 
 // openVirtualKeyboard connects to display ("" = $WAYLAND_DISPLAY) and creates a virtual
@@ -28,8 +28,8 @@ func openVirtualKeyboard(display string) (*vkConn, error) {
 		name = C.CString(display)
 		defer C.free(unsafe.Pointer(name))
 	}
-	vk := (*C.rkl_vk)(C.calloc(1, C.sizeof_rkl_vk))
-	if rc := C.rkl_vk_open(vk, name); rc != C.RKL_VK_OK {
+	vk := (*C.divvy_vk)(C.calloc(1, C.sizeof_divvy_vk))
+	if rc := C.divvy_vk_open(vk, name); rc != C.DIVVY_VK_OK {
 		C.free(unsafe.Pointer(vk))
 		return nil, platform.Backend("virtual keyboard: %s", vkError(int(rc)))
 	}
@@ -38,13 +38,13 @@ func openVirtualKeyboard(display string) (*vkConn, error) {
 
 func vkError(rc int) string {
 	switch rc {
-	case C.RKL_VK_CONNECT:
+	case C.DIVVY_VK_CONNECT:
 		return "cannot connect to the Wayland display"
-	case C.RKL_VK_NO_SEAT:
+	case C.DIVVY_VK_NO_SEAT:
 		return "compositor has no seat"
-	case C.RKL_VK_NO_MANAGER:
+	case C.DIVVY_VK_NO_MANAGER:
 		return "compositor does not implement zwp_virtual_keyboard_manager_v1"
-	case C.RKL_VK_KEYMAP:
+	case C.DIVVY_VK_KEYMAP:
 		return "cannot build the xkb keymap"
 	default:
 		return "Wayland protocol error"
@@ -56,21 +56,21 @@ func (v *vkConn) key(code uint16, down bool) error {
 	if down {
 		d = 1
 	}
-	if C.rkl_vk_key(v.c, C.uint32_t(code), d) != 0 {
+	if C.divvy_vk_key(v.c, C.uint32_t(code), d) != 0 {
 		return platform.Backend("virtual keyboard: connection lost")
 	}
 	return nil
 }
 
 func (v *vkConn) sync() error {
-	if C.rkl_vk_sync(v.c) != 0 {
+	if C.divvy_vk_sync(v.c) != 0 {
 		return platform.Backend("virtual keyboard: connection lost")
 	}
 	return nil
 }
 
 func (v *vkConn) close() {
-	C.rkl_vk_close(v.c)
+	C.divvy_vk_close(v.c)
 	C.free(unsafe.Pointer(v.c))
 	v.c = nil
 }

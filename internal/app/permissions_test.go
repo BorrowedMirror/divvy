@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // fakeProbe is a fake TCC: missing kinds can be changed between rechecks; records opened panes.
@@ -87,7 +87,7 @@ func TestPermissionsWaylandNotesExplainPortalTriggerAndLayerShell(t *testing.T) 
 	r := buildPermissionReport(platform.BackendWayland, nil, capsNotes, false)
 	assert.Equal(t, []string{noteWaylandPortal, noteWaylandTrigger, noteWaylandLayerShell, capsNotes[0]}, r.Notes,
 		"duplicate capability notes are dropped")
-	assert.Contains(t, noteWaylandTrigger, "rkl --trigger")
+	assert.Contains(t, noteWaylandTrigger, "divvy --trigger")
 	assert.False(t, r.GNOME)
 }
 
@@ -191,7 +191,7 @@ func TestPermissionsJSON(t *testing.T) {
 			buildPermissionReport(platform.BackendWayland, []string{"foo"}, nil, true),
 			`{"platform":"wayland","missing":[{"kind":"foo","granted":false,"required":false,"settings_url":null}],"notes":[` +
 				`"Wayland-native: global hotkeys use the GlobalShortcuts desktop portal when the compositor offers it",` +
-				"\"Wayland-native: without the portal, bind `rkl --trigger` (add `--pinned` for pinned) in your compositor\"," +
+				"\"Wayland-native: without the portal, bind `divvy --trigger` (add `--pinned` for pinned) in your compositor\"," +
 				`"Wayland-native: the overlay is anchored to the output with layer-shell, not to the game window",` +
 				`"GNOME: only X11/XWayland is supported; run the game under XWayland"],"gnome":true}`,
 		},

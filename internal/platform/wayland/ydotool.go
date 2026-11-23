@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // commandTimeout bounds a helper command (ydotool, wl-clipboard), so a hung daemon or

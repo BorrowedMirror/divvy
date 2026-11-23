@@ -14,8 +14,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/updater"
 	"github.com/wailsapp/wails/v3/pkg/updater/providers/endpoint"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 // Set by the linker in release builds (-ldflags -X, see cmd/release). Without a public key the
@@ -25,7 +25,7 @@ var (
 	UpdaterPublicKey = ""
 	// UpdateManifestURL is the update manifest (Wails' endpoint protocol). GitHub's "latest"
 	// skips drafts and pre-releases, so installs only see a release once it is published.
-	UpdateManifestURL = "https://github.com/BorrowedMirror/rust-king-ledger/releases/latest/download/update.json"
+	UpdateManifestURL = "https://github.com/BorrowedMirror/divvy/releases/latest/download/update.json"
 )
 
 const (

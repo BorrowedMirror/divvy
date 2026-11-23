@@ -92,7 +92,7 @@ func (x *x11Game) setup() error {
 		{&x.atoms.text, "TEXT"}, {&x.atoms.plain, "text/plain"}, {&x.atoms.plainUTF8, "text/plain;charset=utf-8"},
 		{&x.atoms.netWMName, "_NET_WM_NAME"}, {&x.atoms.wmProtocols, "WM_PROTOCOLS"},
 		{&x.atoms.wmDelete, "WM_DELETE_WINDOW"}, {&x.atoms.netWMPID, "_NET_WM_PID"},
-		{&x.atoms.paste, "RKL_FAKE_GAME_PASTE"},
+		{&x.atoms.paste, "DIVVY_FAKE_GAME_PASTE"},
 	} {
 		atom, err := x.intern(a.name)
 		if err != nil {

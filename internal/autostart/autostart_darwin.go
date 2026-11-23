@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// set writes or removes `~/Library/LaunchAgents/app.rkl.plist`.
+// set writes or removes `~/Library/LaunchAgents/app.divvy.plist`.
 func set(enabled bool, path string) error {
 	home, err := os.UserHomeDir()
 	if err != nil {

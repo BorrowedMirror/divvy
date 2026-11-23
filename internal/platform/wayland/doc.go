@@ -1,4 +1,4 @@
-// Package wayland is the Wayland-native backend (no DISPLAY, or RKL_BACKEND=wayland).
+// Package wayland is the Wayland-native backend (no DISPLAY, or DIVVY_BACKEND=wayland).
 //
 // What Wayland allows a regular client:
 //   - window tracking: impossible (no global window list), so the overlay is anchored to the

@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "アプリのアップデート",
-    "available": "RKL {{version}} が利用可能です。",
+    "available": "Divvy {{version}} が利用可能です。",
     "notes": "新機能",
     "later": "後で",
     "install": "インストールして再起動",
@@ -182,11 +182,11 @@
     "rememberFiltersHelp": "次に指輪や弓などを検索すると、前回その種類を検索したときにオン/オフにしたステータスから始まります。",
     "forgetFilters": "記憶した選択を消去",
     "forgotFilters": "消去しました",
-    "autostart": "ログイン時に RKL を起動する",
+    "autostart": "ログイン時に Divvy を起動する",
     "scale": "パネルのサイズ",
     "backdropDim": "パネルの背後の背景",
     "closePinnedOnGameFocus": "ゲームをクリックして戻ったら固定したパネルを閉じる",
-    "readyNotice": "RKL がゲームを検出したらゲーム上に通知を表示する",
+    "readyNotice": "Divvy がゲームを検出したらゲーム上に通知を表示する",
     "checkUpdates": "アップデートを自動的に確認",
     "checkUpdatesHelp": "起動直後と1日1回、新しいリリースを確認します。インストールを選ぶまで何もダウンロードしません。",
     "itemLinks": "パネルのアイテムリンク",
@@ -266,21 +266,21 @@
     "clipboard": "クリップボードへのアクセス"
   },
   "guidance": {
-    "accessibility": "macOS: システム設定 → プライバシーとセキュリティ → アクセシビリティを開き、RKL を有効にしてください。ホットキーとアイテムのコピーに必要です。",
-    "screenRecording": "macOS: システム設定 → プライバシーとセキュリティ → 画面収録を開き、RKL を有効にしてください。ゲームウィンドウの検出に必要です。その後 RKL を再起動してください。",
+    "accessibility": "macOS: システム設定 → プライバシーとセキュリティ → アクセシビリティを開き、Divvy を有効にしてください。ホットキーとアイテムのコピーに必要です。",
+    "screenRecording": "macOS: システム設定 → プライバシーとセキュリティ → 画面収録を開き、Divvy を有効にしてください。ゲームウィンドウの検出に必要です。その後 Divvy を再起動してください。",
     "wayland": "Wayland ネイティブモード: グローバルホットキーはデスクトップポータル経由になり、オーバーレイはゲームウィンドウではなく画面に固定され、キー入力の送信は使えない場合があります。コンポジターが対応していれば X11/XWayland を使用してください。",
-    "gnome": "GNOME は RKL に必要な Wayland 機能に対応していないため、GNOME では XWayland (X11) 経由で動作します。ゲームも XWayland で実行してください。",
+    "gnome": "GNOME は Divvy に必要な Wayland 機能に対応していないため、GNOME では XWayland (X11) 経由で動作します。ゲームも XWayland で実行してください。",
     "generic": "不足している権限: {{permission}}"
   },
   "tray": {
     "priceCheck": "価格チェック (固定)",
     "settings": "設定…",
     "diagnostics": "診断",
-    "quit": "RKL を終了",
-    "tooltip": "RKL"
+    "quit": "Divvy を終了",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "RKL のセットアップ",
+    "title": "Divvy のセットアップ",
     "intro": "価格チェックをスムーズに使うための、プラットフォームごとの手順です。この画面には診断からいつでも戻れます。",
     "stepsHeading": "{{platform}} のセットアップ",
     "loadFailed": "権限を確認できませんでした。",
@@ -289,21 +289,21 @@
     "granted": "許可済み",
     "notGranted": "未許可",
     "openSettings": "システム設定を開く",
-    "relaunch": "この権限は RKL の再起動後に macOS で反映されます。有効にしたら RKL を終了して再度開いてください。",
+    "relaunch": "この権限は Divvy の再起動後に macOS で反映されます。有効にしたら Divvy を終了して再度開いてください。",
     "requestFailed": "システム設定を開けませんでした: {{message}}",
     "details": "技術的な詳細",
-    "blockedHint": "必須の権限がまだ不足しています。RKL は一部の機能を制限した状態で動作を続けます。",
+    "blockedHint": "必須の権限がまだ不足しています。Divvy は一部の機能を制限した状態で動作を続けます。",
     "continueWithout": "許可せずに続ける",
     "done": "完了",
     "saveFailed": "保存できませんでした: {{message}}",
     "permission": {
       "accessibility": {
         "name": "アクセシビリティ",
-        "body": "価格チェックのホットキーを押すと、RKL がゲームのコピーショートカットを代わりに押します。そのために macOS ではアクセシビリティへのアクセスが必要です。"
+        "body": "価格チェックのホットキーを押すと、Divvy がゲームのコピーショートカットを代わりに押します。そのために macOS ではアクセシビリティへのアクセスが必要です。"
       },
       "screen_recording": {
         "name": "画面収録",
-        "body": "RKL がウィンドウタイトルを読み取り、Path of Exile 2 のウィンドウを確実に見つけられるようにします。RKL が画面をキャプチャすることはありません。"
+        "body": "Divvy がウィンドウタイトルを読み取り、Path of Exile 2 のウィンドウを確実に見つけられるようにします。Divvy が画面をキャプチャすることはありません。"
       },
       "input_monitoring": {
         "name": "入力監視",
@@ -315,15 +315,15 @@
       "windowedTitle": "ウィンドウモードまたはボーダーレスフルスクリーンを使用",
       "windowedBody": "オーバーレイは排他的フルスクリーンの上には表示できません。ゲームのグラフィック設定で「ウィンドウ」または「ウィンドウフルスクリーン」(ボーダーレス) を選んでください。",
       "elevatedTitle": "ゲームを管理者として実行していますか?",
-      "elevatedBody": "Windows は通常のアプリから管理者権限のアプリへのホットキーやキー入力の送信をブロックします (UIPI)。ゲームを管理者として実行している場合は、RKL も管理者として実行してください。"
+      "elevatedBody": "Windows は通常のアプリから管理者権限のアプリへのホットキーやキー入力の送信をブロックします (UIPI)。ゲームを管理者として実行している場合は、Divvy も管理者として実行してください。"
     },
     "x11": {
       "title": "追加の設定は不要です",
-      "body": "X11 は RKL に必要な機能 (グローバルホットキー、ウィンドウの追跡、ゲーム上へのオーバーレイ表示) にすべて対応しています。"
+      "body": "X11 は Divvy に必要な機能 (グローバルホットキー、ウィンドウの追跡、ゲーム上へのオーバーレイ表示) にすべて対応しています。"
     },
     "gnome": {
       "title": "GNOME: X11/XWayland のみ",
-      "x11Body": "GNOME には RKL に必要な Wayland 機能がないため、ここでは XWayland 経由で動作します。ゲームも XWayland で実行してください (Proton と Wine では既定)。",
+      "x11Body": "GNOME には Divvy に必要な Wayland 機能がないため、ここでは XWayland 経由で動作します。ゲームも XWayland で実行してください (Proton と Wine では既定)。",
       "waylandBody": "GNOME には layer-shell がないため、Wayland ネイティブモードではオーバーレイをゲームの上に表示し続けられません。設定でバックエンドを X11 / XWayland に切り替えてください。"
     },
     "wayland": {
@@ -331,9 +331,9 @@
       "degradedBody": "Wayland はアプリ同士を分離するため、一部の機能の動作が異なります:",
       "portal": "グローバルホットキーはデスクトップの GlobalShortcuts ポータルを経由し、確認を求められます。すべてのコンポジターが対応しているわけではありません。",
       "layerShell": "オーバーレイはゲームウィンドウに追従せず、layer-shell で画面の端に固定されます。",
-      "noTracking": "RKL はゲームウィンドウを認識できず Esc も検知できないため、オーバーレイは専用のボタンで閉じてください。",
+      "noTracking": "Divvy はゲームウィンドウを認識できず Esc も検知できないため、オーバーレイは専用のボタンで閉じてください。",
       "triggerTitle": "コンポジターで価格チェックを割り当てる",
-      "triggerBody": "ホットキーが動作しない場合は、コンポジターに RKL --trigger を実行するキーボードショートカットを追加してください。実行中の RKL でカーソル下のアイテムの価格をチェックします。",
+      "triggerBody": "ホットキーが動作しない場合は、コンポジターに Divvy --trigger を実行するキーボードショートカットを追加してください。実行中の Divvy でカーソル下のアイテムの価格をチェックします。",
       "pinnedHint": "--pinned を付けると、オーバーレイを固定した状態で開きます。",
       "example": {
         "sway": "sway",
@@ -391,7 +391,7 @@
       "area": "エリアと報酬",
       "other": "その他の判定済みMod"
     },
-    "footnote": "ModはRKLのゲームデータに基づきます。# はロールされた値を表します。パネルから判定したModもここに表示されます。"
+    "footnote": "ModはDivvyのゲームデータに基づきます。# はロールされた値を表します。パネルから判定したModもここに表示されます。"
   },
   "resultsLayout": {
     "below": "条件の下",
@@ -421,6 +421,6 @@
     "addSearch": "検索を追加",
     "remove": "{{what}} を削除",
     "ctrlScroll": "Ctrl+マウスホイールでスタッシュタブを切り替える",
-    "ctrlScrollHelp": "ゲーム上でホイールを 1 段回すごとに、左または右の矢印キーを 1 回押します。RKL の再起動後に反映されます。"
+    "ctrlScrollHelp": "ゲーム上でホイールを 1 段回すごとに、左または右の矢印キーを 1 回押します。Divvy の再起動後に反映されます。"
   }
 }

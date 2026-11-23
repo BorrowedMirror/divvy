@@ -9,7 +9,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/record"
 	"github.com/jezek/xgb/shape"

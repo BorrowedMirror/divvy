@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "App-Update",
-    "available": "RKL {{version}} ist verfügbar.",
+    "available": "Divvy {{version}} ist verfügbar.",
     "notes": "Neuerungen",
     "later": "Später",
     "install": "Installieren und neu starten",
@@ -187,11 +187,11 @@
     "rememberFiltersHelp": "Der nächste Ring, Bogen usw. startet mit den Werten, die bei der letzten Suche nach dieser Art an oder aus waren.",
     "forgetFilters": "Gemerkte Auswahl vergessen",
     "forgotFilters": "Vergessen.",
-    "autostart": "RKL beim Anmelden starten",
+    "autostart": "Divvy beim Anmelden starten",
     "scale": "Panelgröße",
     "backdropDim": "Hintergrund hinter dem Panel",
     "closePinnedOnGameFocus": "Angeheftetes Panel schließen, wenn ich zurück ins Spiel klicke",
-    "readyNotice": "Hinweis über dem Spiel anzeigen, wenn RKL es findet",
+    "readyNotice": "Hinweis über dem Spiel anzeigen, wenn Divvy es findet",
     "itemLinks": "Links zum Gegenstand im Panel",
     "results": "Preise und Angebote"
   },
@@ -269,21 +269,21 @@
     "clipboard": "Zugriff auf die Zwischenablage"
   },
   "guidance": {
-    "accessibility": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen öffnen und RKL aktivieren. Erforderlich für Tastenkürzel und das Kopieren von Gegenständen.",
-    "screenRecording": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme öffnen und RKL aktivieren, damit das Spielfenster gefunden wird. Danach RKL neu starten.",
+    "accessibility": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen öffnen und Divvy aktivieren. Erforderlich für Tastenkürzel und das Kopieren von Gegenständen.",
+    "screenRecording": "macOS: Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme öffnen und Divvy aktivieren, damit das Spielfenster gefunden wird. Danach Divvy neu starten.",
     "wayland": "Nativer Wayland-Modus: Globale Tastenkürzel laufen über das Desktop-Portal, das Overlay wird am Bildschirm statt am Spielfenster ausgerichtet, und das Senden von Tastatureingaben ist eventuell nicht verfügbar. Wenn der Compositor es erlaubt, X11/XWayland verwenden.",
-    "gnome": "GNOME unterstützt die von RKL benötigten Wayland-Funktionen nicht, daher läuft es dort über XWayland (X11). Das Spiel ebenfalls unter XWayland ausführen.",
+    "gnome": "GNOME unterstützt die von Divvy benötigten Wayland-Funktionen nicht, daher läuft es dort über XWayland (X11). Das Spiel ebenfalls unter XWayland ausführen.",
     "generic": "Fehlende Berechtigung: {{permission}}"
   },
   "tray": {
     "priceCheck": "Preisprüfung (angeheftet)",
     "settings": "Einstellungen…",
     "diagnostics": "Diagnose",
-    "quit": "RKL beenden",
-    "tooltip": "RKL"
+    "quit": "Divvy beenden",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "RKL einrichten",
+    "title": "Divvy einrichten",
     "intro": "Ein paar plattformspezifische Schritte, damit Preisprüfungen reibungslos funktionieren. Diese Seite ist jederzeit über die Diagnose wieder erreichbar.",
     "stepsHeading": "Einrichtung für {{platform}}",
     "loadFailed": "Berechtigungen konnten nicht geprüft werden.",
@@ -292,25 +292,25 @@
     "granted": "Erteilt",
     "notGranted": "Nicht erteilt",
     "openSettings": "Systemeinstellungen öffnen",
-    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von RKL. Nach dem Aktivieren RKL beenden und erneut öffnen.",
+    "relaunch": "macOS übernimmt diese Berechtigung erst nach einem Neustart von Divvy. Nach dem Aktivieren Divvy beenden und erneut öffnen.",
     "requestFailed": "Systemeinstellungen konnten nicht geöffnet werden: {{message}}",
     "details": "Technische Details",
-    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. RKL funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
+    "blockedHint": "Einige erforderliche Berechtigungen fehlen noch. Divvy funktioniert weiterhin, aber mit eingeschränktem Funktionsumfang.",
     "continueWithout": "Ohne fortfahren",
     "done": "Fertig",
     "saveFailed": "Speichern fehlgeschlagen: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Bedienungshilfen",
-        "body": "Beim Tastenkürzel für die Preisprüfung drückt RKL die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
+        "body": "Beim Tastenkürzel für die Preisprüfung drückt Divvy die Kopier-Tastenkombination des Spiels. macOS verlangt dafür Zugriff auf die Bedienungshilfen."
       },
       "screen_recording": {
         "name": "Bildschirmaufnahme",
-        "body": "Ermöglicht RKL, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. RKL nimmt den Bildschirm niemals auf."
+        "body": "Ermöglicht Divvy, Fenstertitel zu lesen, um das Fenster von Path of Exile 2 zuverlässig zu finden. Divvy nimmt den Bildschirm niemals auf."
       },
       "input_monitoring": {
         "name": "Eingabeüberwachung",
-        "body": "Ermöglicht RKL, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
+        "body": "Ermöglicht Divvy, das Overlay mit Esc zu schließen und auf Strg+Mausrad zu reagieren, während das Spiel im Fokus ist."
       },
       "unknown": "Berechtigung: {{kind}}"
     },
@@ -318,15 +318,15 @@
       "windowedTitle": "Fenstermodus oder randloses Vollbild verwenden",
       "windowedBody": "Über exklusivem Vollbild kann das Overlay nicht erscheinen. In den Grafikoptionen des Spiels Fenster oder Fenster-Vollbild (randlos) wählen.",
       "elevatedTitle": "Läuft das Spiel als Administrator?",
-      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, RKL ebenfalls als Administrator starten."
+      "elevatedBody": "Windows blockiert Tastenkürzel und simulierte Tastatureingaben von einer normalen App an eine App mit erhöhten Rechten (UIPI). Läuft das Spiel als Administrator, Divvy ebenfalls als Administrator starten."
     },
     "x11": {
       "title": "Keine weitere Einrichtung nötig",
-      "body": "X11 unterstützt alles, was RKL braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
+      "body": "X11 unterstützt alles, was Divvy braucht: globale Tastenkürzel, Fensterverfolgung und ein Overlay über dem Spiel."
     },
     "gnome": {
       "title": "GNOME: nur X11/XWayland",
-      "x11Body": "GNOME fehlen die von RKL benötigten Wayland-Funktionen, daher läuft RKL hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
+      "x11Body": "GNOME fehlen die von Divvy benötigten Wayland-Funktionen, daher läuft Divvy hier über XWayland. Das Spiel ebenfalls unter XWayland ausführen (Standard bei Proton und Wine).",
       "waylandBody": "GNOME bietet kein layer-shell, daher kann das Overlay im nativen Wayland-Modus nicht über dem Spiel bleiben. In den Einstellungen das Backend auf X11 / XWayland umstellen."
     },
     "wayland": {
@@ -334,9 +334,9 @@
       "degradedBody": "Wayland isoliert Apps voneinander, daher funktionieren einige Funktionen anders:",
       "portal": "Globale Tastenkürzel laufen über das GlobalShortcuts-Portal des Desktops, das um Bestätigung bittet. Nicht jeder Compositor bietet es an.",
       "layerShell": "Das Overlay wird per layer-shell am Bildschirmrand verankert, statt dem Spielfenster zu folgen.",
-      "noTracking": "RKL kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
+      "noTracking": "Divvy kann das Spielfenster nicht sehen und nicht auf Esc reagieren, daher das Overlay über die eigene Schaltfläche schließen.",
       "triggerTitle": "Preisprüfung im Compositor belegen",
-      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das RKL --trigger ausführt. Damit prüft das laufende RKL den Preis des Gegenstands unter dem Mauszeiger.",
+      "triggerBody": "Falls Tastenkürzel nicht funktionieren, im Compositor ein Tastenkürzel anlegen, das Divvy --trigger ausführt. Damit prüft das laufende Divvy den Preis des Gegenstands unter dem Mauszeiger.",
       "pinnedHint": "Mit --pinned öffnet sich das Overlay angeheftet.",
       "example": {
         "sway": "sway",
@@ -400,7 +400,7 @@
       "area": "Gebiet und Belohnungen",
       "other": "Weitere markierte Mods"
     },
-    "footnote": "Die Mods stammen aus den Spieldaten von RKL; # steht für den gewürfelten Wert. Im Panel markierte Mods erscheinen ebenfalls hier."
+    "footnote": "Die Mods stammen aus den Spieldaten von Divvy; # steht für den gewürfelten Wert. Im Panel markierte Mods erscheinen ebenfalls hier."
   },
   "resultsLayout": {
     "below": "Unter den Filtern",
@@ -430,6 +430,6 @@
     "addSearch": "Suche hinzufügen",
     "remove": "{{what}} entfernen",
     "ctrlScroll": "Truhenreiter mit Strg + Mausrad wechseln",
-    "ctrlScrollHelp": "Jeder Mausradschritt über dem Spiel drückt einmal die Pfeiltaste links oder rechts. Wird nach einem Neustart von RKL wirksam."
+    "ctrlScrollHelp": "Jeder Mausradschritt über dem Spiel drückt einmal die Pfeiltaste links oder rechts. Wird nach einem Neustart von Divvy wirksam."
   }
 }

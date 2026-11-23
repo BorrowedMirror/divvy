@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // OverlayCallKind is the kind of an [OverlayCall].

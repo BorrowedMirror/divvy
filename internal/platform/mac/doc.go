@@ -1,4 +1,4 @@
-// Package mac is RKL's macOS platform backend, cgo-free over purego.
+// Package mac is Divvy's macOS platform backend, cgo-free over purego.
 //
 //   - Window tracking: CGWindowListCopyWindowInfo snapshots, made event-driven by an AXObserver
 //     on the game's pid running on a dedicated CFRunLoop thread.

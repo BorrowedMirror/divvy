@@ -13,7 +13,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // imageHost serves the relative `image` paths of `/api/trade2/data/static`.

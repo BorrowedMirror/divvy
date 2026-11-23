@@ -5,9 +5,9 @@ import (
 	"math"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/autostart"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/autostart"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 // settingsWidth and settingsHeight are the settings window's size (logical px) when it is not

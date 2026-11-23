@@ -16,16 +16,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 // The e2e test hook: a line protocol on 127.0.0.1 that drives the flow and reports its state
 // (CONTRACTS.md#test-hook). Only test-hook builds have it.
 
 // testHookTokenEnv optionally requires `auth <token>` as the first line of each connection.
-const testHookTokenEnv = "RKL_TEST_HOOK_TOKEN"
+const testHookTokenEnv = "DIVVY_TEST_HOOK_TOKEN"
 
 // HookActions are what the hook drives outside the flow.
 type HookActions struct {

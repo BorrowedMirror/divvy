@@ -32,7 +32,7 @@ export function guidanceFor(d: Diagnostics_Serialize): string[] {
 
 export function buildReport(d: Diagnostics_Serialize, t: TFunction): string {
   const lines = [
-    `Rust King Ledger ${d.version}`,
+    `Divvy ${d.version}`,
     `${t("diagnostics.os")}: ${d.os}`,
     `${t("diagnostics.backend")}: ${d.backend}`,
     `${t("diagnostics.dataVersion")}: ${d.data_version ?? "-"}`,

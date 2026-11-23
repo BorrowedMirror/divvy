@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 func win(number uint32, pid int32, title, owner *string) rawWindow {
@@ -40,7 +40,7 @@ func TestGameBehindAnotherWindowIsNotFocused(t *testing.T) {
 }
 
 func TestOverlayLayersDoNotStealFocus(t *testing.T) {
-	overlay := win(3, 99, new("rkl"), nil)
+	overlay := win(3, 99, new("divvy"), nil)
 	overlay.Layer = 25
 	info, ok := findGame([]rawWindow{overlay, win(1, 10, new("Path of Exile 2"), nil)})
 	require.True(t, ok)

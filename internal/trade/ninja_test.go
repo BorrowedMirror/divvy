@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // Unit tests.
@@ -95,7 +95,7 @@ func newNinja(t *testing.T, base *url.URL, ttl time.Duration) *NinjaSource {
 // Contract tests against recorded poe.ninja fixtures.
 
 const (
-	ninjaUA       = "rkl-test/1.0 (+ninja)"
+	ninjaUA       = "divvy-test/1.0 (+ninja)"
 	ninjaLeague   = "Forbidden Rites"
 	ninjaExchange = "/poe2/api/economy/exchange/current/overview"
 	ninjaStash    = "/poe2/api/economy/stash/current/item/overview"

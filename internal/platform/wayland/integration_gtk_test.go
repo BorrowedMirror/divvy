@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // waitFor iterates the GTK main loop until cond holds.
@@ -42,9 +42,9 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	require.True(t, gtkTestInit(), "gtk_init on the headless sway display")
 
 	// Control: a plain toplevel shows up in sway's tree.
-	plain := gtkTestWindow("rkl-plain")
+	plain := gtkTestWindow("divvy-plain")
 	gtkTestShow(plain)
-	waitFor(t, "plain toplevel in tree", func() bool { return inTree(t, "rkl-plain") })
+	waitFor(t, "plain toplevel in tree", func() bool { return inTree(t, "divvy-plain") })
 
 	// The virtual keyboard's chords reach the focused client with their modifiers.
 	if vk, ok := parts.InputSimulator.(*virtualKeyboard); ok && vk.ready() {
@@ -62,7 +62,7 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	}
 
 	// Unrealised window, like Wails' Hidden overlay: Prepare, then show.
-	ov := gtkTestWindow("rkl-layer")
+	ov := gtkTestWindow("divvy-layer")
 	require.False(t, gtkTestRealized(ov))
 	w, err := parts.Overlay(ov)
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	require.NoError(t, w.SetClickThrough(true))
 	require.NoError(t, w.ShowAt(platform.Rect{X: 1000, Y: 100, Width: 300, Height: 200}))
 	waitFor(t, "layer surface mapped", lo.isMapped)
-	assert.False(t, inTree(t, "rkl-layer"), "a layer surface is not a toplevel")
+	assert.False(t, inTree(t, "divvy-layer"), "a layer surface is not a toplevel")
 	require.NoError(t, w.SetClickThrough(false))
 	anchorer, ok := w.(platform.LayerAnchorer)
 	require.True(t, ok)
@@ -84,9 +84,9 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	waitFor(t, "layer surface unmapped", func() bool { return !lo.isMapped() })
 
 	// Realised and shown first (as if Wails had shown it): Prepare hides and unrealises it.
-	late := gtkTestWindow("rkl-late")
+	late := gtkTestWindow("divvy-late")
 	gtkTestShow(late)
-	waitFor(t, "late toplevel in tree", func() bool { return inTree(t, "rkl-late") })
+	waitFor(t, "late toplevel in tree", func() bool { return inTree(t, "divvy-late") })
 	w2, err := parts.Overlay(late)
 	require.NoError(t, err)
 	require.NoError(t, w2.Prepare())
@@ -95,7 +95,7 @@ func layerShellScenario(t *testing.T, parts platform.Parts) {
 	assert.True(t, lo2.isLayer())
 	gtkTestShow(late) // Wails' show: realize + show_all
 	waitFor(t, "late layer surface mapped", lo2.isMapped)
-	waitFor(t, "late window gone from tree", func() bool { return !inTree(t, "rkl-late") })
+	waitFor(t, "late window gone from tree", func() bool { return !inTree(t, "divvy-late") })
 	assert.True(t, gtkTestHasGdkWindow(late))
 
 	// A window that is not a layer surface cannot be anchored.

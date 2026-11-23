@@ -8,7 +8,7 @@ coverage/
 /.claude/
 *.tsbuildinfo
 *.AppImage
-# Windows resources linked into cmd/rkl by `go run ./cmd/release package windows` (removed after the build).
+# Windows resources linked into cmd/divvy by `go run ./cmd/release package windows` (removed after the build).
 *.syso
 
 # Task (Taskfile.yml) checksums

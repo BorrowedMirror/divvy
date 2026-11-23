@@ -29,11 +29,11 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/wayland"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform/wayland"
 )
 
-const childEnv = "RKL_TEST_WAILSPROTO_CHILD"
+const childEnv = "DIVVY_TEST_WAILSPROTO_CHILD"
 
 func TestMain(m *testing.M) {
 	if os.Getenv(childEnv) != "" {
@@ -48,7 +48,7 @@ func TestWailsOverlayIsALayerSurface(t *testing.T) {
 			t.Skip(bin + " not installed")
 		}
 	}
-	dir, err := os.MkdirTemp("", "rkl-wails-")
+	dir, err := os.MkdirTemp("", "divvy-wails-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,11 +85,11 @@ func TestWailsOverlayIsALayerSurface(t *testing.T) {
 	cmd := exec.Command(exe)
 	cmd.Env = append(baseEnv(), childEnv+"=1", "XDG_RUNTIME_DIR="+dir, "WAYLAND_DISPLAY="+socket,
 		"SWAYSOCK="+ipc, "XDG_SESSION_TYPE=wayland", "XDG_CURRENT_DESKTOP=sway", "GDK_BACKEND=wayland",
-		"WEBKIT_DISABLE_COMPOSITING_MODE=1", "LIBGL_ALWAYS_SOFTWARE=1", "WAYLAND_DEBUG="+os.Getenv("RKL_PROTO_WLDEBUG"),
-		"DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/rkl-test-bus")
-	// RKL_PROTO_JSCSIG=keep leaves JSC on SIGUSR1 (to see the crash MoveJSCSignal prevents).
-	if v := os.Getenv("RKL_PROTO_JSCSIG"); v != "" {
-		cmd.Env = append(cmd.Env, "RKL_PROTO_JSCSIG="+v)
+		"WEBKIT_DISABLE_COMPOSITING_MODE=1", "LIBGL_ALWAYS_SOFTWARE=1", "WAYLAND_DEBUG="+os.Getenv("DIVVY_PROTO_WLDEBUG"),
+		"DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/divvy-test-bus")
+	// DIVVY_PROTO_JSCSIG=keep leaves JSC on SIGUSR1 (to see the crash MoveJSCSignal prevents).
+	if v := os.Getenv("DIVVY_PROTO_JSCSIG"); v != "" {
+		cmd.Env = append(cmd.Env, "DIVVY_PROTO_JSCSIG="+v)
 	}
 	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out
@@ -101,7 +101,7 @@ func TestWailsOverlayIsALayerSurface(t *testing.T) {
 		_ = cmd.Process.Kill()
 		err = <-done
 	}
-	if p := os.Getenv("RKL_PROTO_LOG"); p != "" {
+	if p := os.Getenv("DIVVY_PROTO_LOG"); p != "" {
 		_ = os.WriteFile(p, out.Bytes(), 0o600)
 	}
 	for line := range strings.SplitSeq(out.String(), "\n") {
@@ -119,7 +119,7 @@ func baseEnv() []string {
 	for _, kv := range os.Environ() {
 		k, _, _ := strings.Cut(kv, "=")
 		switch k {
-		case "DISPLAY", "WAYLAND_DISPLAY", "SWAYSOCK", "RKL_BACKEND", "XDG_RUNTIME_DIR", "GDK_BACKEND",
+		case "DISPLAY", "WAYLAND_DISPLAY", "SWAYSOCK", "DIVVY_BACKEND", "XDG_RUNTIME_DIR", "GDK_BACKEND",
 			"XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE", "DBUS_SESSION_BUS_ADDRESS":
 			continue
 		}
@@ -139,7 +139,7 @@ func tail(s string, n int) string {
 func child() int {
 	// First thing, as the shell should: an unhandled SIGUSR1 would kill us.
 	triggers := platform.SignalTriggers(context.Background())
-	if os.Getenv("RKL_PROTO_JSCSIG") != "keep" {
+	if os.Getenv("DIVVY_PROTO_JSCSIG") != "keep" {
 		platform.MoveJSCSignal()
 	}
 	var logs bytes.Buffer
@@ -151,12 +151,12 @@ func child() int {
 	}), nil)))
 
 	app := application.New(application.Options{
-		Name:  "rkl-wailsproto",
-		Linux: application.LinuxOptions{DisableQuitOnLastWindowClosed: true, ProgramName: "rkl-wailsproto"},
+		Name:  "divvy-wailsproto",
+		Linux: application.LinuxOptions{DisableQuitOnLastWindowClosed: true, ProgramName: "divvy-wailsproto"},
 	})
 	// Created before Run, like the shell's overlay: Wails runs it from a goroutine at startup.
 	overlay := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Name: "overlay", Title: "rkl-proto-overlay", Width: 300, Height: 200, Hidden: true, Frameless: true,
+		Name: "overlay", Title: "divvy-proto-overlay", Width: 300, Height: 200, Hidden: true, Frameless: true,
 		AlwaysOnTop:      true,
 		BackgroundColour: application.NewRGBA(255, 0, 0, 255),
 		HTML:             `<html><body style="margin:0;background:#ff0000;width:100vw;height:100vh"></body></html>`,
@@ -230,11 +230,11 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	if err != nil {
 		return err
 	}
-	if os.Getenv("RKL_PROTO_NOPREPARE") != "" {
+	if os.Getenv("DIVVY_PROTO_NOPREPARE") != "" {
 		overlay.Show()
 		time.Sleep(3 * time.Second)
 		shot, _ := exec.Command("grim", "-t", "png", "-").Output()
-		_ = os.WriteFile(os.Getenv("RKL_PROTO_SHOT"), shot, 0o600)
+		_ = os.WriteFile(os.Getenv("DIVVY_PROTO_SHOT"), shot, 0o600)
 		return errors.New("control run without Prepare")
 	}
 	if err := ov.Prepare(); err != nil {
@@ -249,7 +249,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	if err := ov.(platform.LayerAnchorer).AnchorLayer(true, 50, 50); err != nil {
 		return err
 	}
-	if os.Getenv("RKL_PROTO_SHOWAT") != "" {
+	if os.Getenv("DIVVY_PROTO_SHOWAT") != "" {
 		if err := ov.ShowAt(platform.Rect{X: 1280 - 50 - 300, Y: 50, Width: 300, Height: 200}); err != nil {
 			return err
 		}
@@ -270,7 +270,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	if err != nil {
 		return err
 	}
-	if strings.Contains(string(tree), `"name": "rkl-`) {
+	if strings.Contains(string(tree), `"name": "divvy-`) {
 		return errors.New("overlay is an xdg toplevel, not a layer surface")
 	}
 	fmt.Println("PROTO overlay absent from sway's toplevel tree (layer surface)")
@@ -279,7 +279,7 @@ func scenario(app *application.App, overlay *application.WebviewWindow, logs *by
 	if err != nil {
 		return fmt.Errorf("grim: %w", err)
 	}
-	if d := os.Getenv("RKL_PROTO_SHOT"); d != "" {
+	if d := os.Getenv("DIVVY_PROTO_SHOT"); d != "" {
 		_ = os.WriteFile(d, shot, 0o600)
 	}
 	img, err := png.Decode(bytes.NewReader(shot))

@@ -18,7 +18,7 @@ vars:
   VERSION:
     sh: cat VERSION
   # The version in diagnostics and the trade User-Agent (cmd/release does the same for packages).
-  LDFLAGS: -X github.com/BorrowedMirror/rust-king-ledger/internal/app.Version={{.VERSION}}
+  LDFLAGS: -X github.com/BorrowedMirror/divvy/internal/app.Version={{.VERSION}}
 
 tasks:
   default:
@@ -42,13 +42,13 @@ tasks:
     desc: Build a development binary (web inspector on, FRONTEND_DEVSERVER_URL honoured).
     deps: [web]
     cmds:
-      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/rkl{{exeExt}} ./cmd/rkl
+      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/divvy{{exeExt}} ./cmd/divvy
 
   run:
     desc: Build and run the development binary.
     deps: [build]
     cmds:
-      - ./{{.OUT}}/rkl{{exeExt}}
+      - ./{{.OUT}}/divvy{{exeExt}}
 
   dev:
     desc: Vite with hot reload, plus a Go rebuild and restart on every Go change.
@@ -60,7 +60,7 @@ tasks:
   dev:build:
     internal: true
     cmds:
-      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/rkl-dev{{exeExt}} ./cmd/rkl
+      - go build -tags '{{.TAGS}}' -ldflags '{{.LDFLAGS}}' -o {{.OUT}}/divvy-dev{{exeExt}} ./cmd/divvy
   dev:frontend:
     internal: true
     cmds:
@@ -69,7 +69,7 @@ tasks:
   dev:run:
     internal: true
     cmds:
-      - ./{{.OUT}}/rkl-dev{{exeExt}}
+      - ./{{.OUT}}/divvy-dev{{exeExt}}
 
   test:
     desc: Run the Go tests with the race detector.

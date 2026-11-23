@@ -50,7 +50,7 @@ func TestManifestIsReadByWailsEndpointProvider(t *testing.T) {
 		require.NoError(t, err, want.platform)
 		require.NotNil(t, rel, want.platform)
 		assert.Equal(t, "9.9.9", rel.Version)
-		assert.True(t, strings.HasPrefix(rel.Artifact.Filename, "rkl-9.9.9-"), rel.Artifact.Filename)
+		assert.True(t, strings.HasPrefix(rel.Artifact.Filename, "divvy-9.9.9-"), rel.Artifact.Filename)
 		assert.Equal(t, want.platform, rel.Artifact.Platform)
 		v := rel.Verification
 		require.NotNil(t, v, want.platform)
@@ -66,7 +66,7 @@ func TestManifestNeedsEveryArtifact(t *testing.T) {
 	require.NoError(t, err)
 	dir := t.TempDir()
 	writeArtifacts(t, dir, "1.0.0")
-	require.NoError(t, os.Remove(filepath.Join(dir, "rkl-1.0.0-linux-x86_64.AppImage")))
+	require.NoError(t, os.Remove(filepath.Join(dir, "divvy-1.0.0-linux-x86_64.AppImage")))
 	_, err = buildManifest(dir, "1.0.0", "https://x/", "", priv, time.Now())
 	assert.Error(t, err, "a release missing an OS's artifact must not get a manifest")
 }

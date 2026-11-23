@@ -4,12 +4,12 @@ import (
 	"math"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
-// The ready notice: a small card shown over the game window for a few seconds when RKL finds
-// it, so the user knows RKL is running. It never takes focus or mouse input.
+// The ready notice: a small card shown over the game window for a few seconds when Divvy finds
+// it, so the user knows Divvy is running. It never takes focus or mouse input.
 
 const (
 	// noticeWidth and noticeHeight are the notice window's size in logical px.

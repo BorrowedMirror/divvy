@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
+	"github.com/BorrowedMirror/divvy/internal/enum"
 )
 
 // ItemCategory is a coarse category used for routing (which price source, which filters).

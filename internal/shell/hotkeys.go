@@ -7,7 +7,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Hotkeys implements platform.HotkeyHost with Wails' global shortcuts (Win32 RegisterHotKey,
@@ -25,7 +25,7 @@ type Hotkeys struct {
 
 var _ platform.HotkeyHost = (*Hotkeys)(nil)
 
-// NewHotkeys returns a hotkey host on app's global shortcut manager. x11 is true when RKL uses
+// NewHotkeys returns a hotkey host on app's global shortcut manager. x11 is true when Divvy uses
 // its X11 backend on Linux: Wails picks X11 key grabs or the Wayland GlobalShortcuts portal from
 // the session type, but under XWayland the game (Proton/Wine) is an X11 window, so the keys must
 // be grabbed through X11.
@@ -38,7 +38,7 @@ func NewHotkeys(a *application.App, x11 bool) *Hotkeys {
 // with the variable set to x11.
 //
 // The override is scoped to that call rather than set for the whole process before Wails
-// starts: Wails also reads the session type to set up GTK and the GPU, and programs RKL
+// starts: Wails also reads the session type to set up GTK and the GPU, and programs Divvy
 // launches (the browser) inherit the environment; all of them must see the real session.
 func (h *Hotkeys) register(accel string, callback func()) error {
 	var err error

@@ -9,7 +9,7 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/web"
+	"github.com/BorrowedMirror/divvy/web"
 )
 
 // trayLocales is every language in `web/src/i18n/languages.ts`; each has a
@@ -30,8 +30,8 @@ var trayFallback = TrayLabels{
 	PriceCheck:  "Price check (pinned)",
 	Settings:    "Settings…",
 	Diagnostics: "Diagnostics",
-	Quit:        "Quit rkl",
-	Tooltip:     "rkl",
+	Quit:        "Quit divvy",
+	Tooltip:     "divvy",
 }
 
 // trayTable is the `tray` value of a locale's translation file; ok is false (and the value nil)

@@ -22,7 +22,7 @@ describe("UpdateBanner", () => {
     await mount();
     expect(screen.queryByRole("region", { name: "App update" })).not.toBeInTheDocument();
     await emitEvent("update-available", update);
-    expect(screen.getByRole("status")).toHaveTextContent("RKL 0.2.0 is available.");
+    expect(screen.getByRole("status")).toHaveTextContent("Divvy 0.2.0 is available.");
     expect(screen.getByText("What's new")).toBeInTheDocument();
     expect(screen.getByText("Faster price checks.")).toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe("UpdateBanner", () => {
     await emitEvent("update-available", update);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     await emitEvent("update-available", { ...update, version: "0.3.0" });
-    expect(screen.getByRole("status")).toHaveTextContent("RKL 0.3.0 is available.");
+    expect(screen.getByRole("status")).toHaveTextContent("Divvy 0.3.0 is available.");
   });
 
   test("shown on the settings route only, not the overlay", async () => {

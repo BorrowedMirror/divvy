@@ -2,7 +2,7 @@
 
 package wayland
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // vkConn is never opened without cgo.
 type vkConn struct{}

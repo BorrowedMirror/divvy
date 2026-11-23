@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/web"
+	"github.com/BorrowedMirror/divvy/web"
 )
 
 func TestTrayEveryLocaleResolvesNonEmptyLabels(t *testing.T) {
@@ -48,7 +48,7 @@ func TestTrayFallsBackKeyByKey(t *testing.T) {
 	assert.Equal(t, "Einstellungen…", l.Settings)
 	assert.Equal(t, "Quit", l.Quit, "an empty string falls back")
 	assert.Equal(t, "Diag", l.Diagnostics)
-	assert.Equal(t, "rkl", l.Tooltip, "missing everywhere: built-in English")
+	assert.Equal(t, "divvy", l.Tooltip, "missing everywhere: built-in English")
 	assert.Equal(t, "Price check (pinned)", resolveTrayLabels(nil, nil).PriceCheck)
 }
 

@@ -3,7 +3,7 @@ package mac
 import (
 	"log/slog"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // New builds the macOS backend. Missing permissions never fail it; they turn capabilities off

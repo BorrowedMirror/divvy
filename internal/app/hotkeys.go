@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // hotkeyBindings is every hotkey from settings, chat commands and stash searches included.
@@ -73,7 +73,7 @@ func (f *Flow) registerHotkeys(s *config.Settings) error {
 	return nil
 }
 
-// hotkeysWanted reports whether the hotkeys should be grabbed: while the game or one of RKL's
+// hotkeysWanted reports whether the hotkeys should be grabbed: while the game or one of Divvy's
 // own windows (the panel, settings) has focus, so Ctrl+Alt+D and the settings hotkey still
 // close what they opened.
 func (f *Flow) hotkeysWanted() bool {
@@ -83,11 +83,11 @@ func (f *Flow) hotkeysWanted() bool {
 	return f.d.Overlay().IsFocused() || f.d.Settings().IsFocused()
 }
 
-// focusRecheck is how long after releasing the hotkeys, with an RKL window open, they are
+// focusRecheck is how long after releasing the hotkeys, with a Divvy window open, they are
 // checked again.
 const focusRecheck = 250 * time.Millisecond
 
-// recheckHotkeys grabs the hotkeys again if an RKL window got focus after they were released.
+// recheckHotkeys grabs the hotkeys again if a Divvy window got focus after they were released.
 // It never schedules another check, so the two cannot loop.
 func (f *Flow) recheckHotkeys() {
 	st := f.st
@@ -106,9 +106,9 @@ func (f *Flow) recheckHotkeys() {
 	}
 }
 
-// SyncHotkeysToFocus grabs the hotkeys while the game or an RKL window has focus and releases
+// SyncHotkeysToFocus grabs the hotkeys while the game or a Divvy window has focus and releases
 // them otherwise, so the same keys still work in other apps. The shell also calls it when an
-// RKL window gains or loses focus. Only once the game's focus is tracked (not on
+// Divvy window gains or loses focus. Only once the game's focus is tracked (not on
 // Wayland, where every portal registration asks the user); until then the hotkeys stay
 // grabbed everywhere.
 func (f *Flow) SyncHotkeysToFocus() {
@@ -122,7 +122,7 @@ func (f *Flow) SyncHotkeysToFocus() {
 	focused := f.hotkeysWanted()
 	slog.Debug("focus changed", "grab_hotkeys", focused)
 	if !focused && (st.overlayVisible.Load() || f.d.Settings().IsVisible()) {
-		// The game lost focus to an RKL window that the window manager may not have activated
+		// The game lost focus to a Divvy window that the window manager may not have activated
 		// yet (its own focus event can come later, or not at all); look again shortly.
 		f.goSafe("hotkey recheck", func() {
 			if f.sleep(focusRecheck) {

@@ -6,16 +6,16 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/wayland"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform/x11"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform/wayland"
+	"github.com/BorrowedMirror/divvy/internal/platform/x11"
 )
 
 // preInit runs before Wails initialises GTK and creates any web view: it points GTK at the X11
 // backend for X11/XWayland (window positions are global there) and at Wayland for
 // Wayland-native, and moves WebKitGTK's garbage-collector signal off SIGUSR1, which it would
-// otherwise take over, crashing the app on the first `pkill -USR1 rkl`.
+// otherwise take over, crashing the app on the first `pkill -USR1 divvy`.
 func preInit(kind platform.BackendKind) error {
 	platform.MoveJSCSignal()
 	if err := platform.SetGDKBackend(kind); err != nil {

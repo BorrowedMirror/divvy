@@ -5,11 +5,11 @@ import { emitEvent, flush, renderWithProviders, setupIpc } from "@test/ipc";
 import { NoticeView } from "@views/notice/NoticeView";
 
 describe("NoticeView", () => {
-  test("says RKL is ready", async () => {
+  test("says Divvy is ready", async () => {
     setupIpc();
     renderWithProviders(<NoticeView />);
     const status = await screen.findByRole("status");
-    expect(status).toHaveTextContent("Rust King Ledger");
+    expect(status).toHaveTextContent("Divvy");
     expect(status).toHaveTextContent("Ready and running in the background");
   });
 

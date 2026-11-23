@@ -11,11 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 const (
-	scoutUA        = "rkl-test/0 (+scout)"
+	scoutUA        = "divvy-test/0 (+scout)"
 	scoutLeagueStr = "Forbidden Rites"
 	scoutItemsPath = "/poe2/Leagues/Forbidden%20Rites/Items"
 )

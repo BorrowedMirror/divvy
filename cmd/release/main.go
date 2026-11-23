@@ -1,4 +1,4 @@
-// Command release packages RKL and signs its updates: the steps of a release that the go
+// Command release packages Divvy and signs its updates: the steps of a release that the go
 // command cannot do on its own. Taskfile.yml runs it (task package:linux, updater:manifest, ...).
 //
 //	go run ./cmd/release package linux      # AppImage        -> target/go/
@@ -26,8 +26,8 @@ const usage = `usage: go run ./cmd/release <command> [flags]
 commands:
   package linux|windows|macos
                            build the release binary and its installer under target/go/
-  updater-keygen           print a new updater key pair (RKL_UPDATER_PUBKEY / RKL_UPDATER_PRIVATE_KEY)
-  update-manifest          sign the update artifacts and write update.json (needs RKL_UPDATER_PRIVATE_KEY)
+  updater-keygen           print a new updater key pair (DIVVY_UPDATER_PUBKEY / DIVVY_UPDATER_PRIVATE_KEY)
+  update-manifest          sign the update artifacts and write update.json (needs DIVVY_UPDATER_PRIVATE_KEY)
   notices [-check]         write THIRD-PARTY-NOTICES.html (or only check the licence policy)
   version                  print the app version
 

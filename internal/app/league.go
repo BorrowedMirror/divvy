@@ -3,8 +3,8 @@ package app
 import (
 	"strings"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/trade"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/trade"
 )
 
 // autoLeague picks the current softcore trade league: the first league that is not Standard,

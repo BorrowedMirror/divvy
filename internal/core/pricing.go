@@ -6,7 +6,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/enum"
+	"github.com/BorrowedMirror/divvy/internal/enum"
 )
 
 // Price is an amount in a trade currency.

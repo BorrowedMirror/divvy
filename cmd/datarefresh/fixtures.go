@@ -39,7 +39,7 @@ type recordOptions struct {
 }
 
 func fixturesUserAgent(version string) string {
-	return "rkl-fixtures/" + version + " (fixture recorder; +https://github.com/BorrowedMirror/rust-king-ledger)"
+	return "divvy-fixtures/" + version + " (fixture recorder; +https://github.com/BorrowedMirror/divvy)"
 }
 
 // searchBody is the trade2 search body recorded into search.json.

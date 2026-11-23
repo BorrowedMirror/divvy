@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // RunInputLoop uses the passive hook (where supported): Esc closes an unpinned panel even

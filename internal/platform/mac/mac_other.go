@@ -2,7 +2,7 @@
 
 package mac
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // New is only available on macOS.
 func New(Options) (platform.Parts, error) {

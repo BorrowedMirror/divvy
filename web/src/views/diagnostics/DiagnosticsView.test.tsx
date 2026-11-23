@@ -35,7 +35,7 @@ describe("DiagnosticsView", () => {
     renderWithProviders(<DiagnosticsView />);
     await user.click(await screen.findByRole("button", { name: "Copy report" }));
     expect(writeText).toHaveBeenCalledOnce();
-    expect(writeText.mock.calls[0]?.[0]).toContain("Rust King Ledger 0.1.0-rc.1");
+    expect(writeText.mock.calls[0]?.[0]).toContain("Divvy 0.1.0-rc.1");
     expect(await screen.findByText("Report copied to clipboard")).toBeInTheDocument();
   });
 

@@ -124,7 +124,7 @@ func run(g *game, w, h uint32) error {
 	if err != nil {
 		return err
 	}
-	className, _ := windows.UTF16PtrFromString("RklFakeGame")
+	className, _ := windows.UTF16PtrFromString("DivvyFakeGame")
 	titleW, _ := windows.UTF16PtrFromString(title)
 	cursor, _, _ := procLoadCursorW.Call(0, idcArrow)
 	wc := wndClassEx{

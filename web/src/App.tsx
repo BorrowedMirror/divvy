@@ -136,7 +136,7 @@ function SettingsShell({ children }: { children: ReactNode }) {
         {/* Borderless window away from the game: drag it by this bar (Wails' --wails-draggable). */}
         <div className="k-titlebar" data-testid="settings-titlebar">
           <BrandMark size={18} />
-          <span className="text-sm font-semibold text-gold">Rust King Ledger</span>
+          <span className="text-sm font-semibold text-gold">Divvy</span>
         </div>
         <button
           type="button"

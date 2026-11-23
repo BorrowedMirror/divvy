@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 func TestUnidentifiedUniquesListTheirPossibleUniques(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-// LogLevel turns an RKL_LOG value into a level: its first comma-separated directive (`debug`,
+// LogLevel turns an DIVVY_LOG value into a level: its first comma-separated directive (`debug`,
 // `info`, `warn`, `error`; `trace` counts as debug), info by default. Later directives
 // (`reqwest=info`, kept by older configurations) are ignored.
 func LogLevel(env string) slog.Level {
@@ -26,7 +26,7 @@ func LogLevel(env string) slog.Level {
 }
 
 // logFileName is the log file's name in the log directory.
-const logFileName = "rkl.log"
+const logFileName = "divvy.log"
 
 // LogFile is the log file sink: it discards everything until Attach opens the file, so the
 // second instance of a single-instance launch never truncates the running instance's log.
@@ -44,7 +44,7 @@ func (l *LogFile) Write(p []byte) (int, error) {
 	return l.f.Write(p)
 }
 
-// Attach creates (truncates) dir/rkl.log, owner-only (it can hold whispers and character
+// Attach creates (truncates) dir/divvy.log, owner-only (it can hold whispers and character
 // names), and starts writing to it. It returns the file's path.
 func (l *LogFile) Attach(dir string) (string, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {

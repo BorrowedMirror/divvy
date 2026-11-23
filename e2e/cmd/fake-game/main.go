@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
+	"github.com/BorrowedMirror/divvy/internal/core/coretest"
 )
 
 const title = "Path of Exile 2"
@@ -44,7 +44,7 @@ type options struct {
 	logKeys                    bool
 }
 
-// parseArgs parses args (without the program name). getenv supplies RKL_CORPUS_DIR.
+// parseArgs parses args (without the program name). getenv supplies DIVVY_CORPUS_DIR.
 func parseArgs(args []string, getenv func(string) string) (options, error) {
 	o := options{width: 1280, height: 720}
 	fs := flag.NewFlagSet("fake-game", flag.ContinueOnError)
@@ -53,7 +53,7 @@ func parseArgs(args []string, getenv func(string) string) (options, error) {
 	fs.StringVar(&o.advancedItem, "advanced-item", "", "item text file served on Ctrl+Alt+C (defaults to the normal item)")
 	fs.StringVar(&o.corpusID, "corpus-id", "", "corpus id (e.g. currency/divine-orb) served on Ctrl+C")
 	fs.StringVar(&o.advancedCorpusID, "advanced-corpus-id", "", "corpus id served on Ctrl+Alt+C")
-	fs.StringVar(&o.corpusDir, "corpus-dir", "", "corpus directory (env RKL_CORPUS_DIR; default: the in-repo corpus)")
+	fs.StringVar(&o.corpusDir, "corpus-dir", "", "corpus directory (env DIVVY_CORPUS_DIR; default: the in-repo corpus)")
 	fs.Func("exit-after", "exit after this many seconds (CI safety net)", func(s string) error {
 		v, err := strconv.ParseFloat(s, 64)
 		if err != nil {
@@ -87,7 +87,7 @@ func parseArgs(args []string, getenv func(string) string) (options, error) {
 		return o, errors.New("--advanced-item and --advanced-corpus-id cannot be used together")
 	}
 	if !set["corpus-dir"] {
-		o.corpusDir = getenv("RKL_CORPUS_DIR")
+		o.corpusDir = getenv("DIVVY_CORPUS_DIR")
 	}
 	return o, nil
 }

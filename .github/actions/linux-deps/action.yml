@@ -1,5 +1,5 @@
 name: Linux system dependencies
-description: Installs the GTK3/WebKitGTK, Wayland and headless-display packages the rkl Go build and its tests need on Ubuntu.
+description: Installs the GTK3/WebKitGTK, Wayland and headless-display packages the divvy Go build and its tests need on Ubuntu.
 inputs:
   extra:
     description: Additional apt packages (space separated).

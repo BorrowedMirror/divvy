@@ -1,7 +1,7 @@
 {
   "update": {
     "title": "Uygulama güncellemesi",
-    "available": "RKL {{version}} kullanıma sunuldu.",
+    "available": "Divvy {{version}} kullanıma sunuldu.",
     "notes": "Yenilikler",
     "later": "Daha sonra",
     "install": "Yükle ve yeniden başlat",
@@ -187,11 +187,11 @@
     "rememberFiltersHelp": "Bir sonraki yüzük, yay vb. o türü en son aradığınızda açık veya kapalı olan özelliklerle başlar.",
     "forgetFilters": "Hatırlanan seçimleri unut",
     "forgotFilters": "Unutuldu.",
-    "autostart": "Oturum açtığımda RKL'yi başlat",
+    "autostart": "Oturum açtığımda Divvy'yi başlat",
     "scale": "Panel boyutu",
     "backdropDim": "Panelin arkasındaki arka plan",
     "closePinnedOnGameFocus": "Oyuna geri tıkladığımda sabitlenmiş paneli kapat",
-    "readyNotice": "RKL oyunu bulduğunda oyunun üzerinde bildirim göster",
+    "readyNotice": "Divvy oyunu bulduğunda oyunun üzerinde bildirim göster",
     "itemLinks": "Paneldeki eşya bağlantıları",
     "results": "Fiyatlar ve ilanlar"
   },
@@ -269,21 +269,21 @@
     "clipboard": "Pano erişimi"
   },
   "guidance": {
-    "accessibility": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünü açın ve RKL'yı etkinleştirin. Kısayollar ve eşya kopyalama için gereklidir.",
-    "screenRecording": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Ekran Kaydı bölümünü açın ve oyun penceresini bulabilmesi için RKL'yı etkinleştirin. Ardından RKL'yı yeniden başlatın.",
+    "accessibility": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünü açın ve Divvy'yı etkinleştirin. Kısayollar ve eşya kopyalama için gereklidir.",
+    "screenRecording": "macOS: Sistem Ayarları → Gizlilik ve Güvenlik → Ekran Kaydı bölümünü açın ve oyun penceresini bulabilmesi için Divvy'yı etkinleştirin. Ardından Divvy'yı yeniden başlatın.",
     "wayland": "Yerel Wayland modu: genel kısayollar masaüstü portalı üzerinden çalışır, arayüz oyun penceresine değil ekrana sabitlenir ve tuş vuruşu gönderme kullanılamayabilir. Compositor'ünüz izin veriyorsa X11/XWayland kullanın.",
-    "gnome": "GNOME, RKL'nın ihtiyaç duyduğu Wayland özelliklerini desteklemez; bu yüzden orada XWayland (X11) üzerinden çalışır. Oyunu da XWayland altında çalıştırın.",
+    "gnome": "GNOME, Divvy'nın ihtiyaç duyduğu Wayland özelliklerini desteklemez; bu yüzden orada XWayland (X11) üzerinden çalışır. Oyunu da XWayland altında çalıştırın.",
     "generic": "Eksik izin: {{permission}}"
   },
   "tray": {
     "priceCheck": "Fiyat kontrolü (sabit)",
     "settings": "Ayarlar…",
     "diagnostics": "Tanılama",
-    "quit": "RKL'dan çık",
-    "tooltip": "RKL"
+    "quit": "Divvy'dan çık",
+    "tooltip": "Divvy"
   },
   "onboarding": {
-    "title": "RKL'yı kur",
+    "title": "Divvy'yı kur",
     "intro": "Fiyat kontrollerinin sorunsuz çalışması için platformunuza özel birkaç adım. Buraya istediğiniz zaman Tanılama'dan geri dönebilirsiniz.",
     "stepsHeading": "{{platform}} için kurulum",
     "loadFailed": "İzinler kontrol edilemedi.",
@@ -292,25 +292,25 @@
     "granted": "Verildi",
     "notGranted": "Verilmedi",
     "openSettings": "Sistem Ayarları'nı aç",
-    "relaunch": "macOS bu izni RKL yeniden başlatıldıktan sonra uygular. İzni etkinleştirdikten sonra RKL'dan çıkıp yeniden açın.",
+    "relaunch": "macOS bu izni Divvy yeniden başlatıldıktan sonra uygular. İzni etkinleştirdikten sonra Divvy'dan çıkıp yeniden açın.",
     "requestFailed": "Sistem Ayarları açılamadı: {{message}}",
     "details": "Teknik ayrıntılar",
-    "blockedHint": "Bazı gerekli izinler hâlâ eksik. RKL kısıtlı özelliklerle çalışmaya devam edecek.",
+    "blockedHint": "Bazı gerekli izinler hâlâ eksik. Divvy kısıtlı özelliklerle çalışmaya devam edecek.",
     "continueWithout": "İzin vermeden devam et",
     "done": "Bitti",
     "saveFailed": "Kaydedilemedi: {{message}}",
     "permission": {
       "accessibility": {
         "name": "Erişilebilirlik",
-        "body": "Fiyat kontrolü kısayoluna bastığınızda RKL oyunun kopyalama kısayoluna sizin yerinize basar. macOS bunun için Erişilebilirlik erişimi gerektirir."
+        "body": "Fiyat kontrolü kısayoluna bastığınızda Divvy oyunun kopyalama kısayoluna sizin yerinize basar. macOS bunun için Erişilebilirlik erişimi gerektirir."
       },
       "screen_recording": {
         "name": "Ekran Kaydı",
-        "body": "RKL'nın Path of Exile 2 penceresini güvenilir şekilde bulabilmesi için pencere başlıklarını okumasına izin verir. RKL ekranınızı asla kaydetmez."
+        "body": "Divvy'nın Path of Exile 2 penceresini güvenilir şekilde bulabilmesi için pencere başlıklarını okumasına izin verir. Divvy ekranınızı asla kaydetmez."
       },
       "input_monitoring": {
         "name": "Girdi İzleme",
-        "body": "Oyun odaktayken RKL'nın arayüzü Esc ile kapatmasına ve Ctrl+kaydırmaya tepki vermesine izin verir."
+        "body": "Oyun odaktayken Divvy'nın arayüzü Esc ile kapatmasına ve Ctrl+kaydırmaya tepki vermesine izin verir."
       },
       "unknown": "İzin: {{kind}}"
     },
@@ -318,15 +318,15 @@
       "windowedTitle": "Pencereli veya kenarlıksız tam ekran kullanın",
       "windowedBody": "Arayüz, özel tam ekran modunun üzerinde görünemez. Oyunun grafik seçeneklerinde Pencereli veya Pencereli Tam Ekran'ı (kenarlıksız) seçin.",
       "elevatedTitle": "Oyunu yönetici olarak mı çalıştırıyorsunuz?",
-      "elevatedBody": "Windows, normal bir uygulamadan yükseltilmiş bir uygulamaya giden kısayolları ve benzetilmiş tuş vuruşlarını engeller (UIPI). Oyun yönetici olarak çalışıyorsa RKL'yı da yönetici olarak çalıştırın."
+      "elevatedBody": "Windows, normal bir uygulamadan yükseltilmiş bir uygulamaya giden kısayolları ve benzetilmiş tuş vuruşlarını engeller (UIPI). Oyun yönetici olarak çalışıyorsa Divvy'yı da yönetici olarak çalıştırın."
     },
     "x11": {
       "title": "Ek kurulum gerekmez",
-      "body": "X11, RKL'nın ihtiyaç duyduğu her şeyi destekler: genel kısayollar, pencere takibi ve oyunun üzerinde bir arayüz."
+      "body": "X11, Divvy'nın ihtiyaç duyduğu her şeyi destekler: genel kısayollar, pencere takibi ve oyunun üzerinde bir arayüz."
     },
     "gnome": {
       "title": "GNOME: yalnızca X11/XWayland",
-      "x11Body": "GNOME'da RKL'nın ihtiyaç duyduğu Wayland özellikleri yok; bu yüzden RKL burada XWayland üzerinden çalışır. Oyunu da XWayland altında çalıştırın (Proton ve Wine'da varsayılan).",
+      "x11Body": "GNOME'da Divvy'nın ihtiyaç duyduğu Wayland özellikleri yok; bu yüzden Divvy burada XWayland üzerinden çalışır. Oyunu da XWayland altında çalıştırın (Proton ve Wine'da varsayılan).",
       "waylandBody": "GNOME'da layer-shell yok; bu yüzden yerel Wayland modunda arayüz oyunun üzerinde kalamaz. Ayarlar'dan altyapıyı X11 / XWayland olarak değiştirin."
     },
     "wayland": {
@@ -334,9 +334,9 @@
       "degradedBody": "Wayland uygulamaları birbirinden yalıtır, bu yüzden bazı özellikler farklı çalışır:",
       "portal": "Genel kısayollar masaüstünün GlobalShortcuts portalı üzerinden çalışır ve portal bunları onaylamanızı ister. Her compositor bu portalı sunmaz.",
       "layerShell": "Arayüz, oyun penceresini takip etmek yerine layer-shell ile ekran kenarına sabitlenir.",
-      "noTracking": "RKL oyun penceresini göremez ve Esc tuşunu dinleyemez; bu yüzden arayüzü kendi düğmesiyle kapatın.",
+      "noTracking": "Divvy oyun penceresini göremez ve Esc tuşunu dinleyemez; bu yüzden arayüzü kendi düğmesiyle kapatın.",
       "triggerTitle": "Fiyat kontrolünü compositor'ünüzde atayın",
-      "triggerBody": "Kısayollar çalışmıyorsa compositor'ünüzde RKL --trigger komutunu çalıştıran bir klavye kısayolu ekleyin. Bu komut, çalışan RKL'da imlecin altındaki eşyanın fiyatını kontrol eder.",
+      "triggerBody": "Kısayollar çalışmıyorsa compositor'ünüzde Divvy --trigger komutunu çalıştıran bir klavye kısayolu ekleyin. Bu komut, çalışan Divvy'da imlecin altındaki eşyanın fiyatını kontrol eder.",
       "pinnedHint": "Arayüzü sabitlenmiş olarak açmak için --pinned ekleyin.",
       "example": {
         "sway": "sway",
@@ -400,7 +400,7 @@
       "area": "Bölge ve ödüller",
       "other": "Diğer işaretli modlar"
     },
-    "footnote": "Modlar RKL'nin oyun verilerinden gelir; # gelen değeri temsil eder. Panelden işaretlediğiniz modlar da burada görünür."
+    "footnote": "Modlar Divvy'nin oyun verilerinden gelir; # gelen değeri temsil eder. Panelden işaretlediğiniz modlar da burada görünür."
   },
   "resultsLayout": {
     "below": "Filtrelerin altında",
@@ -430,6 +430,6 @@
     "addSearch": "Arama ekle",
     "remove": "{{what}} öğesini kaldır",
     "ctrlScroll": "Ctrl + fare tekerleğiyle depo sekmeleri arasında geçiş yap",
-    "ctrlScrollHelp": "Oyunun üzerindeki her tekerlek adımı, sol veya sağ ok tuşuna bir kez basar. RKL yeniden başlatıldıktan sonra geçerli olur."
+    "ctrlScrollHelp": "Oyunun üzerindeki her tekerlek adımı, sol veya sağ ok tuşuna bir kez basar. Divvy yeniden başlatıldıktan sonra geçerli olur."
   }
 }

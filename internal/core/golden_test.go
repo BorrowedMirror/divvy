@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
+	"github.com/BorrowedMirror/divvy/internal/core/coretest"
 )
 
 // loadCorpus returns every corpus entry with its text, in index order.

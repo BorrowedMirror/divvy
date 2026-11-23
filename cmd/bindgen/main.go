@@ -14,9 +14,9 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/bindgen"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/ipc"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/bindgen"
+	"github.com/BorrowedMirror/divvy/internal/ipc"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func run(root string, check bool) error {
 	}
 	out, err := bindgen.Generate(bindgen.Spec{
 		Service:    reflect.TypeFor[app.Service](),
-		ModulePath: "github.com/BorrowedMirror/rust-king-ledger",
+		ModulePath: "github.com/BorrowedMirror/divvy",
 		ModuleDir:  root,
 		Error:      reflect.TypeFor[ipc.Error](),
 		// The frontend imports the command error as IpcError.

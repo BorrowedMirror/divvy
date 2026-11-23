@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // displayPrice picks a readable currency for amount (expressed in rates.Base): divine when
@@ -50,7 +50,7 @@ func exchangeName(item *core.ParsedItem) string {
 }
 
 // DefaultSourceCacheTTL is how long the aggregated sources cache responses in production:
-// they refresh roughly hourly, and ten minutes keeps RKL well inside their "don't hammer the
+// they refresh roughly hourly, and ten minutes keeps Divvy well inside their "don't hammer the
 // economy endpoints" policies.
 const DefaultSourceCacheTTL = 10 * time.Minute
 

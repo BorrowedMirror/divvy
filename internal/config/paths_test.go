@@ -9,12 +9,12 @@ import (
 )
 
 func TestResolveHonoursEnvOverride(t *testing.T) {
-	root := filepath.FromSlash("/portable/rkl")
+	root := filepath.FromSlash("/portable/divvy")
 	t.Setenv(ConfigDirEnv, root)
 	paths, err := Resolve()
 	require.NoError(t, err)
 	assert.Equal(t, Under(root), paths)
-	assert.Equal(t, filepath.FromSlash("/portable/rkl/config/settings.toml"), paths.SettingsFile)
+	assert.Equal(t, filepath.FromSlash("/portable/divvy/config/settings.toml"), paths.SettingsFile)
 }
 
 func TestResolveIgnoresBlankOverride(t *testing.T) {

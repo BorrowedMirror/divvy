@@ -3,8 +3,8 @@ package app
 import (
 	"math"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/platform"
 )
 
 // Area is an integer rectangle in physical pixels.

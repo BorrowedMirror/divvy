@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestReadyNotice checks the notice RKL shows over the game window when it finds it: it
+// TestReadyNotice checks the notice Divvy shows over the game window when it finds it: it
 // appears without taking the game's focus, then goes away by itself.
 func TestReadyNotice(t *testing.T) {
 	if runtime.GOOS == "linux" && !isX11() {
@@ -29,7 +29,7 @@ func TestReadyNotice(t *testing.T) {
 		step{"shows over the game when the game window appears", func(t *testing.T) {
 			app.WaitState(t, "the ready notice", 10*time.Second, func(s appState) bool { return s.NoticeVisible })
 			d := app.WaitDOM(t, "notice", `[data-testid="ready-notice"]`, 5*time.Second, func(d domReply) bool {
-				return d.Visible && strings.Contains(d.Text, "Rust King Ledger")
+				return d.Visible && strings.Contains(d.Text, "Divvy")
 			})
 			assert.Contains(t, d.Text, "Ready and running in the background")
 		}},

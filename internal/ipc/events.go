@@ -3,8 +3,8 @@ package ipc
 import (
 	"encoding/json/jsontext"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // Event names on the bus, as the frontend listens for them. Each carries the payload type of

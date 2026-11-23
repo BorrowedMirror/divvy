@@ -1,6 +1,6 @@
 package mac
 
-import "github.com/BorrowedMirror/rust-king-ledger/internal/platform"
+import "github.com/BorrowedMirror/divvy/internal/platform"
 
 // Capability notes.
 const (

@@ -11,7 +11,7 @@ import { events } from "@src/bindings";
 const DEFAULT_DURATION_MS = 4000;
 
 /**
- * The ready notice: a small card shown over the game window once RKL has found it. The
+ * The ready notice: a small card shown over the game window once Divvy has found it. The
  * window ignores the mouse and never takes focus; each `ready-notice` replays the fade in and out.
  */
 export function NoticeView() {
@@ -27,7 +27,7 @@ export function NoticeView() {
     >
       <BrandMark size={36} />
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="truncate font-semibold leading-tight text-gold-bright">Rust King Ledger</span>
+        <span className="truncate font-semibold leading-tight text-gold-bright">Divvy</span>
         <span className="truncate text-xs leading-tight text-muted">{t("notice.ready")}</span>
       </span>
     </output>

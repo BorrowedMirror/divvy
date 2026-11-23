@@ -22,10 +22,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
-const tradeUA = "rkl-test/0.0 (+https://example.invalid)"
+const tradeUA = "divvy-test/0.0 (+https://example.invalid)"
 
 func tradeConfig(m *mockServer) Config {
 	return Config{BaseURL: m.baseURL(), UserAgent: tradeUA, FetchCount: 20, CacheTTL: 60 * time.Second}
@@ -135,7 +135,7 @@ func TestEmptyPoesessidSendsNoCookie(t *testing.T) {
 func TestInvalidConfigIsRejected(t *testing.T) {
 	base := DefaultConfig("dev")
 	assert.Equal(t, "https://www.pathofexile.com", base.BaseURL.String())
-	assert.True(t, strings.HasPrefix(base.UserAgent, "rkl/dev "))
+	assert.True(t, strings.HasPrefix(base.UserAgent, "divvy/dev "))
 	for _, bad := range []string{"mailto:a@b.c", "/relative", "ftp://host"} {
 		cfg := base
 		cfg.BaseURL = mustURL(t, bad)

@@ -7,7 +7,7 @@ import (
 	"encoding/json/v2"
 	"net/http"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core"
+	"github.com/BorrowedMirror/divvy/internal/core"
 )
 
 // exchangeRequest is the bulk-exchange body, as the trade site sends it.

@@ -1,4 +1,4 @@
-// Command rkl is the Rust King Ledger desktop app: a Path of Exile 2 price-check overlay.
+// Command divvy is the Divvy desktop app: a Path of Exile 2 price-check overlay.
 package main
 
 import (
@@ -16,13 +16,13 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/app"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/autostart"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/config"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/data"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/platform"
-	"github.com/BorrowedMirror/rust-king-ledger/internal/shell"
-	"github.com/BorrowedMirror/rust-king-ledger/web"
+	"github.com/BorrowedMirror/divvy/internal/app"
+	"github.com/BorrowedMirror/divvy/internal/autostart"
+	"github.com/BorrowedMirror/divvy/internal/config"
+	"github.com/BorrowedMirror/divvy/internal/data"
+	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/shell"
+	"github.com/BorrowedMirror/divvy/web"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 	trayTemplateIcon []byte
 )
 
-// cli is `rkl [--trigger [--pinned]]`. --trigger asks the running instance to price-check (a
+// cli is `divvy [--trigger [--pinned]]`. --trigger asks the running instance to price-check (a
 // Wayland compositor key binding when global shortcuts are unavailable); the arguments reach
 // it through single-instance handling.
 type cli struct{ trigger, pinned bool }
@@ -48,7 +48,7 @@ func main() {
 	err := run(ctx, os.Args[1:])
 	stop()
 	if err != nil {
-		slog.Error("rkl exited", "err", err)
+		slog.Error("divvy exited", "err", err)
 		os.Exit(1)
 	}
 }
@@ -64,7 +64,7 @@ func run(ctx context.Context, argv []string) error {
 
 	var logFile app.LogFile
 	defer logFile.Close()
-	logger := app.NewLogger(app.LogLevel(os.Getenv("RKL_LOG")), os.Stderr, &logFile)
+	logger := app.NewLogger(app.LogLevel(os.Getenv("DIVVY_LOG")), os.Stderr, &logFile)
 	slog.SetDefault(logger)
 	args := parseArgs(argv)
 
@@ -102,8 +102,8 @@ func run(ctx context.Context, argv []string) error {
 		Assets: web.Dist(),
 		Icons:  icons,
 		Logger: logger,
-		// A test-hook run is never single-instance, so it can start next to an installed RKL.
-		SingleInstance: os.Getenv("RKL_TEST_HOOK") == "",
+		// A test-hook run is never single-instance, so it can start next to an installed Divvy.
+		SingleInstance: os.Getenv("DIVVY_TEST_HOOK") == "",
 		OnSecondInstance: func(argv []string) {
 			f := flow.Load()
 			if f == nil {
@@ -129,7 +129,7 @@ func run(ctx context.Context, argv []string) error {
 			startErrs = append(startErrs, fmt.Errorf("log file: %w", err))
 		}
 	}
-	slog.Info("rkl starting", "version", app.Version, "log", logPath)
+	slog.Info("divvy starting", "version", app.Version, "log", logPath)
 
 	plat := platformFrom(ctx, kind, parts, partsErr == nil, s)
 	st, err := app.NewState(app.StateOptions{
@@ -156,8 +156,8 @@ func run(ctx context.Context, argv []string) error {
 		Diagnostics: func() { f.ShowSettings("diagnostics") },
 	})
 
-	// Hotkeys follow focus: grabbed while the game or an RKL window is focused. The game's focus
-	// comes from the tracker; RKL's own windows report theirs here. Wails emits the common focus
+	// Hotkeys follow focus: grabbed while the game or a Divvy window is focused. The game's focus
+	// comes from the tracker; Divvy's own windows report theirs here. Wails emits the common focus
 	// events on Windows and macOS only; on Linux it sends its own FocusIn/FocusOut and never maps
 	// them, so both kinds are listened to. Off the UI thread: syncing can wait on the settings lock.
 	focusEvents := []events.WindowEventType{

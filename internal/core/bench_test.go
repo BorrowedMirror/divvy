@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BorrowedMirror/rust-king-ledger/internal/core/coretest"
+	"github.com/BorrowedMirror/divvy/internal/core/coretest"
 )
 
 type benchFixture struct {
