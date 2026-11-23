@@ -1,0 +1,9 @@
+# OSV-Scanner (CI) scans only what ships: Divvy's go.mod and the web app's production dependencies
+# (pnpm sbom --prod). The tools module, tools/game-extract and web's dev dependencies are build
+# and test tooling, so they are left out. govulncheck covers the Go code paths too.
+#
+# Ignore a vulnerability only with a reason, as:
+#
+# [[IgnoredVulns]]
+# id = "GO-0000-0000"
+# reason = "why it cannot affect Divvy"

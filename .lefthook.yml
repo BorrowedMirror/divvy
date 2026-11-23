@@ -1,40 +1,81 @@
-# Install hooks with `pnpm --dir web exec lefthook install` (pnpm lives in web/).
-commit-msg:
-  commands:
-    commitlint:
-      # commitlint is installed in web/; --cwd .. reads .commitlintrc.json from the repo root.
-      run: pnpm --dir web exec commitlint --cwd .. --edit {1}
+# Git hooks, installed by `pnpm --dir web exec lefthook install` (lefthook is a dev dependency of
+# web/). Skip them once with LEFTHOOK=0.
 pre-commit:
-  parallel: true
-  commands:
-    rustfmt:
-      root: tools/game-extract/
-      glob: "*.rs"
-      run: cargo fmt -- --check
-    # golangci-lint (pinned in tools/go.mod) also formats: .golangci.yml enables gofmt, so --fix
-    # rewrites badly formatted files and the fixes are staged again.
-    golangci-lint:
-      glob: "*.go"
-      run: go tool -modfile=tools/go.mod golangci-lint run --fix ./...
-      stage_fixed: true
-    actionlint:
-      glob: ".github/workflows/*.{yml,yaml}"
-      run: go tool -modfile=tools/go.mod actionlint {staged_files}
-    # zizmor is not a Go tool, so it is not pinned here; CI runs a pinned version on every push.
-    zizmor:
-      glob: ".github/workflows/*.{yml,yaml}"
+  piped: true
+  jobs:
+    # The Go tools come from tools/go.mod and the web ones from web/; these have to be installed.
+    # See the development setup in CONTRIBUTING.md.
+    - name: check tools
       run: |
-        if command -v zizmor >/dev/null; then
-          zizmor --no-progress {staged_files}
-        else
-          echo "zizmor is not installed, skipping (CI still runs it): https://docs.zizmor.sh/installation/"
+        missing=""
+        for tool in pnpm shellcheck trufflehog zizmor; do
+          command -v "$tool" >/dev/null 2>&1 || missing="$missing $tool"
+        done
+        if [ -n "$missing" ]; then
+          echo "Install these first:$missing (see Development setup in CONTRIBUTING.md)"
+          exit 1
         fi
-    biome:
-      root: web/
-      glob: "*.{js,jsx,ts,tsx,mjs,json,jsonc,css}"
-      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
-      stage_fixed: true
-    tsc:
-      root: web/
-      glob: "*.{ts,tsx}"
-      run: pnpm --reporter=silent typecheck
+
+    - name: linters
+      group:
+        parallel: true
+        jobs:
+          - name: actionlint
+            run: go tool -modfile=tools/go.mod actionlint {staged_files}
+            glob: ".github/workflows/*.{yml,yaml}"
+
+          - name: biome (web)
+            root: "web/"
+            run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+            glob: "*.{js,jsx,ts,tsx,mjs,json,jsonc,css}"
+            stage_fixed: true
+
+          - name: editorconfig
+            run: go tool -modfile=tools/go.mod editorconfig-checker {staged_files}
+
+          # golangci-lint (pinned in tools/go.mod) also formats: .golangci.yml enables gofumpt and
+          # goimports, so --fix rewrites badly formatted files and the fixes are staged again.
+          - name: golangci-lint
+            run: go tool -modfile=tools/go.mod golangci-lint run --fix ./...
+            glob: "*.go"
+            stage_fixed: true
+
+          # tools/game-extract is the only Rust; most changes never touch it, so Cargo is optional.
+          - name: rustfmt (game-extract)
+            root: "tools/game-extract/"
+            run: |
+              if command -v cargo >/dev/null; then
+                cargo fmt -- --check
+              else
+                echo "cargo is not installed, skipping rustfmt for tools/game-extract"
+              fi
+            glob: "*.rs"
+
+          - name: shellcheck
+            run: shellcheck --format=gcc --severity=warning {staged_files}
+            glob: "*.sh"
+
+          - name: sort-package-json (web)
+            root: "web/"
+            run: pnpm exec sort-package-json {staged_files}
+            glob: "web/package.json"
+            stage_fixed: true
+
+          # Secrets in what is about to be committed; CI scans the whole tree.
+          - name: trufflehog
+            run: trufflehog --fail --log-level=-1 filesystem {staged_files}
+
+          - name: tsc (web)
+            root: "web/"
+            run: pnpm --reporter=silent typecheck
+            glob: "*.{ts,tsx}"
+
+          - name: zizmor
+            run: zizmor --no-progress {staged_files}
+            glob: ".github/workflows/*.{yml,yaml}"
+
+commit-msg:
+  jobs:
+    # commitlint is installed in web/; --cwd .. reads .commitlintrc.json from the repo root.
+    - name: commitlint
+      run: pnpm --dir web exec commitlint --cwd .. --edit {1}

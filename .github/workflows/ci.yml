@@ -20,6 +20,10 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -38,20 +42,66 @@ jobs:
       - run: pnpm --dir web install --frozen-lockfile
       - run: pnpm --dir web build
       # go vet for the host (gtk3), GOOS=windows and GOOS=darwin (purego, since cgo needs the macOS
-      # SDK); bindgen and commitconfig -check; golangci-lint (pinned in tools/go.mod, and with gofmt
-      # as its formatter) for the same three targets; actionlint. The tests run in the matrix below.
-      # The Wails CLI runs one task per call and is built without cgo (see WAILS in Taskfile.yml).
+      # SDK); bindgen and commitconfig -check; golangci-lint (pinned in tools/go.mod, with gofumpt
+      # and goimports as its formatters) for the same three targets. The tests run in the matrix
+      # below. The Wails CLI runs one task per call and is built without cgo (see WAILS in
+      # Taskfile.yml).
       - run: |
           wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
-          for t in vet bindings:check commitconfig:check lint actionlint; do "$wails" task "$t"; done
-      # zizmor is a Python tool, so it is pinned here rather than in tools/go.mod.
-      - name: zizmor
-        run: pipx run zizmor==1.33.1 --no-progress --format github .github/workflows
+          for t in vet bindings:check commitconfig:check lint; do "$wails" task "$t"; done
       # Known vulnerabilities in reachable code, and the dependency licence policy, for all three
       # targets (cmd/release/notices.go holds the allow-list).
       - run: |
           wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
           for t in vuln licenses:check; do "$wails" task "$t"; done
+
+  # Everything that isn't Go or the web app: the workflows, whitespace and line endings, shell
+  # scripts, secrets and known vulnerabilities in what ships.
+  checks:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      # actionlint and editorconfig-checker run from the tools module, which pins their versions;
+      # the rest are pinned here.
+      - name: actionlint
+        run: go tool -modfile=tools/go.mod actionlint
+      - name: editorconfig-checker
+        run: git ls-files -z | xargs -0 go tool -modfile=tools/go.mod editorconfig-checker
+      # Preinstalled on GitHub's Ubuntu runners.
+      - name: shellcheck
+        run: git ls-files -z '*.sh' | xargs -0 shellcheck --format=gcc --severity=warning
+      - name: zizmor
+        run: pipx run zizmor==1.33.1 --no-progress --format github .github/workflows
+      - name: trufflehog
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" -w /repo \
+            trufflesecurity/trufflehog:3.100.1@sha256:9c7a8325d43a4af2960d3f21d61a08981d8a1bf0542e007efa2e47097e386452 \
+            --fail --no-update --log-level=-1 filesystem -x .trufflehog .
+      # Only what ships: go.mod and the web app's production dependencies (see .osv-scanner.toml).
+      - name: osv-scanner
+        run: |
+          pnpm --dir web sbom --sbom-format cyclonedx --prod --lockfile-only > "$RUNNER_TEMP/web.cdx.json"
+          docker run --rm -v "$PWD:/repo:ro" -v "$RUNNER_TEMP:/sbom:ro" -w /repo \
+            ghcr.io/google/osv-scanner:v2.7.1@sha256:a70ffffc2bfd33482953e5d6b64c6fcdb30239717a07b0f0d3ab2859ce3e4cde \
+            scan source --config .osv-scanner.toml -L go.mod -L /sbom/web.cdx.json
 
   test:
     name: Test (${{ matrix.label }})
@@ -73,6 +123,10 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -188,6 +242,10 @@ jobs:
     name: Windows installer
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -221,6 +279,10 @@ jobs:
       id-token: write # upload coverage to Codecov without a token (OIDC)
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false

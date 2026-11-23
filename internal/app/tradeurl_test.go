@@ -296,7 +296,7 @@ func TestTradeURLAllowList(t *testing.T) {
 		},
 		{
 			"RejectsPortAsUserInfo",
-			"https://www.pathofexile.com:443@evil.example.com/trade2/search/x",
+			"https://www.pathofexile.com:443@evil.example.com/trade2/search/x", // trufflehog:ignore (a spoofed host, not credentials)
 			false,
 		},
 	}

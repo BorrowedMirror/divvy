@@ -5,7 +5,8 @@
 #   for the CLI build, see WAILS)
 #
 # Everyday work needs no task: `go build`, `go test ./...`, `go vet ./...` and `go generate ./...`
-# work as usual. The tools (wails3, golangci-lint, actionlint) are pinned in tools/go.mod.
+# work as usual. The tools (wails3, golangci-lint, actionlint, editorconfig-checker) are pinned in
+# tools/go.mod.
 version: "3"
 
 vars:
@@ -89,7 +90,7 @@ tasks:
       - go test -tags '{{.TAGS}}' -race ./...
 
   fmt:
-    desc: Format the Go code with golangci-lint's formatters (gofmt, see .golangci.yml); lint checks it.
+    desc: Format the Go code with golangci-lint's formatters (gofumpt and goimports, see .golangci.yml); lint checks it.
     cmds:
       - '{{.TOOL}} golangci-lint fmt'
 
@@ -121,6 +122,16 @@ tasks:
     desc: actionlint (kjanat's fork, pinned in tools/go.mod) over the GitHub workflows.
     cmds:
       - '{{.TOOL}} actionlint'
+
+  editorconfig:
+    desc: editorconfig-checker (pinned in tools/go.mod) over every tracked file (.editorconfig).
+    cmds:
+      - git ls-files -z | xargs -0 {{.TOOL}} editorconfig-checker
+
+  shellcheck:
+    desc: shellcheck over the shell scripts (install it from your package manager).
+    cmds:
+      - git ls-files -z '*.sh' | xargs -0 shellcheck --severity=warning
 
   bindings:check:
     desc: Fail when web/src/bindings.ts is out of date.
@@ -163,6 +174,8 @@ tasks:
       - task: commitconfig:check
       - task: lint
       - task: actionlint
+      - task: editorconfig
+      - task: shellcheck
 
   coverage:
     desc: Race-detector tests with coverage, one profile per package for Codecov's flags.

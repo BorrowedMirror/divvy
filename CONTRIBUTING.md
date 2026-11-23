@@ -15,10 +15,14 @@ All platforms need:
 - **Go**, the version in `go.mod`. A newer local Go downloads the pinned `toolchain` on its own.
 - **Node.js 24** and **pnpm** (version pinned by `packageManager` in `web/package.json`;
   `corepack enable` picks it up).
+- For the pre-commit hook: **shellcheck**, **trufflehog** and **zizmor**. The hook checks for
+  them first and stops with a list of what is missing. Cargo is only needed to change
+  `tools/game-extract`.
 
 The other tools (the Wails CLI with its built-in Task runner, golangci-lint, govulncheck,
-go-licenses, and kjanat's actionlint for the GitHub workflows) are pinned in `tools/go.mod` and run through `go tool -modfile=tools/go.mod`; there
-is nothing else to install.
+go-licenses, kjanat's actionlint for the GitHub workflows and editorconfig-checker) are pinned in
+`tools/go.mod` and run through `go tool -modfile=tools/go.mod`; there is nothing else to install.
+CI runs every linter the hook does, plus osv-scanner, in the **Repository checks** job.
 
 ### Linux (Debian/Ubuntu)
 
@@ -53,7 +57,7 @@ install a gcc toolchain such as MinGW-w64 for it.
 
 ```sh
 pnpm --dir web install                 # web deps, commitlint, lefthook
-pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: golangci-lint --fix, biome --write and tsc, actionlint and zizmor (workflows; zizmor only if installed) and rustfmt (tools/game-extract) on commit, commitlint on commit-msg
+pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: a tools check, then actionlint, biome --write, editorconfig-checker, golangci-lint --fix, rustfmt (if Cargo is installed), shellcheck, sort-package-json, trufflehog, tsc and zizmor on commit; commitlint on commit-msg
 pnpm --dir web build                   # the binary embeds web/dist, so build it first
 go run -tags gtk3 ./cmd/divvy            # Linux; drop -tags gtk3 on Windows and macOS
 ```
@@ -81,8 +85,8 @@ task per invocation.
 | `make dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
 | `make run` | builds the frontend and a development binary (`target/go/divvy`) and runs it |
 | `make test` | `go test -race ./...` |
-| `make fmt` | formats the Go code with golangci-lint's formatters (gofmt) |
-| `make check` | go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`, which also checks gofmt); actionlint over the workflows |
+| `make fmt` | formats the Go code with golangci-lint's formatters (gofumpt and goimports) |
+| `make check` | go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`, which also checks formatting and runs gosec); actionlint over the workflows; editorconfig-checker (`.editorconfig`) over every tracked file; shellcheck over the shell scripts |
 | `make vuln` | govulncheck for the same three targets |
 | `make licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
 | `make coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |
@@ -173,7 +177,8 @@ The allowed types and scopes are listed in
 - Body: explain **why**, not what.
 - Keep commits small and atomic; one logical change each.
 
-Before opening a PR, run `make check` and, for web changes, `pnpm --dir web lint`,
+Before opening a PR, run `make check` and, for web changes, `pnpm --dir web lint` (Biome and
+the order of `package.json`; `pnpm --dir web format` fixes both),
 `pnpm --dir web typecheck` and `pnpm --dir web coverage`. If you change the IPC service or its types, run `go generate ./...`
 and commit `web/src/bindings.ts`.
 

@@ -51,6 +51,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -111,6 +115,10 @@ jobs:
     outputs:
       checksums: ${{ steps.checksums.outputs.checksums }}
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -180,6 +188,10 @@ jobs:
       contents: write # attach divvy.intoto.jsonl to the draft release
       id-token: write # sign the provenance with Sigstore (OIDC)
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - name: Write checksums
         env:
           CHECKSUMS: ${{ needs.draft.outputs.checksums }}

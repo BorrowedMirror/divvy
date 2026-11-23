@@ -26,6 +26,10 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
@@ -56,6 +60,10 @@ jobs:
     timeout-minutes: 5
     environment: automation
     steps:
+      - name: Harden the runner (audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
       # GitHub treats a new ref as a workflow change when the tagged commit's .github/workflows
       # differs from master's (once a workflow change merges after the release commit), and refuses
       # it without the workflows permission.
