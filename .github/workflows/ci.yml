@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   check:
-    name: gofmt + vet (linux, windows, darwin) + golangci-lint + generated files + vuln + licences
+    name: gofmt + vet (linux, windows, darwin) + golangci-lint + generated files + vuln + licences + actionlint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -43,7 +43,7 @@ jobs:
       # call and is built without cgo (see WAILS in Taskfile.yml).
       - run: |
           wails=$(CGO_ENABLED=0 go tool -modfile=tools/go.mod -n wails3)
-          for t in fmt vet bindings:check commitconfig:check lint; do "$wails" task "$t"; done
+          for t in fmt vet bindings:check commitconfig:check lint actionlint; do "$wails" task "$t"; done
       # Known vulnerabilities in reachable code, and the dependency licence policy, for all three
       # targets (cmd/release/notices.go holds the allow-list).
       - run: |

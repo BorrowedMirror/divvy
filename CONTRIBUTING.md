@@ -17,7 +17,7 @@ All platforms need:
   `corepack enable` picks it up).
 
 The other tools (the Wails CLI with its built-in Task runner, golangci-lint, govulncheck,
-go-licenses) are pinned in `tools/go.mod` and run through `go tool -modfile=tools/go.mod`; there
+go-licenses, and kjanat's actionlint for the GitHub workflows) are pinned in `tools/go.mod` and run through `go tool -modfile=tools/go.mod`; there
 is nothing else to install.
 
 ### Linux (Debian/Ubuntu)
@@ -53,7 +53,7 @@ install a gcc toolchain such as MinGW-w64 for it.
 
 ```sh
 pnpm --dir web install                 # web deps, commitlint, lefthook
-pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: gofmt, biome and rustfmt (tools/game-extract) on commit, commitlint on commit-msg
+pnpm --dir web exec lefthook install   # hooks from .lefthook.yml: gofmt, biome, actionlint (workflows) and rustfmt (tools/game-extract) on commit, commitlint on commit-msg
 pnpm --dir web build                   # the binary embeds web/dist, so build it first
 go run -tags gtk3 ./cmd/divvy            # Linux; drop -tags gtk3 on Windows and macOS
 ```
@@ -81,7 +81,7 @@ task per invocation.
 | `make dev` | `wails3 dev`: Vite with hot reload in the app's windows, and a Go rebuild and restart on every Go change (`build/config.yml`) |
 | `make run` | builds the frontend and a development binary (`target/go/divvy`) and runs it |
 | `make test` | `go test -race ./...` |
-| `make check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`) |
+| `make check` | gofmt; go vet for the host, `GOOS=windows` and `GOOS=darwin` (`-tags purego`, since cgo needs the macOS SDK); `go test -race`; `bindgen -check`; `commitconfig -check`; golangci-lint for the same three targets (`.golangci.yml`); actionlint over the workflows |
 | `make vuln` | govulncheck for the same three targets |
 | `make licenses:check` | fails when a dependency's licence is outside the policy in `cmd/release/notices.go` |
 | `make coverage` | `go test -race` with one coverage profile per internal package in `target/go/coverage/` |

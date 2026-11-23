@@ -5,7 +5,7 @@
 #   for the CLI build, see WAILS)
 #
 # Everyday work needs no task: `go build`, `go test ./...`, `go vet ./...` and `go generate ./...`
-# work as usual. The tools (wails3, golangci-lint) are pinned in tools/go.mod.
+# work as usual. The tools (wails3, golangci-lint, actionlint) are pinned in tools/go.mod.
 version: "3"
 
 vars:
@@ -119,6 +119,11 @@ tasks:
       - 'GOOS=windows GOARCH=amd64 CGO_ENABLED=0 {{.LINT}} run'
       - 'GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 {{.LINT}} run --build-tags purego'
 
+  actionlint:
+    desc: actionlint (kjanat's fork, pinned in tools/go.mod) over the GitHub workflows.
+    cmds:
+      - '{{.TOOL}} actionlint'
+
   bindings:check:
     desc: Fail when web/src/bindings.ts is out of date.
     cmds:
@@ -160,6 +165,7 @@ tasks:
       - task: bindings:check
       - task: commitconfig:check
       - task: lint
+      - task: actionlint
 
   coverage:
     desc: Race-detector tests with coverage, one profile per package for Codecov's flags.
