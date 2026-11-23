@@ -24,8 +24,21 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Check the Crowdin secrets are set
+        id: secrets
+        env:
+          PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+        run: |
+          if [ -n "$PROJECT_ID" ] && [ -n "$TOKEN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping the Crowdin sync: CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN are not set."
+          fi
       - uses: actions/checkout@v4
+        if: steps.secrets.outputs.configured == 'true'
       - name: Upload sources and download translations
+        if: steps.secrets.outputs.configured == 'true'
         uses: crowdin/github-action@v2
         with:
           config: .crowdin.yml

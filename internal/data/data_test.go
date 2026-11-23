@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json/v2"
 	"errors"
+	"flag"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -375,9 +376,12 @@ func TestBundledIsCached(t *testing.T) {
 	assert.Same(t, first, second)
 }
 
+// updateGolden rewrites testdata/bundled_manifest.json from the bundled data instead of comparing
+// with it; the data-refresh workflow runs it after refreshing, so its PR shows the count changes.
+var updateGolden = flag.Bool("update", false, "rewrite testdata/bundled_manifest.json")
+
 func TestBundledManifestGolden(t *testing.T) {
-	want, err := os.ReadFile(filepath.Join("testdata", "bundled_manifest.json"))
-	require.NoError(t, err)
+	path := filepath.Join("testdata", "bundled_manifest.json")
 	m := bundledData(t).Manifest
 	require.NotNil(t, m.L10n)
 	l10n := *m.L10n // the cached bundle's entry must not change
@@ -387,6 +391,13 @@ func TestBundledManifestGolden(t *testing.T) {
 	for _, e := range []*AssetEntry{&m.Stats, &m.Bases, &m.Uniques, &m.Statics, m.L10n} {
 		e.Sha256 = "[sha256]"
 	}
+	if *updateGolden {
+		b, err := marshalManifest(&m)
+		require.NoError(t, err)
+		require.NoError(t, os.WriteFile(path, b, 0o644))
+	}
+	want, err := os.ReadFile(path)
+	require.NoError(t, err)
 	got, err := json.Marshal(m)
 	require.NoError(t, err)
 	assert.JSONEq(t, string(want), string(got))
