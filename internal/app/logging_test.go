@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log/slog"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,6 +39,9 @@ func TestLoggerWritesToStderrAndTheFileOnceAttached(t *testing.T) {
 	assert.NotContains(t, string(b), "after close")
 	assert.Contains(t, stderr.String(), "before attach")
 	assert.NotContains(t, stderr.String(), "hidden at info")
+	if runtime.GOOS == "windows" {
+		return // no Unix permission bits: Go reports any writable file as 0666
+	}
 	info, err := os.Stat(path)
 	require.NoError(t, err)
 	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())

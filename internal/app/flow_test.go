@@ -2,6 +2,7 @@ package app
 
 import (
 	"os"
+	"runtime"
 	"sync"
 	"testing"
 	"testing/synctest"
@@ -481,6 +482,9 @@ func TestNothingCopiedIsNotRecordedAsAnError(t *testing.T) {
 }
 
 func TestFocusGuardTakesFocusBackFromTheGameAFewTimes(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("the focus guard runs only on Linux/X11 (startFocusGuard)")
+	}
 	item := corpusText(t, "gloves/rare-stocky-mitts")
 	st := newTestState(t)
 	synctest.Test(t, func(t *testing.T) {

@@ -87,7 +87,8 @@ func bindingsTS(t *testing.T) string {
 	_, file, _, _ := runtime.Caller(0)
 	b, err := os.ReadFile(filepath.Join(filepath.Dir(file), "..", "..", "web", "src", "bindings.ts"))
 	require.NoError(t, err)
-	return string(b)
+	// A Windows checkout may have CRLF line endings; the parsers below match "\n".
+	return strings.ReplaceAll(string(b), "\r\n", "\n")
 }
 
 // tsUnion returns the string literals of `export type name = "a" | "b";`.
