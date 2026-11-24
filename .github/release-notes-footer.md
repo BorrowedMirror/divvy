@@ -7,10 +7,9 @@
 | macOS 12+ | [`divvy-${VERSION}-macos-universal.dmg`](https://github.com/${REPOSITORY}/releases/download/${TAG}/divvy-${VERSION}-macos-universal.dmg), Apple silicon and Intel |
 | Linux (x86_64) | [`divvy-${VERSION}-linux-x86_64.AppImage`](https://github.com/${REPOSITORY}/releases/download/${TAG}/divvy-${VERSION}-linux-x86_64.AppImage); make it executable and run it |
 
-Installed copies update themselves; the other `.exe`, `.app.zip` and `update.json` assets are
-what they download. Divvy is not code-signed yet, so Windows SmartScreen and macOS Gatekeeper
-warn on first launch, and macOS asks for the permissions in the
-[README](https://github.com/${REPOSITORY}#macos-12).
+Installed copies update themselves; the other `.exe`, `.app.zip` and `update.json` assets are what they download. Divvy
+is not code-signed yet, so Windows SmartScreen and macOS Gatekeeper warn on first launch, and macOS asks for the
+permissions in the [README](https://github.com/${REPOSITORY}#macos-12).
 
 ### Verify
 

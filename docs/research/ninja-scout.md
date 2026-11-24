@@ -1,8 +1,7 @@
 # Aggregated price APIs: poe.ninja and poe2scout
 
-Captured live on **2026-11-05** with User-Agent
-`divvy-research/0.1 (+https://github.com/BorrowedMirror/divvy)`. Trimmed fixtures live in
-`internal/trade/testdata/fixtures/{ninja,scout}/`.
+Captured live on **2026-11-05** with User-Agent `divvy-research/0.1 (+https://github.com/BorrowedMirror/divvy)`. Trimmed
+fixtures live in `internal/trade/testdata/fixtures/{ninja,scout}/`.
 
 ## poe.ninja (PoE2)
 
@@ -14,11 +13,10 @@ Docs: <https://poe.ninja/docs/api>. Base `https://poe.ninja`.
 | `GET /poe2/api/economy/exchange/current/overview?league={id}&type={T}` | currency-like items; `T` in `Currency Fragments Abyss UncutGems LineageSupportGems Essences SoulCores Idols Runes Ritual Expedition Delirium Breach Verisium` |
 | `GET /poe2/api/economy/stash/current/item/overview?league={id}&type={T}` | uniques; `T` in `UniqueWeapons UniqueArmours UniqueAccessories UniqueFlasks UniqueCharms UniqueJewels UniqueSanctumRelics UniqueTablets PrecursorTablets` |
 
-Policy (from the docs page): no numeric limit published; excessive use gets clients
-blocked; responses are HTTP-cached (~5 min, ETags; we saw
-`cache-control: public, max-age=1800`), data refreshes roughly hourly; descriptive UA with
-contact required; they prefer apps proxy through their own backend. No
-rate-limit headers are sent. **We cache each (league, type) response for 10 minutes.**
+Policy (from the docs page): no numeric limit published; excessive use gets clients blocked; responses are HTTP-cached
+(~5 min, ETags; we saw `cache-control: public, max-age=1800`), data refreshes roughly hourly; descriptive UA with
+contact required; they prefer apps proxy through their own backend. No rate-limit headers are sent. **We cache each
+(league, type) response for 10 minutes.**
 
 ### Exchange overview shape
 ```json
@@ -31,8 +29,8 @@ rate-limit headers are sent. **We cache each (league, type) response for 10 minu
 ```
 - `primaryValue` is in `core.primary` (divine).
 - `core.rates[c]` is how many `c` one `primary` buys (1 divine = 724.8 exalted).
-- `lines[].id` is the trade static id; `items[]` maps it to the display name, which
-  is what we match against the copied item's base type.
+- `lines[].id` is the trade static id; `items[]` maps it to the display name, which is what we match against the copied
+  item's base type.
 
 ### Stash item overview shape
 ```json
@@ -45,11 +43,9 @@ rate-limit headers are sent. **We cache each (league, type) response for 10 minu
 
 ## poe2scout
 
-Docs: Swagger UI at <https://api.poe2scout.com/swagger/index.html>, spec at
-`https://api.poe2scout.com/openapi/v1.json` (`Poe2scout.Api | v1`). Base
-`https://api.poe2scout.com`. **JSON keys are PascalCase.** Responses served
-behind Cloudflare/Caddy, `content-encoding: zstd` when offered (gzip otherwise), no
-rate-limit headers.
+Docs: Swagger UI at <https://api.poe2scout.com/swagger/index.html>, spec at `https://api.poe2scout.com/openapi/v1.json`
+(`Poe2scout.Api | v1`). Base `https://api.poe2scout.com`. **JSON keys are PascalCase.** Responses served behind
+Cloudflare/Caddy, `content-encoding: zstd` when offered (gzip otherwise), no rate-limit headers.
 
 | Endpoint | Notes |
 | --- | --- |
@@ -71,17 +67,16 @@ rate-limit headers.
  "ApiId":"divine","BaseItemTypeId":"Metadata/Items/Currency/CurrencyModValues","CurrentPrice":966.56,"IconUrl":"..."}
 ```
 - `CurrentPrice` is in the league's base currency (`BaseCurrencyApiId`, exalted on this date).
-- Uniques match on `Name` + `Type`; currency/gems on `Text` (uncut gems are
-  `"Uncut Support Gem (Level 2)"`).
+- Uniques match on `Name` + `Type`; currency/gems on `Text` (uncut gems are `"Uncut Support Gem (Level 2)"`).
 - Rates: `DivinePrice` = exalted per divine; `DivinePrice / ChaosDivinePrice` = exalted per chaos.
-- Categories seen: `accessory armour weapon flask map jewel sanctum currency fragments runes talismans essences ultimatum breach expedition ritual delirium waystones vaultkeys abyss uncutgems lineagesupportgems incursion idol verisium vaal`.
+- Categories seen:
+  `accessory armour weapon flask map jewel sanctum currency fragments runes talismans essences ultimatum breach expedition ritual delirium waystones vaultkeys abyss uncutgems lineagesupportgems incursion idol verisium vaal`.
 
 We fetch `/Leagues` + `/Leagues/{league}/Items` once per league and cache both for 10 minutes.
 
 ## Normalisation
 
-Both sources are reduced to `core.ExchangeRates` with the doc's
-semantics (`rates[c]` = value of 1 `c` in `base`):
+Both sources are reduced to `core.ExchangeRates` with the doc's semantics (`rates[c]` = value of 1 `c` in `base`):
 
 - ninja: `base = "divine"`, `rates = {divine: 1, exalted: 1/724.8, chaos: 1/9.36}`
 - scout: `base = "exalted"`, `rates = {exalted: 1, divine: 966.56, chaos: 104.2}`

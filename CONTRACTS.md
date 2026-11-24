@@ -1,13 +1,12 @@
 # Divvy contracts
 
-The interfaces between the parts of Divvy that are not obvious from a single package: the
-package boundaries, the IPC between the Go backend and the web UI, the command line, the test
-hook, the settings and data files, and the generated files. The Go API of each package is
-documented in its own doc comments (`go doc ./internal/<package>`); this page does not repeat
-it.
+The interfaces between the parts of Divvy that are not obvious from a single package: the package boundaries, the IPC
+between the Go backend and the web UI, the command line, the test hook, the settings and data files, and the generated
+files. The Go API of each package is documented in its own doc comments (`go doc ./internal/<package>`); this page does
+not repeat it.
 
-Changing a contract: prefer the smallest compatible change (a new optional field, a new
-command), and update this page in the same pull request.
+Changing a contract: prefer the smallest compatible change (a new optional field, a new command), and update this page
+in the same pull request.
 
 ## Data flow
 
@@ -39,56 +38,50 @@ web edits the FilterSet -> command `query_price` -> trade.PriceSource -> PriceSu
 
 Rules that keep this testable:
 
-- **core is pure.** Anything that touches the network, filesystem or OS lives elsewhere, so the
-  parser and query logic can be tested exhaustively.
-- **Platform behind interfaces.** The app sees only `platform.Platform`; tests use
-  `platformtest` fakes. One global passive input hook per process, and hook callbacks only push into
-  a channel. Missing permissions turn capabilities off; they never panic or spin.
+- **core is pure.** Anything that touches the network, filesystem or OS lives elsewhere, so the parser and query logic
+  can be tested exhaustively.
+- **Platform behind interfaces.** The app sees only `platform.Platform`; tests use `platformtest` fakes. One global
+  passive input hook per process, and hook callbacks only push into a channel. Missing permissions turn capabilities
+  off; they never panic or spin.
 - **Wails stays in the shell.** `app` and everything below it build and test without a window.
-- **Compatible files.** The settings TOML and the JSON sent to the web UI keep the field names
-  and value shapes of the earlier releases, so existing settings load unchanged. `internal/ipc`
-  owns the JSON boundary: lists and maps are never `null` on the wire.
+- **Compatible files.** The settings TOML and the JSON sent to the web UI keep the field names and value shapes of the
+  earlier releases, so existing settings load unchanged. `internal/ipc` owns the JSON boundary: lists and maps are never
+  `null` on the wire.
 
 ## IPC
 
-The bound service is `app.Service` (`internal/app/service.go`): one method per command. The
-web UI calls the commands and listens to the events only through the generated
-`web/src/bindings.ts` (commands are `snake_case`, e.g. `get_settings`, `price_check`,
-`query_price`, `open_trade`); Biome forbids calling the Wails runtime's `Call` directly.
+The bound service is `app.Service` (`internal/app/service.go`): one method per command. The web UI calls the commands
+and listens to the events only through the generated `web/src/bindings.ts` (commands are `snake_case`, e.g.
+`get_settings`, `price_check`, `query_price`, `open_trade`); Biome forbids calling the Wails runtime's `Call` directly.
 
-Events (`internal/ipc/events.go`): `item-copied`, `price-ready`, `price-failed`,
-`settings-changed`, `overlay-state`, `overlay-layout`, `permissions-changed`,
-`update-available`.
+Events (`internal/ipc/events.go`): `item-copied`, `price-ready`, `price-failed`, `settings-changed`, `overlay-state`,
+`overlay-layout`, `permissions-changed`, `update-available`.
 
-Every command that can fail returns `IpcError { kind, message, retry_after_ms }` (`ipc.Error`; the kinds are the `ipc.Kind` constants):
-`parse`, `trade`, `rate_limited` (with `retry_after_ms`), `config`, `platform`, `no_item`,
+Every command that can fail returns `IpcError { kind, message, retry_after_ms }` (`ipc.Error`; the kinds are the
+`ipc.Kind` constants): `parse`, `trade`, `rate_limited` (with `retry_after_ms`), `config`, `platform`, `no_item`,
 `busy`, `update`, `internal`.
 
-`open_trade` opens only `https://` pathofexile.com URLs (or, in test-hook builds, the
-`DIVVY_TRADE_BASE_URL` host). Item lookups open fixed sites only (`app.LookupURL`).
+`open_trade` opens only `https://` pathofexile.com URLs (or, in test-hook builds, the `DIVVY_TRADE_BASE_URL` host). Item
+lookups open fixed sites only (`app.LookupURL`).
 
-Windows: `overlay` (`/#/overlay`; transparent, undecorated, always on top, hidden by default)
-and `settings` (`/#/settings`; also `#/diagnostics` and `#/onboarding`). The web UI picks its
-view from the hash (`web/src/route.ts`).
+Windows: `overlay` (`/#/overlay`; transparent, undecorated, always on top, hidden by default) and `settings`
+(`/#/settings`; also `#/diagnostics` and `#/onboarding`). The web UI picks its view from the hash (`web/src/route.ts`).
 
 ## Command line, single instance and signals
 
-`divvy [--trigger [--pinned]]`. One instance per user on every OS. A second launch focuses the
-settings window; with `--trigger` (`--pinned`) it forwards a price check (pinned price check)
-to the running instance and exits 0, or exits 1 with "no running instance". On Unix the app
-also handles `SIGUSR2` (price check) and `SIGUSR1` (pinned), so `pkill -USR2 divvy` works.
-Price-check triggers from every source are serialised; a trigger during a running copy is
-dropped with an `IpcError` of kind `busy`. Test-hook runs (`DIVVY_TEST_HOOK` set) skip the
-single-instance check.
+`divvy [--trigger [--pinned]]`. One instance per user on every OS. A second launch focuses the settings window; with
+`--trigger` (`--pinned`) it forwards a price check (pinned price check) to the running instance and exits 0, or exits 1
+with "no running instance". On Unix the app also handles `SIGUSR2` (price check) and `SIGUSR1` (pinned), so
+`pkill -USR2 divvy` works. Price-check triggers from every source are serialised; a trigger during a running copy is
+dropped with an `IpcError` of kind `busy`. Test-hook runs (`DIVVY_TEST_HOOK` set) skip the single-instance check.
 
 ## Test hook
 
-Compiled only into builds with `-tags testhook` (the e2e builds) and active only when
-`DIVVY_TEST_HOOK=<port>` is set. It binds `127.0.0.1:<port>` (port 0 picks a free one; when
-`DIVVY_TEST_HOOK_PORT_FILE` names a file, the bound port is written to it) and speaks a line
-protocol: one command per line, exactly one reply line each (`ok`, `err <message>`, or JSON).
-When `DIVVY_TEST_HOOK_TOKEN` is set, the first line of every connection must be `auth <token>`; a
-line that starts with an HTTP method closes the connection.
+Compiled only into builds with `-tags testhook` (the e2e builds) and active only when `DIVVY_TEST_HOOK=<port>` is set.
+It binds `127.0.0.1:<port>` (port 0 picks a free one; when `DIVVY_TEST_HOOK_PORT_FILE` names a file, the bound port is
+written to it) and speaks a line protocol: one command per line, exactly one reply line each (`ok`, `err <message>`, or
+JSON). When `DIVVY_TEST_HOOK_TOKEN` is set, the first line of every connection must be `auth <token>`; a line that
+starts with an HTTP method closes the connection.
 
 | Command | Effect / reply |
 | --- | --- |
@@ -102,18 +95,17 @@ line that starts with an HTTP method closes the connection.
 | `hide` | hide the overlay |
 | `quit` | exit the app |
 
-Test-hook builds also honour `DIVVY_TRADE_BASE_URL`, `DIVVY_NINJA_BASE_URL` and
-`DIVVY_SCOUT_BASE_URL`. Release builds contain none of this.
+Test-hook builds also honour `DIVVY_TRADE_BASE_URL`, `DIVVY_NINJA_BASE_URL` and `DIVVY_SCOUT_BASE_URL`. Release builds
+contain none of this.
 
 ## Fake game
 
-`e2e/cmd/fake-game` opens a window titled `Path of Exile 2` (X11, native Wayland, Windows,
-macOS). On Ctrl+C (or Cmd+C) it puts the normal item text on the clipboard, on Ctrl+Alt+C the
-advanced one. Flags: `--item <file>` / `--corpus-id <id>`, `--advanced-item <file>` /
-`--advanced-corpus-id <id>`, `--corpus-dir` (env `DIVVY_CORPUS_DIR`), `--exit-after <secs>`,
-`--size WxH` (default `1280x720`), `--log-keys`. Stdout: `READY` once the window is mapped,
-`COPIED <n>` per copy, `EXIT` on shutdown, and with `--log-keys` `KEY <chord>` / `PASTE <text>`.
-`FAKE_GAME_DEBUG=1` logs window events to stderr.
+`e2e/cmd/fake-game` opens a window titled `Path of Exile 2` (X11, native Wayland, Windows, macOS). On Ctrl+C (or Cmd+C)
+it puts the normal item text on the clipboard, on Ctrl+Alt+C the advanced one. Flags: `--item <file>` /
+`--corpus-id <id>`, `--advanced-item <file>` / `--advanced-corpus-id <id>`, `--corpus-dir` (env `DIVVY_CORPUS_DIR`),
+`--exit-after <secs>`, `--size WxH` (default `1280x720`), `--log-keys`. Stdout: `READY` once the window is mapped,
+`COPIED <n>` per copy, `EXIT` on shutdown, and with `--log-keys` `KEY <chord>` / `PASTE <text>`. `FAKE_GAME_DEBUG=1`
+logs window events to stderr.
 
 ## Data files
 
@@ -124,8 +116,8 @@ advanced one. Flags: `--item <file>` / `--corpus-id <id>`, `--advanced-item <fil
 | `internal/trade/testdata/fixtures/` | recorded trade2, poe.ninja and poe2scout responses | `go run ./cmd/datarefresh fixtures` (trade2) |
 | `settings.toml` | versioned TOML, migrated on load; unknown newer versions are refused | the app |
 
-`core.Catalog` lookup semantics (stat kinds, generated aliases, the sanctum fallback, magic-name
-matching) are documented on the interface and on `data.GameData`.
+`core.Catalog` lookup semantics (stat kinds, generated aliases, the sanctum fallback, magic-name matching) are
+documented on the interface and on `data.GameData`.
 
 ## Generated files
 
@@ -136,5 +128,5 @@ matching) are documented on the interface and on `data.GameData`.
 
 ## Environment variables
 
-User-facing and development variables are listed in the [README](README.md#environment-variables);
-the e2e ones in `e2e/doc.go`.
+User-facing and development variables are listed in the [README](README.md#environment-variables); the e2e ones in
+`e2e/doc.go`.

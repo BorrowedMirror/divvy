@@ -1,13 +1,12 @@
 # Screenshots
 
-Every view of Divvy, taken from the browser preview (`pnpm --dir web dev` outside the app, which
-fakes the backend with the test fixtures) in Noto Sans, a typical Linux desktop's font. Divvy
-uses each system's own UI font, so Windows and macOS show Segoe UI and San Francisco instead.
+Every view of Divvy, taken from the browser preview (`pnpm --dir web dev` outside the app, which fakes the backend with
+the test fixtures) in Noto Sans, a typical Linux desktop's font. Divvy uses each system's own UI font, so Windows and
+macOS show Segoe UI and San Francisco instead.
 
-Retake them all after a web change with `make screenshots` (it needs Chromium), or only some
-with `make screenshots NAMES="price-check settings-trade"`. `web/scripts/screenshots.mjs` lists
-them; it also makes the README's `readme-*.png`, the same views framed in pairs of one height
-so its table cells match.
+Retake them all after a web change with `make screenshots` (it needs Chromium), or only some with
+`make screenshots NAMES="price-check settings-trade"`. `web/scripts/screenshots.mjs` lists them; it also makes the
+README's `readme-*.png`, the same views framed in pairs of one height so its table cells match.
 
 ## Price check
 
@@ -49,8 +48,8 @@ so its table cells match.
 
 ## Diagnostics
 
-The preview's `?platform=` picks what Diagnostics and Setup describe: `linux` is an X11 desktop
-running through XWayland, `windows` is Windows 10/11, and macOS is the default.
+The preview's `?platform=` picks what Diagnostics and Setup describe: `linux` is an X11 desktop running through
+XWayland, `windows` is Windows 10/11, and macOS is the default.
 
 ### Linux
 

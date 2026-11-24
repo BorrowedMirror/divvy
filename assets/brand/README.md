@@ -1,11 +1,11 @@
 # Brand: Divine Orb
 
-Divvy's icon is the Path of Exile 2 Divine Orb inventory icon, used as it is, the way Awakened
-PoE Trade uses the Awakener's Orb and Exiled Exchange 2 uses the Perfect Jeweller's Orb. The name
-riffs on "div", the game's shorthand for a Divine Orb.
+Divvy's icon is the Path of Exile 2 Divine Orb inventory icon, used as it is, the way Awakened PoE Trade uses the
+Awakener's Orb and Exiled Exchange 2 uses the Perfect Jeweller's Orb. The name riffs on "div", the game's shorthand for
+a Divine Orb.
 
-The artwork belongs to Grinding Gear Games and is not covered by the project's licence. Divvy is
-not affiliated with or endorsed by Grinding Gear Games. A logo of our own may replace it later.
+The artwork belongs to Grinding Gear Games and is not covered by the project's licence. Divvy is not affiliated with or
+endorsed by Grinding Gear Games. A logo of our own may replace it later.
 
 | File | Use |
 | --- | --- |
@@ -17,8 +17,8 @@ not affiliated with or endorsed by Grinding Gear Games. A logo of our own may re
 ./assets/brand/build-icons.sh
 ```
 
-It needs ffmpeg and Go (Wails' icon generator, pinned in `tools/go.mod`, writes the `.ico` and
-`.icns`; it runs with cgo off, so no GTK headers are needed). It writes:
+It needs ffmpeg and Go (Wails' icon generator, pinned in `tools/go.mod`, writes the `.ico` and `.icns`; it runs with cgo
+off, so no GTK headers are needed). It writes:
 
 | File | Size | Notes |
 | --- | --- | --- |

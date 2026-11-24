@@ -24,8 +24,8 @@ Notes on external systems Divvy depends on (captured live; background, not a spe
 
 ## Using Divvy
 
-Install requirements, the Linux session matrix, settings paths and every `DIVVY_*`
-environment variable are in the [README](../README.md).
+Install requirements, the Linux session matrix, settings paths and every `DIVVY_*` environment variable are in the
+[README](../README.md).
 
 ## Policies
 

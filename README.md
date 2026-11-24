@@ -24,12 +24,12 @@
 
 ---
 
-Hover an item in game, press **Ctrl+D**, and Divvy copies the item text, parses it, queries
-the official trade API and shows a price panel beside your cursor. **Ctrl+Alt+D** opens a pinned
-panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can be rebound.
+Hover an item in game, press **Ctrl+D**, and Divvy copies the item text, parses it, queries the official trade API and
+shows a price panel beside your cursor. **Ctrl+Alt+D** opens a pinned panel that does not auto-hide; **Ctrl+Space**
+opens the settings. All three can be rebound.
 
-> Divvy only reads what the game puts on the clipboard after the single, user-triggered copy
-> keystroke. It never reads game memory, never automates gameplay and never uses OCR.
+> Divvy only reads what the game puts on the clipboard after the single, user-triggered copy keystroke. It never reads
+> game memory, never automates gameplay and never uses OCR.
 
 ## Screenshots
 
@@ -65,32 +65,31 @@ panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can 
   </tr>
 </table>
 
-Every other view, including diagnostics and setup on Windows, macOS and Linux, is in [docs/screenshots.md](docs/screenshots.md).
+Every other view, including diagnostics and setup on Windows, macOS and Linux, is in
+[docs/screenshots.md](docs/screenshots.md).
 
 ## Features
 
-- Every PoE2 item class: currency, gems, uniques, rares, magic, waystones, tablets, jewels,
-  flasks and charms.
+- Every PoE2 item class: currency, gems, uniques, rares, magic, waystones, tablets, jewels, flasks and charms.
 - Editable filters: per-stat min/max, global ±% widening, online-only, league; "open on trade".
 - Price sources: official trade2 API (default), poe.ninja, poe2scout.
 - Header-driven rate limiting that respects GGG's `X-Rate-Limit-*` and `Retry-After` headers.
 - Settings window, tray icon, hotkey rebinding, league auto-detect, diagnostics page.
-- Hotkeys are only taken while the game window has focus, so the same keys keep working in
-  other apps (Wayland-native excepted: the portal holds them all the time).
+- Hotkeys are only taken while the game window has focus, so the same keys keep working in other apps (Wayland-native
+  excepted: the portal holds them all the time).
 
 ## Requirements
 
-The game must run in **windowed** or **borderless windowed** mode. Exclusive fullscreen hides
-overlays on Windows and Linux.
+The game must run in **windowed** or **borderless windowed** mode. Exclusive fullscreen hides overlays on Windows and
+Linux.
 
 ### Windows 10/11
-Run the per-user setup `.exe` (no administrator rights needed). It installs WebView2 when it is
-missing; Windows 11 already has it. Nothing else is required.
+Run the per-user setup `.exe` (no administrator rights needed). It installs WebView2 when it is missing; Windows 11
+already has it. Nothing else is required.
 
 ### macOS 12+
-Install the DMG (universal binary). macOS gates the overlay behind privacy permissions, granted
-in System Settings → Privacy & Security to the Divvy app (in development: to the terminal
-that runs the binary):
+Install the DMG (universal binary). macOS gates the overlay behind privacy permissions, granted in System Settings →
+Privacy & Security to the Divvy app (in development: to the terminal that runs the binary):
 
 | Permission | Why | Without it |
 | --- | --- | --- |
@@ -98,22 +97,21 @@ that runs the binary):
 | Screen & System Audio Recording (recommended) | read other apps' window titles (macOS hides them otherwise); Divvy never captures the screen | the game window is matched by process name instead of title |
 | Input Monitoring (optional) | passive keyboard hook (Esc to close) | no Esc-to-close (Accessibility alone also enables the hook) |
 
-Global hotkeys and the clipboard need no permission. Without a permission Divvy keeps
-running with that capability disabled, and **Diagnostics** (tray menu) lists what is missing.
-It never crashes or busy-loops waiting for permissions. Screen Recording and Input Monitoring
-usually take effect only after a relaunch. Details: [docs/research/macos.md](docs/research/macos.md).
+Global hotkeys and the clipboard need no permission. Without a permission Divvy keeps running with that capability
+disabled, and **Diagnostics** (tray menu) lists what is missing. It never crashes or busy-loops waiting for permissions.
+Screen Recording and Input Monitoring usually take effect only after a relaunch. Details:
+[docs/research/macos.md](docs/research/macos.md).
 
-The native macOS client copies items with **Cmd+C**, which Divvy sends by default; for the
-Windows client under CrossOver/Wine set `DIVVY_MACOS_COPY_MODIFIER=ctrl`.
+The native macOS client copies items with **Cmd+C**, which Divvy sends by default; for the Windows client under
+CrossOver/Wine set `DIVVY_MACOS_COPY_MODIFIER=ctrl`.
 
 ### Linux
 An x86_64 AppImage is provided.
 
-Divvy picks a backend at start-up: the **Settings → Platform** override, else
-`DIVVY_BACKEND`, else auto-detection. Auto-detection chooses X11 whenever `DISPLAY` is set
-(XWayland running, GNOME included), Wayland-native when only `WAYLAND_DISPLAY` /
-`XDG_SESSION_TYPE=wayland` is present, and X11 otherwise. `GDK_BACKEND` is set to match before
-GTK starts.
+Divvy picks a backend at start-up: the **Settings → Platform** override, else `DIVVY_BACKEND`, else auto-detection.
+Auto-detection chooses X11 whenever `DISPLAY` is set (XWayland running, GNOME included), Wayland-native when only
+`WAYLAND_DISPLAY` / `XDG_SESSION_TYPE=wayland` is present, and X11 otherwise. `GDK_BACKEND` is set to match before GTK
+starts.
 
 | Session | Support |
 | --- | --- |
@@ -122,10 +120,9 @@ GTK starts.
 | **GNOME** (Wayland or X11) | **X11/XWayland by default.** GNOME does not implement `wlr-layer-shell`, so a forced Wayland-native overlay cannot stay above the game. |
 | **Wayland-native** (no XWayland, or `DIVVY_BACKEND=wayland`) | Degraded: overlay anchored to the output via layer-shell (no game-window tracking); hotkeys via the XDG GlobalShortcuts portal; keystroke injection via the virtual-keyboard protocol (wlroots compositors) or `ydotool` (needs `ydotoold`); no passive input hook. |
 
-**Compositor shortcut fallback.** When global hotkeys are unavailable, bind a compositor
-shortcut to `divvy --trigger` (price check) or `divvy --trigger --pinned` (pinned
-panel). The command hands the request to the already running instance (Divvy allows only
-one instance per user) and exits; `pkill -USR2 divvy` (price check) and `pkill -USR1
+**Compositor shortcut fallback.** When global hotkeys are unavailable, bind a compositor shortcut to `divvy --trigger`
+(price check) or `divvy --trigger --pinned` (pinned panel). The command hands the request to the already running
+instance (Divvy allows only one instance per user) and exits; `pkill -USR2 divvy` (price check) and `pkill -USR1
 divvy` (pinned) work too.
 
 ## Configuration
@@ -138,11 +135,10 @@ Settings live in `settings.toml` in the per-OS config directory:
 | macOS | `~/Library/Application Support/app.divvy/settings.toml` | `~/Library/Caches/app.divvy` | `~/Library/Application Support/app.divvy/logs` |
 | Linux | `$XDG_CONFIG_HOME/divvy/settings.toml` (`~/.config/divvy`) | `$XDG_CACHE_HOME/divvy` (`~/.cache/divvy`) | `$XDG_STATE_HOME/divvy/logs` (`~/.local/state/divvy/logs`) |
 
-The log file is `divvy.log` (rewritten on every start). The Diagnostics page shows the
-settings and log paths.
+The log file is `divvy.log` (rewritten on every start). The Diagnostics page shows the settings and log paths.
 
-GGG asks API clients to identify themselves; add your contact e-mail in
-**Settings → Trade → Contact** and it is appended to the User-Agent.
+GGG asks API clients to identify themselves; add your contact e-mail in **Settings → Trade → Contact** and it is
+appended to the User-Agent.
 
 ### Environment variables
 
@@ -181,14 +177,12 @@ make dev                                # app with hot reload
 make check                              # what CI checks on the Go side
 ```
 
-See [docs/architecture.md](docs/architecture.md) for an overview,
-[CONTRACTS.md](CONTRACTS.md) for the interfaces between the parts,
-[CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
+See [docs/architecture.md](docs/architecture.md) for an overview, [CONTRACTS.md](CONTRACTS.md) for the interfaces
+between the parts, [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
 [docs/contributing/commit-message.md](docs/contributing/commit-message.md) for commit rules.
 
 ## Licence
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
-Path of Exile is a trademark of Grinding Gear Games; Divvy is not affiliated with or endorsed
-by Grinding Gear Games. The Divine Orb artwork used as Divvy's icon belongs to Grinding Gear
-Games and is not covered by this licence.
+Licensed under the [Apache License, Version 2.0](LICENSE). Path of Exile is a trademark of Grinding Gear Games; Divvy is
+not affiliated with or endorsed by Grinding Gear Games. The Divine Orb artwork used as Divvy's icon belongs to Grinding
+Gear Games and is not covered by this licence.

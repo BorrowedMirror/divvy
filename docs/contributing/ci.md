@@ -13,10 +13,9 @@
 
 ## Conventions
 
-- Actions are pinned to commit SHAs; Renovate (`.renovaterc.json`) proposes bumps as
-  `build(deps): ...` after a 3-day minimum release age.
-- Workflows default to `permissions: contents: read`; jobs that write (PRs, releases) widen
-  permissions locally.
+- Actions are pinned to commit SHAs; Renovate (`.renovaterc.json`) proposes bumps as `build(deps): ...` after a 3-day
+  minimum release age.
+- Workflows default to `permissions: contents: read`; jobs that write (PRs, releases) widen permissions locally.
 - `concurrency` cancels superseded PR runs; scheduled and release runs are never cancelled.
 - Linux system packages come from one composite action, `.github/actions/linux-deps`.
 - Every Go job builds `web/dist` first, because the binary embeds it.
@@ -33,5 +32,4 @@ pnpm --dir web lint && pnpm --dir web typecheck && pnpm --dir web coverage
 Lint workflows with [actionlint](https://github.com/rhysd/actionlint):
 `go run github.com/rhysd/actionlint/cmd/actionlint@latest`.
 
-The e2e suites can be run locally too; see
-[CONTRIBUTING.md](../../CONTRIBUTING.md#end-to-end-tests).
+The e2e suites can be run locally too; see [CONTRIBUTING.md](../../CONTRIBUTING.md#end-to-end-tests).

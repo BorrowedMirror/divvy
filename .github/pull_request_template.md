@@ -8,7 +8,8 @@
 
 ## Checklist
 
-- [ ] PR title and commits follow [the commit conventions](../blob/master/docs/contributing/commit-message.md) (`<type>(<scope>): <summary>`)
+- [ ] PR title and commits follow [the commit conventions](../blob/master/docs/contributing/commit-message.md)
+  (`<type>(<scope>): <summary>`)
 - [ ] `make check` passes (gofmt, vet, tests, generated files, golangci-lint) and `pnpm --dir web lint` is clean
 - [ ] Tests added or updated
 - [ ] `go generate ./...` run if IPC types or `.commit-config.toml` changed (`web/src/bindings.ts` is committed)

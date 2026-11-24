@@ -1,10 +1,9 @@
 # Architecture
 
-Divvy reads the item text Path of Exile 2 puts on the clipboard, parses it, builds a trade
-query and shows prices in a transparent always-on-top overlay. It never reads game memory or
-automates gameplay. It is a single Go binary built on [Wails v3](https://v3.wails.io), with the
-React UI embedded. The interfaces between the parts are in [`CONTRACTS.md`](../CONTRACTS.md);
-this page is the overview.
+Divvy reads the item text Path of Exile 2 puts on the clipboard, parses it, builds a trade query and shows prices in a
+transparent always-on-top overlay. It never reads game memory or automates gameplay. It is a single Go binary built on
+[Wails v3](https://v3.wails.io), with the React UI embedded. The interfaces between the parts are in
+[`CONTRACTS.md`](../CONTRACTS.md); this page is the overview.
 
 ## Data flow
 
@@ -41,19 +40,16 @@ web edits FilterSet -> command `query_price` -> trade.PriceSource -> event `pric
 
 ## Boundaries
 
-- **core is pure.** Everything that touches the network, filesystem or OS lives in another
-  package, which keeps the parser and query logic exhaustively unit-testable (90% line coverage
-  target).
-- **Platform behind interfaces.** The app only sees `platform.Platform`; tests use the
-  `platformtest` fakes. Each backend has at most one passive input hook, and its callbacks only push
-  into a channel.
-- **Wails stays in the shell.** `internal/app` and the packages below it do not import Wails,
-  so they are tested without a window.
-- **Typed IPC.** Commands and events are declared in Go and exported to TypeScript by
-  `cmd/bindgen`. The web never calls the Wails runtime's `Call` directly (enforced by Biome), and
-  CI fails if `web/src/bindings.ts` is stale.
-- **Respectful API use.** The trade client honours the server's rate-limit headers and
-  `Retry-After`, caches responses, and sends a descriptive User-Agent.
+- **core is pure.** Everything that touches the network, filesystem or OS lives in another package, which keeps the
+  parser and query logic exhaustively unit-testable (90% line coverage target).
+- **Platform behind interfaces.** The app only sees `platform.Platform`; tests use the `platformtest` fakes. Each
+  backend has at most one passive input hook, and its callbacks only push into a channel.
+- **Wails stays in the shell.** `internal/app` and the packages below it do not import Wails, so they are tested without
+  a window.
+- **Typed IPC.** Commands and events are declared in Go and exported to TypeScript by `cmd/bindgen`. The web never calls
+  the Wails runtime's `Call` directly (enforced by Biome), and CI fails if `web/src/bindings.ts` is stale.
+- **Respectful API use.** The trade client honours the server's rate-limit headers and `Retry-After`, caches responses,
+  and sends a descriptive User-Agent.
 
 ## Testing layers
 
