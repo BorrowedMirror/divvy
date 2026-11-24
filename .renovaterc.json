@@ -24,6 +24,15 @@
       "datasourceTemplate": "pypi"
     },
     {
+      "description": "Node.js major in workflows (node-version: 26.x)",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["node-version: (?<currentValue>\\d+)\\.x"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version",
+      "versioningTemplate": "node"
+    },
+    {
       "description": "Images CI runs with docker run, pinned as <image>:<version>@sha256:<digest>",
       "customType": "regex",
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],

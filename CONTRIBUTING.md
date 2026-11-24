@@ -13,7 +13,7 @@ through [SECURITY.md](SECURITY.md), not public issues.
 All platforms need:
 
 - **Go**, the version in `go.mod`. A newer local Go downloads the pinned `toolchain` on its own.
-- **Node.js 24** and **pnpm** (version pinned by `packageManager` in `web/package.json`;
+- **Node.js 26** and **pnpm** (version pinned by `packageManager` in `web/package.json`;
   `corepack enable` picks it up).
 - For the pre-commit hook: **shellcheck**, **trufflehog** and **zizmor**. The hook checks for
   them first and stops with a list of what is missing. Cargo is only needed to change
