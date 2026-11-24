@@ -16,6 +16,9 @@
   "internalChecksFilter": "strict",
   "rangeStrategy": "bump",
   "rebaseWhen": "conflicted",
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 6am on monday"]
