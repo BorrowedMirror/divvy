@@ -110,6 +110,25 @@ export function installDevMock(route: string, platform: PreviewPlatform = previe
         return system.permissions;
       case "query_price":
         return new Promise((r) => setTimeout(() => r(priceSummary()), 400));
+      // The bundled data's entries (internal/data statics) for the currencies the fixtures price in.
+      case "currency_icons":
+        return [
+          {
+            id: "divine",
+            name: "Divine Orb",
+            icon: "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lNb2RWYWx1ZXMiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/2986e220b3/CurrencyModValues.png",
+          },
+          {
+            id: "exalted",
+            name: "Exalted Orb",
+            icon: "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lBZGRNb2RUb1JhcmUiLCJzY2FsZSI6MSwicmVhbG0iOiJwb2UyIn1d/ad7c366789/CurrencyAddModToRare.png",
+          },
+          {
+            id: "chaos",
+            name: "Chaos Orb",
+            icon: "https://web.poecdn.com/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvQ3VycmVuY3lSZXJvbGxSYXJlIiwic2NhbGUiOjEsInJlYWxtIjoicG9lMiJ9XQ/c0ca392a78/CurrencyRerollRare.png",
+          },
+        ];
       // A sample of the real catalogue (internal/app's waystoneCatalog over the bundled data), short
       // enough that the list doesn't scroll.
       case "waystone_mods":

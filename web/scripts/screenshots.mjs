@@ -218,6 +218,12 @@ async function main() {
       if (s.wait) await waitFor(s.wait, s.name);
       await sleep(600); // let queries settle and transitions finish
       await evaluate("document.fonts.ready.then(() => true)");
+      // Images (the currency icons come from GGG's CDN, as in the app) must have loaded, or the
+      // view would show its text fallback.
+      const broken = await evaluate(
+        `Promise.all([...document.images].map((i) => i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))).then(() => [...document.images].filter((i) => !i.naturalWidth).map((i) => i.src))`,
+      );
+      if (broken.length) throw new Error(`${s.name}: images did not load: ${broken.join(", ")}`);
       return evaluate(
         `(() => { const b = document.querySelector(${JSON.stringify(s.clip)}).getBoundingClientRect(); return [b.x, b.y, b.width, b.height]; })()`,
       );

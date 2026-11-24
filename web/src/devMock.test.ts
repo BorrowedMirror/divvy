@@ -22,6 +22,8 @@ test("dev mock answers every command from fixtures", async () => {
   expect((await commands.recheckPermissions()).platform).toBe("macos");
   expect((await commands.getPermissions()).missing).toHaveLength(3);
   expect(await commands.getOverlayLayout()).toEqual({ cover: false, x: 0, y: 0 });
+  const icons = await commands.currencyIcons();
+  expect(icons.status === "ok" && icons.data.map((i) => i.id)).toEqual(["divine", "exalted", "chaos"]);
   expect(await commands.getOverlaySnapshot()).toBeNull();
 });
 
