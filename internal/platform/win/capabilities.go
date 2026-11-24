@@ -13,7 +13,7 @@ func capabilities() platform.Capabilities {
 		PassiveHook:         true,
 		KeystrokeInjection:  true,
 		Notes: []string{
-			"If Path of Exile 2 runs as administrator, divvy must too: Windows (UIPI) blocks " +
+			"If Path of Exile 2 runs as administrator, Divvy must too: Windows (UIPI) blocks " +
 				"injected Ctrl+C into elevated windows.",
 			"Use windowed or borderless fullscreen; exclusive fullscreen hides the overlay.",
 		},
