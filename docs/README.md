@@ -1,6 +1,7 @@
 # Divvy documentation
 
 - [Architecture](architecture.md): components, data flow and boundaries.
+- [Screenshots](screenshots.md): every view, retaken with `make screenshots`.
 - [Contracts](../CONTRACTS.md): package boundaries, IPC, the command line, the test hook and the data files.
 
 ## Contributing

@@ -49,6 +49,8 @@ panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can 
   </tr>
 </table>
 
+Every other view, from diagnostics to the update prompt, is in [docs/screenshots.md](docs/screenshots.md).
+
 ## Features
 
 - Every PoE2 item class: currency, gems, uniques, rares, magic, waystones, tablets, jewels,
