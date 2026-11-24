@@ -57,7 +57,7 @@ jobs:
           permission-pull-requests: write
       - name: Upload sources and download translations
         if: steps.secrets.outputs.configured == 'true'
-        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
+        uses: crowdin/github-action@d651c77756acbe11a31d77a6fb79d8a239e1e05a # v3.6.0
         with:
           config: .crowdin.yml
           upload_sources: true

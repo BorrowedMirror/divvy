@@ -1,15 +1,21 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommits", ":dependencyDashboard", "helpers:pinGitHubActionDigests"],
-  "enabledManagers": ["gomod", "cargo", "npm", "github-actions", "custom.regex"],
-  "semanticCommits": "enabled",
-  "semanticCommitType": "build",
-  "semanticCommitScope": "deps",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(build)",
+    ":semanticCommitScope(deps)",
+    ":prHourlyLimitNone",
+    ":separatePatchReleases",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "ignorePresets": [":semanticPrefixFixDepsChoreOthers"],
+  "enabledManagers": ["cargo", "custom.regex", "github-actions", "gomod", "npm", "rust-toolchain"],
   "commitMessageLowerCase": "auto",
   "minimumReleaseAge": "3 days",
   "internalChecksFilter": "strict",
-  "prConcurrentLimit": 10,
   "rangeStrategy": "bump",
+  "rebaseWhen": "conflicted",
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 6am on monday"]
@@ -40,32 +46,6 @@
         "(?<depName>(?:[a-z0-9.-]+/)+[a-z0-9._-]+):(?<currentValue>v?\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
-    }
-  ],
-  "packageRules": [
-    {
-      "description": "Actions are pinned to commit digests (with a version comment); batch their bumps.",
-      "matchManagers": ["github-actions"],
-      "groupName": "github actions",
-      "matchUpdateTypes": ["minor", "patch", "digest"]
-    },
-    {
-      "description": "Lint/test tooling minor+patch in one PR.",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "web dev tooling"
-    },
-    {
-      "description": "Wails v3 moves fast; its Go module and the wails3 tool (tools/go.mod) move together.",
-      "matchPackageNames": ["github.com/wailsapp/wails/v3", "github.com/wailsapp/wails/v3/**"],
-      "groupName": "wails"
-    },
-    {
-      "description": "The pinned Go tools (tools/go.mod) minor+patch in one PR.",
-      "matchManagers": ["gomod"],
-      "matchFileNames": ["tools/go.mod"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "go tools"
     }
   ]
 }
