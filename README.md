@@ -1,8 +1,28 @@
-<p align="center"><img src="assets/brand/divine-orb.png" width="108" height="108" alt="Divvy logo: the Path of Exile 2 Divine Orb"></p>
+<p align="center">
+  <img src="assets/brand/divine-orb.png" width="108" height="108" alt="Divvy logo: the Path of Exile 2 Divine Orb">
+</p>
 
-# Divvy
+<h1 align="center">Divvy</h1>
 
-An open-source price-check overlay for **Path of Exile 2**. Go + [Wails](https://v3.wails.io) + React.
+<p align="center">An open-source price-check overlay for <b>Path of Exile 2</b>. Go + <a href="https://v3.wails.io">Wails</a> + React.</p>
+
+<p align="center">
+  <a href="https://github.com/BorrowedMirror/divvy/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fgithub%2Factions%2Fworkflow%2Fstatus%2FBorrowedMirror%2Fdivvy%2Fci.yml.json%3Fbranch%3Dmaster%26cacheSeconds%3D300&query=%24.message&label=build&logo=githubactions&logoColor=%232088ff&mode=dark&size=sm&variant=outline"><img alt="Build" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fgithub%2Factions%2Fworkflow%2Fstatus%2FBorrowedMirror%2Fdivvy%2Fci.yml.json%3Fbranch%3Dmaster%26cacheSeconds%3D300&query=%24.message&label=build&logo=githubactions&logoColor=%232088ff&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://codecov.io/gh/BorrowedMirror/divvy"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fcodecov%2Fc%2Fgithub%2FBorrowedMirror%2Fdivvy.json%3FcacheSeconds%3D300&query=%24.message&label=coverage&logo=codecov&logoColor=%23f01f7a&mode=dark&size=sm&variant=outline"><img alt="Coverage" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fcodecov%2Fc%2Fgithub%2FBorrowedMirror%2Fdivvy.json%3FcacheSeconds%3D300&query=%24.message&label=coverage&logo=codecov&logoColor=%23f01f7a&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="docs/contributing/releasing.md#provenance"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/slsa-level_3.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY2NzQwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTIwIDEzYzAgNS0zLjUgNy41LTcuNjYgOC45NWExIDEgMCAwIDEtLjY3LS4wMUM3LjUgMjAuNSA0IDE4IDQgMTNWNmExIDEgMCAwIDEgMS0xYzIgMCA0LjUtMS4yIDYuMjQtMi43MmExLjE3IDEuMTcgMCAwIDEgMS41MiAwQzE0LjUxIDMuODEgMTcgNSAxOSA1YTEgMSAwIDAgMSAxIDF6Ii8%2BPHBhdGggZD0ibTkgMTIgMiAyIDQtNCIvPjwvc3ZnPg%3D%3D&mode=dark&size=sm&variant=outline"><img alt="SLSA Build Level 3" src="https://shieldcn.dev/badge/slsa-level_3.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY2NzQwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTIwIDEzYzAgNS0zLjUgNy41LTcuNjYgOC45NWExIDEgMCAwIDEtLjY3LS4wMUM3LjUgMjAuNSA0IDE4IDQgMTNWNmExIDEgMCAwIDEgMS0xYzIgMCA0LjUtMS4yIDYuMjQtMi43MmExLjE3IDEuMTcgMCAwIDEgMS41MiAwQzE0LjUxIDMuODEgMTcgNSAxOSA1YTEgMSAwIDAgMSAxIDF6Ii8%2BPHBhdGggZD0ibTkgMTIgMiAyIDQtNCIvPjwvc3ZnPg%3D%3D&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/BorrowedMirror/divvy/license.svg?label=licence&logo=apache&logoColor=%23d22128&mode=dark&size=sm&variant=outline"><img alt="Licence" src="https://shieldcn.dev/github/BorrowedMirror/divvy/license.svg?label=licence&logo=apache&logoColor=%23d22128&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://www.conventionalcommits.org/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fbadge%2Fcommits-conventional-blue.json&query=%24.message&label=commits&logo=conventionalcommits&logoColor=%23fe5196&mode=dark&size=sm&variant=outline"><img alt="Conventional Commits" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fbadge%2Fcommits-conventional-blue.json&query=%24.message&label=commits&logo=conventionalcommits&logoColor=%23fe5196&mode=light&size=sm&variant=outline"></picture></a>
+</p>
+<p align="center">
+  <a href="https://pathofexile2.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/path_of_exile-2.svg?logo=ri%3AGiCrossedSwords&logoColor=%23af6025&mode=dark&size=sm&variant=outline"><img alt="Path of Exile 2" src="https://shieldcn.dev/badge/path_of_exile-2.svg?logo=ri%3AGiCrossedSwords&logoColor=%23af6025&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="#windows-1011"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/windows-10%20%7C%2011.svg?logo=ri%3ARiWindowsFill&logoColor=%230078d4&mode=dark&size=sm&variant=outline"><img alt="Windows 10 or 11" src="https://shieldcn.dev/badge/windows-10%20%7C%2011.svg?logo=ri%3ARiWindowsFill&logoColor=%230078d4&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="#macos-12"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/macos-12%2B.svg?logo=apple&logoColor=%23ffffff&mode=dark&size=sm&variant=outline"><img alt="macOS 12 or later" src="https://shieldcn.dev/badge/macos-12%2B.svg?logo=apple&logoColor=%23000000&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="#linux"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/linux-x11%20%7C%20wayland.svg?logo=linux&logoColor=%23fcc624&mode=dark&size=sm&variant=outline"><img alt="Linux: X11 and Wayland" src="https://shieldcn.dev/badge/linux-x11%20%7C%20wayland.svg?logo=linux&logoColor=%23fcc624&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="go.mod"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fgithub%2Fgo-mod%2Fgo-version%2FBorrowedMirror%2Fdivvy.json%3FcacheSeconds%3D300&query=%24.message&label=go&logo=go&logoColor=%2300add8&mode=dark&size=sm&variant=outline"><img alt="Go version" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fgithub%2Fgo-mod%2Fgo-version%2FBorrowedMirror%2Fdivvy.json%3FcacheSeconds%3D300&query=%24.message&label=go&logo=go&logoColor=%2300add8&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://v3.wails.io"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/wails-v3.svg?logo=wails&logoColor=%23df0000&mode=dark&size=sm&variant=outline"><img alt="Wails v3" src="https://shieldcn.dev/badge/wails-v3.svg?logo=wails&logoColor=%23df0000&mode=light&size=sm&variant=outline"></picture></a>
+</p>
+
+---
 
 Hover an item in game, press **Ctrl+D**, and Divvy copies the item text, parses it, queries
 the official trade API and shows a price panel beside your cursor. **Ctrl+Alt+D** opens a pinned
@@ -10,6 +30,24 @@ panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can 
 
 > Divvy only reads what the game puts on the clipboard after the single, user-triggered copy
 > keystroke. It never reads game memory, never automates gameplay and never uses OCR.
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/price-check.png" width="420" alt="The price check panel for a rare helmet: the item's stats and properties as editable trade filters, then the minimum, median and maximum prices and the cheapest listings">
+</p>
+<p align="center"><sub>A price check: the item's stats become editable trade filters, with the prices and the cheapest listings below.</sub></p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/settings-hotkeys.png" alt="The Hotkeys tab of the settings window: price check Ctrl+D, pinned price check Ctrl+Alt+D, open settings Ctrl+Space and open on trade site, each rebindable"></td>
+    <td width="50%"><img src="docs/images/settings-trade.png" alt="The Trade tab of the settings window: price source, league detection, default sellers, stat range widening, listings to fetch and currency comparison"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Every hotkey can be rebound.</sub></td>
+    <td align="center"><sub>Trade settings: price source, league, sellers and filters.</sub></td>
+  </tr>
+</table>
 
 ## Features
 
