@@ -94,6 +94,7 @@ task per invocation.
 | `make package:windows` | cross-compiles `divvy.exe` (no cgo) with its icon, manifest and version info, then builds the per-user NSIS installer `target/go/divvy-<version>-windows-x64-setup.exe` and the update exe |
 | `make package:linux` | builds `target/go/divvy-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
 | `make package:macos` | universal `Divvy.app`, `target/go/divvy-<version>-macos-universal.dmg` and the update zip; macOS only |
+| `make screenshots` | retakes every screenshot in [docs/screenshots.md](docs/screenshots.md) from the browser preview after a web change (needs Chromium; `NAMES="price-check settings-trade"` for only some) |
 | `make notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
 | `make release patch` | commits `release: vX.Y.Z` on a new `release/vX.Y.Z` branch with the next version (`patch`, `minor`, `major`, or `BUMP=X.Y.Z[-PRE]`) stamped into `VERSION` and `web/package.json` (see [releasing](docs/contributing/releasing.md)) |
 | `make updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |

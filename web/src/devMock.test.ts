@@ -25,6 +25,14 @@ test("dev mock answers every command from fixtures", async () => {
   expect(await commands.getOverlaySnapshot()).toBeNull();
 });
 
+test("dev mock lets scripts send events", async () => {
+  installDevMock("notice");
+  const seen = vi.fn();
+  await events.readyNotice.listen((e) => seen(e.payload));
+  await window.divvyPreview?.emit("ready-notice", { duration_ms: 1000 });
+  expect(seen).toHaveBeenCalledExactlyOnceWith({ duration_ms: 1000 });
+});
+
 test("dev mock hands the overlay its item when it catches up", async () => {
   installDevMock("overlay");
   expect(await commands.getOverlaySnapshot()).toEqual(itemCopied());

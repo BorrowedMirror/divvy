@@ -211,6 +211,11 @@ tasks:
     cmds:
       - go run ./cmd/release bump '{{.BUMP}}'
 
+  screenshots:
+    desc: 'Retake the docs screenshots (docs/images) from the browser preview; needs Chromium. NAMES="price-check settings-trade" retakes only those.'
+    cmds:
+      - node web/scripts/screenshots.mjs {{.NAMES}}
+
   updater:keygen:
     desc: Print a new updater key pair for the release environment.
     cmds:
