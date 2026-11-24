@@ -8,6 +8,8 @@ import { diagnostics, itemCopied, leagues, priceSummary, settings } from "@test/
  */
 export function installDevMock(route: string): void {
   let current = settings();
+  // The fixtures rebind this for the tests; show the default the app ships with.
+  current.hotkeys.open_settings = { modifiers: ["ctrl"], key: "Space" };
   const { transport, emit } = mockTransport((cmd, args) => {
     const a = args as Record<string, unknown> | undefined;
     switch (cmd) {
@@ -34,6 +36,12 @@ export function installDevMock(route: string): void {
         };
       case "query_price":
         return new Promise((r) => setTimeout(() => r(priceSummary()), 400));
+      // A plain window: the card where the backend would show it, not over a covering backdrop.
+      case "get_overlay_layout":
+        return { cover: false, x: 0, y: 0 };
+      // The overlay catches up from this once it listens, so a slow first load still shows the item.
+      case "get_overlay_snapshot":
+        return route === "overlay" ? itemCopied() : null;
       default:
         return null;
     }
