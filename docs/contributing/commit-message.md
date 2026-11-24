@@ -19,6 +19,7 @@ Reverts: `revert: <original header>` with body `This reverts commit <SHA>.`
 | `perf` | A performance improvement |
 | `refactor` | A change that neither fixes a bug nor adds a feature |
 | `release` | Release commits |
+| `revert` | Reverts an earlier change; the body names the commit it reverts |
 | `test` | Adding or fixing tests |
 
 ## Scopes

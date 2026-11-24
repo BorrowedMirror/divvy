@@ -162,7 +162,20 @@ jobs:
           echo "checksums=$(base64 -w0 SHA256SUMS.txt)" >> "$GITHUB_OUTPUT"
           mv SHA256SUMS.txt dist/
       # GitHub writes the notes from the merged pull requests since the previous release,
-      # grouped by their labels (.github/release.yml).
+      # grouped by their labels (.github/release.yml); the install and verify footer
+      # (.github/release-notes-footer.md) follows them.
+      - name: Release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh api "repos/$REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq .body > "$RUNNER_TEMP/notes.md"
+          # The names, not their values: envsubst replaces only these in the footer.
+          # shellcheck disable=SC2016
+          envsubst '${VERSION} ${TAG} ${REPOSITORY}' < .github/release-notes-footer.md >> "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
       - name: Create the draft release with the assets
         env:
           GH_TOKEN: ${{ github.token }}
@@ -173,7 +186,7 @@ jobs:
           prerelease=()
           case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
           gh release create "$TAG" --draft "${prerelease[@]}" --verify-tag \
-            --title "divvy $VERSION" --generate-notes dist/*
+            --title "divvy $VERSION" --notes-file "$RUNNER_TEMP/notes.md" dist/*
 
   # Signs SLSA provenance with Sigstore through GitHub's artifact attestations, in a job of its own
   # so the build steps never hold the signing token. The bundle is attached to the draft release

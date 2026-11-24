@@ -90,7 +90,8 @@ requests merged since the previous release, grouped into the categories in `.git
 by their labels. `.github/workflows/pr-labels.yml` sets those labels from the pull request's
 Conventional Commits title whenever it is opened or edited:
 
-- `type/<type>` from the type (`feat` -> Features, `fix` -> Bug fixes, and so on);
+- `type/<type>` from the type (`feat` -> Features, `fix` -> Bug fixes, `revert` -> Reverts, and
+  so on);
 - `area/<scope>` from the scope; `area/deps` (Renovate's `build(deps)`) goes under Dependencies;
 - `type/breaking-change` for `type!:` or a `BREAKING CHANGE:` footer in the body or a commit.
 
@@ -105,6 +106,14 @@ workflow set is recomputed when the title changes.
 Pull requests are squash-merged, so the title is the commit message; fix a wrong title before
 merging, or relabel the pull request by hand before publishing the draft. Commits pushed
 straight to `master` without a pull request do not appear in the notes.
+
+Revert through a pull request titled `revert: <the reverted title>`, not GitHub's
+`Revert "..."` title, which commitlint rejects; name the reverted commit in the body.
+
+After the notes, the **Draft release** job appends `.github/release-notes-footer.md`, with the
+version, tag and repository filled in: which asset to download for each system, what to
+expect from SmartScreen and Gatekeeper, and how to verify a download's provenance. Edit that
+file to change what every release says.
 
 ## Secrets and variables
 

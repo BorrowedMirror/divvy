@@ -1,6 +1,7 @@
 # Release notes GitHub generates for each tag (`gh release create --generate-notes` in
 # workflows/release-slsa.yml), grouped by the labels workflows/pr-labels.yml applies from each pull
 # request's Conventional Commits title. A pull request goes in the first category it matches.
+# release-slsa.yml adds .github/release-notes-footer.md (install and verify) after the notes.
 changelog:
   exclude:
     labels:
@@ -41,6 +42,9 @@ changelog:
       exclude:
         labels:
           - area/deps
+    - title: Reverts
+      labels:
+        - type/revert
     - title: Dependencies
       labels:
         - area/deps
