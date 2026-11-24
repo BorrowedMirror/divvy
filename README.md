@@ -40,16 +40,32 @@ panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can 
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/settings-hotkeys.png" alt="The Hotkeys tab of the settings window: price check Ctrl+D, pinned price check Ctrl+Alt+D, open settings Ctrl+Space and open on trade site, each rebindable"></td>
-    <td width="50%"><img src="docs/images/settings-trade.png" alt="The Trade tab of the settings window: price source, league detection, default sellers, stat range widening, listings to fetch and currency comparison"></td>
+    <td width="50%" valign="top"><img src="docs/images/readme-hotkeys.png" alt="The Hotkeys tab of the settings window: price check Ctrl+D, pinned price check Ctrl+Alt+D, open settings Ctrl+Space and open on trade site, each rebindable"></td>
+    <td width="50%" valign="top"><img src="docs/images/readme-update.png" alt="The update banner above the settings: Divvy 0.2.0 is available, with Later and Install and restart"></td>
   </tr>
   <tr>
     <td align="center"><sub>Every hotkey can be rebound.</sub></td>
-    <td align="center"><sub>Trade settings: price source, league, sellers and filters.</sub></td>
+    <td align="center"><sub>Signed updates, installed only when you choose.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/images/readme-trade.png" alt="The Trade tab of the settings window: price source, league detection, default sellers, stat range widening, listings to fetch and currency comparison"></td>
+    <td width="50%" valign="top"><img src="docs/images/readme-overlay.png" alt="The Overlay tab of the settings window: auto-hide delay, opacity, position, panel size, backdrop, item links, where prices and listings go, and listing columns"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Price source, league, sellers and filters.</sub></td>
+    <td align="center"><sub>Where the panel goes and what it shows.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/images/readme-diagnostics-linux.png" alt="Diagnostics on Linux through XWayland: version, backend, game data, league, settings and log files, and every capability ticked"></td>
+    <td width="50%" valign="top"><img src="docs/images/readme-in-game.png" alt="The In game tab: chat command hotkeys such as /hideout on F5, the game log file, stash searches and switching stash tabs with Ctrl and the mouse wheel"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Diagnostics shows what each platform supports.</sub></td>
+    <td align="center"><sub>Chat commands and stash searches on hotkeys.</sub></td>
   </tr>
 </table>
 
-Every other view, from diagnostics to the update prompt, is in [docs/screenshots.md](docs/screenshots.md).
+Every other view, including setup on macOS and Linux, is in [docs/screenshots.md](docs/screenshots.md).
 
 ## Features
 

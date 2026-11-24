@@ -6,7 +6,8 @@ uses each system's own UI font, so Windows and macOS show Segoe UI and San Franc
 
 Retake them all after a web change with `make screenshots` (it needs Chromium), or only some
 with `make screenshots NAMES="price-check settings-trade"`. `web/scripts/screenshots.mjs` lists
-them.
+them; it also makes the README's `readme-*.png`, the same views framed in pairs of one height
+so its table cells match.
 
 ## Price check
 
@@ -48,11 +49,26 @@ them.
 
 ## Diagnostics
 
-<img src="images/diagnostics.png" width="672" alt="Diagnostics: version, OS, backend, game data, league, settings and log files, each capability with a tick or cross, missing permissions and recent errors">
+The preview's `?platform=` picks what Diagnostics and Setup describe: `linux` is an X11 desktop
+running through XWayland, and macOS is the default.
 
-## Setup (macOS)
+### Linux
 
-<img src="images/onboarding.png" width="672" alt="The setup view on macOS: Accessibility, Screen Recording and Input Monitoring, each granted or with a button to open System Settings">
+<img src="images/diagnostics-linux.png" width="672" alt="Diagnostics on Linux through XWayland: version, backend, game data, league, settings and log files, and every capability ticked">
+
+### macOS
+
+<img src="images/diagnostics-macos.png" width="672" alt="Diagnostics on macOS: version, backend, game data, league and settings file, each capability with a tick or cross, missing permissions and recent errors">
+
+## Setup
+
+### Linux
+
+<img src="images/onboarding-linux.png" width="672" alt="The setup view on X11 and XWayland: no extra setup needed">
+
+### macOS
+
+<img src="images/onboarding-macos.png" width="672" alt="The setup view on macOS: Accessibility, Screen Recording and Input Monitoring, each granted or with a button to open System Settings">
 
 ## Ready notice
 
