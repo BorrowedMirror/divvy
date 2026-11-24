@@ -1,5 +1,5 @@
 # Release notes GitHub generates for each tag (`gh release create --generate-notes` in
-# workflows/release.yml), grouped by the labels workflows/pr-labels.yml applies from each pull
+# workflows/release-slsa.yml), grouped by the labels workflows/pr-labels.yml applies from each pull
 # request's Conventional Commits title. A pull request goes in the first category it matches.
 changelog:
   exclude:
