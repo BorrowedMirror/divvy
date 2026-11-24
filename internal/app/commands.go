@@ -72,6 +72,7 @@ func (a *App) diagnostics() ipc.Diagnostics {
 		DataVersion:  st.dataVersion(),
 		League:       new(st.league()),
 		RecentErrors: st.recentErrors(),
+		GNOME:        a.permissions != nil && a.permissions.gnome,
 	}
 	if st.paths != nil {
 		d.SettingsPath = new(st.paths.SettingsFile)

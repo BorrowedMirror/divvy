@@ -13,6 +13,7 @@ import (
 
 	"github.com/BorrowedMirror/divvy/internal/ipc"
 	"github.com/BorrowedMirror/divvy/internal/platform"
+	"github.com/BorrowedMirror/divvy/internal/platform/platformtest"
 )
 
 // fakeProbe is a fake TCC: missing kinds can be changed between rechecks; records opened panes.
@@ -221,4 +222,25 @@ func TestPermissionsJSONRoundTrips(t *testing.T) {
 	var back ipc.PermissionsChanged
 	require.NoError(t, json.Unmarshal(b, &back))
 	assert.True(t, back.Report.Equal(r), "%+v", back.Report)
+}
+
+// Diagnostics says GNOME only when the permissions, built from the environment, do.
+func TestDiagnosticsReportsGNOME(t *testing.T) {
+	testCases := []struct {
+		name        string
+		permissions *Permissions
+		expected    bool
+	}{
+		{"NoPermissions", nil, false},
+		{"NotGNOME", newPermissions(platform.BackendX11, platform.Capabilities{}, false, staticProbe{}), false},
+		{"GNOME", newPermissions(platform.BackendX11, platform.Capabilities{}, true, staticProbe{}), true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			a, _, _ := newTestApp(t, platformtest.Options{})
+			a.permissions = tc.permissions
+			assert.Equal(t, tc.expected, a.diagnostics().GNOME)
+		})
+	}
 }

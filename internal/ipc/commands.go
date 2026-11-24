@@ -56,6 +56,9 @@ type Diagnostics struct {
 	SettingsPath *string               `json:"settings_path"`
 	LogPath      *string               `json:"log_path"`
 	RecentErrors []string              `json:"recent_errors"`
+	// GNOME is set when running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports
+	// X11/XWayland.
+	GNOME bool `json:"gnome"`
 }
 
 // MarshalJSONTo writes the wire format.

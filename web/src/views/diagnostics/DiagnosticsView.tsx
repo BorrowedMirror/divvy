@@ -16,7 +16,7 @@ export const CAPABILITY_KEYS = [
   "clipboard",
 ] as const satisfies readonly (keyof Capabilities)[];
 
-/** Guidance paragraphs (i18n keys) for the current platform state. */
+/** Guidance paragraphs (i18n keys) for the permissions Divvy is missing. */
 export function guidanceFor(d: Diagnostics_Serialize): string[] {
   const out: string[] = [];
   const missing = d.capabilities.missing_permissions;
@@ -25,8 +25,14 @@ export function guidanceFor(d: Diagnostics_Serialize): string[] {
   for (const p of missing) {
     if (p !== "accessibility" && p !== "screen_recording") out.push(`permission:${p}`);
   }
+  return out;
+}
+
+/** Advice (i18n keys) on what the session limits: Wayland-native, or GNOME through XWayland. */
+export function platformAdviceFor(d: Diagnostics_Serialize): string[] {
+  const out: string[] = [];
   if (d.backend === "wayland") out.push("guidance.wayland");
-  if (d.backend === "x11" && d.os === "linux") out.push("guidance.gnome");
+  if (d.gnome) out.push("guidance.gnome");
   return out;
 }
 
@@ -73,6 +79,7 @@ export function DiagnosticsView() {
   }
   const d = query.data;
   const guidance = guidanceFor(d);
+  const advice = platformAdviceFor(d);
 
   const copy = async () => {
     try {
@@ -129,6 +136,15 @@ export function DiagnosticsView() {
           <ul className="mt-2 list-disc pl-5 text-xs text-muted">
             {d.capabilities.notes.map((n) => (
               <li key={n}>{n}</li>
+            ))}
+          </ul>
+        )}
+        {advice.length > 0 && (
+          <ul className="mt-3 flex flex-col gap-2">
+            {advice.map((a) => (
+              <li key={a} className="rounded-md border border-gold/40 bg-gold/5 p-2.5 text-sm">
+                {t(a)}
+              </li>
             ))}
           </ul>
         )}

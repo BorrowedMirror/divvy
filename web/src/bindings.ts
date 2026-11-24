@@ -280,6 +280,11 @@ export type Diagnostics_Serialize = {
 	settings_path: string | null,
 	log_path: string | null,
 	recent_errors: string[],
+	/**
+	 * GNOME is set when running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports
+	 * X11/XWayland.
+	 */
+	gnome: boolean,
 };
 export type Diagnostics_Deserialize = {
 	version: string,
@@ -291,6 +296,11 @@ export type Diagnostics_Deserialize = {
 	settings_path?: string | null,
 	log_path?: string | null,
 	recent_errors: string[],
+	/**
+	 * GNOME is set when running under GNOME (`XDG_CURRENT_DESKTOP`), which only supports
+	 * X11/XWayland.
+	 */
+	gnome: boolean,
 };
 
 /** DragPhase is the phase of a header drag of the price card. */

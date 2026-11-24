@@ -65,7 +65,7 @@ func TestPayloadsZeroValues(t *testing.T) {
 			`{"version":"","os":"","backend":"","capabilities":{"window_tracking":false,` +
 				`"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,` +
 				`"keystroke_injection":false,"clipboard":false,"missing_permissions":[],"notes":[]},"data_version":null,` +
-				`"league":null,"settings_path":null,"log_path":null,"recent_errors":[]}`,
+				`"league":null,"settings_path":null,"log_path":null,"recent_errors":[],"gnome":false}`,
 		},
 		{
 			"PriceCheckResponse",
@@ -158,11 +158,12 @@ func TestPayloadsPopulated(t *testing.T) {
 	assert.JSONEq(t, `{"version":"1.0","os":"linux","backend":"x11","capabilities":{"window_tracking":true,`+
 		`"overlay_always_on_top":false,"overlay_click_through":false,"global_hotkeys":false,"passive_hook":false,`+
 		`"keystroke_injection":false,"clipboard":true,"missing_permissions":[],"notes":["n"]},"data_version":"0.5",`+
-		`"league":"Standard","settings_path":null,"log_path":null,"recent_errors":["boom"]}`,
+		`"league":"Standard","settings_path":null,"log_path":null,"recent_errors":["boom"],"gnome":true}`,
 		wailsJSON(t, Diagnostics{
 			Version: "1.0", OS: "linux", Backend: platform.BackendX11,
 			Capabilities: platform.Capabilities{WindowTracking: true, Clipboard: true, Notes: []string{"n"}},
 			DataVersion:  new("0.5"), League: new("Standard"), RecentErrors: []string{"boom"},
+			GNOME: true,
 		}))
 }
 

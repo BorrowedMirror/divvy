@@ -218,6 +218,7 @@ export function diagnostics(overrides: Partial<Diagnostics_Serialize> = {}): Dia
     settings_path: "/Users/exile/Library/Application Support/divvy/settings.toml",
     log_path: null,
     recent_errors: ["trade: 503 Service Unavailable"],
+    gnome: false,
     ...overrides,
   };
 }

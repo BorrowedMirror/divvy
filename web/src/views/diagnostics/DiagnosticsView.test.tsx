@@ -3,9 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
 
 import i18n from "@i18n/index";
+import type { Diagnostics_Serialize } from "@src/bindings";
 import { diagnostics } from "@test/fixtures";
 import { fail, renderWithProviders, setupIpc } from "@test/ipc";
-import { DiagnosticsView, buildReport, guidanceFor } from "@views/diagnostics/DiagnosticsView";
+import { DiagnosticsView, buildReport, guidanceFor, platformAdviceFor } from "@views/diagnostics/DiagnosticsView";
 
 describe("DiagnosticsView", () => {
   test("renders facts, capability checklist, guidance and errors", async () => {
@@ -70,16 +71,41 @@ describe("DiagnosticsView", () => {
 });
 
 describe("guidance + report", () => {
-  test("wayland, gnome/x11 and unknown permissions", () => {
+  test("permissions only, never platform advice", () => {
     const base = diagnostics().capabilities;
-    expect(
-      guidanceFor(diagnostics({ os: "linux", backend: "wayland", capabilities: { ...base, missing_permissions: [] } })),
-    ).toEqual(["guidance.wayland"]);
+    const linux = (o: object) => diagnostics({ os: "linux", capabilities: { ...base, missing_permissions: [] }, ...o });
+    expect(guidanceFor(linux({ backend: "wayland" }))).toEqual([]);
+    expect(guidanceFor(linux({ backend: "x11", gnome: true }))).toEqual([]);
     expect(
       guidanceFor(
         diagnostics({ os: "linux", backend: "x11", capabilities: { ...base, missing_permissions: ["input"] } }),
       ),
-    ).toEqual(["permission:input", "guidance.gnome"]);
+    ).toEqual(["permission:input"]);
+  });
+
+  test("platform advice: wayland, and gnome only when detected", () => {
+    const testCases: { name: string; have: Partial<Diagnostics_Serialize>; expected: string[] }[] = [
+      { name: "WaylandNative", have: { backend: "wayland" }, expected: ["guidance.wayland"] },
+      { name: "X11NotGNOME", have: { backend: "x11" }, expected: [] },
+      { name: "X11GNOME", have: { backend: "x11", gnome: true }, expected: ["guidance.gnome"] },
+    ];
+    for (const tc of testCases) {
+      expect(platformAdviceFor(diagnostics({ os: "linux", ...tc.have })), tc.name).toEqual(tc.expected);
+    }
+  });
+
+  test("gnome advice sits with the capabilities, not under missing permissions", async () => {
+    const d = diagnostics({
+      os: "linux",
+      backend: "x11",
+      gnome: true,
+      capabilities: { ...diagnostics().capabilities, missing_permissions: [] },
+    });
+    setupIpc({ get_diagnostics: () => d });
+    renderWithProviders(<DiagnosticsView />);
+    const advice = await screen.findByText(/GNOME does not support the Wayland features/);
+    expect(advice.closest("section")).toHaveAttribute("aria-labelledby", "caps-heading");
+    expect(screen.queryByText("Missing permissions")).toBeNull();
   });
 
   test("report lists capabilities and placeholders", () => {
