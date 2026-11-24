@@ -49,8 +49,11 @@ const shots = [
     setup: emit("update-available", { version: "0.2.0", notes: null, date: null }),
     wait: "main [role=status]",
   },
-  { name: "diagnostics", route: "diagnostics", ...column, ready: "main h1" },
-  { name: "onboarding", route: "onboarding", ...column, ready: "main h1" },
+  // The preview's ?platform= picks what Diagnostics and Setup describe (src/devMock.ts).
+  ...["macos", "linux"].flatMap((p) => [
+    { name: `diagnostics-${p}`, route: `diagnostics?platform=${p}`, ...column, ready: "main h1" },
+    { name: `onboarding-${p}`, route: `onboarding?platform=${p}`, ...column, ready: "main h1" },
+  ]),
   {
     name: "ready-notice",
     route: "notice",
@@ -62,6 +65,19 @@ const shots = [
     wait: '[data-testid="ready-notice"]',
   },
 ];
+
+// The README's grid, two views to a row: both are framed at the taller one's height, so the
+// table's cells match. The shorter view shows its window's background below it.
+const readmeRows = [
+  ["settings-hotkeys", "update"],
+  ["settings-trade", "settings-overlay"],
+  ["diagnostics-linux", "settings-in-game"],
+];
+readmeRows.forEach((row, i) => {
+  for (const name of row) {
+    shots.push({ ...shots.find((s) => s.name === name), name: `readme-${name.replace(/^settings-/, "")}`, row: i });
+  }
+});
 
 // The @fontsource CSS (every subset, with its unicode-range), its files inlined as data URIs.
 function fontCSS() {
@@ -184,7 +200,8 @@ async function main() {
       ],
     });
     await send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
-    for (const s of todo) {
+    // Opens a view as the screenshot shows it, and returns its bounds.
+    const open = async (s) => {
       await send("Emulation.setDeviceMetricsOverride", {
         width: s.width,
         height: s.height,
@@ -201,9 +218,19 @@ async function main() {
       if (s.wait) await waitFor(s.wait, s.name);
       await sleep(600); // let queries settle and transitions finish
       await evaluate("document.fonts.ready.then(() => true)");
-      const r = await evaluate(
+      return evaluate(
         `(() => { const b = document.querySelector(${JSON.stringify(s.clip)}).getBoundingClientRect(); return [b.x, b.y, b.width, b.height]; })()`,
       );
+    };
+    const frames = new Map();
+    for (const s of todo) {
+      if (s.row !== undefined && !frames.has(s.row)) {
+        let tallest = 0;
+        for (const peer of shots.filter((p) => p.row === s.row)) tallest = Math.max(tallest, (await open(peer))[3]);
+        frames.set(s.row, Math.ceil(tallest));
+      }
+      const r = await open(s);
+      if (s.row !== undefined) r[3] = frames.get(s.row);
       const shot = await send("Page.captureScreenshot", {
         format: "png",
         clip: { x: r[0], y: r[1], width: r[2], height: r[3], scale: 1 },

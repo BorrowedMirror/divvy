@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
 
 import { commands, events } from "@src/bindings";
-import { installDevMock } from "@src/devMock";
+import { installDevMock, previewPlatform } from "@src/devMock";
 import { diagnostics, filterSet, itemCopied, leagues, priceSummary, settings } from "@test/fixtures";
 
 // The fixtures with the settings hotkey the app ships with, as the preview shows them.
@@ -23,6 +23,16 @@ test("dev mock answers every command from fixtures", async () => {
   expect((await commands.getPermissions()).missing).toHaveLength(3);
   expect(await commands.getOverlayLayout()).toEqual({ cover: false, x: 0, y: 0 });
   expect(await commands.getOverlaySnapshot()).toBeNull();
+});
+
+test("dev mock picks its platform from the hash", async () => {
+  expect(previewPlatform("#/diagnostics")).toBe("macos");
+  expect(previewPlatform("#/diagnostics?platform=linux")).toBe("linux");
+  installDevMock("diagnostics", "linux");
+  const d = await commands.getDiagnostics();
+  expect([d.os, d.backend, d.capabilities.keystroke_injection]).toEqual(["linux", "x11", true]);
+  const p = await commands.getPermissions();
+  expect([p.platform, p.missing]).toEqual(["x11", []]);
 });
 
 test("dev mock lets scripts send events", async () => {
