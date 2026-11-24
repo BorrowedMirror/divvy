@@ -75,7 +75,7 @@ var hintPrefixes = []string{
 // ParseItem parses clipboard text into a [ParsedItem]. Accepts `\r\n` or `\n`. The error
 // is [ErrEmpty], [ErrNotAnItem], an *[UnknownRarityError] or a *[MalformedError].
 func ParseItem(text string) (*ParsedItem, error) {
-	sections := splitSections(text)
+	sections := dropUnusableNotice(splitSections(text))
 	if len(sections) == 0 {
 		return nil, ErrEmpty
 	}
@@ -110,6 +110,30 @@ func splitSections(text string) [][]string {
 		}
 	}
 	return slices.DeleteFunc(out, func(s []string) bool { return len(s) == 0 })
+}
+
+// unusableNotice is the line the game adds after `Rarity:` to an item the character cannot use
+// (unmet requirements, or the inactive weapon set), in a section of its own.
+const unusableNotice = "You cannot use this item. Its stats will be ignored"
+
+// dropUnusableNotice removes [unusableNotice]. When it stood alone after the `Item Class` and
+// `Rarity` lines, the name and base type follow in the next section, so that joins the header:
+// otherwise the notice would be read as the name and the name as the base type.
+func dropUnusableNotice(sections [][]string) [][]string {
+	if len(sections) == 0 {
+		return sections
+	}
+	header := sections[0]
+	i := slices.Index(header, unusableNotice)
+	if i < 0 {
+		return sections
+	}
+	header = slices.Delete(slices.Clone(header), i, i+1)
+	if i == len(header) && len(sections) > 1 {
+		header = append(header, sections[1]...)
+		return append([][]string{header}, sections[2:]...)
+	}
+	return append([][]string{header}, sections[1:]...)
 }
 
 func stripKey(line, key string) (string, bool) {

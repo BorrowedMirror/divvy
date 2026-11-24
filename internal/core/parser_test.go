@@ -99,6 +99,36 @@ func TestRareHelmet(t *testing.T) {
 	assert.False(t, item.Advanced)
 }
 
+// The game puts "You cannot use this item…" after the rarity of an item the character can't use
+// (unmet requirements, the inactive weapon set); it parses as the same item.
+func TestUnusableItem(t *testing.T) {
+	notice := "You cannot use this item. Its stats will be ignored"
+	testCases := []struct {
+		name string
+		have string
+	}{
+		{
+			"OwnSection",
+			strings.Replace(rareHelm, "Rarity: Rare\n", "Rarity: Rare\n"+notice+"\n--------\n", 1),
+		},
+		{
+			"BeforeTheName",
+			strings.Replace(rareHelm, "Rarity: Rare\n", "Rarity: Rare\n"+notice+"\n", 1),
+		},
+	}
+
+	expected := mustParse(t, rareHelm)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := mustParse(t, tc.have)
+			assert.Equal(t, new("Doom Visor"), actual.Name)
+			assert.Equal(t, "Superior Expert Hunter Hood", actual.BaseType)
+			actual.Raw = expected.Raw
+			assert.Equal(t, expected, actual)
+		})
+	}
+}
+
 func TestCRLFMatchesLF(t *testing.T) {
 	crlf := strings.ReplaceAll(rareHelm, "\n", "\r\n")
 	a := mustParse(t, rareHelm)
