@@ -50,7 +50,7 @@ const shots = [
     wait: "main [role=status]",
   },
   // The preview's ?platform= picks what Diagnostics and Setup describe (src/devMock.ts).
-  ...["macos", "linux"].flatMap((p) => [
+  ...["macos", "linux", "windows"].flatMap((p) => [
     { name: `diagnostics-${p}`, route: `diagnostics?platform=${p}`, ...column, ready: "main h1" },
     { name: `onboarding-${p}`, route: `onboarding?platform=${p}`, ...column, ready: "main h1" },
   ]),

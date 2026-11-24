@@ -14,10 +14,11 @@ declare global {
  * views can be designed and checked without the Go side. Never loaded inside the app's web view.
  */
 /** The platform the preview pretends to run on, from `?platform=` in the hash (macOS by default). */
-export type PreviewPlatform = "macos" | "linux";
+export type PreviewPlatform = "macos" | "linux" | "windows";
 
 export function previewPlatform(hash: string): PreviewPlatform {
-  return /[?&]platform=linux\b/.test(hash) ? "linux" : "macos";
+  const p = /[?&]platform=(linux|windows)\b/.exec(hash)?.[1];
+  return p === "linux" || p === "windows" ? p : "macos";
 }
 
 // What the X11 backend reports on a Linux desktop with XWayland (internal/platform/x11): every
@@ -45,6 +46,34 @@ const linux = {
   permissions: { platform: "x11" as const, missing: [], notes: [xwaylandNote], gnome: false },
 };
 
+// What the Windows backend reports (internal/platform/win): every capability, with Wails' hotkeys
+// and clipboard, and its two notes. Paths follow %APPDATA% and %LOCALAPPDATA%.
+const windowsNotes = [
+  "If Path of Exile 2 runs as administrator, Divvy must too: Windows (UIPI) blocks injected Ctrl+C into elevated windows.",
+  "Use windowed or borderless fullscreen; exclusive fullscreen hides the overlay.",
+];
+const windows = {
+  diagnostics: diagnostics({
+    os: "windows",
+    backend: "windows",
+    capabilities: {
+      window_tracking: true,
+      overlay_always_on_top: true,
+      overlay_click_through: true,
+      global_hotkeys: true,
+      passive_hook: true,
+      keystroke_injection: true,
+      clipboard: true,
+      missing_permissions: [],
+      notes: windowsNotes,
+    },
+    settings_path: "C:\\Users\\exile\\AppData\\Roaming\\divvy\\config\\settings.toml",
+    log_path: "C:\\Users\\exile\\AppData\\Local\\divvy\\data\\logs\\divvy.log",
+    recent_errors: [],
+  }),
+  permissions: { platform: "windows" as const, missing: [], notes: windowsNotes, gnome: false },
+};
+
 const macos = {
   diagnostics: diagnostics(),
   permissions: {
@@ -60,7 +89,7 @@ const macos = {
 };
 
 export function installDevMock(route: string, platform: PreviewPlatform = previewPlatform(window.location.hash)): void {
-  const system = platform === "linux" ? linux : macos;
+  const system = { linux, macos, windows }[platform];
   let current = settings();
   // The fixtures rebind this for the tests; show the default the app ships with.
   current.hotkeys.open_settings = { modifiers: ["ctrl"], key: "Space" };

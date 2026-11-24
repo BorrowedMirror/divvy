@@ -28,11 +28,15 @@ test("dev mock answers every command from fixtures", async () => {
 test("dev mock picks its platform from the hash", async () => {
   expect(previewPlatform("#/diagnostics")).toBe("macos");
   expect(previewPlatform("#/diagnostics?platform=linux")).toBe("linux");
+  expect(previewPlatform("#/onboarding?platform=windows")).toBe("windows");
   installDevMock("diagnostics", "linux");
   const d = await commands.getDiagnostics();
   expect([d.os, d.backend, d.capabilities.keystroke_injection]).toEqual(["linux", "x11", true]);
   const p = await commands.getPermissions();
   expect([p.platform, p.missing]).toEqual(["x11", []]);
+  installDevMock("diagnostics", "windows");
+  expect((await commands.getDiagnostics()).backend).toBe("windows");
+  expect((await commands.getPermissions()).platform).toBe("windows");
 });
 
 test("dev mock lets scripts send events", async () => {
