@@ -47,5 +47,13 @@
       ],
       "datasourceTemplate": "docker"
     }
+  ],
+  "packageRules": [
+    {
+      "description": "node-version: 26.x already follows Node 26's latest release; change it only for a new major.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["node"],
+      "rangeStrategy": "replace"
+    }
   ]
 }

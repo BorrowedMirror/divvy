@@ -4,3 +4,6 @@ allowBuilds:
   esbuild: true
 # `pnpm add` writes exact versions; Renovate bumps them.
 saveExact: true
+# A version newer than pnpm's minimum release age is refused, never added to
+# minimumReleaseAgeExclude behind your back; Renovate waits 3 days before proposing one.
+minimumReleaseAgeStrict: true
