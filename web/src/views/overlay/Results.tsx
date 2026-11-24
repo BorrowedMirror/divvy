@@ -69,7 +69,10 @@ export function Results({ summary, now: nowProp }: { summary: PriceSummary_Seria
             ).map(([k, p]) => (
               <div key={k} className="rounded-md border border-line bg-surface-2 px-2 py-1">
                 <dt className="text-[10px] tracking-wider text-muted uppercase">{t(`results.${k}`)}</dt>
-                <dd className={k === "median" ? "font-semibold text-gold" : "text-fg"} data-testid={`price-${k}`}>
+                <dd
+                  className={k === "median" ? "font-semibold text-gold tabular-nums" : "text-fg tabular-nums"}
+                  data-testid={`price-${k}`}
+                >
                   <PriceTag price={p} icons={icons} size={28} />
                 </dd>
               </div>

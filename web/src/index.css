@@ -75,7 +75,9 @@
   --color-rarity-unique: #d27c3a;
   --color-rarity-currency: #aa9e82;
   --color-rarity-gem: #1ba29b;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The system's own UI font: Segoe UI on Windows, San Francisco on macOS, the desktop font on
+     Linux. Nothing is bundled, so each platform looks native and every script has glyphs. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 html,
