@@ -53,7 +53,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
   tag:
-    name: Tag v${{ needs.find.outputs.version }}
+    name: Tag the release
     needs: find
     if: needs.find.outputs.version != ''
     runs-on: ubuntu-latest
