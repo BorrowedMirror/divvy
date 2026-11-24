@@ -50,11 +50,15 @@ so its table cells match.
 ## Diagnostics
 
 The preview's `?platform=` picks what Diagnostics and Setup describe: `linux` is an X11 desktop
-running through XWayland, and macOS is the default.
+running through XWayland, `windows` is Windows 10/11, and macOS is the default.
 
 ### Linux
 
 <img src="images/diagnostics-linux.png" width="672" alt="Diagnostics on Linux through XWayland: version, backend, game data, league, settings and log files, and every capability ticked">
+
+### Windows
+
+<img src="images/diagnostics-windows.png" width="672" alt="Diagnostics on Windows: version, backend, game data, league, settings and log files under AppData, every capability ticked, and notes on administrator mode and exclusive fullscreen">
 
 ### macOS
 
@@ -65,6 +69,10 @@ running through XWayland, and macOS is the default.
 ### Linux
 
 <img src="images/onboarding-linux.png" width="672" alt="The setup view on X11 and XWayland: no extra setup needed">
+
+### Windows
+
+<img src="images/onboarding-windows.png" width="672" alt="The setup view on Windows: use windowed or borderless fullscreen, and run Divvy as administrator if the game runs as administrator">
 
 ### macOS
 

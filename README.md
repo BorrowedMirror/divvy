@@ -65,7 +65,7 @@ panel that does not auto-hide; **Ctrl+Space** opens the settings. All three can 
   </tr>
 </table>
 
-Every other view, including setup on macOS and Linux, is in [docs/screenshots.md](docs/screenshots.md).
+Every other view, including diagnostics and setup on Windows, macOS and Linux, is in [docs/screenshots.md](docs/screenshots.md).
 
 ## Features
 
