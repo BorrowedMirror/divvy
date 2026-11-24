@@ -95,6 +95,7 @@ task per invocation.
 | `make package:linux` | builds `target/go/divvy-<version>-linux-x86_64.AppImage` with `wails3 generate appimage` (downloads linuxdeploy on first use) |
 | `make package:macos` | universal `Divvy.app`, `target/go/divvy-<version>-macos-universal.dmg` and the update zip; macOS only |
 | `make notices` | writes `target/go/THIRD-PARTY-NOTICES.html` |
+| `make release patch` | commits `release: vX.Y.Z` on a new `release/vX.Y.Z` branch with the next version (`patch`, `minor`, `major`, or `BUMP=X.Y.Z[-PRE]`) stamped into `VERSION` and `web/package.json` (see [releasing](docs/contributing/releasing.md)) |
 | `make updater:keygen` | prints a new updater key pair (see [releasing](docs/contributing/releasing.md#updates)) |
 | `make data:refresh` | `go run ./cmd/datarefresh refresh`: downloads the trade2 data and RePoE exports (cached in `target/data-cache`; `OFFLINE=1` reuses the cache) and rebuilds the bundled game data in `internal/data/assets` |
 | `make fixtures:record` | `go run ./cmd/datarefresh fixtures`: re-records the trade fixtures in `internal/trade/testdata/fixtures` from the live API, 2 s between requests (`LEAGUE=`, `BASE_TYPE=`) |
@@ -189,8 +190,9 @@ A fix should add that text to `internal/core/testdata/corpus/` so it stays fixed
 
 ## Releases (maintainers)
 
-Bump the `VERSION` file in a `release: v<version>` pull request, then push the tag
-`v<version>` on the merged commit. The tag runs `.github/workflows/release.yml`, which produces
-a draft GitHub release whose notes GitHub generates from the merged pull requests, grouped by
-the labels `pr-labels.yml` applies from each title. See
+Run `make release patch` (or `minor`, `major`), push the `release/v<version>` branch it makes,
+and squash-merge its `release: v<version>` pull request. Merging tags the release
+(`tag-release.yml`), and the tag runs `release.yml`, which produces a draft GitHub release
+whose notes GitHub generates from the merged pull requests, grouped by the labels
+`pr-labels.yml` applies from each title, with the highlights first. See
 [docs/contributing/releasing.md](docs/contributing/releasing.md).

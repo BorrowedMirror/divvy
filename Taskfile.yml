@@ -206,6 +206,11 @@ tasks:
     cmds:
       - go run ./cmd/release package macos
 
+  release:
+    desc: 'Commit "release: vX.Y.Z" on a release branch with the version stamped into VERSION and web/package.json (make release patch|minor|major, or BUMP=X.Y.Z[-PRE]).'
+    cmds:
+      - go run ./cmd/release bump '{{.BUMP}}'
+
   updater:keygen:
     desc: Print a new updater key pair for the release environment.
     cmds:

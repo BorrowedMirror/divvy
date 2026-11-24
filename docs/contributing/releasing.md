@@ -1,11 +1,19 @@
 # Releasing
 
 The version lives in the `VERSION` file (SemVer without a leading `v`, e.g. `0.2.0` or
-`0.2.0-rc.1`). Packages and the app's diagnostics read it from there.
+`0.2.0-rc.1`), and `web/package.json` carries the same one. Packages and the app's diagnostics
+read it from `VERSION`.
 
 1. Make sure `master` is green.
-2. Open a pull request that changes only `VERSION`, titled `release: v0.2.0`, and squash-merge
-   it. The `release` type keeps it out of the release notes.
+2. Run `make release patch` (or `minor`, `major`; `make release BUMP=0.2.0-rc.1` names an exact
+   version). It fetches `origin/master`, counts the next version from its `VERSION`, and commits
+   `release: v0.2.0` with the version stamped into `VERSION` and `web/package.json` on a new
+   `release/v0.2.0` branch from `origin/master` (so the release carries nothing else). Push the
+   branch, open a pull request with the printed title, and squash-merge it. The `release` type
+   keeps it out of the release notes. Bumped from a pre-release, the version is that release when
+   the bumped part is zero below it: `0.2.0-rc.1` with `patch` or `minor` releases `0.2.0`.
+   Running it again on the release branch counts from `master` again, so `make release minor`
+   after `make release patch` changes the bump; retitle the pull request to match.
 3. Merging it tags the release: `.github/workflows/tag-release.yml` sees the squash-merged
    `release: v0.2.0 (#N)` commit on `master` and pushes the `v0.2.0` tag as the BorrowedMirror
    Bot GitHub App (a tag pushed with `GITHUB_TOKEN` would not start the release). Don't tag by
@@ -110,10 +118,20 @@ straight to `master` without a pull request do not appear in the notes.
 Revert through a pull request titled `revert: <the reverted title>`, not GitHub's
 `Revert "..."` title, which commitlint rejects; name the reverted commit in the body.
 
-After the notes, the **Draft release** job appends `.github/release-notes-footer.md`, with the
-version, tag and repository filled in: which asset to download for each system, what to
-expect from SmartScreen and Gatekeeper, and how to verify a download's provenance. Edit that
-file to change what every release says.
+The **Draft release** job runs GitHub's generated notes through `go run ./cmd/release notes`.
+It keeps the categories players read for in view (Breaking changes, Features, Bug fixes,
+Performance, Translations and Reverts, the `highlightCategories` in `cmd/release/notes.go`) and
+folds the rest (documentation, refactoring, tests, build and CI, dependencies, other changes)
+into a collapsed **Everything else** section beneath them. New Contributors and the Full
+Changelog link stay as GitHub writes them. It then appends `.github/release-notes-footer.md`,
+with the version, tag and repository filled in: which asset to download for each system, what
+to expect from SmartScreen and Gatekeeper, and how to verify a download's provenance. Edit that
+file to change what every release says. To preview the notes for the next release:
+
+```sh
+gh api repos/BorrowedMirror/divvy/releases/generate-notes -f tag_name=v0.2.0 -f target_commitish=master \
+  --jq .body | go run ./cmd/release notes -version 0.2.0 -tag v0.2.0 -repository BorrowedMirror/divvy
+```
 
 ## Secrets and variables
 

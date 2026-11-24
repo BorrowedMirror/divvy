@@ -162,8 +162,9 @@ jobs:
           echo "checksums=$(base64 -w0 SHA256SUMS.txt)" >> "$GITHUB_OUTPUT"
           mv SHA256SUMS.txt dist/
       # GitHub writes the notes from the merged pull requests since the previous release,
-      # grouped by their labels (.github/release.yml); the install and verify footer
-      # (.github/release-notes-footer.md) follows them.
+      # grouped by their labels (.github/release.yml). cmd/release notes keeps the categories
+      # players read for in view, folds the rest into "Everything else", and appends the install
+      # and verify footer (.github/release-notes-footer.md).
       - name: Release notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -171,10 +172,8 @@ jobs:
           TAG: ${{ inputs.tag }}
           VERSION: ${{ inputs.version }}
         run: |
-          gh api "repos/$REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq .body > "$RUNNER_TEMP/notes.md"
-          # The names, not their values: envsubst replaces only these in the footer.
-          # shellcheck disable=SC2016
-          envsubst '${VERSION} ${TAG} ${REPOSITORY}' < .github/release-notes-footer.md >> "$RUNNER_TEMP/notes.md"
+          gh api "repos/$REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq .body |
+            go run ./cmd/release notes -version "$VERSION" -tag "$TAG" -repository "$REPOSITORY" > "$RUNNER_TEMP/notes.md"
           cat "$RUNNER_TEMP/notes.md"
       - name: Create the draft release with the assets
         env:

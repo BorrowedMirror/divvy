@@ -18,6 +18,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/stretchr/testify v1.12.1
 	github.com/wailsapp/wails/v3 v3.1.0
+	golang.org/x/mod v0.41.0
 	golang.org/x/sync v0.24.0
 	golang.org/x/sys v0.49.0
 	pgregory.net/rapid v1.3.0
@@ -32,6 +33,5 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/term v0.46.0 // indirect
 )

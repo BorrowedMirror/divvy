@@ -6,6 +6,8 @@
 //	go run ./cmd/release package macos      # .app + DMG      -> target/go/ (macOS only)
 //	go run ./cmd/release notices            # third-party notices -> target/go/
 //	go run ./cmd/release version            # print the app version
+//	go run ./cmd/release notes ... < gen.md # release notes: highlights first, footer after
+//	go run ./cmd/release bump minor         # commit "release: vX.Y.Z" on a release branch
 //
 // The web UI is embedded into the binary, so build it first: `pnpm --dir web build`.
 package main
@@ -31,6 +33,10 @@ commands:
   update-manifest          sign the update artifacts and write update.json (needs DIVVY_UPDATER_PRIVATE_KEY)
   notices [-check]         write THIRD-PARTY-NOTICES.html (or only check the licence policy)
   version                  print the app version
+  notes -version -tag -repository
+                           reshape GitHub's generated release notes (stdin) for the draft
+  bump patch|minor|major|X.Y.Z
+                           commit "release: vX.Y.Z" with the version stamped (make release patch)
 
 Run it from the repository root. Run "go run ./cmd/release <command> -h" for the flags of a
 command.
@@ -69,6 +75,10 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return runUpdateManifest(rest, stdout)
 	case "notices":
 		return runNotices(ctx, root, rest)
+	case "notes":
+		return runNotes(root, rest, os.Stdin, stdout)
+	case "bump":
+		return runBump(ctx, root, rest, stdout)
 	case "version":
 		v, err := appVersion(root)
 		if err != nil {
