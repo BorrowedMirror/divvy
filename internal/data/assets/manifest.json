@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-23T09:58:17.705269818Z",
+  "generated_at": "2026-11-27T13:58:45.606304988Z",
   "game_version": "0.5.5.10",
   "stats": {
     "file": "stats.json.zst",
     "sources": [
       "https://www.pathofexile.com/api/trade2/data/stats"
     ],
-    "sha256": "b01651ef52b21b603f6a34f0c6b56ef8ef581bc5c38671d6094ac84b3f9508f2",
-    "records": 8236
+    "sha256": "eb10ada4cc1f8ad7043b37c62812891c241b399a8d80744fa9999affddce358e",
+    "records": 8237
   },
   "bases": {
     "file": "bases.json.zst",
