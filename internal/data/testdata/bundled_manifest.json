@@ -8,7 +8,7 @@
       "https://www.pathofexile.com/api/trade2/data/stats"
     ],
     "sha256": "[sha256]",
-    "records": 8236
+    "records": 8237
   },
   "bases": {
     "file": "bases.json.zst",
