@@ -1,13 +1,22 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup } from "@testing-library/react";
-import { afterEach, beforeEach } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 
 import i18n from "@i18n/index";
 import { setTransport } from "@src/bindings";
 import { useOverlayStore } from "@stores/overlay";
 import { useSettingsStore } from "@stores/settings";
 import { useUpdateStore } from "@stores/update";
+
+// Importing @wailsio/runtime starts a 50 ms window timer (its drag handlers' set-up poll). A test
+// file that finishes sooner has its jsdom window torn down first, and the timer then fails with
+// "window is not defined" as an unhandled error in whichever file ran fastest. The tests reach the
+// backend through setTransport mocks, never the runtime, so it is replaced with an inert stand-in.
+vi.mock("@wailsio/runtime", () => ({
+  Call: { ByName: () => Promise.reject(new Error("the Wails runtime is not available in tests")) },
+  Events: { On: () => () => {} },
+}));
 
 // jsdom gaps that Base UI's floating/positioning code touches.
 class ResizeObserverStub {
